@@ -31,7 +31,7 @@ logging:
         gov:
           educ:
             api:
-              graduation: ${APP_LOG_LEVEL}
+              distribution: ${APP_LOG_LEVEL}
     org:
       springframework:
         web: ${SPRING_WEB_LOG_LEVEL}
