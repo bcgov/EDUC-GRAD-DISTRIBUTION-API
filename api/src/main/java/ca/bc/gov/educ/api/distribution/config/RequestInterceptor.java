@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
-import ca.bc.gov.educ.api.graduation.util.GradValidation;
+import ca.bc.gov.educ.api.distribution.util.GradValidation;
 
 @Component
 public class RequestInterceptor extends HandlerInterceptorAdapter {
