@@ -1,0 +1,83 @@
+#Keycloak/OAuth properties
+security:
+  oauth2:
+    resource:
+      jwt:
+        key-value: ${KEYCLOAK_PUBLIC_KEY}
+
+#DB Properties
+spring:
+  jmx:
+    enabled: false
+  mvc:
+    log-request-details: ${SPRING_SHOW_REQUEST_DETAILS}
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: false
+
+#Logging properties
+logging:
+  file:
+    max-history: 1
+    clean-history-on-start: true
+    max-size: 20MB
+    name: /logs/app.log
+  #pattern:
+  #  file: %d | [${HOSTNAME}] | %clr(%5p) | [%t]   | %logger{36}:%L | %msg%n
+  #  console: %d | [${HOSTNAME}] | %clr(%5p) | [%t]   | %logger{36}:%L | %msg%n
+  level:
+    ca:
+      bc:
+        gov:
+          educ:
+            api:
+              graduation: ${APP_LOG_LEVEL}
+    org:
+      springframework:
+        web: ${SPRING_WEB_LOG_LEVEL}
+        security: ${SPRING_SECURITY_LOG_LEVEL}
+        boot:
+          autoconfigure:
+            logging: ${SPRING_BOOT_AUTOCONFIG_LOG_LEVEL}
+
+#Local properties
+server:
+  undertow:
+    threads:
+      worker: 128
+      io: 16
+  #port: ${HTTP_PORT}
+
+#API Documentation
+springdoc:
+  api-docs:
+    path: /api/v1/api-docs
+  swagger-ui:
+    path: /api/v1/api-docs-ui.html
+    operationsSorter: alpha
+
+authorization:
+  user: ${GRAD_CLIENT_NAME}
+  password: ${GRAD_CLIENT_SECRET}
+
+endpoint:
+  keycloak:
+    getToken: ${KEYCLOAK_TOKEN_URL}auth/realms/master/protocol/openid-connect/token
+  grad-graduation-report-api:
+    get-transcript-list:
+      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/gettranscriptsfordistribution
+    get-certificate-list:
+      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/getcertificatesfordistribution
+    get-transcript:
+      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/studenttranscript?studentID=%s&transcriptType=%s&documentStatusCode=%s
+    get-certificate:
+      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/studentcertificate?studentID=%s&certificateType=%s&documentStatusCode=%s
+  grad-student-api:
+    get-student-record:
+      url: ${GRAD_STUDENT_API}api/v1/student/stdid/%s
+  grad-report-api:
+    get-packing-slip:
+      url: ${GRAD_REPORT_API}api/v1/reports/packingslip
+  grad-trax-api:
+    school-by-min-code:
+      url: ${GRAD_TRAX_API}api/v1/school/%s
