@@ -88,9 +88,9 @@ public class MergeProcess implements DistributionProcess {
 						locations.add(transcriptPdf.getInputStream());
 					}
 					PDFMergerUtility objs = new PDFMergerUtility();
-					Path path = Paths.get("C:/Users/s.karekkattumanasree/Downloads/"+mincode+"/");
+					Path path = Paths.get("/tmp/"+mincode+"/");
 					Files.createDirectories(path);
-					objs.setDestinationFileName("C:/Users/s.karekkattumanasree/Downloads/"+mincode+"/GRAD.T.YED4."+ EducDistributionApiUtils.getFileName()+".pdf");
+					objs.setDestinationFileName("/tmp/"+mincode+"/GRAD.T.YED4."+ EducDistributionApiUtils.getFileName()+".pdf");
 					objs.addSources(locations);
 					objs.mergeDocuments(MemoryUsageSetting.setupMainMemoryOnly());
 				} catch (IOException e) {
