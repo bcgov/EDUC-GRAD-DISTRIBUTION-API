@@ -1,10 +1,9 @@
 package ca.bc.gov.educ.api.distribution.process;
 
 public enum DistributionProcessType {
-	TYED4 ("TranscriptDataFileYED4Process"),
-	CYED2 ("CertificateDataFileYED2Process"),
-	CYEDR ("CertificateDataFileYEDRProcess"),
-    CYEDB ("CertificateDataFileYEDBProcess");
+	TPP ("TranscriptDataFileProcess"),
+	CPP ("CertificateDataFileProcess"),
+    MER ("MergeProcess");
 
     private final String value;
 
