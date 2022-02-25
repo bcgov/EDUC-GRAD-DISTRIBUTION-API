@@ -9,6 +9,7 @@ import java.util.Date;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 
 public class EducDistributionApiUtils {
 
@@ -79,6 +80,20 @@ public class EducDistributionApiUtils {
 		httpHeaders.add("Content-Type", "application/json");
 		httpHeaders.setBearerAuth(accessToken);
 		return httpHeaders;
+	}
+
+	public static HttpHeaders getHeaders (String username,String password)
+	{
+		HttpHeaders httpHeaders = new HttpHeaders();
+		httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+		httpHeaders.setBasicAuth(username, password);
+		return httpHeaders;
+	}
+
+	public static String getFileName() {
+		Date date = new Date();
+		SimpleDateFormat month = new SimpleDateFormat("MMM.dd.YYYY.hh.mm.ss");
+		return month.format(date);
 	}
 
 	public static String formatDateForReport(String updatedTimestamp) {
@@ -164,4 +179,5 @@ public class EducDistributionApiUtils {
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 		return formatter.format(date);
 	}
+
 }
