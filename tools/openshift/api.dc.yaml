@@ -61,6 +61,8 @@ objects:
                     name: educ-grad-distribution-api-config-map
                 - secretRef:
                     name: grad-keycloak-pk-secret
+                - secretRef:
+                    name: grad-client-secret
               resources: {}
       test: false
   - apiVersion: v1
