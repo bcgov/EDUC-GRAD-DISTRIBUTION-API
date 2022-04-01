@@ -19,8 +19,7 @@ public class EducDistributionApiConstants {
     public static final String DISTRIBUTION_API_ROOT_MAPPING = "/api/" + API_VERSION + "/distribute";
 
 
-    public static final String DISTRIBUTION_RUN = "/run";
-
+    public static final String DISTRIBUTION_RUN = "/run/{runType}";
     //Default Date format constants
     public static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd";
 

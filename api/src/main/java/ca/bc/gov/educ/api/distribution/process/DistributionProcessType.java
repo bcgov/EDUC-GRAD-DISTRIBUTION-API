@@ -1,8 +1,6 @@
 package ca.bc.gov.educ.api.distribution.process;
 
 public enum DistributionProcessType {
-	TPP ("TranscriptDataFileProcess"),
-	CPP ("CertificateDataFileProcess"),
     MER ("MergeProcess");
 
     private final String value;
