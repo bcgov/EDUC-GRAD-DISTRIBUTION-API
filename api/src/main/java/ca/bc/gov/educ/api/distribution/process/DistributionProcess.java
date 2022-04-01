@@ -6,7 +6,5 @@ import org.springframework.stereotype.Component;
 @Component
 public interface DistributionProcess {
 
-	ProcessorData fire();
-
-    public void setInputData(ProcessorData inputData);
+	ProcessorData fire(ProcessorData processorData);
 }

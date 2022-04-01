@@ -60,6 +60,11 @@ authorization:
   user: ${GRAD_CLIENT_NAME}
   password: ${GRAD_CLIENT_SECRET}
 
+sftp:
+  remote:
+    host: ${BCMAIL_SFTP_HOST}
+  username: ${BCMAIL_SFTP_USER}
+
 endpoint:
   keycloak:
     getToken: ${KEYCLOAK_TOKEN_URL}auth/realms/master/protocol/openid-connect/token

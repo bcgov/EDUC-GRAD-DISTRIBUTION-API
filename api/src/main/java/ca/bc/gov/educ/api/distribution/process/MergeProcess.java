@@ -8,6 +8,7 @@ import ca.bc.gov.educ.api.distribution.service.SchoolService;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils;
 import ca.bc.gov.educ.api.distribution.util.GradValidation;
+import ca.bc.gov.educ.api.distribution.util.SFTPUtils;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.pdfbox.io.MemoryUsageSetting;
@@ -19,14 +20,14 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipOutputStream;
 
 @Data
 @Component
@@ -34,9 +35,6 @@ import java.util.Map;
 public class MergeProcess implements DistributionProcess {
 	
 	private static Logger logger = LoggerFactory.getLogger(MergeProcess.class);
-	
-	@Autowired
-    private ProcessorData processorData;
 
 	@Autowired
 	private GradStudentService gradStudentService;
@@ -58,70 +56,102 @@ public class MergeProcess implements DistributionProcess {
 
 	@Autowired
 	ReportService reportService;
+
+	@Autowired
+	SFTPUtils sftpUtils;
 	
 	@Override
-	public ProcessorData fire() {				
+	public ProcessorData fire(ProcessorData processorData) {
 		long startTime = System.currentTimeMillis();
 		logger.info("************* TIME START  ************ "+startTime);
 		DistributionResponse response = new DistributionResponse();
 		ExceptionMessage exception = new ExceptionMessage();
 		Map<String,DistributionPrintRequest> mapDist = processorData.getMapDistribution();
-		processorData.setMapDistribution(mapDist);
+		Long batchId = processorData.getBatchId();
 		int counter=0;
 		for (Map.Entry<String, DistributionPrintRequest> entry : mapDist.entrySet()) {
 			counter++;
+			int currentSlipCount = 0;
 			String mincode = entry.getKey();
 			SchoolTrax schoolDetails = schoolService.getSchoolDetails(mincode,processorData.getAccessToken(),exception);
-			logger.info("School Details Acquired {}",schoolDetails.getSchoolName());
+			logger.info("*** School Details Acquired {}",schoolDetails.getSchoolName());
 			ReportRequest packSlipReq = reportService.preparePackingSlipData(schoolDetails,processorData.getBatchId());
 			DistributionPrintRequest obj = entry.getValue();
 			if(obj.getTranscriptPrintRequest() != null) {
 				TranscriptPrintRequest transcriptPrintRequest = obj.getTranscriptPrintRequest();
 				List<StudentCredentialDistribution> scdList = transcriptPrintRequest.getTranscriptList();
 				List<InputStream> locations=new ArrayList<InputStream>();
+				currentSlipCount++;
 				setExtraDataForPackingSlip(packSlipReq,"YED4",obj.getTotal(),scdList.size(),1,"Transcript",transcriptPrintRequest.getBatchId());
 				try {
 					locations.add(reportService.getPackingSlip(packSlipReq,processorData.getAccessToken(),exception).getInputStream());
-					logger.info("Packing Slip Added");
+					logger.info("*** Packing Slip Added");
 					for (StudentCredentialDistribution scd : scdList) {
 						InputStreamResource transcriptPdf = webClient.get().uri(String.format(educDistributionApiConstants.getTranscript(),scd.getStudentID(),scd.getCredentialTypeCode(),"COMPL")).headers(h -> h.setBearerAuth(processorData.getAccessToken())).retrieve().bodyToMono(InputStreamResource.class).block();
 						locations.add(transcriptPdf.getInputStream());
 					}
 					PDFMergerUtility objs = new PDFMergerUtility();
-					Path path = Paths.get("/tmp/"+mincode+"/");
+					Path path = Paths.get("/tmp/"+batchId+"/"+mincode+"/");
 					Files.createDirectories(path);
-					objs.setDestinationFileName("/tmp/"+mincode+"/GRAD.T.YED4."+ EducDistributionApiUtils.getFileName()+".pdf");
+					objs.setDestinationFileName("/tmp/"+batchId+"/"+mincode+"/EDGRAD.T.YED4."+ EducDistributionApiUtils.getFileName()+".pdf");
 					objs.addSources(locations);
 					objs.mergeDocuments(MemoryUsageSetting.setupMainMemoryOnly());
+					logger.info("*** Transcript Documents Merged");
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 
 			}
 			if(obj.getYed2CertificatePrintRequest() != null) {
+				currentSlipCount++;
 				CertificatePrintRequest certificatePrintRequest = obj.getYed2CertificatePrintRequest();
-				PackingSlipRequest request = PackingSlipRequest.builder().mincode(mincode).currentSlip(2).total(obj.getTotal()).paperType("YED2").build();
-				mergeCertificates(packSlipReq,certificatePrintRequest,request,exception);
+				PackingSlipRequest request = PackingSlipRequest.builder().mincode(mincode).currentSlip(currentSlipCount).total(obj.getTotal()).paperType("YED2").build();
+				mergeCertificates(packSlipReq,certificatePrintRequest,request,exception,processorData);
+				logger.info("*** YED2 Documents Merged");
 			}
 			if(obj.getYedbCertificatePrintRequest() != null) {
+				currentSlipCount++;
 				CertificatePrintRequest certificatePrintRequest = obj.getYedbCertificatePrintRequest();
-				PackingSlipRequest request = PackingSlipRequest.builder().mincode(mincode).currentSlip(2).total(obj.getTotal()).paperType("YEDB").build();
-				mergeCertificates(packSlipReq,certificatePrintRequest,request,exception);
+				PackingSlipRequest request = PackingSlipRequest.builder().mincode(mincode).currentSlip(currentSlipCount).total(obj.getTotal()).paperType("YEDB").build();
+				mergeCertificates(packSlipReq,certificatePrintRequest,request,exception,processorData);
+				logger.info("*** YEDB Documents Merged");
 			}
 			if(obj.getYedrCertificatePrintRequest() != null) {
+				currentSlipCount++;
 				CertificatePrintRequest certificatePrintRequest = obj.getYedrCertificatePrintRequest();
-				PackingSlipRequest request = PackingSlipRequest.builder().mincode(mincode).currentSlip(2).total(obj.getTotal()).paperType("YEDR").build();
-				mergeCertificates(packSlipReq,certificatePrintRequest,request,exception);
+				PackingSlipRequest request = PackingSlipRequest.builder().mincode(mincode).currentSlip(currentSlipCount).total(obj.getTotal()).paperType("YEDR").build();
+				mergeCertificates(packSlipReq,certificatePrintRequest,request,exception,processorData);
+				logger.info("*** YEDR Documents Merged");
 			}
 			logger.info("PDFs Merged {}",schoolDetails.getSchoolName());
 			if (counter % 50 == 0) {
 				accessTokenService.fetchAccessToken(processorData);
 			}
 		}
+		createZipFile(batchId);
+		sftpUtils.sftpUpload(batchId);
 		long endTime = System.currentTimeMillis();
 		long diff = (endTime - startTime)/1000;
 		logger.info("************* TIME Taken  ************ "+diff+" secs");
+		response.setMergeProcessResponse("Merge Successful and File Uploaded");
+		processorData.setDistributionResponse(response);
 		return processorData;
+	}
+
+	private void createZipFile(Long batchId) {
+		String sourceFile = "/tmp/"+batchId;
+		FileOutputStream fos = null;
+		try {
+			fos = new FileOutputStream("/tmp/EDGRAD.BATCH."+batchId+".zip");
+			ZipOutputStream zipOut = new ZipOutputStream(fos);
+			File fileToZip = new File(sourceFile);
+			EducDistributionApiUtils.zipFile(fileToZip, fileToZip.getName(), zipOut);
+			zipOut.close();
+			fos.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
 	}
 
 	private void setExtraDataForPackingSlip(ReportRequest packSlipReq, String paperType, int total, int quantity, int currentSlip, String orderType, Long batchId) {
@@ -133,7 +163,7 @@ public class MergeProcess implements DistributionProcess {
 		packSlipReq.getData().getPackingSlip().setOrderNumber(batchId);
 	}
 
-	private void mergeCertificates(ReportRequest packSlipReq, CertificatePrintRequest certificatePrintRequest,PackingSlipRequest request, ExceptionMessage exception) {
+	private void mergeCertificates(ReportRequest packSlipReq, CertificatePrintRequest certificatePrintRequest,PackingSlipRequest request, ExceptionMessage exception,ProcessorData processorData) {
 		List<StudentCredentialDistribution> scdList = certificatePrintRequest.getCertificateList();
 		String mincode = request.getMincode();
 		String paperType = request.getPaperType();
@@ -146,20 +176,13 @@ public class MergeProcess implements DistributionProcess {
 				locations.add(certificatePdf.getInputStream());
 			}
 			PDFMergerUtility objs = new PDFMergerUtility();
-			Path path = Paths.get("C:/Users/s.karekkattumanasree/Downloads/"+mincode+"/");
+			Path path = Paths.get("/tmp/"+processorData.getBatchId()+"/"+mincode+"/");
 			Files.createDirectories(path);
-			objs.setDestinationFileName("C:/Users/s.karekkattumanasree/Downloads/"+mincode+"/GRAD.C."+paperType+"."+ EducDistributionApiUtils.getFileName()+".pdf");
+			objs.setDestinationFileName("/tmp/"+processorData.getBatchId()+"/"+mincode+"/EDGRAD.C."+paperType+"."+ EducDistributionApiUtils.getFileName()+".pdf");
 			objs.addSources(locations);
 			objs.mergeDocuments(MemoryUsageSetting.setupMainMemoryOnly());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-
-	@Override
-    public void setInputData(ProcessorData inputData) {
-		processorData = inputData;
-        logger.info("MergeProcess: ");
-    }
-
 }
