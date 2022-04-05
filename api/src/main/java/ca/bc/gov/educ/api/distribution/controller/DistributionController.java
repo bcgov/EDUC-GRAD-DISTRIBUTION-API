@@ -1,5 +1,6 @@
 package ca.bc.gov.educ.api.distribution.controller;
 
+import ca.bc.gov.educ.api.distribution.model.dto.DistributionPrintRequest;
 import ca.bc.gov.educ.api.distribution.model.dto.DistributionResponse;
 import ca.bc.gov.educ.api.distribution.service.GradDistributionService;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
@@ -22,6 +23,8 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.E
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @CrossOrigin
 @RestController
 @RequestMapping(EducDistributionApiConstants.DISTRIBUTION_API_ROOT_MAPPING)
@@ -40,14 +43,14 @@ public class DistributionController {
     @Autowired
     ResponseHelper response;
 
-    @GetMapping(EducDistributionApiConstants.DISTRIBUTION_RUN)
+    @PostMapping(EducDistributionApiConstants.DISTRIBUTION_RUN)
     @PreAuthorize(PermissionsContants.GRADUATE_STUDENT)
     @Operation(summary = "distribution run for Grad", description = "When triggered, run the distribution piece and send out credentials for printing", tags = { "Distribution" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK")})
-    public ResponseEntity<DistributionResponse> distributeCredentials(@RequestParam(required = false) Long batchId) {
+    public ResponseEntity<DistributionResponse> distributeCredentials(@PathVariable String runType, @RequestParam(required = false) Long batchId, @RequestBody Map<String, DistributionPrintRequest> mapDist) {
         OAuth2AuthenticationDetails auth = (OAuth2AuthenticationDetails) SecurityContextHolder.getContext().getAuthentication().getDetails();
         String accessToken = auth.getTokenValue();
-        return response.GET(gradDistributionService.distributeCredentials(batchId,accessToken));
+        return response.GET(gradDistributionService.distributeCredentials(runType,batchId,mapDist,accessToken));
     }
 
 }
