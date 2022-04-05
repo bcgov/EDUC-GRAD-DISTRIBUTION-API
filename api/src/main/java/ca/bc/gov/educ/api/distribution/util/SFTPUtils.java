@@ -21,11 +21,7 @@ public class SFTPUtils {
 
         try {
             JSch jsch = new JSch();
-            jsch.setKnownHosts("/tmp/.ssh/known_hosts");
             jschSession = jsch.getSession(SFTP_USERNAME, REMOTE_HOST, REMOTE_PORT);
-
-            // authenticate using private key
-            jsch.addIdentity("/tmp/.ssh/id_rsa");
             jschSession.connect(SESSION_TIMEOUT);
 
             Channel sftp = jschSession.openChannel("sftp");

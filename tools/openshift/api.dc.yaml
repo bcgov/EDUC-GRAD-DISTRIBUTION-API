@@ -63,6 +63,8 @@ objects:
                     name: grad-keycloak-pk-secret
                 - secretRef:
                     name: grad-client-secret
+                - secretRef:
+                    name: api-distribution-ssh-keys-secret
               resources: {}
       test: false
   - apiVersion: v1
