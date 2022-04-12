@@ -68,6 +68,7 @@ public class MergeProcess implements DistributionProcess {
 		ExceptionMessage exception = new ExceptionMessage();
 		Map<String,DistributionPrintRequest> mapDist = processorData.getMapDistribution();
 		Long batchId = processorData.getBatchId();
+		int numberOfPdfs = 0;
 		int counter=0;
 		for (Map.Entry<String, DistributionPrintRequest> entry : mapDist.entrySet()) {
 			counter++;
@@ -96,6 +97,7 @@ public class MergeProcess implements DistributionProcess {
 					objs.setDestinationFileName("/tmp/"+batchId+"/"+mincode+"/EDGRAD.T.YED4."+ EducDistributionApiUtils.getFileName()+".pdf");
 					objs.addSources(locations);
 					objs.mergeDocuments(MemoryUsageSetting.setupMainMemoryOnly());
+					numberOfPdfs++;
 					logger.info("*** Transcript Documents Merged");
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -107,6 +109,7 @@ public class MergeProcess implements DistributionProcess {
 				CertificatePrintRequest certificatePrintRequest = obj.getYed2CertificatePrintRequest();
 				PackingSlipRequest request = PackingSlipRequest.builder().mincode(mincode).currentSlip(currentSlipCount).total(obj.getTotal()).paperType("YED2").build();
 				mergeCertificates(packSlipReq,certificatePrintRequest,request,exception,processorData);
+				numberOfPdfs++;
 				logger.info("*** YED2 Documents Merged");
 			}
 			if(obj.getYedbCertificatePrintRequest() != null) {
@@ -114,6 +117,7 @@ public class MergeProcess implements DistributionProcess {
 				CertificatePrintRequest certificatePrintRequest = obj.getYedbCertificatePrintRequest();
 				PackingSlipRequest request = PackingSlipRequest.builder().mincode(mincode).currentSlip(currentSlipCount).total(obj.getTotal()).paperType("YEDB").build();
 				mergeCertificates(packSlipReq,certificatePrintRequest,request,exception,processorData);
+				numberOfPdfs++;
 				logger.info("*** YEDB Documents Merged");
 			}
 			if(obj.getYedrCertificatePrintRequest() != null) {
@@ -121,6 +125,7 @@ public class MergeProcess implements DistributionProcess {
 				CertificatePrintRequest certificatePrintRequest = obj.getYedrCertificatePrintRequest();
 				PackingSlipRequest request = PackingSlipRequest.builder().mincode(mincode).currentSlip(currentSlipCount).total(obj.getTotal()).paperType("YEDR").build();
 				mergeCertificates(packSlipReq,certificatePrintRequest,request,exception,processorData);
+				numberOfPdfs++;
 				logger.info("*** YEDR Documents Merged");
 			}
 			logger.info("PDFs Merged {}",schoolDetails.getSchoolName());
@@ -129,6 +134,7 @@ public class MergeProcess implements DistributionProcess {
 			}
 		}
 		createZipFile(batchId);
+		createControlFile(batchId,numberOfPdfs);
 		sftpUtils.sftpUpload(batchId);
 		long endTime = System.currentTimeMillis();
 		long diff = (endTime - startTime)/1000;
@@ -136,6 +142,21 @@ public class MergeProcess implements DistributionProcess {
 		response.setMergeProcessResponse("Merge Successful and File Uploaded");
 		processorData.setDistributionResponse(response);
 		return processorData;
+	}
+
+	private void createControlFile(Long batchId,int numberOfPdfs) {
+		String sourceFile = "/tmp/"+batchId;
+		FileOutputStream fos = null;
+		try {
+			fos = new FileOutputStream("/tmp/EDGRAD.BATCH."+batchId+".txt");
+			byte[] contentInBytes = String.valueOf(numberOfPdfs).getBytes();
+			fos.write(contentInBytes);
+			fos.flush();
+			fos.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
 	}
 
 	private void createZipFile(Long batchId) {
