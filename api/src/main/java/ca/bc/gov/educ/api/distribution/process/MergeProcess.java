@@ -87,9 +87,18 @@ public class MergeProcess implements DistributionProcess {
 				try {
 					locations.add(reportService.getPackingSlip(packSlipReq,processorData.getAccessToken(),exception).getInputStream());
 					logger.info("*** Packing Slip Added");
+					int currentTranscript = 0;
+					int failedToAdd = 0;
 					for (StudentCredentialDistribution scd : scdList) {
 						InputStreamResource transcriptPdf = webClient.get().uri(String.format(educDistributionApiConstants.getTranscript(),scd.getStudentID(),scd.getCredentialTypeCode(),"COMPL")).headers(h -> h.setBearerAuth(processorData.getAccessToken())).retrieve().bodyToMono(InputStreamResource.class).block();
-						locations.add(transcriptPdf.getInputStream());
+						if(transcriptPdf != null) {
+							locations.add(transcriptPdf.getInputStream());
+							currentTranscript++;
+							logger.info("*** Added PDFs {}/{} Current student {}",currentTranscript,scdList.size(),scd.getStudentID());
+						}else {
+							failedToAdd++;
+							logger.info("*** Failed to Add PDFs {} Current student {}",failedToAdd,scd.getStudentID());
+						}
 					}
 					PDFMergerUtility objs = new PDFMergerUtility();
 					Path path = Paths.get("/tmp/"+batchId+"/"+mincode+"/");
@@ -192,9 +201,18 @@ public class MergeProcess implements DistributionProcess {
 		setExtraDataForPackingSlip(packSlipReq,paperType,request.getTotal(),scdList.size(),request.getCurrentSlip(),"Certificate", certificatePrintRequest.getBatchId());
 		try {
 			locations.add(reportService.getPackingSlip(packSlipReq,processorData.getAccessToken(),exception).getInputStream());
+			int currentCertificate = 0;
+			int failedToAdd = 0;
 			for (StudentCredentialDistribution scd : scdList) {
 				InputStreamResource certificatePdf = webClient.get().uri(String.format(educDistributionApiConstants.getCertificate(),scd.getStudentID(),scd.getCredentialTypeCode(),"COMPL")).headers(h -> h.setBearerAuth(processorData.getAccessToken())).retrieve().bodyToMono(InputStreamResource.class).block();
-				locations.add(certificatePdf.getInputStream());
+				if(certificatePdf != null) {
+					locations.add(certificatePdf.getInputStream());
+					currentCertificate++;
+					logger.info("*** Added PDFs {}/{} Current student {}",currentCertificate,scdList.size(),scd.getStudentID());
+				}else {
+					failedToAdd++;
+					logger.info("*** Failed to Add PDFs {} Current student {} papertype : {}",failedToAdd,scd.getStudentID(),paperType);
+				}
 			}
 			PDFMergerUtility objs = new PDFMergerUtility();
 			Path path = Paths.get("/tmp/"+processorData.getBatchId()+"/"+mincode+"/");
