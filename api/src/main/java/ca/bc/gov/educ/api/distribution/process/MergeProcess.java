@@ -90,14 +90,14 @@ public class MergeProcess implements DistributionProcess {
 					int currentTranscript = 0;
 					int failedToAdd = 0;
 					for (StudentCredentialDistribution scd : scdList) {
-						InputStreamResource transcriptPdf = webClient.get().uri(String.format(educDistributionApiConstants.getTranscript(),scd.getStudentID(),scd.getCredentialTypeCode(),"COMPL")).headers(h -> h.setBearerAuth(processorData.getAccessToken())).retrieve().bodyToMono(InputStreamResource.class).block();
+						InputStreamResource transcriptPdf = webClient.get().uri(String.format(educDistributionApiConstants.getTranscript(),scd.getStudentID(),scd.getCredentialTypeCode(),scd.getDocumentStatusCode())).headers(h -> h.setBearerAuth(processorData.getAccessToken())).retrieve().bodyToMono(InputStreamResource.class).block();
 						if(transcriptPdf != null) {
 							locations.add(transcriptPdf.getInputStream());
 							currentTranscript++;
-							logger.info("*** Added PDFs {}/{} Current student {}",currentTranscript,scdList.size(),scd.getStudentID());
+							logger.debug("*** Added PDFs {}/{} Current student {}",currentTranscript,scdList.size(),scd.getStudentID());
 						}else {
 							failedToAdd++;
-							logger.info("*** Failed to Add PDFs {} Current student {}",failedToAdd,scd.getStudentID());
+							logger.debug("*** Failed to Add PDFs {} Current student {}",failedToAdd,scd.getStudentID());
 						}
 					}
 					PDFMergerUtility objs = new PDFMergerUtility();
@@ -204,14 +204,14 @@ public class MergeProcess implements DistributionProcess {
 			int currentCertificate = 0;
 			int failedToAdd = 0;
 			for (StudentCredentialDistribution scd : scdList) {
-				InputStreamResource certificatePdf = webClient.get().uri(String.format(educDistributionApiConstants.getCertificate(),scd.getStudentID(),scd.getCredentialTypeCode(),"COMPL")).headers(h -> h.setBearerAuth(processorData.getAccessToken())).retrieve().bodyToMono(InputStreamResource.class).block();
+				InputStreamResource certificatePdf = webClient.get().uri(String.format(educDistributionApiConstants.getCertificate(),scd.getStudentID(),scd.getCredentialTypeCode(),scd.getDocumentStatusCode())).headers(h -> h.setBearerAuth(processorData.getAccessToken())).retrieve().bodyToMono(InputStreamResource.class).block();
 				if(certificatePdf != null) {
 					locations.add(certificatePdf.getInputStream());
 					currentCertificate++;
-					logger.info("*** Added PDFs {}/{} Current student {}",currentCertificate,scdList.size(),scd.getStudentID());
+					logger.debug("*** Added PDFs {}/{} Current student {}",currentCertificate,scdList.size(),scd.getStudentID());
 				}else {
 					failedToAdd++;
-					logger.info("*** Failed to Add PDFs {} Current student {} papertype : {}",failedToAdd,scd.getStudentID(),paperType);
+					logger.debug("*** Failed to Add PDFs {} Current student {} papertype : {}",failedToAdd,scd.getStudentID(),paperType);
 				}
 			}
 			PDFMergerUtility objs = new PDFMergerUtility();

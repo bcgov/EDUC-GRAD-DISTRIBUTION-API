@@ -12,4 +12,5 @@ public class StudentCredentialDistribution {
 	private UUID studentID;
 	private String paperType;
 	private String schoolOfRecord;
+	private String documentStatusCode;
 }
