@@ -17,11 +17,15 @@ public class SFTPUtils {
     public boolean sftpUpload(Long batchId) {
         String localFile = "/tmp/EDGRAD.BATCH."+batchId+".zip";
         String remoteFile = "/Inbox/Dev/EDGRAD.BATCH."+batchId+".zip";
+        String localControlFile = "/tmp/EDGRAD.BATCH."+batchId+".txt";
+        String remoteControlFile = "/Inbox/Dev/EDGRAD.BATCH."+batchId+".txt";
         Session jschSession = null;
 
         try {
             JSch jsch = new JSch();
+            jsch.setKnownHosts("/.ssh/known_hosts");
             jschSession = jsch.getSession(SFTP_USERNAME, REMOTE_HOST, REMOTE_PORT);
+            jsch.addIdentity("/.ssh/id_rsa");
             jschSession.connect(SESSION_TIMEOUT);
 
             Channel sftp = jschSession.openChannel("sftp");
@@ -30,6 +34,7 @@ public class SFTPUtils {
 
             // transfer file from local to remote server
             channelSftp.put(localFile, remoteFile);
+            channelSftp.put(localControlFile, remoteControlFile);
             channelSftp.exit();
             return true;
         } catch (JSchException | SftpException e) {
