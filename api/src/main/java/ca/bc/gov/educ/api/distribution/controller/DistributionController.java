@@ -18,9 +18,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
-import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -28,7 +25,6 @@ import java.util.Map;
 @CrossOrigin
 @RestController
 @RequestMapping(EducDistributionApiConstants.DISTRIBUTION_API_ROOT_MAPPING)
-@EnableResourceServer
 @OpenAPIDefinition(info = @Info(title = "API for Distributing Credentials to Schools.", description = "This API is for Distributing Credentials to Schools.", version = "1"), security = {@SecurityRequirement(name = "OAUTH2", scopes = {"GRAD_GRADUATE_STUDENT"})})
 public class DistributionController {
 
@@ -47,10 +43,9 @@ public class DistributionController {
     @PreAuthorize(PermissionsContants.GRADUATE_STUDENT)
     @Operation(summary = "distribution run for Grad", description = "When triggered, run the distribution piece and send out credentials for printing", tags = { "Distribution" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK")})
-    public ResponseEntity<DistributionResponse> distributeCredentials(@PathVariable String runType, @RequestParam(required = false) Long batchId, @RequestBody Map<String, DistributionPrintRequest> mapDist) {
-        OAuth2AuthenticationDetails auth = (OAuth2AuthenticationDetails) SecurityContextHolder.getContext().getAuthentication().getDetails();
-        String accessToken = auth.getTokenValue();
+    public ResponseEntity<DistributionResponse> distributeCredentials(
+            @PathVariable String runType, @RequestParam(required = false) Long batchId,
+            @RequestBody Map<String, DistributionPrintRequest> mapDist, @RequestHeader(name="Authorization") String accessToken) {
         return response.GET(gradDistributionService.distributeCredentials(runType,batchId,mapDist,accessToken));
     }
-
 }

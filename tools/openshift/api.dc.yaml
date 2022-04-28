@@ -54,13 +54,18 @@ objects:
               ports:
                 - containerPort: ${{CONTAINER_PORT}}
                   protocol: TCP
+              resources:
+                requests:
+                  cpu: "250m"
+                  memory: "1024Mi"
+                limits:
+                  cpu: "500m"
+                  memory: "208Mi"
               envFrom:
                 - configMapRef:
                     name: educ-grad-api-config-map
                 - configMapRef:
                     name: educ-grad-distribution-api-config-map
-                - secretRef:
-                    name: grad-keycloak-pk-secret
                 - secretRef:
                     name: grad-client-secret
                 - secretRef:
