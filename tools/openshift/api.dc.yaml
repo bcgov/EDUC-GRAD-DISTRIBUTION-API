@@ -60,8 +60,6 @@ objects:
                 - configMapRef:
                     name: educ-grad-distribution-api-config-map
                 - secretRef:
-                    name: grad-keycloak-pk-secret
-                - secretRef:
                     name: grad-client-secret
                 - secretRef:
                     name: api-distribution-ssh-keys-secret
