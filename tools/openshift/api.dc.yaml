@@ -54,6 +54,13 @@ objects:
               ports:
                 - containerPort: ${{CONTAINER_PORT}}
                   protocol: TCP
+              resources:
+                requests:
+                  cpu: "250m"
+                  memory: "1024Mi"
+                limits:
+                  cpu: "500m"
+                  memory: "208Mi"
               envFrom:
                 - configMapRef:
                     name: educ-grad-api-config-map
