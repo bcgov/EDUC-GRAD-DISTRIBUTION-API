@@ -52,4 +52,7 @@ public class EducDistributionApiConstants {
 
     @Value("${endpoint.grad-trax-api.school-by-min-code.url}")
     private String schoolDetails;
+
+    @Value("${endpoint.grad-report-api.get-school-distribution-report.url}")
+    private String distributionReport;
 }

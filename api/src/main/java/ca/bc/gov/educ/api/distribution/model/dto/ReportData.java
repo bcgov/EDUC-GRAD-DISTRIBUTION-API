@@ -35,5 +35,10 @@ public class ReportData implements Serializable {
 	@JsonDeserialize(as = PackingSlip.class)
 	private PackingSlip packingSlip;
 
+	private String logo;
+	private String orgCode;
+	private String gradMessage;
+	private String reportNumber;
+
 	private Map<String, String> parameters;
 }
