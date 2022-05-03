@@ -84,6 +84,7 @@ public class MergeProcess implements DistributionProcess {
 				if(obj.getSchoolDistributionRequest() != null) {
 					ReportRequest schoolDistributionReportRequest = reportService.prepareSchoolDistributionReportData(obj.getSchoolDistributionRequest(), processorData.getBatchId(),schoolDetails);
 					createAndSaveDistributionReport(schoolDistributionReportRequest,mincode,exception,processorData);
+					numberOfPdfs++;
 				}
 				if (obj.getTranscriptPrintRequest() != null) {
 					TranscriptPrintRequest transcriptPrintRequest = obj.getTranscriptPrintRequest();
@@ -234,7 +235,7 @@ public class MergeProcess implements DistributionProcess {
 	}
 
 	private void createAndSaveDistributionReport(ReportRequest distributionRequest,String mincode,ExceptionMessage exception,ProcessorData processorData) {
-		List<InputStream> locations=new ArrayList<InputStream>();
+		List<InputStream> locations=new ArrayList<>();
 		try {
 
 			byte[] bytesSAR = webClient.post().uri(educDistributionApiConstants.getDistributionReport()).headers(h -> h.setBearerAuth(processorData.getAccessToken())).body(BodyInserters.fromValue(distributionRequest)).retrieve().bodyToMono(byte[].class).block();
@@ -249,6 +250,7 @@ public class MergeProcess implements DistributionProcess {
 			objs.mergeDocuments(MemoryUsageSetting.setupMainMemoryOnly());
 		} catch (IOException e) {
 			e.printStackTrace();
+			exception.setExceptionName("Error building Distribution Report");
 		}
 	}
 }
