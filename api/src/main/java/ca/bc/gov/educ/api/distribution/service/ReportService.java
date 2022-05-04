@@ -3,6 +3,7 @@ package ca.bc.gov.educ.api.distribution.service;
 import ca.bc.gov.educ.api.distribution.model.dto.*;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
@@ -10,7 +11,9 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.ByteArrayInputStream;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class ReportService {
@@ -78,4 +81,45 @@ public class ReportService {
 		req.setData(data);
 		return req;
 	}
+
+    public ReportRequest prepareSchoolDistributionReportData(SchoolDistributionRequest schoolDistributionRequest, Long batchId,SchoolTrax schoolDetails) {
+		ReportRequest req = new ReportRequest();
+		ReportData data = new ReportData();
+
+		ReportOptions options = new ReportOptions();
+		options.setReportFile("school distribution");
+		options.setReportName("schoolDistribution");
+		options.setConvertTo("pdf");
+		options.setCacheReport(false);
+		options.setOverwrite(false);
+
+		List<StudentCredentialDistribution> schoolReportList = schoolDistributionRequest.getStudentList();
+		List<Student> stdList = new ArrayList<>();
+		School schObj = new School();
+		schObj.setMincode(schoolDetails.getMinCode());
+		schObj.setName(schoolDetails.getSchoolName());
+		for(StudentCredentialDistribution sc:schoolReportList) {
+			Student std = new Student();
+			std.setFirstName(sc.getLegalFirstName());
+			std.setLastName(sc.getLegalLastName());
+			std.setMiddleName(sc.getLegalMiddleNames());
+			Pen pen = new Pen();
+			pen.setPen(sc.getPen());
+			std.setPen(pen);
+			std.setGradProgram(sc.getProgram());
+			GraduationData gradData = new GraduationData();
+			gradData.setGraduationDate(EducDistributionApiUtils.parsingTraxDate(sc.getProgramCompletionDate()));
+			gradData.setHonorsFlag(sc.getHonoursStanding()!= null && sc.getHonoursStanding().equalsIgnoreCase("Y")?true:false);
+			std.setGraduationData(gradData);
+			stdList.add(std);
+		}
+		schObj.setStudents(stdList);
+		data.setSchool(schObj);
+		data.setOrgCode(StringUtils.startsWith(data.getSchool().getMincode(), "098") ? "YU" : "BC");
+		data.setReportNumber(data.getOrgCode()+"-"+batchId);
+		req.setData(data);
+		req.setOptions(options);
+
+		return req;
+    }
 }

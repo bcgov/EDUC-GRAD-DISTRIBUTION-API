@@ -83,6 +83,8 @@ endpoint:
   grad-report-api:
     get-packing-slip:
       url: ${GRAD_REPORT_API}api/v1/reports/packingslip
+    get-school-distribution-report:
+      url: ${GRAD_REPORT_API}api/v1/reports/schooldistribution
   grad-trax-api:
     school-by-min-code:
       url: ${GRAD_TRAX_API}api/v1/school/%s
