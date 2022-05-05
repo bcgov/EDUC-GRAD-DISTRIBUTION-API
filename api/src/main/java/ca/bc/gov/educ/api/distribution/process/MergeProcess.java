@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.*;
@@ -77,8 +78,14 @@ public class MergeProcess implements DistributionProcess {
 			SchoolTrax schoolDetails = schoolService.getSchoolDetails(mincode,processorData.getAccessToken(),exception);
 			if(schoolDetails != null) {
 				logger.info("*** School Details Acquired {}", schoolDetails.getSchoolName());
+
 				ReportRequest packSlipReq = reportService.preparePackingSlipData(schoolDetails, processorData.getBatchId());
 				DistributionPrintRequest obj = entry.getValue();
+				if(obj.getSchoolDistributionRequest() != null) {
+					ReportRequest schoolDistributionReportRequest = reportService.prepareSchoolDistributionReportData(obj.getSchoolDistributionRequest(), processorData.getBatchId(),schoolDetails);
+					createAndSaveDistributionReport(schoolDistributionReportRequest,mincode,exception,processorData);
+					numberOfPdfs++;
+				}
 				if (obj.getTranscriptPrintRequest() != null) {
 					TranscriptPrintRequest transcriptPrintRequest = obj.getTranscriptPrintRequest();
 					List<StudentCredentialDistribution> scdList = transcriptPrintRequest.getTranscriptList();
@@ -224,6 +231,26 @@ public class MergeProcess implements DistributionProcess {
 			objs.mergeDocuments(MemoryUsageSetting.setupMainMemoryOnly());
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
+	}
+
+	private void createAndSaveDistributionReport(ReportRequest distributionRequest,String mincode,ExceptionMessage exception,ProcessorData processorData) {
+		List<InputStream> locations=new ArrayList<>();
+		try {
+
+			byte[] bytesSAR = webClient.post().uri(educDistributionApiConstants.getDistributionReport()).headers(h -> h.setBearerAuth(processorData.getAccessToken())).body(BodyInserters.fromValue(distributionRequest)).retrieve().bodyToMono(byte[].class).block();
+			if(bytesSAR != null) {
+				locations.add(new ByteArrayInputStream(bytesSAR));
+			}
+			PDFMergerUtility objs = new PDFMergerUtility();
+			Path path = Paths.get("/tmp/"+processorData.getBatchId()+"/"+mincode+"/");
+			Files.createDirectories(path);
+			objs.setDestinationFileName("/tmp/"+processorData.getBatchId()+"/"+mincode+"/EDGRAD.R.324W."+ EducDistributionApiUtils.getFileName()+".pdf");
+			objs.addSources(locations);
+			objs.mergeDocuments(MemoryUsageSetting.setupMainMemoryOnly());
+		} catch (IOException e) {
+			e.printStackTrace();
+			exception.setExceptionName("Error building Distribution Report");
 		}
 	}
 }
