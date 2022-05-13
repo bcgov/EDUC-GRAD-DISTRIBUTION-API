@@ -35,6 +35,8 @@ public class ReportData implements Serializable {
 	@JsonDeserialize(as = PackingSlip.class)
 	private PackingSlip packingSlip;
 
+	private Certificate certificate;
+
 	private String logo;
 	private String orgCode;
 	private String gradMessage;
