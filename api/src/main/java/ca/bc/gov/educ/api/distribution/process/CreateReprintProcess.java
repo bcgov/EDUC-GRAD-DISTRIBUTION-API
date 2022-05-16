@@ -11,12 +11,12 @@ import ca.bc.gov.educ.api.distribution.util.GradValidation;
 import ca.bc.gov.educ.api.distribution.util.SFTPUtils;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.SneakyThrows;
 import org.apache.pdfbox.io.MemoryUsageSetting;
 import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -36,6 +36,9 @@ import java.util.zip.ZipOutputStream;
 public class CreateReprintProcess implements DistributionProcess {
 	
 	private static Logger logger = LoggerFactory.getLogger(CreateReprintProcess.class);
+	private static final String LOC = "/tmp/";
+	private static final String DEL = "/";
+	private static final String EXCEPTION = "IO Exp {} ";
 
 	@Autowired
 	private GradStudentService gradStudentService;
@@ -64,7 +67,7 @@ public class CreateReprintProcess implements DistributionProcess {
 	@Override
 	public ProcessorData fire(ProcessorData processorData) {
 		long startTime = System.currentTimeMillis();
-		logger.info("************* TIME START  ************ "+startTime);
+		logger.info("************* TIME START  ************ {}",startTime);
 		DistributionResponse response = new DistributionResponse();
 		ExceptionMessage exception = new ExceptionMessage();
 		Map<String,DistributionPrintRequest> mapDist = processorData.getMapDistribution();
@@ -121,39 +124,35 @@ public class CreateReprintProcess implements DistributionProcess {
 		sftpUtils.sftpUpload(batchId);
 		long endTime = System.currentTimeMillis();
 		long diff = (endTime - startTime)/1000;
-		logger.info("************* TIME Taken  ************ "+diff+" secs");
+		logger.info("************* TIME Taken  ************ {} secs",diff);
 		response.setMergeProcessResponse("Merge Successful and File Uploaded");
 		processorData.setDistributionResponse(response);
 		return processorData;
 	}
 
-	private void createControlFile(Long batchId,int numberOfPdfs) {
-		String sourceFile = "/tmp/"+batchId;
-		FileOutputStream fos = null;
-		try {
-			fos = new FileOutputStream("/tmp/EDGRAD.BATCH."+batchId+".txt");
+	@SneakyThrows
+	private void createControlFile(Long batchId, int numberOfPdfs) {
+		try (FileOutputStream fos = new FileOutputStream(LOC + "EDGRAD.BATCH." + batchId + ".txt")) {
 			byte[] contentInBytes = String.valueOf(numberOfPdfs).getBytes();
 			fos.write(contentInBytes);
 			fos.flush();
-			fos.close();
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.debug("IO Exp {}", e.getMessage());
 		}
 
 	}
 
+	@SneakyThrows
 	private void createZipFile(Long batchId) {
-		String sourceFile = "/tmp/"+batchId;
-		FileOutputStream fos = null;
-		try {
-			fos = new FileOutputStream("/tmp/EDGRAD.BATCH."+batchId+".zip");
+		String sourceFile = LOC+batchId;
+		try (FileOutputStream fos = new FileOutputStream(LOC + "EDGRAD.BATCH." + batchId + ".zip")) {
 			ZipOutputStream zipOut = new ZipOutputStream(fos);
 			File fileToZip = new File(sourceFile);
 			EducDistributionApiUtils.zipFile(fileToZip, fileToZip.getName(), zipOut);
 			zipOut.close();
-			fos.close();
+
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.debug(EXCEPTION,e.getMessage());
 		}
 
 	}
@@ -171,7 +170,7 @@ public class CreateReprintProcess implements DistributionProcess {
 		List<StudentCredentialDistribution> scdList = certificatePrintRequest.getCertificateList();
 		String mincode = request.getMincode();
 		String paperType = request.getPaperType();
-		List<InputStream> locations=new ArrayList<InputStream>();
+		List<InputStream> locations=new ArrayList<>();
 		setExtraDataForPackingSlip(packSlipReq,paperType,request.getTotal(),scdList.size(),request.getCurrentSlip(),"Certificate", certificatePrintRequest.getBatchId());
 		try {
 			locations.add(reportService.getPackingSlip(packSlipReq,processorData.getAccessToken(),exception).getInputStream());
@@ -179,9 +178,11 @@ public class CreateReprintProcess implements DistributionProcess {
 			int failedToAdd = 0;
 			for (StudentCredentialDistribution scd : scdList) {
 				ReportData data = webClient.get().uri(String.format(educDistributionApiConstants.getCertDataReprint(), scd.getPen())).headers(h -> h.setBearerAuth(processorData.getAccessToken())).retrieve().bodyToMono(ReportData.class).block();
-				data.getCertificate().setCertStyle("Reprint");
-				data.getCertificate().getOrderType().getCertificateType().setReportName(scd.getCredentialTypeCode());
-				data.getCertificate().getOrderType().getCertificateType().getPaperType().setCode(scd.getPaperType());
+				if(data != null) {
+					data.getCertificate().setCertStyle("Reprint");
+					data.getCertificate().getOrderType().getCertificateType().setReportName(scd.getCredentialTypeCode());
+					data.getCertificate().getOrderType().getCertificateType().getPaperType().setCode(scd.getPaperType());
+				}
 				ReportOptions options = new ReportOptions();
 				options.setReportFile("certificate");
 				options.setReportName("Certificate.pdf");
@@ -199,13 +200,13 @@ public class CreateReprintProcess implements DistributionProcess {
 				}
 			}
 			PDFMergerUtility objs = new PDFMergerUtility();
-			Path path = Paths.get("/tmp/"+processorData.getBatchId()+"/"+mincode+"/");
+			Path path = Paths.get(LOC+processorData.getBatchId()+DEL+mincode+DEL);
 			Files.createDirectories(path);
-			objs.setDestinationFileName("/tmp/"+processorData.getBatchId()+"/"+mincode+"/EDGRAD.C."+paperType+"."+ EducDistributionApiUtils.getFileName()+".pdf");
+			objs.setDestinationFileName(LOC+processorData.getBatchId()+DEL+mincode+"/EDGRAD.C."+paperType+"."+ EducDistributionApiUtils.getFileName()+".pdf");
 			objs.addSources(locations);
 			objs.mergeDocuments(MemoryUsageSetting.setupMainMemoryOnly());
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.debug(EXCEPTION,e.getMessage());
 		}
 	}
 
@@ -218,13 +219,13 @@ public class CreateReprintProcess implements DistributionProcess {
 				locations.add(new ByteArrayInputStream(bytesSAR));
 			}
 			PDFMergerUtility objs = new PDFMergerUtility();
-			Path path = Paths.get("/tmp/"+processorData.getBatchId()+"/"+mincode+"/");
+			Path path = Paths.get(LOC+processorData.getBatchId()+DEL+mincode+DEL);
 			Files.createDirectories(path);
-			objs.setDestinationFileName("/tmp/"+processorData.getBatchId()+"/"+mincode+"/EDGRAD.R.324W."+ EducDistributionApiUtils.getFileName()+".pdf");
+			objs.setDestinationFileName(LOC+processorData.getBatchId()+DEL+mincode+"/EDGRAD.R.324W."+ EducDistributionApiUtils.getFileName()+".pdf");
 			objs.addSources(locations);
 			objs.mergeDocuments(MemoryUsageSetting.setupMainMemoryOnly());
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.debug(EXCEPTION,e.getMessage());
 			exception.setExceptionName("Error building Distribution Report");
 		}
 	}
