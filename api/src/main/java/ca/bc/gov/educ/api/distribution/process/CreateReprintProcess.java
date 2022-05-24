@@ -89,30 +89,10 @@ public class CreateReprintProcess implements DistributionProcess {
 					createAndSaveDistributionReport(schoolDistributionReportRequest,mincode,exception,processorData);
 					numberOfPdfs++;
 				}
-				if (obj.getYed2CertificatePrintRequest() != null) {
-					currentSlipCount++;
-					CertificatePrintRequest certificatePrintRequest = obj.getYed2CertificatePrintRequest();
-					PackingSlipRequest request = PackingSlipRequest.builder().mincode(mincode).currentSlip(currentSlipCount).total(obj.getTotal()).paperType("YED2").build();
-					mergeCertificates(packSlipReq, certificatePrintRequest, request, exception, processorData);
-					numberOfPdfs++;
-					logger.info("*** YED2 Documents Merged");
-				}
-				if (obj.getYedbCertificatePrintRequest() != null) {
-					currentSlipCount++;
-					CertificatePrintRequest certificatePrintRequest = obj.getYedbCertificatePrintRequest();
-					PackingSlipRequest request = PackingSlipRequest.builder().mincode(mincode).currentSlip(currentSlipCount).total(obj.getTotal()).paperType("YEDB").build();
-					mergeCertificates(packSlipReq, certificatePrintRequest, request, exception, processorData);
-					numberOfPdfs++;
-					logger.info("*** YEDB Documents Merged");
-				}
-				if (obj.getYedrCertificatePrintRequest() != null) {
-					currentSlipCount++;
-					CertificatePrintRequest certificatePrintRequest = obj.getYedrCertificatePrintRequest();
-					PackingSlipRequest request = PackingSlipRequest.builder().mincode(mincode).currentSlip(currentSlipCount).total(obj.getTotal()).paperType("YEDR").build();
-					mergeCertificates(packSlipReq, certificatePrintRequest, request, exception, processorData);
-					numberOfPdfs++;
-					logger.info("*** YEDR Documents Merged");
-				}
+				numberOfPdfs = processYed2Certificate(obj,currentSlipCount,packSlipReq,mincode,exception,processorData,numberOfPdfs);
+				numberOfPdfs = processYedbCertificate(obj,currentSlipCount,packSlipReq,mincode,exception,processorData,numberOfPdfs);
+				numberOfPdfs = processYedrCertificate(obj,currentSlipCount,packSlipReq,mincode,exception,processorData,numberOfPdfs);
+
 				logger.info("PDFs Merged {}", schoolDetails.getSchoolName());
 				if (counter % 50 == 0) {
 					accessTokenService.fetchAccessToken(processorData);
@@ -128,6 +108,40 @@ public class CreateReprintProcess implements DistributionProcess {
 		response.setMergeProcessResponse("Merge Successful and File Uploaded");
 		processorData.setDistributionResponse(response);
 		return processorData;
+	}
+
+	private int processYedrCertificate(DistributionPrintRequest obj, int currentSlipCount, ReportRequest packSlipReq, String mincode, ExceptionMessage exception, ProcessorData processorData, int numberOfPdfs) {
+		if (obj.getYedrCertificatePrintRequest() != null) {
+			currentSlipCount++;
+			processCertificatePrintFile(packSlipReq,obj.getYedrCertificatePrintRequest(),mincode,currentSlipCount,obj,processorData,exception);
+			numberOfPdfs++;
+			logger.info("*** YEDR Documents Merged");
+		}
+		return numberOfPdfs;
+	}
+
+	private int processYedbCertificate(DistributionPrintRequest obj, int currentSlipCount, ReportRequest packSlipReq, String mincode, ExceptionMessage exception, ProcessorData processorData, int numberOfPdfs) {
+		if (obj.getYedbCertificatePrintRequest() != null) {
+			currentSlipCount++;
+			processCertificatePrintFile(packSlipReq,obj.getYedbCertificatePrintRequest(),mincode,currentSlipCount,obj,processorData,exception);
+			numberOfPdfs++;
+			logger.info("*** YEDB Documents Merged");
+		}
+		return numberOfPdfs;
+	}
+
+	private int processYed2Certificate(DistributionPrintRequest obj, int currentSlipCount, ReportRequest packSlipReq, String mincode, ExceptionMessage exception, ProcessorData processorData, int numberOfPdfs) {
+		if (obj.getYed2CertificatePrintRequest() != null) {
+			currentSlipCount++;
+			processCertificatePrintFile(packSlipReq,obj.getYed2CertificatePrintRequest(),mincode,currentSlipCount,obj,processorData,exception);
+			numberOfPdfs++;
+			logger.info("*** YED2 Documents Merged");
+		}
+		return numberOfPdfs;
+	}
+	private void processCertificatePrintFile(ReportRequest packSlipReq, CertificatePrintRequest certificatePrintRequest, String mincode, int currentSlipCount, DistributionPrintRequest obj, ProcessorData processorData, ExceptionMessage exception) {
+		PackingSlipRequest request = PackingSlipRequest.builder().mincode(mincode).currentSlip(currentSlipCount).total(obj.getTotal()).paperType("YED2").build();
+		mergeCertificates(packSlipReq, certificatePrintRequest, request, exception, processorData);
 	}
 
 	@SneakyThrows
