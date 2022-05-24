@@ -85,6 +85,11 @@ endpoint:
       url: ${GRAD_REPORT_API}api/v1/reports/packingslip
     get-school-distribution-report:
       url: ${GRAD_REPORT_API}api/v1/reports/schooldistribution
+    certificate_report:
+      url: ${GRAD_REPORT_API}api/v1/reports/certificate
   grad-trax-api:
     school-by-min-code:
       url: ${GRAD_TRAX_API}api/v1/school/%s
+  grad-graduation-api:
+    report-by-pen:
+      url: ${GRAD_GRADUATION_API}api/v1/graduate/report/data/%s?type=CERT

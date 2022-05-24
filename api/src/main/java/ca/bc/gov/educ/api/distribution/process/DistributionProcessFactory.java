@@ -13,6 +13,9 @@ public class DistributionProcessFactory {
     @Autowired
     MergeProcess mergeProcess;
 
+    @Autowired
+    CreateReprintProcess createReprintProcess;
+
 	public DistributionProcess createProcess(DistributionProcessType processImplementation) {
 		DistributionProcess pcs = null;
         switch(processImplementation.name()) {
@@ -20,7 +23,10 @@ public class DistributionProcessFactory {
                 logger.info("\n************* MERGE PROCESS (MER) START  ************");
                 pcs = mergeProcess;
                 break;
-
+            case "RPR":
+                logger.info("\n************* CREATE REPRINT PROCESS (RPR) START  ************");
+                pcs = createReprintProcess;
+                break;
             default:
 	        	break;
         }
