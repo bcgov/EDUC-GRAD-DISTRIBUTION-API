@@ -28,6 +28,9 @@ import java.util.Map;
 })
 public class ReportData implements Serializable {
 
+	@JsonDeserialize(as = Student.class)
+	private Student student;
+
 	@JsonDeserialize(as = School.class)
 	private School school;
 	@JsonFormat(pattern="yyyy-MM-dd")
