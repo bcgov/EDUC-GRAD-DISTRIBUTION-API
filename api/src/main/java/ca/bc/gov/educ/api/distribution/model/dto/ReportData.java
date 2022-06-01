@@ -12,6 +12,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 import java.io.Serializable;
+import java.util.Date;
 import java.util.Map;
 
 @Data
@@ -44,6 +45,12 @@ public class ReportData implements Serializable {
 	private String orgCode;
 	private String gradMessage;
 	private String reportNumber;
+
+	@JsonFormat(pattern="yyyy-MM-dd")
+	private Date issueDate;
+
+	private String reportTitle;
+	private String reportSubTitle;
 
 	private Map<String, String> parameters;
 }

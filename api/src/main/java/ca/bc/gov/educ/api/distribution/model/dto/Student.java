@@ -33,6 +33,8 @@ public class Student implements Serializable {
     @JsonDeserialize(as = GraduationData.class)
     private GraduationData graduationData;
 
+    private List<NonGradReason> nonGradReasons = new ArrayList<>();
+
     @JsonDeserialize(as = Pen.class)
     public Pen getPen() {
         return pen;
@@ -178,5 +180,13 @@ public class Student implements Serializable {
 
     public void setGraduationData(GraduationData graduationData) {
         this.graduationData = graduationData;
+    }
+
+    public List<NonGradReason> getNonGradReasons() {
+        return nonGradReasons;
+    }
+
+    public void setNonGradReasons(List<NonGradReason> nonGradReasons) {
+        this.nonGradReasons = nonGradReasons;
     }
 }

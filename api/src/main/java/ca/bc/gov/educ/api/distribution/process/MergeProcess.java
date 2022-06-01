@@ -11,6 +11,8 @@ import ca.bc.gov.educ.api.distribution.util.GradValidation;
 import ca.bc.gov.educ.api.distribution.util.SFTPUtils;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.pdfbox.io.MemoryUsageSetting;
 import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import org.slf4j.Logger;
@@ -22,9 +24,11 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -78,7 +82,7 @@ public class MergeProcess implements DistributionProcess {
 			SchoolTrax schoolDetails = schoolService.getSchoolDetails(mincode,processorData.getAccessToken(),exception);
 			if(schoolDetails != null) {
 				logger.info("*** School Details Acquired {}", schoolDetails.getSchoolName());
-
+				List<Student> studListNonGrad = new ArrayList<>();
 				ReportRequest packSlipReq = reportService.preparePackingSlipData(schoolDetails, processorData.getBatchId());
 				DistributionPrintRequest obj = entry.getValue();
 				if(obj.getSchoolDistributionRequest() != null) {
@@ -98,6 +102,11 @@ public class MergeProcess implements DistributionProcess {
 						int currentTranscript = 0;
 						int failedToAdd = 0;
 						for (StudentCredentialDistribution scd : scdList) {
+							if(scd.getNonGradReasons() != null && !scd.getNonGradReasons().isEmpty()) {
+								Student objStd = prepareStudentObj(scd,studListNonGrad);
+								if(objStd != null)
+									studListNonGrad.add(objStd);
+							}
 							InputStreamResource transcriptPdf = webClient.get().uri(String.format(educDistributionApiConstants.getTranscript(), scd.getStudentID(), scd.getCredentialTypeCode(), scd.getDocumentStatusCode())).headers(h -> h.setBearerAuth(processorData.getAccessToken())).retrieve().bodyToMono(InputStreamResource.class).block();
 							if (transcriptPdf != null) {
 								locations.add(transcriptPdf.getInputStream());
@@ -125,7 +134,7 @@ public class MergeProcess implements DistributionProcess {
 					currentSlipCount++;
 					CertificatePrintRequest certificatePrintRequest = obj.getYed2CertificatePrintRequest();
 					PackingSlipRequest request = PackingSlipRequest.builder().mincode(mincode).currentSlip(currentSlipCount).total(obj.getTotal()).paperType("YED2").build();
-					mergeCertificates(packSlipReq, certificatePrintRequest, request, exception, processorData);
+					mergeCertificates(packSlipReq, certificatePrintRequest, request, exception, processorData,studListNonGrad);
 					numberOfPdfs++;
 					logger.info("*** YED2 Documents Merged");
 				}
@@ -133,7 +142,7 @@ public class MergeProcess implements DistributionProcess {
 					currentSlipCount++;
 					CertificatePrintRequest certificatePrintRequest = obj.getYedbCertificatePrintRequest();
 					PackingSlipRequest request = PackingSlipRequest.builder().mincode(mincode).currentSlip(currentSlipCount).total(obj.getTotal()).paperType("YEDB").build();
-					mergeCertificates(packSlipReq, certificatePrintRequest, request, exception, processorData);
+					mergeCertificates(packSlipReq, certificatePrintRequest, request, exception, processorData,studListNonGrad);
 					numberOfPdfs++;
 					logger.info("*** YEDB Documents Merged");
 				}
@@ -141,9 +150,12 @@ public class MergeProcess implements DistributionProcess {
 					currentSlipCount++;
 					CertificatePrintRequest certificatePrintRequest = obj.getYedrCertificatePrintRequest();
 					PackingSlipRequest request = PackingSlipRequest.builder().mincode(mincode).currentSlip(currentSlipCount).total(obj.getTotal()).paperType("YEDR").build();
-					mergeCertificates(packSlipReq, certificatePrintRequest, request, exception, processorData);
+					mergeCertificates(packSlipReq, certificatePrintRequest, request, exception, processorData,studListNonGrad);
 					numberOfPdfs++;
 					logger.info("*** YEDR Documents Merged");
+				}
+				if(!studListNonGrad.isEmpty()) {
+					createAndSaveNonGradReport(schoolDetails,studListNonGrad,mincode,processorData.getAccessToken(),"NONGRAD");
 				}
 				logger.info("PDFs Merged {}", schoolDetails.getSchoolName());
 				if (counter % 50 == 0) {
@@ -162,6 +174,27 @@ public class MergeProcess implements DistributionProcess {
 		return processorData;
 	}
 
+	private Student prepareStudentObj(StudentCredentialDistribution scd, List<Student> studListNonGrad) {
+		if(scd.getStudentGrade().equalsIgnoreCase("AD") || scd.getStudentGrade().equalsIgnoreCase("12")) {
+			Student std = new Student();
+			std.setFirstName(scd.getLegalFirstName());
+			std.setLastName(scd.getLegalLastName());
+			std.setMiddleName(scd.getLegalMiddleNames());
+			Pen pen = new Pen();
+			pen.setPen(scd.getPen());
+			std.setPen(pen);
+			std.setGrade(scd.getStudentGrade());
+			std.setGraduationData(new GraduationData());
+			std.setNonGradReasons(getNonGradReasons(scd.getNonGradReasons()));
+
+			Student scObj = studListNonGrad.stream().filter(pr -> pr.getPen().getPen().compareTo(std.getPen().getPen()) == 0)
+					.findAny()
+					.orElse(null);
+			if (scObj == null)
+				return std;
+		}
+		return null;
+	}
 	private void createControlFile(Long batchId,int numberOfPdfs) {
 		String sourceFile = "/tmp/"+batchId;
 		FileOutputStream fos = null;
@@ -193,6 +226,19 @@ public class MergeProcess implements DistributionProcess {
 
 	}
 
+	private List<NonGradReason> getNonGradReasons(List<GradRequirement> nonGradReasons) {
+		List<NonGradReason> nList = new ArrayList<>();
+		if (nonGradReasons != null) {
+			for (GradRequirement gR : nonGradReasons) {
+				NonGradReason obj = new NonGradReason();
+				obj.setCode(gR.getRule());
+				obj.setDescription(gR.getDescription());
+				nList.add(obj);
+			}
+		}
+		return nList;
+	}
+
 	private void setExtraDataForPackingSlip(ReportRequest packSlipReq, String paperType, int total, int quantity, int currentSlip, String orderType, Long batchId) {
 		packSlipReq.getData().getPackingSlip().setTotal(total);
 		packSlipReq.getData().getPackingSlip().setCurrent(currentSlip);
@@ -202,7 +248,7 @@ public class MergeProcess implements DistributionProcess {
 		packSlipReq.getData().getPackingSlip().setOrderNumber(batchId);
 	}
 
-	private void mergeCertificates(ReportRequest packSlipReq, CertificatePrintRequest certificatePrintRequest,PackingSlipRequest request, ExceptionMessage exception,ProcessorData processorData) {
+	private void mergeCertificates(ReportRequest packSlipReq, CertificatePrintRequest certificatePrintRequest, PackingSlipRequest request, ExceptionMessage exception, ProcessorData processorData, List<Student> studListNonGrad) {
 		List<StudentCredentialDistribution> scdList = certificatePrintRequest.getCertificateList();
 		String mincode = request.getMincode();
 		String paperType = request.getPaperType();
@@ -213,6 +259,11 @@ public class MergeProcess implements DistributionProcess {
 			int currentCertificate = 0;
 			int failedToAdd = 0;
 			for (StudentCredentialDistribution scd : scdList) {
+				if(scd.getNonGradReasons() != null && !scd.getNonGradReasons().isEmpty()) {
+					Student objStd = prepareStudentObj(scd,studListNonGrad);
+					if(objStd != null)
+						studListNonGrad.add(objStd);
+				}
 				InputStreamResource certificatePdf = webClient.get().uri(String.format(educDistributionApiConstants.getCertificate(),scd.getStudentID(),scd.getCredentialTypeCode(),scd.getDocumentStatusCode())).headers(h -> h.setBearerAuth(processorData.getAccessToken())).retrieve().bodyToMono(InputStreamResource.class).block();
 				if(certificatePdf != null) {
 					locations.add(certificatePdf.getInputStream());
@@ -241,6 +292,9 @@ public class MergeProcess implements DistributionProcess {
 			byte[] bytesSAR = webClient.post().uri(educDistributionApiConstants.getDistributionReport()).headers(h -> h.setBearerAuth(processorData.getAccessToken())).body(BodyInserters.fromValue(distributionRequest)).retrieve().bodyToMono(byte[].class).block();
 			if(bytesSAR != null) {
 				locations.add(new ByteArrayInputStream(bytesSAR));
+				byte[] encoded = Base64.encodeBase64(bytesSAR);
+				String encodedPdf= new String(encoded, StandardCharsets.US_ASCII);
+				saveSchoolDistributionReport(encodedPdf,mincode,processorData.getAccessToken(),"GRAD");
 			}
 			PDFMergerUtility objs = new PDFMergerUtility();
 			Path path = Paths.get("/tmp/"+processorData.getBatchId()+"/"+mincode+"/");
@@ -252,5 +306,40 @@ public class MergeProcess implements DistributionProcess {
 			e.printStackTrace();
 			exception.setExceptionName("Error building Distribution Report");
 		}
+	}
+
+	private void createAndSaveNonGradReport(SchoolTrax schoolDetails, List<Student> studListNonGrad, String mincode, String accessToken, String reportType) {
+		ReportData nongradProjected = new ReportData();
+		School schObj = new School();
+		schObj.setMincode(schoolDetails.getMinCode());
+		schObj.setName(schoolDetails.getSchoolName());
+		schObj.setStudents(studListNonGrad);
+		nongradProjected.setSchool(schObj);
+		nongradProjected.setOrgCode(StringUtils.startsWith(nongradProjected.getSchool().getMincode(), "098") ? "YU" : "BC");
+		nongradProjected.setIssueDate(EducDistributionApiUtils.formatIssueDateForReportJasper(new java.sql.Date(System.currentTimeMillis()).toString()));
+		nongradProjected.setReportNumber("TRAX241B");
+		nongradProjected.setReportTitle("Grade 12 Examinations and Transcripts");
+		nongradProjected.setReportSubTitle("Grade 12 and Adult Students Not Able to Graduate on Grad Requirements");
+		ReportOptions options = new ReportOptions();
+		options.setReportFile(String.format("%s_%s00_NONGRAD",mincode, LocalDate.now().getYear()));
+		options.setReportName(String.format("%s_%s00_NONGRAD.pdf",mincode, LocalDate.now().getYear()));
+		ReportRequest reportParams = new ReportRequest();
+		reportParams.setOptions(options);
+		reportParams.setData(nongradProjected);
+
+		String encodedPdf = null;
+		byte[] bytesSAR = webClient.post().uri(educDistributionApiConstants.getNonGrad())
+				.headers(h -> h.setBearerAuth(accessToken)).body(BodyInserters.fromValue(reportParams)).retrieve().bodyToMono(byte[].class).block();
+		byte[] encoded = Base64.encodeBase64(bytesSAR);
+		encodedPdf= new String(encoded, StandardCharsets.US_ASCII);
+		saveSchoolDistributionReport(encodedPdf,mincode,accessToken,reportType);
+	}
+
+	private void saveSchoolDistributionReport(String encodedPdf, String mincode, String accessToken, String reportType) {
+		SchoolReports requestObj = new SchoolReports();
+		requestObj.setReport(encodedPdf);
+		requestObj.setSchoolOfRecord(mincode);
+		requestObj.setReportTypeCode(reportType);
+		webClient.post().uri(String.format(educDistributionApiConstants.getUpdateSchoolReport())).headers(h ->h.setBearerAuth(accessToken)).body(BodyInserters.fromValue(requestObj)).retrieve().bodyToMono(SchoolReports.class).block();
 	}
 }
