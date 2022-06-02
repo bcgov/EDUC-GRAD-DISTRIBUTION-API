@@ -108,8 +108,8 @@ public class ReportService {
 			std.setPen(pen);
 			std.setGradProgram(sc.getProgram());
 			GraduationData gradData = new GraduationData();
-			gradData.setGraduationDate(EducDistributionApiUtils.parsingTraxDate(sc.getProgramCompletionDate()));
-			gradData.setHonorsFlag(sc.getHonoursStanding()!= null && sc.getHonoursStanding().equalsIgnoreCase("Y")?true:false);
+			gradData.setGraduationDate(sc.getProgramCompletionDate() != null ? EducDistributionApiUtils.parsingTraxDate(sc.getProgramCompletionDate()):null);
+			gradData.setHonorsFlag(sc.getHonoursStanding() != null && sc.getHonoursStanding().equalsIgnoreCase("Y"));
 			std.setGraduationData(gradData);
 			stdList.add(std);
 		}
