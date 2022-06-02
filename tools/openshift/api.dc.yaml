@@ -60,7 +60,7 @@ objects:
                   memory: "1024Mi"
                 limits:
                   cpu: "500m"
-                  memory: "2048Mi"
+                  memory: "4096Mi"
               envFrom:
                 - configMapRef:
                     name: educ-grad-api-config-map
