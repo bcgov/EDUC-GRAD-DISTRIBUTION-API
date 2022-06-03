@@ -94,6 +94,7 @@ public class CreateReprintProcess implements DistributionProcess {
 				numberOfPdfs = processYedrCertificate(obj,currentSlipCount,packSlipReq,mincode,exception,processorData,numberOfPdfs);
 
 				logger.info("PDFs Merged {}", schoolDetails.getSchoolName());
+				logger.info("School {}/{}",counter,mapDist.size());
 				if (counter % 50 == 0) {
 					accessTokenService.fetchAccessToken(processorData);
 				}
@@ -213,34 +214,39 @@ public class CreateReprintProcess implements DistributionProcess {
 					logger.debug("*** Failed to Add PDFs {} Current student {}", failedToAdd, scd.getStudentID());
 				}
 			}
-			PDFMergerUtility objs = new PDFMergerUtility();
-			Path path = Paths.get(LOC+processorData.getBatchId()+DEL+mincode+DEL);
-			Files.createDirectories(path);
-			objs.setDestinationFileName(LOC+processorData.getBatchId()+DEL+mincode+"/EDGRAD.C."+paperType+"."+ EducDistributionApiUtils.getFileName()+".pdf");
-			objs.addSources(locations);
-			objs.mergeDocuments(MemoryUsageSetting.setupMainMemoryOnly());
+			mergeDocuments(processorData,mincode,"/EDGRAD.C.",paperType,locations);
 		} catch (IOException e) {
 			logger.debug(EXCEPTION,e.getMessage());
+		}
+	}
+
+	private void mergeDocuments(ProcessorData processorData,String mincode,String fileName,String paperType,List<InputStream> locations) {
+		try {
+			PDFMergerUtility objs = new PDFMergerUtility();
+			StringBuilder pBuilder = new StringBuilder();
+			pBuilder.append(LOC).append(processorData.getBatchId()).append(DEL).append(mincode).append(DEL);
+			Path path = Paths.get(pBuilder.toString());
+			Files.createDirectories(path);
+			pBuilder = new StringBuilder();
+			pBuilder.append(LOC).append(processorData.getBatchId()).append(DEL).append(mincode).append(fileName).append(paperType).append(".").append(EducDistributionApiUtils.getFileName()).append(".pdf");
+			objs.setDestinationFileName(pBuilder.toString());
+			objs.addSources(locations);
+			objs.mergeDocuments(MemoryUsageSetting.setupMainMemoryOnly());
+		}catch (Exception e) {
+			logger.debug(EXCEPTION,e.getLocalizedMessage());
 		}
 	}
 
 	private void createAndSaveDistributionReport(ReportRequest distributionRequest,String mincode,ExceptionMessage exception,ProcessorData processorData) {
 		List<InputStream> locations=new ArrayList<>();
 		try {
-
 			byte[] bytesSAR = webClient.post().uri(educDistributionApiConstants.getDistributionReport()).headers(h -> h.setBearerAuth(processorData.getAccessToken())).body(BodyInserters.fromValue(distributionRequest)).retrieve().bodyToMono(byte[].class).block();
 			if(bytesSAR != null) {
 				locations.add(new ByteArrayInputStream(bytesSAR));
 			}
-			PDFMergerUtility objs = new PDFMergerUtility();
-			Path path = Paths.get(LOC+processorData.getBatchId()+DEL+mincode+DEL);
-			Files.createDirectories(path);
-			objs.setDestinationFileName(LOC+processorData.getBatchId()+DEL+mincode+"/EDGRAD.R.324W."+ EducDistributionApiUtils.getFileName()+".pdf");
-			objs.addSources(locations);
-			objs.mergeDocuments(MemoryUsageSetting.setupMainMemoryOnly());
-		} catch (IOException e) {
+			mergeDocuments(processorData,mincode,"/EDGRAD.R.","324W",locations);
+		} catch (Exception e) {
 			logger.debug(EXCEPTION,e.getMessage());
-			exception.setExceptionName("Error building Distribution Report");
 		}
 	}
 }
