@@ -19,6 +19,7 @@ public class ProcessorData {
 	private String accessToken;
 	private Long batchId;
 	private String certificateProcessType;
+	private String activityCode;
 	private List<StudentCredentialDistribution> transcriptList;
 	private List<StudentCredentialDistribution> yed2List;
 	private List<StudentCredentialDistribution> yedrList;

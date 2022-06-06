@@ -20,8 +20,8 @@ public class GradDistributionService {
     @Autowired
     AccessTokenService accessTokenService;
 
-    public DistributionResponse distributeCredentials(String runType, Long batchId, Map<String, DistributionPrintRequest> mapDist, String accessToken) {
-        ProcessorData data = ProcessorData.builder().batchId(batchId).accessToken(accessToken).distributionResponse(null).mapDistribution(mapDist).build();
+    public DistributionResponse distributeCredentials(String runType, Long batchId, Map<String, DistributionPrintRequest> mapDist, String activityCode, String accessToken) {
+        ProcessorData data = ProcessorData.builder().batchId(batchId).accessToken(accessToken).distributionResponse(null).mapDistribution(mapDist).activityCode(activityCode).build();
         DistributionResponse disRes = new DistributionResponse();
         disRes.setMergeProcessResponse(processDistribution(runType,data).getMergeProcessResponse());
         return disRes;

@@ -297,7 +297,8 @@ public class MergeProcess implements DistributionProcess {
 				locations.add(new ByteArrayInputStream(bytesSAR));
 				byte[] encoded = Base64.encodeBase64(bytesSAR);
 				String encodedPdf= new String(encoded, StandardCharsets.US_ASCII);
-				saveSchoolDistributionReport(encodedPdf,mincode,processorData.getAccessToken(),"GRAD");
+				if(!processorData.getActivityCode().contains("USERDIST"))
+					saveSchoolDistributionReport(encodedPdf,mincode,processorData.getAccessToken(),"GRAD");
 			}
 			mergeDocuments(processorData,mincode,"/EDGRAD.R.","324W",locations);
 		} catch (Exception e) {
