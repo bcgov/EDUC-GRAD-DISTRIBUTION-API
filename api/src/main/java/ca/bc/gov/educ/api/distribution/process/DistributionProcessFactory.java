@@ -16,6 +16,9 @@ public class DistributionProcessFactory {
     @Autowired
     CreateReprintProcess createReprintProcess;
 
+    @Autowired
+    CreateBlankCredentialProcess createBlankCredentialProcess;
+
 	public DistributionProcess createProcess(DistributionProcessType processImplementation) {
 		DistributionProcess pcs = null;
         switch(processImplementation.name()) {
@@ -26,6 +29,9 @@ public class DistributionProcessFactory {
             case "RPR":
                 logger.info("\n************* CREATE REPRINT PROCESS (RPR) START  ************");
                 pcs = createReprintProcess;
+                break;
+            case "BCPR":
+                pcs = createBlankCredentialProcess;
                 break;
             default:
 	        	break;

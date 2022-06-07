@@ -11,4 +11,5 @@ public class CertificatePrintRequest {
 	private String psId;
 	private Integer count;
 	private List<StudentCredentialDistribution> certificateList;
+	private List<BlankCredentialDistribution> blankCertificateList;
 }
