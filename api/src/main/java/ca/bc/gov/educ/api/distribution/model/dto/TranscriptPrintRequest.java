@@ -11,4 +11,5 @@ public class TranscriptPrintRequest {
 	private String psId;
 	private Integer count;
 	private List<StudentCredentialDistribution> transcriptList;
+	private List<BlankCredentialDistribution> blankTranscriptList;
 }

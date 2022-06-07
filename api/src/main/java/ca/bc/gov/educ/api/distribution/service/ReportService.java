@@ -24,15 +24,13 @@ public class ReportService {
 	@Autowired
 	EducDistributionApiConstants educDistributionApiConstants;
 	
-	public InputStreamResource getPackingSlip(ReportRequest packingSlipReq, String accessToken, ExceptionMessage exception) {
+	public InputStreamResource getPackingSlip(ReportRequest packingSlipReq, String accessToken) {
 		try
 		{
 			byte[] packingSlip = webClient.post().uri(educDistributionApiConstants.getPackingSlip()).headers(h -> h.setBearerAuth(accessToken)).body(BodyInserters.fromValue(packingSlipReq)).retrieve().bodyToMono(byte[].class).block();
 			ByteArrayInputStream bis = new ByteArrayInputStream(packingSlip);
 			return new InputStreamResource(bis);
 		} catch (Exception e) {
-			exception.setExceptionName("GRAD-REPORT-API IS DOWN");
-			exception.setExceptionDetails(e.getLocalizedMessage());
 			return null;
 		}
 	}
