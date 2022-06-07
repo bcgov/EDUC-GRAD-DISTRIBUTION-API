@@ -137,9 +137,7 @@ public class CreateBlankCredentialProcess implements DistributionProcess {
 		return numberOfPdfs;
 	}
 	private void processCertificatePrintFile(ReportRequest packSlipReq, CertificatePrintRequest certificatePrintRequest, String mincode, int currentSlipCount, DistributionPrintRequest obj, ProcessorData processorData,String paperType) {
-		int quantity = certificatePrintRequest.getBlankCertificateList().get(0).getQuantity();
-		int total = obj.getTotal()*quantity;
-		PackingSlipRequest request = PackingSlipRequest.builder().mincode(mincode).currentSlip(currentSlipCount).total(total).paperType(paperType).build();
+		PackingSlipRequest request = PackingSlipRequest.builder().mincode(mincode).currentSlip(currentSlipCount).total(obj.getTotal()).paperType(paperType).build();
 		mergeCertificates(packSlipReq, certificatePrintRequest, request,processorData);
 	}
 
@@ -184,7 +182,8 @@ public class CreateBlankCredentialProcess implements DistributionProcess {
 		String mincode = request.getMincode();
 		String paperType = request.getPaperType();
 		List<InputStream> locations=new ArrayList<>();
-		setExtraDataForPackingSlip(packSlipReq,paperType,request.getTotal(),bcdList.size(),request.getCurrentSlip(),certificatePrintRequest.getBatchId());
+		int totalQuantity = certificatePrintRequest.getBlankCertificateList().get(0).getQuantity() * bcdList.size();
+		setExtraDataForPackingSlip(packSlipReq,paperType,request.getTotal(),totalQuantity,request.getCurrentSlip(),certificatePrintRequest.getBatchId());
 		try {
 			locations.add(reportService.getPackingSlip(packSlipReq,processorData.getAccessToken()).getInputStream());
 			int currentCertificate = 0;
