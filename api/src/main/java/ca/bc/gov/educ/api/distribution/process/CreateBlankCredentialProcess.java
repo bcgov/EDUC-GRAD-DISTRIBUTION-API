@@ -85,9 +85,9 @@ public class CreateBlankCredentialProcess implements DistributionProcess {
 				ReportRequest packSlipReq = reportService.preparePackingSlipData(schoolDetails, processorData.getBatchId());
 				DistributionPrintRequest obj = entry.getValue();
 				//TODO: write code for Blank Transcript
-				numberOfPdfs = processYed2Certificate(obj,currentSlipCount,packSlipReq,mincode,exception,processorData,numberOfPdfs);
-				numberOfPdfs = processYedbCertificate(obj,currentSlipCount,packSlipReq,mincode,exception,processorData,numberOfPdfs);
-				numberOfPdfs = processYedrCertificate(obj,currentSlipCount,packSlipReq,mincode,exception,processorData,numberOfPdfs);
+				numberOfPdfs = processYed2Certificate(obj,currentSlipCount,packSlipReq,mincode,processorData,numberOfPdfs);
+				numberOfPdfs = processYedbCertificate(obj,currentSlipCount,packSlipReq,mincode,processorData,numberOfPdfs);
+				numberOfPdfs = processYedrCertificate(obj,currentSlipCount,packSlipReq,mincode,processorData,numberOfPdfs);
 
 				logger.info("PDFs Merged {}", schoolDetails.getSchoolName());
 				logger.info("School {}/{}",counter,mapDist.size());
@@ -107,38 +107,40 @@ public class CreateBlankCredentialProcess implements DistributionProcess {
 		return processorData;
 	}
 
-	private int processYedrCertificate(DistributionPrintRequest obj, int currentSlipCount, ReportRequest packSlipReq, String mincode, ExceptionMessage exception, ProcessorData processorData, int numberOfPdfs) {
+	private int processYedrCertificate(DistributionPrintRequest obj, int currentSlipCount, ReportRequest packSlipReq, String mincode,ProcessorData processorData, int numberOfPdfs) {
 		if (obj.getYedrCertificatePrintRequest() != null) {
 			currentSlipCount++;
-			processCertificatePrintFile(packSlipReq,obj.getYedrCertificatePrintRequest(),mincode,currentSlipCount,obj,processorData,exception);
+			processCertificatePrintFile(packSlipReq,obj.getYedrCertificatePrintRequest(),mincode,currentSlipCount,obj,processorData,"YEDR");
 			numberOfPdfs++;
 			logger.info("*** YEDR Documents Merged");
 		}
 		return numberOfPdfs;
 	}
 
-	private int processYedbCertificate(DistributionPrintRequest obj, int currentSlipCount, ReportRequest packSlipReq, String mincode, ExceptionMessage exception, ProcessorData processorData, int numberOfPdfs) {
+	private int processYedbCertificate(DistributionPrintRequest obj, int currentSlipCount, ReportRequest packSlipReq, String mincode,ProcessorData processorData, int numberOfPdfs) {
 		if (obj.getYedbCertificatePrintRequest() != null) {
 			currentSlipCount++;
-			processCertificatePrintFile(packSlipReq,obj.getYedbCertificatePrintRequest(),mincode,currentSlipCount,obj,processorData,exception);
+			processCertificatePrintFile(packSlipReq,obj.getYedbCertificatePrintRequest(),mincode,currentSlipCount,obj,processorData, "YEDB");
 			numberOfPdfs++;
 			logger.info("*** YEDB Documents Merged");
 		}
 		return numberOfPdfs;
 	}
 
-	private int processYed2Certificate(DistributionPrintRequest obj, int currentSlipCount, ReportRequest packSlipReq, String mincode, ExceptionMessage exception, ProcessorData processorData, int numberOfPdfs) {
+	private int processYed2Certificate(DistributionPrintRequest obj, int currentSlipCount, ReportRequest packSlipReq, String mincode,ProcessorData processorData, int numberOfPdfs) {
 		if (obj.getYed2CertificatePrintRequest() != null) {
 			currentSlipCount++;
-			processCertificatePrintFile(packSlipReq,obj.getYed2CertificatePrintRequest(),mincode,currentSlipCount,obj,processorData,exception);
+			processCertificatePrintFile(packSlipReq,obj.getYed2CertificatePrintRequest(),mincode,currentSlipCount,obj,processorData, "YED2");
 			numberOfPdfs++;
 			logger.info("*** YED2 Documents Merged");
 		}
 		return numberOfPdfs;
 	}
-	private void processCertificatePrintFile(ReportRequest packSlipReq, CertificatePrintRequest certificatePrintRequest, String mincode, int currentSlipCount, DistributionPrintRequest obj, ProcessorData processorData, ExceptionMessage exception) {
-		PackingSlipRequest request = PackingSlipRequest.builder().mincode(mincode).currentSlip(currentSlipCount).total(obj.getTotal()).paperType("YED2").build();
-		mergeCertificates(packSlipReq, certificatePrintRequest, request, exception, processorData);
+	private void processCertificatePrintFile(ReportRequest packSlipReq, CertificatePrintRequest certificatePrintRequest, String mincode, int currentSlipCount, DistributionPrintRequest obj, ProcessorData processorData,String paperType) {
+		int quantity = certificatePrintRequest.getBlankCertificateList().get(0).getQuantity();
+		int total = obj.getTotal()*quantity;
+		PackingSlipRequest request = PackingSlipRequest.builder().mincode(mincode).currentSlip(currentSlipCount).total(total).paperType(paperType).build();
+		mergeCertificates(packSlipReq, certificatePrintRequest, request,processorData);
 	}
 
 	@SneakyThrows
@@ -168,23 +170,23 @@ public class CreateBlankCredentialProcess implements DistributionProcess {
 
 	}
 
-	private void setExtraDataForPackingSlip(ReportRequest packSlipReq, String paperType, int total, int quantity, int currentSlip, String orderType, Long batchId) {
+	private void setExtraDataForPackingSlip(ReportRequest packSlipReq, String paperType, int total, int quantity, int currentSlip, Long batchId) {
 		packSlipReq.getData().getPackingSlip().setTotal(total);
 		packSlipReq.getData().getPackingSlip().setCurrent(currentSlip);
 		packSlipReq.getData().getPackingSlip().setQuantity(quantity);
 		packSlipReq.getData().getPackingSlip().getOrderType().getPackingSlipType().getPaperType().setCode(paperType);
-		packSlipReq.getData().getPackingSlip().getOrderType().setName(orderType);
+		packSlipReq.getData().getPackingSlip().getOrderType().setName("Certificate");
 		packSlipReq.getData().getPackingSlip().setOrderNumber(batchId);
 	}
 
-	private void mergeCertificates(ReportRequest packSlipReq, CertificatePrintRequest certificatePrintRequest,PackingSlipRequest request, ExceptionMessage exception,ProcessorData processorData) {
+	private void mergeCertificates(ReportRequest packSlipReq, CertificatePrintRequest certificatePrintRequest,PackingSlipRequest request,ProcessorData processorData) {
 		List<BlankCredentialDistribution> bcdList = certificatePrintRequest.getBlankCertificateList();
 		String mincode = request.getMincode();
 		String paperType = request.getPaperType();
 		List<InputStream> locations=new ArrayList<>();
-		setExtraDataForPackingSlip(packSlipReq,paperType,request.getTotal(),bcdList.size(),request.getCurrentSlip(),"Certificate", certificatePrintRequest.getBatchId());
+		setExtraDataForPackingSlip(packSlipReq,paperType,request.getTotal(),bcdList.size(),request.getCurrentSlip(),certificatePrintRequest.getBatchId());
 		try {
-			locations.add(reportService.getPackingSlip(packSlipReq,processorData.getAccessToken(),exception).getInputStream());
+			locations.add(reportService.getPackingSlip(packSlipReq,processorData.getAccessToken()).getInputStream());
 			int currentCertificate = 0;
 			int failedToAdd = 0;
 			for (BlankCredentialDistribution bcd : bcdList) {
@@ -207,7 +209,7 @@ public class CreateBlankCredentialProcess implements DistributionProcess {
 					logger.debug("*** Failed to Add PDFs {} Current Credential {}", failedToAdd, bcd.getCredentialTypeCode());
 				}
 			}
-			mergeDocuments(processorData,mincode,"/EDGRAD.C.",paperType,locations);
+			mergeDocuments(processorData,mincode,paperType,locations);
 		} catch (IOException e) {
 			logger.debug(EXCEPTION,e.getMessage());
 		}
@@ -240,7 +242,7 @@ public class CreateBlankCredentialProcess implements DistributionProcess {
 		return data;
 	}
 
-	private void mergeDocuments(ProcessorData processorData,String mincode,String fileName,String paperType,List<InputStream> locations) {
+	private void mergeDocuments(ProcessorData processorData,String mincode,String paperType,List<InputStream> locations) {
 		try {
 			PDFMergerUtility objs = new PDFMergerUtility();
 			StringBuilder pBuilder = new StringBuilder();
@@ -248,7 +250,7 @@ public class CreateBlankCredentialProcess implements DistributionProcess {
 			Path path = Paths.get(pBuilder.toString());
 			Files.createDirectories(path);
 			pBuilder = new StringBuilder();
-			pBuilder.append(LOC).append(processorData.getBatchId()).append(DEL).append(mincode).append(fileName).append(paperType).append(".").append(EducDistributionApiUtils.getFileName()).append(".pdf");
+			pBuilder.append(LOC).append(processorData.getBatchId()).append(DEL).append(mincode).append("/EDGRAD.C.").append(paperType).append(".").append(EducDistributionApiUtils.getFileName()).append(".pdf");
 			objs.setDestinationFileName(pBuilder.toString());
 			objs.addSources(locations);
 			objs.mergeDocuments(MemoryUsageSetting.setupMainMemoryOnly());

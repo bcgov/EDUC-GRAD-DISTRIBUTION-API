@@ -101,7 +101,7 @@ public class MergeProcess implements DistributionProcess {
 					currentSlipCount++;
 					setExtraDataForPackingSlip(packSlipReq, "YED4", obj.getTotal(), scdList.size(), 1, "Transcript", transcriptPrintRequest.getBatchId());
 					try {
-						locations.add(reportService.getPackingSlip(packSlipReq, processorData.getAccessToken(), exception).getInputStream());
+						locations.add(reportService.getPackingSlip(packSlipReq, processorData.getAccessToken()).getInputStream());
 						logger.info("*** Packing Slip Added");
 						int currentTranscript = 0;
 						int failedToAdd = 0;
@@ -132,7 +132,7 @@ public class MergeProcess implements DistributionProcess {
 					currentSlipCount++;
 					CertificatePrintRequest certificatePrintRequest = obj.getYed2CertificatePrintRequest();
 					PackingSlipRequest request = PackingSlipRequest.builder().mincode(mincode).currentSlip(currentSlipCount).total(obj.getTotal()).paperType("YED2").build();
-					mergeCertificates(packSlipReq, certificatePrintRequest, request, exception, processorData,studListNonGrad);
+					mergeCertificates(packSlipReq, certificatePrintRequest, request,processorData,studListNonGrad);
 					numberOfPdfs++;
 					logger.info("*** YED2 Documents Merged");
 				}
@@ -140,7 +140,7 @@ public class MergeProcess implements DistributionProcess {
 					currentSlipCount++;
 					CertificatePrintRequest certificatePrintRequest = obj.getYedbCertificatePrintRequest();
 					PackingSlipRequest request = PackingSlipRequest.builder().mincode(mincode).currentSlip(currentSlipCount).total(obj.getTotal()).paperType("YEDB").build();
-					mergeCertificates(packSlipReq, certificatePrintRequest, request, exception, processorData,studListNonGrad);
+					mergeCertificates(packSlipReq, certificatePrintRequest, request,processorData,studListNonGrad);
 					numberOfPdfs++;
 					logger.info("*** YEDB Documents Merged");
 				}
@@ -148,7 +148,7 @@ public class MergeProcess implements DistributionProcess {
 					currentSlipCount++;
 					CertificatePrintRequest certificatePrintRequest = obj.getYedrCertificatePrintRequest();
 					PackingSlipRequest request = PackingSlipRequest.builder().mincode(mincode).currentSlip(currentSlipCount).total(obj.getTotal()).paperType("YEDR").build();
-					mergeCertificates(packSlipReq, certificatePrintRequest, request, exception, processorData,studListNonGrad);
+					mergeCertificates(packSlipReq, certificatePrintRequest, request,processorData,studListNonGrad);
 					numberOfPdfs++;
 					logger.info("*** YEDR Documents Merged");
 				}
@@ -240,14 +240,14 @@ public class MergeProcess implements DistributionProcess {
 		packSlipReq.getData().getPackingSlip().setOrderNumber(batchId);
 	}
 
-	private void mergeCertificates(ReportRequest packSlipReq, CertificatePrintRequest certificatePrintRequest, PackingSlipRequest request, ExceptionMessage exception, ProcessorData processorData, List<Student> studListNonGrad) {
+	private void mergeCertificates(ReportRequest packSlipReq, CertificatePrintRequest certificatePrintRequest, PackingSlipRequest request,ProcessorData processorData, List<Student> studListNonGrad) {
 		List<StudentCredentialDistribution> scdList = certificatePrintRequest.getCertificateList();
 		String mincode = request.getMincode();
 		String paperType = request.getPaperType();
 		List<InputStream> locations=new ArrayList<>();
 		setExtraDataForPackingSlip(packSlipReq,paperType,request.getTotal(),scdList.size(),request.getCurrentSlip(),"Certificate", certificatePrintRequest.getBatchId());
 		try {
-			locations.add(reportService.getPackingSlip(packSlipReq,processorData.getAccessToken(),exception).getInputStream());
+			locations.add(reportService.getPackingSlip(packSlipReq,processorData.getAccessToken()).getInputStream());
 			int currentCertificate = 0;
 			int failedToAdd = 0;
 			for (StudentCredentialDistribution scd : scdList) {
