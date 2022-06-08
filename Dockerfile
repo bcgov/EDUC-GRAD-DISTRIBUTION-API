@@ -8,6 +8,9 @@ RUN mkdir -p target/dependency && (cd target/dependency; jar -xf ../*.jar)
 
 FROM docker-remote.artifacts.developer.gov.bc.ca/openjdk:11-jdk
 RUN useradd -ms /bin/bash spring && mkdir -p /logs && chown -R spring:spring /logs && chmod 755 /logs
+ARG KNOWN_HOSTS_ENTRY
+ARG BCMAIL_SSH_PRIVATE_KEY
+ARG BCMAIL_SSH_PUBLIC_KEY
 RUN mkdir /.ssh \
     && echo ${KNOWN_HOSTS_ENTRY} > /.ssh/known_hosts \
     && echo ${BCMAIL_SSH_PRIVATE_KEY} > /.ssh/id_rsa \
