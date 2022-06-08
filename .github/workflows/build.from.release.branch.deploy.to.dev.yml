@@ -59,13 +59,13 @@ jobs:
       - name: Build from Dockerfile
         id: build-image
         uses: redhat-actions/buildah-build@v2
-        env:
-          BCMAIL_SSH_PRIVATE_KEY: ${{ secrets.BCMAIL_SSH_PRIVATE_KEY }}
-          BCMAIL_SSH_PUBLIC_KEY: ${{ secrets.BCMAIL_SSH_PUBLIC_KEY }}
-          KNOWN_HOSTS_ENTRY: ${{ secrets.KNOWN_HOSTS_ENTRY }}
         with:
           image: ${{ env.REPO_NAME }}
           tags: ${{ env.TAG }}
+          build-args: |
+            BCMAIL_SSH_PRIVATE_KEY: ${{ secrets.BCMAIL_SSH_PRIVATE_KEY }}
+            BCMAIL_SSH_PUBLIC_KEY: ${{ secrets.BCMAIL_SSH_PUBLIC_KEY }}
+            KNOWN_HOSTS_ENTRY: ${{ secrets.KNOWN_HOSTS_ENTRY }}
 
           # If you don't have a Dockerfile/Containerfile, refer to https://github.com/redhat-actions/buildah-build#scratch-build-inputs
           # Or, perform a source-to-image build using https://github.com/redhat-actions/s2i-build
