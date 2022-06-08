@@ -8,13 +8,19 @@ RUN mkdir -p target/dependency && (cd target/dependency; jar -xf ../*.jar)
 
 FROM docker-remote.artifacts.developer.gov.bc.ca/openjdk:11-jdk
 RUN useradd -ms /bin/bash spring && mkdir -p /logs && chown -R spring:spring /logs && chmod 755 /logs
-ARG KNOWN_HOSTS_ENTRY
-ARG BCMAIL_SSH_PRIVATE_KEY
-ARG BCMAIL_SSH_PUBLIC_KEY
-RUN mkdir /.ssh \
-    && echo ${KNOWN_HOSTS_ENTRY} > /.ssh/known_hosts \
+RUN --mount=type=secret,id=KNOWN_HOSTS_ENTRY \
+    --mount=type=secret,id=BCMAIL_SSH_PRIVATE_KEY \
+    --mount=type=secret,id=BCMAIL_SSH_PUBLIC_KEY \
+    mkdir /.ssh \
+    if [ -z $(cat /run/secrets/KNOWN_HOSTS_ENTRY) && -z $(cat /run/secrets/BCMAIL_SSH_PRIVATE_KEY) && -z $(cat /run/secrets/BCMAIL_SSH_PUBLIC_KEY)]; then \
+    echo ${KNOWN_HOSTS_ENTRY} > /.ssh/known_hosts \
     && echo ${BCMAIL_SSH_PRIVATE_KEY} > /.ssh/id_rsa \
-    && echo ${BCMAIL_SSH_PUBLIC_KEY} > /.ssh/id_rsa.pub
+    && echo ${BCMAIL_SSH_PUBLIC_KEY} > /.ssh/id_rsa.pub \
+    else \
+    cat /run/secrets/KNOWN_HOSTS_ENTRY > /.ssh/known_hosts \
+    && cat /run/secrets/BCMAIL_SSH_PRIVATE_KEY > /.ssh/id_rsa \
+    && cat /run/secrets/BCMAIL_SSH_PUBLIC_KEY > /.ssh/id_rsa.pub \
+    fi
 RUN chown -R 1002710000:1002710000 /.ssh /.ssh/known_hosts /.ssh/id_rsa /.ssh/id_rsa.pub \
     && chmod 700 /.ssh/id_rsa
 EXPOSE 22
