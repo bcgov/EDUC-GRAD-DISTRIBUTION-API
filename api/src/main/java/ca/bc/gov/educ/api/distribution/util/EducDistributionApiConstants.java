@@ -55,4 +55,16 @@ public class EducDistributionApiConstants {
 
     @Value("${endpoint.grad-report-api.get-school-distribution-report.url}")
     private String distributionReport;
+
+    @Value("${endpoint.grad-graduation-api.report-by-pen.url}")
+    private String certDataReprint;
+
+    @Value("${endpoint.grad-report-api.certificate_report.url}")
+    private String certificateReport;
+
+    @Value("${endpoint.grad-graduation-report-api.update-grad-school-report.url}")
+    private String updateSchoolReport;
+
+    @Value("${endpoint.grad-report-api.student_non_grad}")
+    private String nonGrad;
 }

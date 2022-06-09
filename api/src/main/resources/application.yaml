@@ -77,6 +77,8 @@ endpoint:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/studenttranscript?studentID=%s&transcriptType=%s&documentStatusCode=%s
     get-certificate:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/studentcertificate?studentID=%s&certificateType=%s&documentStatusCode=%s
+    update-grad-school-report:
+      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/schoolreport
   grad-student-api:
     get-student-record:
       url: ${GRAD_STUDENT_API}api/v1/student/stdid/%s
@@ -85,6 +87,12 @@ endpoint:
       url: ${GRAD_REPORT_API}api/v1/reports/packingslip
     get-school-distribution-report:
       url: ${GRAD_REPORT_API}api/v1/reports/schooldistribution
+    certificate_report:
+      url: ${GRAD_REPORT_API}api/v1/reports/certificate
+    student_non_grad: ${GRAD_REPORT_API}api/v1/reports/studentnongrad
   grad-trax-api:
     school-by-min-code:
       url: ${GRAD_TRAX_API}api/v1/school/%s
+  grad-graduation-api:
+    report-by-pen:
+      url: ${GRAD_GRADUATION_API}api/v1/graduate/report/data/%s?type=CERT
