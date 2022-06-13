@@ -1,12 +1,9 @@
 package ca.bc.gov.educ.api.distribution.util;
 
-import java.util.Date;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 @Component
 @Getter
@@ -61,6 +58,9 @@ public class EducDistributionApiConstants {
 
     @Value("${endpoint.grad-report-api.certificate_report.url}")
     private String certificateReport;
+
+    @Value("${endpoint.grad-report-api.transcript_report.url}")
+    private String transcriptReport;
 
     @Value("${endpoint.grad-graduation-report-api.update-grad-school-report.url}")
     private String updateSchoolReport;

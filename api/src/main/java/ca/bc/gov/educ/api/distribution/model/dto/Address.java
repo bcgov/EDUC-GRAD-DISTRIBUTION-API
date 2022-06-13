@@ -1,6 +1,11 @@
 package ca.bc.gov.educ.api.distribution.model.dto;
 
-public class Address {
+import java.io.Serializable;
+
+public class Address implements Serializable {
+
+    private static final long serialVersionUID = 2L;
+
     private String streetLine1;
     private String streetLine2;
     private String city;
