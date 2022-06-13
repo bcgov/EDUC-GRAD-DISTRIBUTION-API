@@ -44,8 +44,8 @@ public class DistributionController {
     @Operation(summary = "distribution run for Grad", description = "When triggered, run the distribution piece and send out credentials for printing", tags = { "Distribution" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK")})
     public ResponseEntity<DistributionResponse> distributeCredentials(
-            @PathVariable String runType, @RequestParam(required = false) Long batchId,
+            @PathVariable String runType, @RequestParam(required = false) Long batchId ,@RequestParam(required = false) String activityCode,
             @RequestBody Map<String, DistributionPrintRequest> mapDist, @RequestHeader(name="Authorization") String accessToken) {
-        return response.GET(gradDistributionService.distributeCredentials(runType,batchId,mapDist,accessToken));
+        return response.GET(gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,accessToken));
     }
 }

@@ -12,6 +12,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 import java.io.Serializable;
+import java.util.Date;
 import java.util.Map;
 
 @Data
@@ -28,12 +29,28 @@ import java.util.Map;
 })
 public class ReportData implements Serializable {
 
+	@JsonDeserialize(as = Student.class)
+	private Student student;
+
 	@JsonDeserialize(as = School.class)
 	private School school;
 	@JsonFormat(pattern="yyyy-MM-dd")
 	private String updateDate;
 	@JsonDeserialize(as = PackingSlip.class)
 	private PackingSlip packingSlip;
+
+	private Certificate certificate;
+
+	private String logo;
+	private String orgCode;
+	private String gradMessage;
+	private String reportNumber;
+
+	@JsonFormat(pattern="yyyy-MM-dd")
+	private Date issueDate;
+
+	private String reportTitle;
+	private String reportSubTitle;
 
 	private Map<String, String> parameters;
 }

@@ -2,6 +2,8 @@ package ca.bc.gov.educ.api.distribution.model.dto;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
+import java.util.List;
+
 public class School {
 
     private String mincode;
@@ -15,6 +17,8 @@ public class School {
     private Address address;
     private String phoneNumber = "";
     private String dogwoodElig = "";
+
+    private List<Student> students;
 
     public String getMincode() {
         return mincode;
@@ -103,5 +107,13 @@ public class School {
 
     public void setDogwoodElig(String dogwoodElig) {
         this.dogwoodElig = dogwoodElig;
+    }
+
+    public List<Student> getStudents() {
+        return students;
+    }
+
+    public void setStudents(List<Student> students) {
+        this.students = students;
     }
 }

@@ -2,6 +2,7 @@ package ca.bc.gov.educ.api.distribution.model.dto;
 
 import lombok.Data;
 
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -13,4 +14,14 @@ public class StudentCredentialDistribution {
 	private String paperType;
 	private String schoolOfRecord;
 	private String documentStatusCode;
+
+	private String pen;
+	private String legalFirstName;
+	private String legalMiddleNames;
+	private String legalLastName;
+	private String programCompletionDate;
+	private String honoursStanding;
+	private String program;
+	private String studentGrade;
+	private List<GradRequirement> nonGradReasons;
 }

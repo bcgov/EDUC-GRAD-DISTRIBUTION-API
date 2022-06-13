@@ -60,7 +60,7 @@ objects:
                   memory: "1024Mi"
                 limits:
                   cpu: "500m"
-                  memory: "208Mi"
+                  memory: "2048Mi"
               envFrom:
                 - configMapRef:
                     name: educ-grad-api-config-map
@@ -70,7 +70,6 @@ objects:
                     name: grad-client-secret
                 - secretRef:
                     name: api-distribution-ssh-keys-secret
-              resources: {}
       test: false
   - apiVersion: v1
     kind: Service

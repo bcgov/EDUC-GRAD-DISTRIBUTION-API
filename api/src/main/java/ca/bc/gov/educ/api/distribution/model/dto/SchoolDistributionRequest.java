@@ -5,11 +5,10 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class TranscriptPrintRequest {
+public class SchoolDistributionRequest {
 
 	private Long batchId;
 	private String psId;
 	private Integer count;
-	private List<StudentCredentialDistribution> transcriptList;
-	private List<BlankCredentialDistribution> blankTranscriptList;
+	private List<StudentCredentialDistribution> studentList;
 }
