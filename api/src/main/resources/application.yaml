@@ -89,6 +89,8 @@ endpoint:
       url: ${GRAD_REPORT_API}api/v1/reports/schooldistribution
     certificate_report:
       url: ${GRAD_REPORT_API}api/v1/reports/certificate
+    transcript_report:
+      url: ${GRAD_REPORT_API}api/v1/reports/transcriptreport
     student_non_grad: ${GRAD_REPORT_API}api/v1/reports/studentnongrad
   grad-trax-api:
     school-by-min-code:

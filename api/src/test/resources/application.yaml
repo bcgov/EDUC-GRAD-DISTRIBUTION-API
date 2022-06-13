@@ -85,6 +85,8 @@ endpoint:
       url: https://educ-grad-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/reports/schooldistribution
     certificate_report:
       url: https://educ-grad-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/reports/certificate
+    transcript_report:
+      url: https://educ-grad-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/reports/transcriptreport
     student_non_grad: https://educ-grad-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/reports/studentnongrad
   grad-trax-api:
     school-by-min-code:

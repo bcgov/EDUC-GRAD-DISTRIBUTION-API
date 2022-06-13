@@ -40,6 +40,8 @@ public class ReportData implements Serializable {
 	private PackingSlip packingSlip;
 
 	private Certificate certificate;
+	private Transcript transcript;
+	private GradProgram gradProgram;
 
 	private String logo;
 	private String orgCode;
