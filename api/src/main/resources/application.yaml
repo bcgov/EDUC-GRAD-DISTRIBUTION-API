@@ -92,7 +92,7 @@ endpoint:
     student_non_grad: ${GRAD_REPORT_API}api/v1/reports/studentnongrad
   grad-trax-api:
     school-by-min-code:
-      url: ${GRAD_TRAX_API}api/v1/school/%s
+      url: ${GRAD_TRAX_API}api/v1/trax/school/%s
   grad-graduation-api:
     report-by-pen:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/report/data/%s?type=CERT
