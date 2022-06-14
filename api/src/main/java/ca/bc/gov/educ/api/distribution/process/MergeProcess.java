@@ -68,7 +68,7 @@ public class MergeProcess implements DistributionProcess {
 
 	@Autowired
 	SFTPUtils sftpUtils;
-	
+
 	@Override
 	public ProcessorData fire(ProcessorData processorData) {
 		long startTime = System.currentTimeMillis();
@@ -164,7 +164,7 @@ public class MergeProcess implements DistributionProcess {
 		}
 		createZipFile(batchId);
 		createControlFile(batchId,numberOfPdfs);
-		sftpUtils.sftpUpload(batchId);
+		sftpUtils.sftpUploadBCMail(batchId);
 		long endTime = System.currentTimeMillis();
 		long diff = (endTime - startTime)/1000;
 		logger.info("************* TIME Taken  ************ {} secs",diff);
