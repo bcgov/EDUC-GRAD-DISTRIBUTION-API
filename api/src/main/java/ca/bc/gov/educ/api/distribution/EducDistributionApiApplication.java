@@ -37,9 +37,9 @@ public class EducDistributionApiApplication {
     public static void main(String[] args) {
         logger.debug("#Initializing BCMail SFTP....");
         SFTPUtils.setupBcmailSftp();
-        logger.debug("########Starting API");
+        logger.debug("#######Starting API");
         SpringApplication.run(EducDistributionApiApplication.class, args);
-        logger.debug("########Started API");
+        logger.debug("#######Started API");
     }
 
     @Bean
