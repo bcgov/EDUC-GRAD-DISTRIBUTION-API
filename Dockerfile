@@ -13,7 +13,7 @@ RUN mkdir /.ssh \
     && echo "Private Key" > /.ssh/bcmail_id_rsa \
     && echo "Public Key" > /.ssh/id_rsa.pub
 RUN chown -R 1002710000:1002710000 /.ssh /.ssh/known_hosts /.ssh/bcmail_id_rsa /.ssh/id_rsa.pub \
-    && chmod 700 /.ssh/id_rsa
+    && chmod 700 /.ssh/bcmail_id_rsa
 EXPOSE 22
 
 USER spring
