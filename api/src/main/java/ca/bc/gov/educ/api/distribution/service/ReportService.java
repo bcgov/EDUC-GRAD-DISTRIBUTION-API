@@ -35,22 +35,22 @@ public class ReportService {
 		}
 	}
 
-	public ReportRequest preparePackingSlipData(SchoolTrax schoolDetails,Long batchId) {
+	public ReportRequest preparePackingSlipData(CommonSchool schoolDetails,Long batchId) {
 		ReportRequest req = new ReportRequest();
 
 		School schObj = new School();
 		Address addr = new Address();
-		addr.setStreetLine1(schoolDetails.getAddress1());
-		addr.setStreetLine2(schoolDetails.getAddress2());
-		addr.setCity(schoolDetails.getCity());
-		addr.setCode(schoolDetails.getPostal());
-		addr.setCountry(schoolDetails.getCountryCode());
-		addr.setRegion(schoolDetails.getProvCode());
+		addr.setStreetLine1(schoolDetails.getScAddressLine1());
+		addr.setStreetLine2(schoolDetails.getScAddressLine2());
+		addr.setCity(schoolDetails.getScCity());
+		addr.setCode(schoolDetails.getScPostalCode());
+		addr.setCountry(schoolDetails.getScCountryCode());
+		addr.setRegion(schoolDetails.getScProvinceCode());
 		schObj.setAddress(addr);
-		schObj.setDistno(schoolDetails.getMinCode().substring(0, 3));
+		schObj.setDistno(schoolDetails.getDistNo());
 		schObj.setName(schoolDetails.getSchoolName());
-		schObj.setSchlno(schoolDetails.getMinCode());
-		schObj.setMincode(schoolDetails.getMinCode());
+		schObj.setSchlno(schoolDetails.getSchlNo());
+		schObj.setMincode(schoolDetails.getDistNo()+schoolDetails.getSchlNo());
 
 
 		ReportOptions options = new ReportOptions();
@@ -80,7 +80,7 @@ public class ReportService {
 		return req;
 	}
 
-    public ReportRequest prepareSchoolDistributionReportData(SchoolDistributionRequest schoolDistributionRequest, Long batchId,SchoolTrax schoolDetails) {
+    public ReportRequest prepareSchoolDistributionReportData(SchoolDistributionRequest schoolDistributionRequest, Long batchId,CommonSchool schoolDetails) {
 		ReportRequest req = new ReportRequest();
 		ReportData data = new ReportData();
 
@@ -94,7 +94,7 @@ public class ReportService {
 		List<StudentCredentialDistribution> schoolReportList = schoolDistributionRequest.getStudentList();
 		List<Student> stdList = new ArrayList<>();
 		School schObj = new School();
-		schObj.setMincode(schoolDetails.getMinCode());
+		schObj.setMincode(schoolDetails.getDistNo()+schoolDetails.getSchlNo());
 		schObj.setName(schoolDetails.getSchoolName());
 		for(StudentCredentialDistribution sc:schoolReportList) {
 			Student std = new Student();

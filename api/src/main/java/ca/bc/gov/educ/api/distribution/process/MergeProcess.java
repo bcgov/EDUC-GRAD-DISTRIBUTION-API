@@ -83,7 +83,7 @@ public class MergeProcess implements DistributionProcess {
 			counter++;
 			int currentSlipCount = 0;
 			String mincode = entry.getKey();
-			SchoolTrax schoolDetails = schoolService.getSchoolDetails(mincode,processorData.getAccessToken(),exception);
+			CommonSchool schoolDetails = schoolService.getSchoolDetails(mincode,processorData.getAccessToken(),exception);
 			if(schoolDetails != null) {
 				logger.info("*** School Details Acquired {}", schoolDetails.getSchoolName());
 				List<Student> studListNonGrad = new ArrayList<>();
@@ -306,10 +306,10 @@ public class MergeProcess implements DistributionProcess {
 		}
 	}
 
-	private void createAndSaveNonGradReport(SchoolTrax schoolDetails, List<Student> studListNonGrad, String mincode, String accessToken) {
+	private void createAndSaveNonGradReport(CommonSchool schoolDetails, List<Student> studListNonGrad, String mincode, String accessToken) {
 		ReportData nongradProjected = new ReportData();
 		School schObj = new School();
-		schObj.setMincode(schoolDetails.getMinCode());
+		schObj.setMincode(schoolDetails.getDistNo()+schoolDetails.getSchlNo());
 		schObj.setName(schoolDetails.getSchoolName());
 		schObj.setStudents(studListNonGrad);
 		nongradProjected.setSchool(schObj);

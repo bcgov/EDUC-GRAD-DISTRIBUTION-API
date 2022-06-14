@@ -18,7 +18,6 @@ import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -80,7 +79,7 @@ public class CreateBlankCredentialProcess implements DistributionProcess {
 			counter++;
 			int currentSlipCount = 0;
 			String mincode = entry.getKey();
-			SchoolTrax schoolDetails = schoolService.getSchoolDetails(mincode,processorData.getAccessToken(),exception);
+			CommonSchool schoolDetails = schoolService.getSchoolDetails(mincode,processorData.getAccessToken(),exception);
 			if(schoolDetails != null) {
 				logger.info("*** School Details Acquired {}", schoolDetails.getSchoolName());
 

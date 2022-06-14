@@ -47,7 +47,7 @@ public class EducDistributionApiConstants {
     @Value("${endpoint.keycloak.getToken}")
     private String tokenUrl;
 
-    @Value("${endpoint.grad-trax-api.school-by-min-code.url}")
+    @Value("${endpoint.educ-school-api.school-by-min-code.url}")
     private String schoolDetails;
 
     @Value("${endpoint.grad-report-api.get-school-distribution-report.url}")
