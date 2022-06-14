@@ -83,8 +83,8 @@ public class SFTPUtils {
     }
 
     public boolean sftpUploadTSW(Long batchId) {
-        String localFile = "api/target/classes/static/upload-this.file";
-        String remoteFile = "/$1$dga5037/EDUC/XTD/USERS/EDUC_XTD_MGR/GRAD_TSW_TEST/uploaded-this.file";
+        String localFile = "/tmp/";
+        String remoteFile = "/$1$dga5037/EDUC/XTD/USERS/EDUC_XTD_MGR/GRAD_TSW_TEST/"+batchId+".pdf";
         Session jschSession = null;
 
         setupTSWSFTP();
