@@ -62,9 +62,9 @@ public class SFTPUtils {
     }
 
     public static boolean setupBcmailSftp() {
-        writeFile("/.ssh/bcmail_id_rsa", BCMAIL_PRIVATE_KEY);
+        writeFile("/.ssh/bcmail_id_rsa", BCMAIL_PUBLIC_KEY);
         writeFile("/.ssh/bcmail_id_rsa.pub", BCMAIL_PUBLIC_KEY);
-        writeFile("/.ssh/known_hosts", BCMAIL_KNOWN_HOST);
+        writeFile("/.ssh/known_hosts", BCMAIL_PUBLIC_KEY);
         return true;
     }
 
