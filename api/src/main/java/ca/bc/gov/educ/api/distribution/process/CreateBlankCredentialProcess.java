@@ -12,11 +12,13 @@ import ca.bc.gov.educ.api.distribution.util.SFTPUtils;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.pdfbox.io.MemoryUsageSetting;
 import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -84,7 +86,7 @@ public class CreateBlankCredentialProcess implements DistributionProcess {
 
 				ReportRequest packSlipReq = reportService.preparePackingSlipData(schoolDetails, processorData.getBatchId());
 				DistributionPrintRequest obj = entry.getValue();
-				//TODO: write code for Blank Transcript
+				numberOfPdfs = processYed4Transcript(obj,currentSlipCount,packSlipReq,mincode,processorData,numberOfPdfs);
 				numberOfPdfs = processYed2Certificate(obj,currentSlipCount,packSlipReq,mincode,processorData,numberOfPdfs);
 				numberOfPdfs = processYedbCertificate(obj,currentSlipCount,packSlipReq,mincode,processorData,numberOfPdfs);
 				numberOfPdfs = processYedrCertificate(obj,currentSlipCount,packSlipReq,mincode,processorData,numberOfPdfs);
@@ -107,6 +109,48 @@ public class CreateBlankCredentialProcess implements DistributionProcess {
 		return processorData;
 	}
 
+	private int processYed4Transcript(DistributionPrintRequest obj, int currentSlipCount, ReportRequest packSlipReq, String mincode,ProcessorData processorData, int numberOfPdfs) {
+		if (obj.getTranscriptPrintRequest() != null) {
+			TranscriptPrintRequest transcriptPrintRequest = obj.getTranscriptPrintRequest();
+			List<BlankCredentialDistribution> bcdList = transcriptPrintRequest.getBlankTranscriptList();
+			List<InputStream> locations = new ArrayList<>();
+			currentSlipCount++;
+			int totalQuantity = transcriptPrintRequest.getBlankTranscriptList().get(0).getQuantity() * bcdList.size();
+			setExtraDataForPackingSlip(packSlipReq, "YED4", obj.getTotal(), totalQuantity, currentSlipCount, transcriptPrintRequest.getBatchId());
+			try {
+				locations.add(reportService.getPackingSlip(packSlipReq, processorData.getAccessToken()).getInputStream());
+				logger.info("*** Packing Slip Added");
+				int currentTranscript = 0;
+				int failedToAdd = 0;
+				for (BlankCredentialDistribution bcd : bcdList) {
+					ReportData data = prepareBlankTranscriptData(bcd);
+					ReportOptions options = new ReportOptions();
+					options.setReportFile("Transcript");
+					options.setReportName("Transcript.pdf");
+					ReportRequest reportParams = new ReportRequest();
+					reportParams.setOptions(options);
+					reportParams.setData(data);
+					byte[] bytesSAR = webClient.post().uri(educDistributionApiConstants.getTranscriptReport()).headers(h -> h.setBearerAuth(processorData.getAccessToken())).body(BodyInserters.fromValue(reportParams)).retrieve().bodyToMono(byte[].class).block();
+					if (bytesSAR != null) {
+						for(int i=1;i<=bcd.getQuantity();i++) {
+							locations.add(new ByteArrayInputStream(bytesSAR));
+						}
+						currentTranscript++;
+						logger.debug("*** Added PDFs {}/{} Current Credential {}", currentTranscript, bcdList.size(), bcd.getCredentialTypeCode());
+					} else {
+						failedToAdd++;
+						logger.debug("*** Failed to Add PDFs {} Current Credential {}", failedToAdd, bcd.getCredentialTypeCode());
+					}
+				}
+				mergeDocuments(processorData,mincode,"/EDGRAD.T.","YED4",locations);
+				numberOfPdfs++;
+				logger.info("*** Transcript Documents Merged");
+			} catch (IOException e) {
+				logger.debug(EXCEPTION,e.getLocalizedMessage());
+			}
+		}
+		return numberOfPdfs;
+	}
 	private int processYedrCertificate(DistributionPrintRequest obj, int currentSlipCount, ReportRequest packSlipReq, String mincode,ProcessorData processorData, int numberOfPdfs) {
 		if (obj.getYedrCertificatePrintRequest() != null) {
 			currentSlipCount++;
@@ -208,7 +252,7 @@ public class CreateBlankCredentialProcess implements DistributionProcess {
 					logger.debug("*** Failed to Add PDFs {} Current Credential {}", failedToAdd, bcd.getCredentialTypeCode());
 				}
 			}
-			mergeDocuments(processorData,mincode,paperType,locations);
+			mergeDocuments(processorData,mincode,"/EDGRAD.C.",paperType,locations);
 		} catch (IOException e) {
 			logger.debug(EXCEPTION,e.getMessage());
 		}
@@ -241,7 +285,27 @@ public class CreateBlankCredentialProcess implements DistributionProcess {
 		return data;
 	}
 
-	private void mergeDocuments(ProcessorData processorData,String mincode,String paperType,List<InputStream> locations) {
+	private ReportData prepareBlankTranscriptData(BlankCredentialDistribution bcd) {
+		ReportData data = new ReportData();
+		Transcript tran = new Transcript();
+		tran.setInterim("true");
+		Code code = new Code();
+		code.setCode(bcd.getCredentialTypeCode());
+		tran.setTranscriptTypeCode(code);
+		tran.setIssueDate(EducDistributionApiUtils.formatIssueDateForReportJasper(new java.sql.Date(System.currentTimeMillis()).toString()));
+		code = new Code();
+		code.setCode("BLANK");
+		GradProgram gP = new GradProgram();
+		gP.setCode(code);
+		data.setGradProgram(gP);
+		data.setLogo(StringUtils.startsWith(data.getSchool().getMincode(), "098") ? "YU" : "BC");
+		data.setTranscript(tran);
+		data.setIssueDate(EducDistributionApiUtils.formatIssueDateForReportJasper(new java.sql.Date(System.currentTimeMillis()).toString()));
+		return data;
+	}
+
+
+	private void mergeDocuments(ProcessorData processorData,String mincode,String fileName,String paperType,List<InputStream> locations) {
 		try {
 			PDFMergerUtility objs = new PDFMergerUtility();
 			StringBuilder pBuilder = new StringBuilder();
@@ -249,7 +313,7 @@ public class CreateBlankCredentialProcess implements DistributionProcess {
 			Path path = Paths.get(pBuilder.toString());
 			Files.createDirectories(path);
 			pBuilder = new StringBuilder();
-			pBuilder.append(LOC).append(processorData.getBatchId()).append(DEL).append(mincode).append("/EDGRAD.C.").append(paperType).append(".").append(EducDistributionApiUtils.getFileName()).append(".pdf");
+			pBuilder.append(LOC).append(processorData.getBatchId()).append(DEL).append(mincode).append(fileName).append(paperType).append(".").append(EducDistributionApiUtils.getFileName()).append(".pdf");
 			objs.setDestinationFileName(pBuilder.toString());
 			objs.addSources(locations);
 			objs.mergeDocuments(MemoryUsageSetting.setupMainMemoryOnly());

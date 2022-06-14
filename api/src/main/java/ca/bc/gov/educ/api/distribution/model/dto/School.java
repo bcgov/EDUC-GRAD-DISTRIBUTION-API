@@ -2,9 +2,12 @@ package ca.bc.gov.educ.api.distribution.model.dto;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class School {
+public class School implements Serializable {
+
+    private static final long serialVersionUID = 2L;
 
     private String mincode;
     private String name;
