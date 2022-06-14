@@ -24,6 +24,9 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import reactor.netty.http.client.HttpClient;
 
+import java.io.FileWriter;
+import java.io.IOException;
+
 @SpringBootApplication(exclude = {
         DataSourceAutoConfiguration.class, 
         DataSourceTransactionManagerAutoConfiguration.class,
@@ -35,8 +38,6 @@ public class EducDistributionApiApplication {
     private static Logger logger = LoggerFactory.getLogger(EducDistributionApiApplication.class);
 
     public static void main(String[] args) {
-        logger.debug("#Initializing BCMail SFTP....");
-        SFTPUtils.setupBcmailSftp();
         logger.debug("#######Starting API");
         SpringApplication.run(EducDistributionApiApplication.class, args);
         logger.debug("#######Started API");

@@ -70,6 +70,8 @@ objects:
                     name: grad-client-secret
                 - secretRef:
                     name: api-distribution-ssh-keys-secret
+                - secretRef:
+                    name: api-tsw-ssh-keys-secret
       test: false
   - apiVersion: v1
     kind: Service

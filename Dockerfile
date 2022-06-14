@@ -10,10 +10,10 @@ FROM docker-remote.artifacts.developer.gov.bc.ca/openjdk:11-jdk
 RUN useradd -ms /bin/bash spring && mkdir -p /logs && chown -R spring:spring /logs && chmod 755 /logs
 RUN mkdir /.ssh \
     && echo "Known hosts entry" > /.ssh/known_hosts \
-    && echo "Private Key" > /.ssh/bcmail_id_rsa \
+    && echo "Private Key" > /.ssh/id_rsa \
     && echo "Public Key" > /.ssh/id_rsa.pub
-RUN chown -R 1002710000:1002710000 /.ssh /.ssh/known_hosts /.ssh/bcmail_id_rsa /.ssh/id_rsa.pub \
-    && chmod 700 /.ssh/bcmail_id_rsa
+RUN chown -R 1002710000:1002710000 /.ssh /.ssh/known_hosts /.ssh/id_rsa /.ssh/id_rsa.pub \
+    && chmod 700 /.ssh/id_rsa
 EXPOSE 22
 
 USER spring
