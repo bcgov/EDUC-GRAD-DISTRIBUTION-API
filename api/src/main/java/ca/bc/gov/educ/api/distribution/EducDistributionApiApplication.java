@@ -1,5 +1,6 @@
 package ca.bc.gov.educ.api.distribution;
 
+import ca.bc.gov.educ.api.distribution.util.SFTPUtils;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +35,8 @@ public class EducDistributionApiApplication {
     private static Logger logger = LoggerFactory.getLogger(EducDistributionApiApplication.class);
 
     public static void main(String[] args) {
+        logger.debug("#Initializing BCMail SFTP....");
+        SFTPUtils.setupBcmailSftp();
         logger.debug("########Starting API");
         SpringApplication.run(EducDistributionApiApplication.class, args);
         logger.debug("########Started API");

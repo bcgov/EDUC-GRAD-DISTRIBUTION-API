@@ -63,9 +63,6 @@ public class CreateBlankCredentialProcess implements DistributionProcess {
 	@Autowired
 	ReportService reportService;
 
-	@Autowired
-	SFTPUtils sftpUtils;
-	
 	@Override
 	public ProcessorData fire(ProcessorData processorData) {
 		long startTime = System.currentTimeMillis();
@@ -100,7 +97,7 @@ public class CreateBlankCredentialProcess implements DistributionProcess {
 		}
 		createZipFile(batchId);
 		createControlFile(batchId,numberOfPdfs);
-		sftpUtils.sftpUpload(batchId);
+		SFTPUtils.sftpUpload(batchId);
 		long endTime = System.currentTimeMillis();
 		long diff = (endTime - startTime)/1000;
 		logger.info("************* TIME Taken  ************ {} secs",diff);

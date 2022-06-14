@@ -9,10 +9,10 @@ RUN mkdir -p target/dependency && (cd target/dependency; jar -xf ../*.jar)
 FROM docker-remote.artifacts.developer.gov.bc.ca/openjdk:11-jdk
 RUN useradd -ms /bin/bash spring && mkdir -p /logs && chown -R spring:spring /logs && chmod 755 /logs
 RUN mkdir /.ssh \
-    && echo ${KNOWN_HOSTS_ENTRY} > /.ssh/known_hosts \
-    && echo ${BCMAIL_SSH_PRIVATE_KEY} > /.ssh/id_rsa \
-    && echo ${BCMAIL_SSH_PUBLIC_KEY} > /.ssh/id_rsa.pub
-RUN chown -R 1002710000:1002710000 /.ssh /.ssh/known_hosts /.ssh/id_rsa /.ssh/id_rsa.pub \
+    && echo "Known hosts entry" > /.ssh/known_hosts \
+    && echo "Private Key" > /.ssh/bcmail_id_rsa \
+    && echo "Public Key" > /.ssh/id_rsa.pub
+RUN chown -R 1002710000:1002710000 /.ssh /.ssh/known_hosts /.ssh/bcmail_id_rsa /.ssh/id_rsa.pub \
     && chmod 700 /.ssh/id_rsa
 EXPOSE 22
 
