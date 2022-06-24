@@ -14,6 +14,12 @@ public class DistributionProcessFactory {
     MergeProcess mergeProcess;
 
     @Autowired
+    MergeProcess yearlyMergeProcess;
+
+    @Autowired
+    PostingSchoolReportProcess postingSchoolReportProcess;
+
+    @Autowired
     CreateReprintProcess createReprintProcess;
 
     @Autowired
@@ -31,7 +37,16 @@ public class DistributionProcessFactory {
                 pcs = createReprintProcess;
                 break;
             case "BCPR":
+                logger.info("\n************* CREATE BLANK CREDENTIAL PROCESS (BCPR) START  ************");
                 pcs = createBlankCredentialProcess;
+                break;
+            case "MERYER":
+                logger.info("\n************* MERGE PROCESS (MERYER) START  ************");
+                pcs = yearlyMergeProcess;
+                break;
+            case "PSR":
+                logger.info("\n************* POSTING SCHOOL REPORT PROCESS (PSR) START  ************");
+                pcs = postingSchoolReportProcess;
                 break;
             default:
 	        	break;

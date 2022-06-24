@@ -1,10 +1,9 @@
 package ca.bc.gov.educ.api.distribution.util;
 
+import com.jcraft.jsch.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import com.jcraft.jsch.*;
 import org.springframework.stereotype.Component;
 
 import java.io.FileWriter;
@@ -37,6 +36,9 @@ public class SFTPUtils {
     private static final int REMOTE_PORT = 22;
     private static final int SESSION_TIMEOUT = 10000;
     private static final int CHANNEL_TIMEOUT = 5000;
+    private static final String KNOWN_HOST = "/.ssh/known_hosts";
+    private static final String RSA_PUB = "/.ssh/id_rsa.pub";
+    private static final String RSA_PRV = "/.ssh/id_rsa";
 
     private static Logger logger = LoggerFactory.getLogger(SFTPUtils.class);
 
@@ -51,9 +53,9 @@ public class SFTPUtils {
 
         try {
             JSch jsch = new JSch();
-            jsch.setKnownHosts("/.ssh/known_hosts");
+            jsch.setKnownHosts(KNOWN_HOST);
             jschSession = jsch.getSession(BCMAIL_SFTP_USERNAME, BCMAIL_REMOTE_HOST, REMOTE_PORT);
-            jsch.addIdentity("/.ssh/id_rsa");
+            jsch.addIdentity(RSA_PRV);
             jschSession.connect(SESSION_TIMEOUT);
 
             Channel sftp = jschSession.openChannel("sftp");
@@ -76,24 +78,24 @@ public class SFTPUtils {
     }
 
     private boolean setupBCMailSFTP() {
-        writeFile("/.ssh/id_rsa", BCMAIL_PRIVATE_KEY);
-        writeFile("/.ssh/id_rsa.pub", BCMAIL_PUBLIC_KEY);
-        writeFile("/.ssh/known_hosts", BCMAIL_KNOWN_HOSTS);
+        writeFile(RSA_PRV, BCMAIL_PRIVATE_KEY);
+        writeFile(RSA_PUB, BCMAIL_PUBLIC_KEY);
+        writeFile(KNOWN_HOST, BCMAIL_KNOWN_HOSTS);
         return true;
     }
 
-    public boolean sftpUploadTSW(Long batchId) {
-        String localFile = "/tmp/";
-        String remoteFile = "/$1$dga5037/EDUC/XTD/USERS/EDUC_XTD_MGR/GRAD_TSW_TEST/"+batchId+".pdf";
+    public boolean sftpUploadTSW(Long batchId,String mincode,String fileName) {
+        String localFile = "/tmp/"+batchId+"/"+mincode+"/"+fileName+".pdf";
+        String remoteFile = "/$1$dga5037/EDUC/XTD/USERS/EDUC_XTD_MGR/GRAD_TSW_TEST/"+fileName+".pdf";
         Session jschSession = null;
 
         setupTSWSFTP();
 
         try {
             JSch jsch = new JSch();
-            jsch.setKnownHosts("/.ssh/known_hosts");
+            jsch.setKnownHosts(KNOWN_HOST);
             jschSession = jsch.getSession(BCMAIL_SFTP_USERNAME, BCMAIL_REMOTE_HOST, REMOTE_PORT);
-            jsch.addIdentity("/.ssh/id_rsa");
+            jsch.addIdentity(RSA_PRV);
             jschSession.connect(SESSION_TIMEOUT);
 
             Channel sftp = jschSession.openChannel("sftp");
@@ -115,20 +117,18 @@ public class SFTPUtils {
     }
 
     private boolean setupTSWSFTP() {
-        writeFile("/.ssh/id_rsa", TSW_PRIVATE_KEY);
-        writeFile("/.ssh/id_rsa.pub", TSW_PUBLIC_KEY);
-        writeFile("/.ssh/known_hosts", TSW_KNOWN_HOSTS);
+        writeFile(RSA_PRV, TSW_PRIVATE_KEY);
+        writeFile(RSA_PUB, TSW_PUBLIC_KEY);
+        writeFile(KNOWN_HOST, TSW_KNOWN_HOSTS);
         return true;
     }
 
     public boolean writeFile(String filename, String content) {
-        try {
-            FileWriter fileWriter = new FileWriter(filename);
+        try (FileWriter fileWriter = new FileWriter(filename)){
             fileWriter.write(content);
-            fileWriter.close();
-            logger.debug("Write File Complete! - " + filename);
+            logger.debug("Write File Complete! - {} ",filename);
         } catch (IOException e) {
-            logger.debug("Write File Failed! - " + filename);
+            logger.debug("Write File Failed! - {}",filename);
             e.printStackTrace();
         }
         return true;

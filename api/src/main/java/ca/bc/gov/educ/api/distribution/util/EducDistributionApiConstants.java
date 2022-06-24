@@ -19,6 +19,7 @@ public class EducDistributionApiConstants {
     public static final String DISTRIBUTION_RUN = "/run/{runType}";
     //Default Date format constants
     public static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd";
+    public static final String SECONDARY_DATE_FORMAT = "yyyy/MM/dd";
 
     @Value("${endpoint.grad-graduation-report-api.get-transcript-list.url}")
     private String transcriptDistributionList;
@@ -67,4 +68,8 @@ public class EducDistributionApiConstants {
 
     @Value("${endpoint.grad-report-api.student_non_grad}")
     private String nonGrad;
+
+    @Value("${endpoint.grad-graduation-report-api.school-report.url}")
+    private String schoolReport;
+
 }
