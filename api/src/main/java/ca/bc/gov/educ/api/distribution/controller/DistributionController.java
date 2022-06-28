@@ -5,7 +5,7 @@ import ca.bc.gov.educ.api.distribution.model.dto.DistributionResponse;
 import ca.bc.gov.educ.api.distribution.service.GradDistributionService;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import ca.bc.gov.educ.api.distribution.util.GradValidation;
-import ca.bc.gov.educ.api.distribution.util.PermissionsContants;
+import ca.bc.gov.educ.api.distribution.util.PermissionsConstants;
 import ca.bc.gov.educ.api.distribution.util.ResponseHelper;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -40,12 +41,21 @@ public class DistributionController {
     ResponseHelper response;
 
     @PostMapping(EducDistributionApiConstants.DISTRIBUTION_RUN)
-    @PreAuthorize(PermissionsContants.GRADUATE_STUDENT)
+    @PreAuthorize(PermissionsConstants.GRADUATE_STUDENT)
     @Operation(summary = "distribution run for Grad", description = "When triggered, run the distribution piece and send out credentials for printing", tags = { "Distribution" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK")})
     public ResponseEntity<DistributionResponse> distributeCredentials(
             @PathVariable String runType, @RequestParam(required = false) Long batchId ,@RequestParam(required = false) String activityCode,
             @RequestBody Map<String, DistributionPrintRequest> mapDist, @RequestHeader(name="Authorization") String accessToken) {
         return response.GET(gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,accessToken));
+    }
+
+    @GetMapping(EducDistributionApiConstants.LOCAL_DOWNLOAD)
+    @PreAuthorize(PermissionsConstants.GRADUATE_STUDENT)
+    @Operation(summary = "Read Student Reports by Student ID and Report Type", description = "Read Student Reports by Student ID and Report Type", tags = { "Reports" })
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK")})
+    public ResponseEntity<InputStreamResource> downloadZipFile(@PathVariable(value = "batchId", required = true) Long batchId) {
+        logger.debug("downloadZipFile : ");
+        return gradDistributionService.getDownload(batchId);
     }
 }
