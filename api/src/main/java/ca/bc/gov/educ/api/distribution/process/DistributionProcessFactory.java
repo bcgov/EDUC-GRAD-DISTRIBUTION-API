@@ -14,7 +14,7 @@ public class DistributionProcessFactory {
     MergeProcess mergeProcess;
 
     @Autowired
-    MergeProcess yearlyMergeProcess;
+    YearlyMergeProcess yearlyMergeProcess;
 
     @Autowired
     PostingSchoolReportProcess postingSchoolReportProcess;

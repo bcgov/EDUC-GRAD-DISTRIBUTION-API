@@ -86,7 +86,10 @@ public class SFTPUtils {
 
     public boolean sftpUploadTSW(Long batchId,String mincode,String fileName) {
         String localFile = "/tmp/"+batchId+"/"+mincode+"/"+fileName+".pdf";
-        String remoteFile = "/$1$dga5037/EDUC/XTD/USERS/EDUC_XTD_MGR/GRAD_TSW_TEST/"+fileName+".pdf";
+        String remoteFile = "/$1$dga5037/EDUC/XTD";
+        String location1 = remoteFile+"/WEB/"+fileName+".pdf";
+        String location2 = remoteFile+"/TSWSFTP/"+fileName+".pdf";
+        String location3 = remoteFile+"/WEB/PST/"+fileName+".pdf";
         Session jschSession = null;
 
         setupTSWSFTP();
@@ -103,7 +106,9 @@ public class SFTPUtils {
             ChannelSftp channelSftp = (ChannelSftp) sftp;
 
             // transfer file from local to remote server
-            channelSftp.put(localFile, remoteFile);
+            channelSftp.put(localFile, location1);
+            channelSftp.put(localFile, location2);
+            channelSftp.put(localFile, location3);
             channelSftp.exit();
             return true;
         } catch (JSchException | SftpException e) {
