@@ -227,7 +227,7 @@ public class MergeProcess implements DistributionProcess {
 			fos.write(contentInBytes);
 			fos.flush();
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.debug(EXCEPTION,e.getLocalizedMessage());
 		}
 
 	}
@@ -240,7 +240,7 @@ public class MergeProcess implements DistributionProcess {
 			EducDistributionApiUtils.zipFile(fileToZip, fileToZip.getName(), zipOut);
 			zipOut.close();
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.debug(EXCEPTION,e.getLocalizedMessage());
 		}
 
 	}
