@@ -46,8 +46,8 @@ public class DistributionController {
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK")})
     public ResponseEntity<DistributionResponse> distributeCredentials(
             @PathVariable String runType, @RequestParam(required = false) Long batchId ,@RequestParam(required = false) String activityCode,
-            @RequestBody Map<String, DistributionPrintRequest> mapDist, @RequestHeader(name="Authorization") String accessToken) {
-        return response.GET(gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,accessToken));
+            @RequestBody Map<String, DistributionPrintRequest> mapDist,@RequestParam(required = false) String localDownload, @RequestHeader(name="Authorization") String accessToken) {
+        return response.GET(gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,localDownload,accessToken));
     }
 
     @GetMapping(EducDistributionApiConstants.LOCAL_DOWNLOAD)
