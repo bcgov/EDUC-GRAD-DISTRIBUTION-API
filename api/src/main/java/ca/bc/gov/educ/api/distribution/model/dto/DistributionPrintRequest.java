@@ -10,5 +10,6 @@ public class DistributionPrintRequest {
 	private CertificatePrintRequest yed2CertificatePrintRequest;
 	private CertificatePrintRequest yedbCertificatePrintRequest;
 	private CertificatePrintRequest yedrCertificatePrintRequest;
+	private SchoolReportPostRequest schoolReportPostRequest;
 	private int total=0;
 }

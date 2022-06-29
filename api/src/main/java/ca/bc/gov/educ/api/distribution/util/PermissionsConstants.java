@@ -1,6 +1,6 @@
 package ca.bc.gov.educ.api.distribution.util;
 
-public interface PermissionsContants {
+public interface PermissionsConstants {
 	String _PREFIX = "hasAuthority('";
 	String _SUFFIX = "')";
 
