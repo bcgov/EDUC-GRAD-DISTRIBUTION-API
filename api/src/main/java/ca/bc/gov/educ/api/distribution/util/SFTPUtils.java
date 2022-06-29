@@ -97,7 +97,7 @@ public class SFTPUtils {
         try {
             JSch jsch = new JSch();
             jsch.setKnownHosts(KNOWN_HOST);
-            jschSession = jsch.getSession(BCMAIL_SFTP_USERNAME, BCMAIL_REMOTE_HOST, REMOTE_PORT);
+            jschSession = jsch.getSession(TSW_SFTP_USERNAME, TSW_REMOTE_HOST, REMOTE_PORT);
             jsch.addIdentity(RSA_PRV);
             jschSession.connect(SESSION_TIMEOUT);
 
