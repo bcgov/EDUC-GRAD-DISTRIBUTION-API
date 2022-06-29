@@ -106,7 +106,9 @@ public class SFTPUtils {
             ChannelSftp channelSftp = (ChannelSftp) sftp;
 
             // transfer file from local to remote server
-            channelSftp.put(localFile, remoteFile);
+            channelSftp.put(localFile, location1);
+            channelSftp.put(localFile, location2);
+            channelSftp.put(localFile, location3);
             channelSftp.exit();
             return true;
         } catch (JSchException | SftpException e) {
