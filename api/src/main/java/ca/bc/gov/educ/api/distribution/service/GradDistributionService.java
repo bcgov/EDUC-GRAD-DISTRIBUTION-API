@@ -67,6 +67,6 @@ public class GradDistributionService {
         } catch (IOException e) {
             logger.debug("Error Message {}",e.getLocalizedMessage());
         }
-        return null;
+        return ResponseEntity.notFound().build();
     }
 }
