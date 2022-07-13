@@ -11,6 +11,7 @@ env:
   SPRING_BOOT_IMAGE_NAME: educ-grad-distribution-api-dc
 
   REPO_NAME: "educ-grad-distribution-api"
+  BRANCH_NAME: "grad-release"
   APP_DOMAIN: ${{ secrets.APP_DOMAIN }}
   TAG: "latest"
 
@@ -29,7 +30,7 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v3
         with:
-          ref: grad-release
+          ref: ${{ env.BRANCH_NAME }}
 
       - name: Determine image tags
         if: env.TAG == ''
@@ -57,7 +58,7 @@ jobs:
           
           # run build
           # apply build config
-          oc apply -f https://raw.githubusercontent.com/bcgov/EDUC-GRAD-DISTRIBUTION-API/grad-release/tools/openshift/api.bc.yaml
+          oc process -f https://raw.githubusercontent.com/bcgov/EDUC-GRAD-DISTRIBUTION-API/grad-release/tools/openshift/api.bc.yaml -p REPO_NAME=${{ env.REPO_NAME }} -p BRANCH_NAME=${{ env.BRANCH_NAME }} | oc apply -f -
   
           # run build --follow shows log, --wait throws non-zero if fail
           oc start-build ${{ env.REPO_NAME }}-bc --follow --wait
