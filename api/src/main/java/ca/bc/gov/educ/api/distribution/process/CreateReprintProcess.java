@@ -78,7 +78,7 @@ public class CreateReprintProcess implements DistributionProcess {
 			counter++;
 			int currentSlipCount = 0;
 			String mincode = entry.getKey();
-			SchoolTrax schoolDetails = schoolService.getSchoolDetails(mincode,processorData.getAccessToken(),exception);
+			CommonSchool schoolDetails = schoolService.getSchoolDetails(mincode,processorData.getAccessToken(),exception);
 			if(schoolDetails != null) {
 				logger.info("*** School Details Acquired {}", schoolDetails.getSchoolName());
 
@@ -86,7 +86,7 @@ public class CreateReprintProcess implements DistributionProcess {
 				DistributionPrintRequest obj = entry.getValue();
 				if(obj.getSchoolDistributionRequest() != null) {
 					ReportRequest schoolDistributionReportRequest = reportService.prepareSchoolDistributionReportData(obj.getSchoolDistributionRequest(), processorData.getBatchId(),schoolDetails);
-					createAndSaveDistributionReport(schoolDistributionReportRequest,mincode,exception,processorData);
+					createAndSaveDistributionReport(schoolDistributionReportRequest,mincode,processorData);
 					numberOfPdfs++;
 				}
 				numberOfPdfs = processYed2Certificate(obj,currentSlipCount,packSlipReq,mincode,processorData,numberOfPdfs);
@@ -101,8 +101,10 @@ public class CreateReprintProcess implements DistributionProcess {
 			}
 		}
 		createZipFile(batchId);
-		createControlFile(batchId,numberOfPdfs);
-		sftpUtils.sftpUpload(batchId);
+		if(processorData.getLocalDownload() == null) {
+			createControlFile(batchId, numberOfPdfs);
+			sftpUtils.sftpUploadBCMail(batchId);
+		}
 		long endTime = System.currentTimeMillis();
 		long diff = (endTime - startTime)/1000;
 		logger.info("************* TIME Taken  ************ {} secs",diff);
@@ -172,12 +174,12 @@ public class CreateReprintProcess implements DistributionProcess {
 
 	}
 
-	private void setExtraDataForPackingSlip(ReportRequest packSlipReq, String paperType, int total, int quantity, int currentSlip, String orderType, Long batchId) {
+	private void setExtraDataForPackingSlip(ReportRequest packSlipReq, String paperType, int total, int quantity, int currentSlip,Long batchId) {
 		packSlipReq.getData().getPackingSlip().setTotal(total);
 		packSlipReq.getData().getPackingSlip().setCurrent(currentSlip);
 		packSlipReq.getData().getPackingSlip().setQuantity(quantity);
 		packSlipReq.getData().getPackingSlip().getOrderType().getPackingSlipType().getPaperType().setCode(paperType);
-		packSlipReq.getData().getPackingSlip().getOrderType().setName(orderType);
+		packSlipReq.getData().getPackingSlip().getOrderType().setName("Certificate");
 		packSlipReq.getData().getPackingSlip().setOrderNumber(batchId);
 	}
 
@@ -186,7 +188,7 @@ public class CreateReprintProcess implements DistributionProcess {
 		String mincode = request.getMincode();
 		String paperType = request.getPaperType();
 		List<InputStream> locations=new ArrayList<>();
-		setExtraDataForPackingSlip(packSlipReq,paperType,request.getTotal(),scdList.size(),request.getCurrentSlip(),"Certificate", certificatePrintRequest.getBatchId());
+		setExtraDataForPackingSlip(packSlipReq,paperType,request.getTotal(),scdList.size(),request.getCurrentSlip(), certificatePrintRequest.getBatchId());
 		try {
 			locations.add(reportService.getPackingSlip(packSlipReq,processorData.getAccessToken()).getInputStream());
 			int currentCertificate = 0;
@@ -237,7 +239,7 @@ public class CreateReprintProcess implements DistributionProcess {
 		}
 	}
 
-	private void createAndSaveDistributionReport(ReportRequest distributionRequest,String mincode,ExceptionMessage exception,ProcessorData processorData) {
+	private void createAndSaveDistributionReport(ReportRequest distributionRequest,String mincode,ProcessorData processorData) {
 		List<InputStream> locations=new ArrayList<>();
 		try {
 			byte[] bytesSAR = webClient.post().uri(educDistributionApiConstants.getDistributionReport()).headers(h -> h.setBearerAuth(processorData.getAccessToken())).body(BodyInserters.fromValue(distributionRequest)).retrieve().bodyToMono(byte[].class).block();

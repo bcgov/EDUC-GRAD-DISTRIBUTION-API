@@ -3,7 +3,9 @@ package ca.bc.gov.educ.api.distribution.process;
 public enum DistributionProcessType {
     MER ("MergeProcess"),
     RPR ("CreateReprintProcess"),
-    BCPR ("CreateBlankCredentialProcess");
+    BCPR ("CreateBlankCredentialProcess"),
+    MERYER ("YearlyMergeProcess"),
+    PSR ("PostingSchoolReportProcess");
 
     private final String value;
 

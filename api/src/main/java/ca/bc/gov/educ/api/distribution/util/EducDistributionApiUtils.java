@@ -19,6 +19,10 @@ import org.springframework.http.MediaType;
 public class EducDistributionApiUtils {
 
 	private static final Logger logger = LoggerFactory.getLogger(EducDistributionApiUtils.class);
+	private static final String ERROR = "ERROR: {}";
+	private static final String PARSE_EXP = "Parse Exception {}";
+
+	private EducDistributionApiUtils() {}
 
 	public static String formatDate(Date date) {
 		if (date == null)
@@ -67,10 +71,8 @@ public class EducDistributionApiUtils {
 			return null;
 
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat(EducDistributionApiConstants.DEFAULT_DATE_FORMAT);
-		Date date = new Date();
-
 		try {
-			date = simpleDateFormat.parse(sessionDate);
+			Date date = simpleDateFormat.parse(sessionDate);
 			LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 			return localDate.getYear() + "/" + String.format("%02d", localDate.getMonthValue());
 
@@ -97,44 +99,45 @@ public class EducDistributionApiUtils {
 
 	public static String getFileName() {
 		Date date = new Date();
-		SimpleDateFormat month = new SimpleDateFormat("MMM.dd.YYYY.hh.mm.ss");
+		SimpleDateFormat month = new SimpleDateFormat("MMM.dd.yyyy.hh.mm.ss");
 		return month.format(date);
 	}
 
+	public static String getFileNameSchoolReports(String mincode, int year, String month, String type) {
+		return mincode + "_" + year + month + "_" + type;
+	}
+
 	public static String formatDateForReport(String updatedTimestamp) {
-		SimpleDateFormat fromUser = new SimpleDateFormat("yyyy-mm-dd");
+		SimpleDateFormat fromUser = new SimpleDateFormat("yyyy-MM-dd");
 		SimpleDateFormat myFormat = new SimpleDateFormat("yyyyMMdd");
 		try {
 			return myFormat.format(fromUser.parse(updatedTimestamp));
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.debug(PARSE_EXP,e.getLocalizedMessage());
 		}
 		return updatedTimestamp;
 
 	}
 
 	public static String formatDateForReportJasper(String updatedTimestamp) {
-		SimpleDateFormat fromUser = new SimpleDateFormat("yyyy-MM-dd");
-		SimpleDateFormat myFormat = new SimpleDateFormat("yyyy-MM-dd");
+		SimpleDateFormat fromUser = new SimpleDateFormat(EducDistributionApiConstants.DEFAULT_DATE_FORMAT);
+		SimpleDateFormat myFormat = new SimpleDateFormat(EducDistributionApiConstants.DEFAULT_DATE_FORMAT);
 		try {
 			return myFormat.format(fromUser.parse(updatedTimestamp));
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.debug(PARSE_EXP,e.getLocalizedMessage());
 		}
 		return updatedTimestamp;
 
 	}
 
 	public static Date formatIssueDateForReportJasper(String updatedTimestamp) {
-		SimpleDateFormat fromUser = new SimpleDateFormat("yyyy-MM-dd");
-		SimpleDateFormat myFormat = new SimpleDateFormat("yyyy-MM-dd");
+		SimpleDateFormat fromUser = new SimpleDateFormat(EducDistributionApiConstants.DEFAULT_DATE_FORMAT);
+		SimpleDateFormat myFormat = new SimpleDateFormat(EducDistributionApiConstants.DEFAULT_DATE_FORMAT);
 		try {
-			return new SimpleDateFormat("yyyy-MM-dd").parse(myFormat.format(fromUser.parse(updatedTimestamp)));
+			return new SimpleDateFormat(EducDistributionApiConstants.DEFAULT_DATE_FORMAT).parse(myFormat.format(fromUser.parse(updatedTimestamp)));
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.debug(PARSE_EXP,e.getLocalizedMessage());
 		}
 		return null;
 
@@ -142,46 +145,43 @@ public class EducDistributionApiUtils {
 
 	public static String parsingDateForCertificate(String sessionDate) {
 		String actualSessionDate = sessionDate + "/01";
-		Date temp = new Date();
 		String sDates = null;
 		try {
-			temp = parseDate(actualSessionDate, "yyyy/MM/dd");
-			sDates = formatDate(temp, "yyyy-MM-dd");
+			Date temp = parseDate(actualSessionDate, EducDistributionApiConstants.SECONDARY_DATE_FORMAT);
+			sDates = formatDate(temp, EducDistributionApiConstants.DEFAULT_DATE_FORMAT);
 		} catch (ParseException pe) {
-			logger.error("ERROR: " + pe.getMessage());
+			logger.error(ERROR,pe.getMessage());
 		}
 		return sDates;
 	}
 
 	public static Date parsingTraxDate(String sessionDate) {
 		String actualSessionDate = sessionDate + "/01";
-		Date temp = new Date();
 		Date sDate = null;
 		try {
-			temp = EducDistributionApiUtils.parseDate(actualSessionDate, "yyyy/MM/dd");
-			String sDates = EducDistributionApiUtils.formatDate(temp, "yyyy-MM-dd");
-			sDate = EducDistributionApiUtils.parseDate(sDates, "yyyy-MM-dd");
+			Date temp = EducDistributionApiUtils.parseDate(actualSessionDate, EducDistributionApiConstants.SECONDARY_DATE_FORMAT);
+			String sDates = EducDistributionApiUtils.formatDate(temp, EducDistributionApiConstants.DEFAULT_DATE_FORMAT);
+			sDate = EducDistributionApiUtils.parseDate(sDates, EducDistributionApiConstants.DEFAULT_DATE_FORMAT);
 		} catch (ParseException pe) {
-			logger.error("ERROR: " + pe.getMessage());
+			logger.error(ERROR,pe.getMessage());
 		}
 		return sDate;
 	}
 
 	public static String parsingNFormating(String inDate) {
 		String actualDate = inDate + "/01";
-		Date temp = new Date();
 		String sDates = null;
 		try {
-			temp = EducDistributionApiUtils.parseDate(actualDate, "yyyy/MM/dd");
-			sDates = EducDistributionApiUtils.formatDate(temp, "yyyy-MM-dd");
+			Date temp = EducDistributionApiUtils.parseDate(actualDate, EducDistributionApiConstants.SECONDARY_DATE_FORMAT);
+			sDates = EducDistributionApiUtils.formatDate(temp, EducDistributionApiConstants.DEFAULT_DATE_FORMAT);
 		} catch (ParseException pe) {
-			logger.error("ERROR: " + pe.getMessage());
+			logger.error(ERROR,pe.getMessage());
 		}
 		return sDates;
 	}
 
 	public static String getSimpleDateFormat(Date date) {
-		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+		SimpleDateFormat formatter = new SimpleDateFormat(EducDistributionApiConstants.DEFAULT_DATE_FORMAT);
 		return formatter.format(date);
 	}
 
@@ -198,20 +198,23 @@ public class EducDistributionApiUtils {
 				zipOut.closeEntry();
 			}
 			File[] children = fileToZip.listFiles();
+			assert children != null;
 			for (File childFile : children) {
 				zipFile(childFile, fileName + "/" + childFile.getName(), zipOut);
 			}
 			return;
 		}
-		FileInputStream fis = new FileInputStream(fileToZip);
-		ZipEntry zipEntry = new ZipEntry(fileName);
-		zipOut.putNextEntry(zipEntry);
-		byte[] bytes = new byte[1024];
-		int length;
-		while ((length = fis.read(bytes)) >= 0) {
-			zipOut.write(bytes, 0, length);
+		try (FileInputStream fis = new FileInputStream(fileToZip)) {
+			ZipEntry zipEntry = new ZipEntry(fileName);
+			zipOut.putNextEntry(zipEntry);
+			byte[] bytes = new byte[1024];
+			int length;
+			while ((length = fis.read(bytes)) >= 0) {
+				zipOut.write(bytes, 0, length);
+			}
+		}catch (Exception e) {
+			logger.debug("Write Exception {}",e.getLocalizedMessage());
 		}
-		fis.close();
 	}
 
 }

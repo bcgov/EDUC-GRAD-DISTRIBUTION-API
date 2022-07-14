@@ -1,12 +1,9 @@
 package ca.bc.gov.educ.api.distribution.util;
 
-import java.util.Date;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 @Component
 @Getter
@@ -20,8 +17,10 @@ public class EducDistributionApiConstants {
 
 
     public static final String DISTRIBUTION_RUN = "/run/{runType}";
+    public static final String LOCAL_DOWNLOAD = "/download/{batchId}";
     //Default Date format constants
     public static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd";
+    public static final String SECONDARY_DATE_FORMAT = "yyyy/MM/dd";
 
     @Value("${endpoint.grad-graduation-report-api.get-transcript-list.url}")
     private String transcriptDistributionList;
@@ -50,7 +49,7 @@ public class EducDistributionApiConstants {
     @Value("${endpoint.keycloak.getToken}")
     private String tokenUrl;
 
-    @Value("${endpoint.grad-trax-api.school-by-min-code.url}")
+    @Value("${endpoint.educ-school-api.school-by-min-code.url}")
     private String schoolDetails;
 
     @Value("${endpoint.grad-report-api.get-school-distribution-report.url}")
@@ -62,9 +61,16 @@ public class EducDistributionApiConstants {
     @Value("${endpoint.grad-report-api.certificate_report.url}")
     private String certificateReport;
 
+    @Value("${endpoint.grad-report-api.transcript_report.url}")
+    private String transcriptReport;
+
     @Value("${endpoint.grad-graduation-report-api.update-grad-school-report.url}")
     private String updateSchoolReport;
 
     @Value("${endpoint.grad-report-api.student_non_grad}")
     private String nonGrad;
+
+    @Value("${endpoint.grad-graduation-report-api.school-report.url}")
+    private String schoolReport;
+
 }

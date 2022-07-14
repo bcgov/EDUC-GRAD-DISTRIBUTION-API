@@ -38,9 +38,9 @@ import java.util.zip.ZipOutputStream;
 @Data
 @Component
 @NoArgsConstructor
-public class MergeProcess implements DistributionProcess {
+public class YearlyMergeProcess implements DistributionProcess {
 	
-	private static Logger logger = LoggerFactory.getLogger(MergeProcess.class);
+	private static Logger logger = LoggerFactory.getLogger(YearlyMergeProcess.class);
 
 	private static final String LOC = "/tmp/";
 	private static final String DEL = "/";
@@ -106,6 +106,7 @@ public class MergeProcess implements DistributionProcess {
 				numberOfPdfs = pV.getRight();
 				pV = processYedrCertificatePrintRequest(obj,currentSlipCount,packSlipReq,studListNonGrad,processorData,mincode,numberOfPdfs);
 				numberOfPdfs = pV.getRight();
+
 				if(!studListNonGrad.isEmpty()) {
 					createAndSaveNonGradReport(schoolDetails,studListNonGrad,mincode,processorData.getAccessToken());
 				}
@@ -117,10 +118,8 @@ public class MergeProcess implements DistributionProcess {
 			}
 		}
 		createZipFile(batchId);
-		if(processorData.getLocalDownload() == null) {
-			createControlFile(batchId, numberOfPdfs);
-			sftpUtils.sftpUploadBCMail(batchId);
-		}
+		createControlFile(batchId,numberOfPdfs);
+		sftpUtils.sftpUploadBCMail(batchId);
 		long endTime = System.currentTimeMillis();
 		long diff = (endTime - startTime)/1000;
 		logger.info("************* TIME Taken  ************ {} secs",diff);
@@ -201,7 +200,6 @@ public class MergeProcess implements DistributionProcess {
 		}
 		return Pair.of(currentSlipCount,numberOfPdfs);
 	}
-
 	private Student prepareStudentObj(StudentCredentialDistribution scd, List<Student> studListNonGrad) {
 		if(scd.getStudentGrade().equalsIgnoreCase("AD") || scd.getStudentGrade().equalsIgnoreCase("12")) {
 			Student std = new Student();
