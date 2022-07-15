@@ -18,11 +18,5 @@ public class GradCommonConfig implements WebMvcConfigurer {
 	public void addInterceptors(InterceptorRegistry registry) {
 		registry.addInterceptor(requestInterceptor);
 	}
-
-	@Bean
-	public MessageHelper messageHelper() {
-		return new MessageHelper();
-	}
-
 	
 }
