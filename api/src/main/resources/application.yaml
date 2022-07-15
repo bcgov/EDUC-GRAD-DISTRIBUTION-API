@@ -90,6 +90,8 @@ endpoint:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/schoolreport
     school-report:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/schoolreport?mincode=%s&reportType=%s
+    get-achievement-report:
+      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/studentreport?studentID=%s&reportType=%s&documentStatusCode=%s
   grad-student-api:
     get-student-record:
       url: ${GRAD_STUDENT_API}api/v1/student/stdid/%s

@@ -25,6 +25,9 @@ public class DistributionProcessFactory {
     @Autowired
     CreateBlankCredentialProcess createBlankCredentialProcess;
 
+    @Autowired
+    PostingStudentReportProcess postingStudentReportProcess;
+
 	public DistributionProcess createProcess(DistributionProcessType processImplementation) {
 		DistributionProcess pcs = null;
         switch(processImplementation.name()) {
@@ -47,6 +50,10 @@ public class DistributionProcessFactory {
             case "PSR":
                 logger.info("\n************* POSTING SCHOOL REPORT PROCESS (PSR) START  ************");
                 pcs = postingSchoolReportProcess;
+                break;
+            case "PSTR":
+                logger.info("\n************* POSTING STUDENT REPORT PROCESS (PSTR) START  ************");
+                pcs = postingStudentReportProcess;
                 break;
             default:
 	        	break;
