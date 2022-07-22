@@ -2,7 +2,6 @@ package ca.bc.gov.educ.api.distribution.process;
 
 import ca.bc.gov.educ.api.distribution.model.dto.*;
 import ca.bc.gov.educ.api.distribution.service.AccessTokenService;
-import ca.bc.gov.educ.api.distribution.service.GradStudentService;
 import ca.bc.gov.educ.api.distribution.service.ReportService;
 import ca.bc.gov.educ.api.distribution.service.SchoolService;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
@@ -45,9 +44,6 @@ public class YearlyMergeProcess implements DistributionProcess {
 	private static final String LOC = "/tmp/";
 	private static final String DEL = "/";
 	private static final String EXCEPTION = "Error {} ";
-
-	@Autowired
-	private GradStudentService gradStudentService;
 
 	@Autowired
 	GradValidation validation;

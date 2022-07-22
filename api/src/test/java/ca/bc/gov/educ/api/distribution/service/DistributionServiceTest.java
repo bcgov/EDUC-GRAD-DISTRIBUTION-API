@@ -17,6 +17,9 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -64,6 +67,9 @@ public class DistributionServiceTest {
 
 	@Autowired
 	private EducDistributionApiConstants constants;
+
+	@Mock
+	Path path;
 	
 	@Test
 	public void testdistributeCredentialsMonthly() {
@@ -111,7 +117,12 @@ public class DistributionServiceTest {
 		assertNotNull(res);
 	}
 
-
+	@Test
+	public void testGetDownload() {
+		Long batchId= 9029L;
+		byte[] arr = gradDistributionService.getDownload(batchId);
+		assertNotNull(arr);
+	}
 
 	private DistributionResponse testdistributeCredentials_transcript_blank(String runType) {
 		Long batchId= 9029L;
