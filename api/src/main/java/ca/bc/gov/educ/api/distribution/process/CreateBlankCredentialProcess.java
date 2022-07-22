@@ -124,7 +124,7 @@ public class CreateBlankCredentialProcess implements DistributionProcess {
 				int currentTranscript = 0;
 				int failedToAdd = 0;
 				for (BlankCredentialDistribution bcd : bcdList) {
-					ReportData data = prepareBlankTranscriptData(bcd);
+					ReportData data = prepareBlankTranscriptData(bcd,mincode);
 					ReportOptions options = new ReportOptions();
 					options.setReportFile("Transcript");
 					options.setReportName("Transcript.pdf");
@@ -286,7 +286,7 @@ public class CreateBlankCredentialProcess implements DistributionProcess {
 		return data;
 	}
 
-	private ReportData prepareBlankTranscriptData(BlankCredentialDistribution bcd) {
+	private ReportData prepareBlankTranscriptData(BlankCredentialDistribution bcd, String mincode) {
 		ReportData data = new ReportData();
 		Transcript tran = new Transcript();
 		tran.setInterim("true");
@@ -299,7 +299,7 @@ public class CreateBlankCredentialProcess implements DistributionProcess {
 		GradProgram gP = new GradProgram();
 		gP.setCode(code);
 		data.setGradProgram(gP);
-		data.setLogo(StringUtils.startsWith(data.getSchool().getMincode(), "098") ? "YU" : "BC");
+		data.setLogo(StringUtils.startsWith(mincode, "098") ? "YU" : "BC");
 		data.setTranscript(tran);
 		data.setIssueDate(EducDistributionApiUtils.formatIssueDateForReportJasper(new java.sql.Date(System.currentTimeMillis()).toString()));
 		return data;
