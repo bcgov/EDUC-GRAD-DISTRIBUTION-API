@@ -17,7 +17,7 @@ import java.util.*;
 
 
 @ExtendWith(MockitoExtension.class)
-public class DistributionControllerTest {
+class DistributionControllerTest {
 
 	@Mock
 	private GradDistributionService gradDistributionService;
@@ -38,7 +38,7 @@ public class DistributionControllerTest {
 	SecurityContextHolder securityContextHolder;
 	
 	@Test
-	public void testDistributeCredentials() {
+	void testDistributeCredentials() {
 		String runType = "MER";
 		String activityCode = "USERDIST";
 		Long batchId= 9029L;
@@ -100,7 +100,7 @@ public class DistributionControllerTest {
 
 
 	@Test
-	public void testDownloadZipFile() {
+	void testDownloadZipFile() {
 		Long batchId= 9029L;
 		byte[] bytesSAR = "Any String you want".getBytes();
 		Mockito.when(gradDistributionService.getDownload(batchId)).thenReturn(bytesSAR);
