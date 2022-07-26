@@ -75,12 +75,17 @@ public class CreateBlankCredentialProcess implements DistributionProcess {
 			counter++;
 			int currentSlipCount = 0;
 			String mincode = entry.getKey();
-			CommonSchool schoolDetails = schoolService.getSchoolDetails(mincode,processorData.getAccessToken(),exception);
+			DistributionPrintRequest obj = entry.getValue();
+			CommonSchool schoolDetails;
+			if(obj.getProperName() != null)
+				schoolDetails = schoolService.getDetailsForPackingSlip(obj.getProperName());
+			else
+				schoolDetails = schoolService.getSchoolDetails(mincode,processorData.getAccessToken(),exception);
+
 			if(schoolDetails != null) {
 				logger.info("*** School Details Acquired {}", schoolDetails.getSchoolName());
 
 				ReportRequest packSlipReq = reportService.preparePackingSlipData(schoolDetails, processorData.getBatchId());
-				DistributionPrintRequest obj = entry.getValue();
 				numberOfPdfs = processYed4Transcript(obj,currentSlipCount,packSlipReq,mincode,processorData,numberOfPdfs);
 				numberOfPdfs = processYed2Certificate(obj,currentSlipCount,packSlipReq,mincode,processorData,numberOfPdfs);
 				numberOfPdfs = processYedbCertificate(obj,currentSlipCount,packSlipReq,mincode,processorData,numberOfPdfs);
