@@ -85,6 +85,7 @@ public class MergeProcess extends BaseProcess{
 			}
 		}
 		createZipFile(batchId);
+		logger.info("Local Download {}",processorData.getLocalDownload());
 		if(processorData.getLocalDownload() == null) {
 			createControlFile(batchId, numberOfPdfs);
 			sftpUtils.sftpUploadBCMail(batchId);
