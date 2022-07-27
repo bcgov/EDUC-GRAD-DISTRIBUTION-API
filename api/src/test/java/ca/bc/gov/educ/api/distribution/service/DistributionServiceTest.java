@@ -17,9 +17,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -76,7 +74,31 @@ public class DistributionServiceTest {
 	
 	@Test
 	public void testdistributeCredentialsMonthly() {
-		DistributionResponse res = testdistributeCredentials_transcript("MER","USERDIST");
+		DistributionResponse res = testdistributeCredentials_transcript("MER","USERDIST",false,null);
+		assertNotNull(res);
+		res = testdistributeCredentials_certificate("MER","USERDIST","YED2",null);
+		assertNotNull(res);
+		res = testdistributeCredentials_certificate("MER","USERDIST","YEDB",null);
+		assertNotNull(res);
+		res = testdistributeCredentials_certificate("MER","USERDIST","YEDR",null);
+		assertNotNull(res);
+	}
+
+	@Test
+	public void testdistributeCredentialsMonthlyLocalDownload() {
+		DistributionResponse res = testdistributeCredentials_transcript("MER","USERDIST",false,"Y");
+		assertNotNull(res);
+		res = testdistributeCredentials_certificate("MER","USERDIST","YED2",null);
+		assertNotNull(res);
+		res = testdistributeCredentials_certificate("MER","USERDIST","YEDB",null);
+		assertNotNull(res);
+		res = testdistributeCredentials_certificate("MER","USERDIST","YEDR",null);
+		assertNotNull(res);
+	}
+
+	@Test
+	public void testdistributeCredentialsMonthly_schoolNull() {
+		DistributionResponse res = testdistributeCredentials_transcript("MER","USERDIST",true,null);
 		assertNotNull(res);
 		res = testdistributeCredentials_certificate("MER","USERDIST","YED2",null);
 		assertNotNull(res);
@@ -98,7 +120,7 @@ public class DistributionServiceTest {
 
 	@Test
 	public void testdistributeCredentialsYearly() {
-		DistributionResponse res = testdistributeCredentials_transcript("MERYER","USERDIST");
+		DistributionResponse res = testdistributeCredentials_transcript("MERYER","USERDIST",false,null);
 		assertNotNull(res);
 		res = testdistributeCredentials_certificate("MERYER","USERDIST","YED2",null);
 		assertNotNull(res);
@@ -110,17 +132,29 @@ public class DistributionServiceTest {
 
 	@Test
 	public void testdistributeCredentialsCertReprint() {
-		DistributionResponse res = testdistributeCredentials_certificate_reprint("RPR","USERDIST","YED2");
+		DistributionResponse res = testdistributeCredentials_certificate_reprint("RPR","USERDIST","YED2",true);
 		assertNotNull(res);
-		res = testdistributeCredentials_certificate_reprint("RPR","USERDIST","YEDB");
+		res = testdistributeCredentials_certificate_reprint("RPR","USERDIST","YEDB",false);
 		assertNotNull(res);
-		res = testdistributeCredentials_certificate_reprint("RPR","USERDIST","YEDR");
+		res = testdistributeCredentials_certificate_reprint("RPR","USERDIST","YEDR",false);
+		assertNotNull(res);
+	}
+
+	@Test
+	public void testdistributeCredentialsBlankSchoolNUll() {
+		DistributionResponse res = testdistributeCredentials_transcript_blank("BCPR",false,null);
+		assertNotNull(res);
+		res = testdistributeCredentials_certificate_blank("BCPR","YED2");
+		assertNotNull(res);
+		res = testdistributeCredentials_certificate_blank("BCPR","YEDB");
+		assertNotNull(res);
+		res = testdistributeCredentials_certificate_blank("BCPR","YEDR");
 		assertNotNull(res);
 	}
 
 	@Test
 	public void testdistributeCredentialsBlank() {
-		DistributionResponse res = testdistributeCredentials_transcript_blank("BCPR");
+		DistributionResponse res = testdistributeCredentials_transcript_blank("BCPR",true,"Y");
 		assertNotNull(res);
 		res = testdistributeCredentials_certificate_blank("BCPR","YED2");
 		assertNotNull(res);
@@ -208,18 +242,21 @@ public class DistributionServiceTest {
 		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,null,null,accessToken);
 	}
 
-	private DistributionResponse testdistributeCredentials_transcript_blank(String runType) {
+	private DistributionResponse testdistributeCredentials_transcript_blank(String runType,boolean schoolNull,String localDownload) {
 		Long batchId= 9029L;
 		Map<String, DistributionPrintRequest > mapDist= new HashMap<>();
-		String localDownload = null;
 		String accessToken = "123";
 		String mincode = "123123133";
 
-		CommonSchool schObj = new CommonSchool();
-		schObj.setSchlNo(mincode.substring(2,mincode.length()-1));
-		schObj.setDistNo(mincode.substring(0,2));
-		schObj.setPhysAddressLine1("sadadad");
-		schObj.setPhysAddressLine2("adad");
+		CommonSchool schObj = null;
+		if(!schoolNull) {
+			schObj = new CommonSchool();
+			schObj.setSchlNo(mincode.substring(2,mincode.length()-1));
+			schObj.setDistNo(mincode.substring(0,2));
+			schObj.setPhysAddressLine1("sadadad");
+			schObj.setPhysAddressLine2("adad");
+		}
+
 
 		List<BlankCredentialDistribution> bcdList = new ArrayList<>();
 		BlankCredentialDistribution bcd = new BlankCredentialDistribution();
@@ -279,7 +316,7 @@ public class DistributionServiceTest {
 		when(this.responseMock.bodyToMono(CommonSchool.class)).thenReturn(inputResponseSchool);
 		when(this.inputResponseSchool.block()).thenReturn(schObj);
 
-		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,null,null,accessToken);
+		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,null,localDownload,accessToken);
 	}
 
 	private DistributionResponse testdistributeCredentials_certificate_blank(String runType,String paperType) {
@@ -355,18 +392,20 @@ public class DistributionServiceTest {
 		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,null,null,accessToken);
 	}
 
-	private DistributionResponse testdistributeCredentials_transcript(String runType, String activityCode) {
+	private DistributionResponse testdistributeCredentials_transcript(String runType, String activityCode,boolean schoolNull,String localDownload) {
 		Long batchId= 9029L;
 		Map<String, DistributionPrintRequest > mapDist= new HashMap<>();
-		String localDownload = null;
 		String accessToken = "123";
 		String mincode = "123123133";
 
-		CommonSchool schObj = new CommonSchool();
-		schObj.setSchlNo(mincode.substring(2,mincode.length()-1));
-		schObj.setDistNo(mincode.substring(0,2));
-		schObj.setPhysAddressLine1("sadadad");
-		schObj.setPhysAddressLine2("adad");
+		CommonSchool schObj = null;
+		if(!schoolNull) {
+			schObj = new CommonSchool();
+			schObj.setSchlNo(mincode.substring(2, mincode.length() - 1));
+			schObj.setDistNo(mincode.substring(0, 2));
+			schObj.setPhysAddressLine1("sadadad");
+			schObj.setPhysAddressLine2("adad");
+		}
 
 		List<StudentCredentialDistribution> scdList = new ArrayList<>();
 		StudentCredentialDistribution scd = new StudentCredentialDistribution();
@@ -611,18 +650,21 @@ public class DistributionServiceTest {
 		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,localDownload,accessToken);
 	}
 
-	private DistributionResponse testdistributeCredentials_certificate_reprint(String runType, String activityCode,String paperType) {
+	private DistributionResponse testdistributeCredentials_certificate_reprint(String runType, String activityCode,String paperType,boolean schoolNull) {
 		Long batchId= 9029L;
 		Map<String, DistributionPrintRequest > mapDist= new HashMap<>();
 		String localDownload = null;
 		String accessToken = "123";
 		String mincode = "123123133";
 
-		CommonSchool schObj = new CommonSchool();
-		schObj.setSchlNo(mincode.substring(2,mincode.length()-1));
-		schObj.setDistNo(mincode.substring(0,2));
-		schObj.setPhysAddressLine1("sadadad");
-		schObj.setPhysAddressLine2("adad");
+		CommonSchool schObj =null;
+		if(!schoolNull) {
+			schObj = new CommonSchool();
+			schObj.setSchlNo(mincode.substring(2, mincode.length() - 1));
+			schObj.setDistNo(mincode.substring(0, 2));
+			schObj.setPhysAddressLine1("sadadad");
+			schObj.setPhysAddressLine2("adad");
+		}
 
 		List<StudentCredentialDistribution> scdList = new ArrayList<>();
 		StudentCredentialDistribution scd = new StudentCredentialDistribution();
