@@ -1,14 +1,9 @@
 package ca.bc.gov.educ.api.distribution.process;
 
 import ca.bc.gov.educ.api.distribution.model.dto.*;
-import ca.bc.gov.educ.api.distribution.service.AccessTokenService;
-import ca.bc.gov.educ.api.distribution.service.ReportService;
-import ca.bc.gov.educ.api.distribution.service.SchoolService;
-import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils;
-import ca.bc.gov.educ.api.distribution.util.GradValidation;
-import ca.bc.gov.educ.api.distribution.util.SFTPUtils;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
@@ -16,10 +11,8 @@ import org.apache.pdfbox.io.MemoryUsageSetting;
 import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -33,33 +26,10 @@ import java.util.zip.ZipOutputStream;
 @Data
 @Component
 @NoArgsConstructor
-public class CreateBlankCredentialProcess implements DistributionProcess {
+@EqualsAndHashCode(callSuper = false)
+public class CreateBlankCredentialProcess extends BaseProcess {
 	
 	private static Logger logger = LoggerFactory.getLogger(CreateBlankCredentialProcess.class);
-	private static final String LOC = "/tmp/";
-	private static final String DEL = "/";
-	private static final String EXCEPTION = "IO Exp {} ";
-
-	@Autowired
-	GradValidation validation;
-
-	@Autowired
-	WebClient webClient;
-
-	@Autowired
-	EducDistributionApiConstants educDistributionApiConstants;
-
-	@Autowired
-	AccessTokenService accessTokenService;
-
-	@Autowired
-	SchoolService schoolService;
-
-	@Autowired
-	ReportService reportService;
-
-	@Autowired
-	SFTPUtils sftpUtils;
 
 	@Override
 	public ProcessorData fire(ProcessorData processorData) {
@@ -76,12 +46,7 @@ public class CreateBlankCredentialProcess implements DistributionProcess {
 			int currentSlipCount = 0;
 			String mincode = entry.getKey();
 			DistributionPrintRequest obj = entry.getValue();
-			CommonSchool schoolDetails;
-			if(obj.getProperName() != null)
-				schoolDetails = schoolService.getDetailsForPackingSlip(obj.getProperName());
-			else
-				schoolDetails = schoolService.getSchoolDetails(mincode,processorData.getAccessToken(),exception);
-
+			CommonSchool schoolDetails = getBaseSchoolDetails(obj,mincode,processorData,exception);
 			if(schoolDetails != null) {
 				logger.info("*** School Details Acquired {}", schoolDetails.getSchoolName());
 
