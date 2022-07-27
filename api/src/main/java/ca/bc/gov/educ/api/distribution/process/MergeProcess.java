@@ -299,7 +299,7 @@ public class MergeProcess extends BaseProcess{
 		nongradProjected.setOrgCode(StringUtils.startsWith(nongradProjected.getSchool().getMincode(), "098") ? "YU" : "BC");
 		nongradProjected.setIssueDate(EducDistributionApiUtils.formatIssueDateForReportJasper(new java.sql.Date(System.currentTimeMillis()).toString()));
 		nongradProjected.setReportNumber("TRAX241B");
-		nongradProjected.setReportTitle("Grade 12 Examinations and Transcripts");
+		nongradProjected.setReportTitle("Graduation Records and Achievement Data");
 		nongradProjected.setReportSubTitle("Grade 12 and Adult Students Not Able to Graduate on Grad Requirements");
 		ReportOptions options = new ReportOptions();
 		options.setReportFile(String.format("%s_%s00_NONGRAD",mincode, LocalDate.now().getYear()));
