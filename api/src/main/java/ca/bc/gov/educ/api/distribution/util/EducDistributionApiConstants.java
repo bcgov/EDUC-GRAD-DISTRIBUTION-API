@@ -31,6 +31,9 @@ public class EducDistributionApiConstants {
     @Value("${endpoint.grad-graduation-report-api.get-transcript.url}")
     private String transcript;
 
+    @Value("${endpoint.grad-graduation-report-api.get-achievement-report.url}")
+    private String achievementReport;
+
     @Value("${endpoint.grad-graduation-report-api.get-certificate.url}")
     private String certificate;
 

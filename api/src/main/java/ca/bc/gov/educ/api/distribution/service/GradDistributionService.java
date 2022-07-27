@@ -9,13 +9,8 @@ import ca.bc.gov.educ.api.distribution.process.DistributionProcessType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,8 +22,7 @@ public class GradDistributionService {
 
     private static Logger logger = LoggerFactory.getLogger(GradDistributionService.class);
 
-    private static final String CONTENT_DISPOSITION = "Content-Disposition";
-    private static final String ZIP_FILE_NAME = "inline; filename=userdistributionbatch_%s.zip";
+
 
     @Autowired
     DistributionProcessFactory distributionProcessFactory;
@@ -51,22 +45,14 @@ public class GradDistributionService {
         return data.getDistributionResponse();
     }
 
-    public ResponseEntity<InputStreamResource> getDownload(Long batchId) {
+    public byte[] getDownload(Long batchId) {
         String localFile = "/tmp/EDGRAD.BATCH."+batchId+".zip";
         Path path = Paths.get(localFile);
         try {
-            byte[] data = Files.readAllBytes(path);
-            ByteArrayInputStream bis = new ByteArrayInputStream(data);
-            HttpHeaders headers = new HttpHeaders();
-            headers.add(CONTENT_DISPOSITION, String.format(ZIP_FILE_NAME,batchId));
-            return ResponseEntity
-                    .ok()
-                    .headers(headers)
-                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                    .body(new InputStreamResource(bis));
+            return Files.readAllBytes(path);
         } catch (IOException e) {
             logger.debug("Error Message {}",e.getLocalizedMessage());
         }
-        return ResponseEntity.notFound().build();
+        return new byte[0];
     }
 }

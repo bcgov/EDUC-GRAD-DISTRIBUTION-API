@@ -1,15 +1,9 @@
 package ca.bc.gov.educ.api.distribution.process;
 
 import ca.bc.gov.educ.api.distribution.model.dto.*;
-import ca.bc.gov.educ.api.distribution.service.AccessTokenService;
-import ca.bc.gov.educ.api.distribution.service.GradStudentService;
-import ca.bc.gov.educ.api.distribution.service.ReportService;
-import ca.bc.gov.educ.api.distribution.service.SchoolService;
-import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils;
-import ca.bc.gov.educ.api.distribution.util.GradValidation;
-import ca.bc.gov.educ.api.distribution.util.SFTPUtils;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
@@ -17,53 +11,27 @@ import org.apache.pdfbox.io.MemoryUsageSetting;
 import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
-import org.springframework.web.reactive.function.client.WebClient;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.zip.ZipOutputStream;
 
 @Data
 @Component
 @NoArgsConstructor
-public class CreateBlankCredentialProcess implements DistributionProcess {
+@EqualsAndHashCode(callSuper = false)
+public class CreateBlankCredentialProcess extends BaseProcess {
 	
 	private static Logger logger = LoggerFactory.getLogger(CreateBlankCredentialProcess.class);
-	private static final String LOC = "/tmp/";
-	private static final String DEL = "/";
-	private static final String EXCEPTION = "IO Exp {} ";
-
-	@Autowired
-	private GradStudentService gradStudentService;
-
-	@Autowired
-	GradValidation validation;
-
-	@Autowired
-	WebClient webClient;
-
-	@Autowired
-	EducDistributionApiConstants educDistributionApiConstants;
-
-	@Autowired
-	AccessTokenService accessTokenService;
-
-	@Autowired
-	SchoolService schoolService;
-
-	@Autowired
-	ReportService reportService;
-
-	@Autowired
-	SFTPUtils sftpUtils;
 
 	@Override
 	public ProcessorData fire(ProcessorData processorData) {
@@ -79,12 +47,12 @@ public class CreateBlankCredentialProcess implements DistributionProcess {
 			counter++;
 			int currentSlipCount = 0;
 			String mincode = entry.getKey();
-			CommonSchool schoolDetails = schoolService.getSchoolDetails(mincode,processorData.getAccessToken(),exception);
+			DistributionPrintRequest obj = entry.getValue();
+			CommonSchool schoolDetails = getBaseSchoolDetails(obj,mincode,processorData,exception);
 			if(schoolDetails != null) {
 				logger.info("*** School Details Acquired {}", schoolDetails.getSchoolName());
 
 				ReportRequest packSlipReq = reportService.preparePackingSlipData(schoolDetails, processorData.getBatchId());
-				DistributionPrintRequest obj = entry.getValue();
 				numberOfPdfs = processYed4Transcript(obj,currentSlipCount,packSlipReq,mincode,processorData,numberOfPdfs);
 				numberOfPdfs = processYed2Certificate(obj,currentSlipCount,packSlipReq,mincode,processorData,numberOfPdfs);
 				numberOfPdfs = processYedbCertificate(obj,currentSlipCount,packSlipReq,mincode,processorData,numberOfPdfs);
@@ -124,7 +92,7 @@ public class CreateBlankCredentialProcess implements DistributionProcess {
 				int currentTranscript = 0;
 				int failedToAdd = 0;
 				for (BlankCredentialDistribution bcd : bcdList) {
-					ReportData data = prepareBlankTranscriptData(bcd);
+					ReportData data = prepareBlankTranscriptData(bcd,mincode);
 					ReportOptions options = new ReportOptions();
 					options.setReportFile("Transcript");
 					options.setReportName("Transcript.pdf");
@@ -198,30 +166,6 @@ public class CreateBlankCredentialProcess implements DistributionProcess {
 
 	}
 
-	@SneakyThrows
-	private void createZipFile(Long batchId) {
-		String sourceFile = LOC+batchId;
-		try (FileOutputStream fos = new FileOutputStream(LOC + "EDGRAD.BATCH." + batchId + ".zip")) {
-			ZipOutputStream zipOut = new ZipOutputStream(fos);
-			File fileToZip = new File(sourceFile);
-			EducDistributionApiUtils.zipFile(fileToZip, fileToZip.getName(), zipOut);
-			zipOut.close();
-
-		} catch (IOException e) {
-			logger.debug(EXCEPTION,e.getMessage());
-		}
-
-	}
-
-	private void setExtraDataForPackingSlip(ReportRequest packSlipReq, String paperType, int total, int quantity, int currentSlip, Long batchId) {
-		packSlipReq.getData().getPackingSlip().setTotal(total);
-		packSlipReq.getData().getPackingSlip().setCurrent(currentSlip);
-		packSlipReq.getData().getPackingSlip().setQuantity(quantity);
-		packSlipReq.getData().getPackingSlip().getOrderType().getPackingSlipType().getPaperType().setCode(paperType);
-		packSlipReq.getData().getPackingSlip().getOrderType().setName("Certificate");
-		packSlipReq.getData().getPackingSlip().setOrderNumber(batchId);
-	}
-
 	private void mergeCertificates(ReportRequest packSlipReq, CertificatePrintRequest certificatePrintRequest,PackingSlipRequest request,ProcessorData processorData) {
 		List<BlankCredentialDistribution> bcdList = certificatePrintRequest.getBlankCertificateList();
 		String mincode = request.getMincode();
@@ -286,7 +230,7 @@ public class CreateBlankCredentialProcess implements DistributionProcess {
 		return data;
 	}
 
-	private ReportData prepareBlankTranscriptData(BlankCredentialDistribution bcd) {
+	private ReportData prepareBlankTranscriptData(BlankCredentialDistribution bcd, String mincode) {
 		ReportData data = new ReportData();
 		Transcript tran = new Transcript();
 		tran.setInterim("true");
@@ -299,7 +243,7 @@ public class CreateBlankCredentialProcess implements DistributionProcess {
 		GradProgram gP = new GradProgram();
 		gP.setCode(code);
 		data.setGradProgram(gP);
-		data.setLogo(StringUtils.startsWith(data.getSchool().getMincode(), "098") ? "YU" : "BC");
+		data.setLogo(StringUtils.startsWith(mincode, "098") ? "YU" : "BC");
 		data.setTranscript(tran);
 		data.setIssueDate(EducDistributionApiUtils.formatIssueDateForReportJasper(new java.sql.Date(System.currentTimeMillis()).toString()));
 		return data;

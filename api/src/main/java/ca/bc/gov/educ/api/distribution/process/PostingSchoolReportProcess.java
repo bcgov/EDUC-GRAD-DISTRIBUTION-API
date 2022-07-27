@@ -1,26 +1,19 @@
 package ca.bc.gov.educ.api.distribution.process;
 
 import ca.bc.gov.educ.api.distribution.model.dto.*;
-import ca.bc.gov.educ.api.distribution.service.AccessTokenService;
-import ca.bc.gov.educ.api.distribution.service.GradStudentService;
-import ca.bc.gov.educ.api.distribution.service.ReportService;
-import ca.bc.gov.educ.api.distribution.service.SchoolService;
-import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils;
-import ca.bc.gov.educ.api.distribution.util.GradValidation;
-import ca.bc.gov.educ.api.distribution.util.SFTPUtils;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.apache.pdfbox.io.MemoryUsageSetting;
 import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -29,37 +22,10 @@ import java.util.*;
 @Data
 @Component
 @NoArgsConstructor
-public class PostingSchoolReportProcess implements DistributionProcess {
+@EqualsAndHashCode(callSuper = false)
+public class PostingSchoolReportProcess extends BaseProcess {
 	
 	private static Logger logger = LoggerFactory.getLogger(PostingSchoolReportProcess.class);
-
-	private static final String LOC = "/tmp/";
-	private static final String DEL = "/";
-	private static final String EXCEPTION = "Error {} ";
-
-	@Autowired
-	private GradStudentService gradStudentService;
-
-	@Autowired
-	GradValidation validation;
-
-	@Autowired
-	WebClient webClient;
-
-	@Autowired
-	EducDistributionApiConstants educDistributionApiConstants;
-
-	@Autowired
-	AccessTokenService accessTokenService;
-
-	@Autowired
-	SchoolService schoolService;
-
-	@Autowired
-	ReportService reportService;
-
-	@Autowired
-	SFTPUtils sftpUtils;
 
 	@Override
 	public ProcessorData fire(ProcessorData processorData) {

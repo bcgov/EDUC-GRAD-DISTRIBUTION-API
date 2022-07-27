@@ -59,6 +59,24 @@ springdoc:
   swagger-ui:
     path: /api/v1/api-docs-ui.html
     operationsSorter: alpha
+
+authorization:
+  user: batch-api
+  password: dsfs3434fddf
+
+sftp:
+  bcmail:
+    host: 3234@bc.ail.com
+    username: bmail
+    priv-key: 232
+    pub-key: 676
+    known-hosts: 45fsdss
+  tsw:
+    host: 454@tsw.aril.com
+    username: tswmail
+    priv-key: 565
+    pub-key: 888
+    known-hosts: 5644ddww
   
 #Endpoints
 endpoint:
@@ -77,6 +95,8 @@ endpoint:
       url: https://educ-grad-graduation-report-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/schoolreport
     school-report:
       url: https://educ-grad-graduation-report-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/schoolreport?mincode=%s&reportType=%s
+    get-achievement-report:
+      url: https://educ-grad-graduation-report-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/studentreport?studentID=%s&reportType=%s&documentStatusCode=%s
   grad-student-api:
     get-student-record:
       url: https://educ-grad-student-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v1/student/stdid/%s
@@ -96,3 +116,6 @@ endpoint:
   grad-graduation-api:
     report-by-pen:
       url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduate/report/data/%s?type=CERT
+  educ-school-api:
+    school-by-min-code:
+      url: https://educ-school-api-75e61b-dev.apps.silver.devops.gov.bc.ca/api/v1/schools/%s
