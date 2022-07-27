@@ -13,14 +13,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.zip.ZipOutputStream;
 
 @Data
 @Component
@@ -126,29 +128,8 @@ public class CreateReprintProcess extends BaseProcess {
 
 	}
 
-	@SneakyThrows
-	private void createZipFile(Long batchId) {
-		String sourceFile = LOC+batchId;
-		try (FileOutputStream fos = new FileOutputStream(LOC + "EDGRAD.BATCH." + batchId + ".zip")) {
-			ZipOutputStream zipOut = new ZipOutputStream(fos);
-			File fileToZip = new File(sourceFile);
-			EducDistributionApiUtils.zipFile(fileToZip, fileToZip.getName(), zipOut);
-			zipOut.close();
 
-		} catch (IOException e) {
-			logger.debug(EXCEPTION,e.getMessage());
-		}
 
-	}
-
-	private void setExtraDataForPackingSlip(ReportRequest packSlipReq, String paperType, int total, int quantity, int currentSlip,Long batchId) {
-		packSlipReq.getData().getPackingSlip().setTotal(total);
-		packSlipReq.getData().getPackingSlip().setCurrent(currentSlip);
-		packSlipReq.getData().getPackingSlip().setQuantity(quantity);
-		packSlipReq.getData().getPackingSlip().getOrderType().getPackingSlipType().getPaperType().setCode(paperType);
-		packSlipReq.getData().getPackingSlip().getOrderType().setName("Certificate");
-		packSlipReq.getData().getPackingSlip().setOrderNumber(batchId);
-	}
 
 	private void mergeCertificates(ReportRequest packSlipReq, CertificatePrintRequest certificatePrintRequest,PackingSlipRequest request,ProcessorData processorData) {
 		List<StudentCredentialDistribution> scdList = certificatePrintRequest.getCertificateList();

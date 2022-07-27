@@ -16,7 +16,10 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -25,7 +28,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.zip.ZipOutputStream;
 
 @Data
 @Component
@@ -204,18 +206,7 @@ public class MergeProcess extends BaseProcess{
 
 	}
 
-	private void createZipFile(Long batchId) {
-		StringBuilder sourceFileBuilder = new StringBuilder().append(LOC).append(batchId);
-		try(FileOutputStream fos = new FileOutputStream(LOC+"EDGRAD.BATCH." + batchId + ".zip")) {
-			ZipOutputStream zipOut = new ZipOutputStream(fos);
-			File fileToZip = new File(sourceFileBuilder.toString());
-			EducDistributionApiUtils.zipFile(fileToZip, fileToZip.getName(), zipOut);
-			zipOut.close();
-		} catch (IOException e) {
-			logger.debug(EXCEPTION,e.getLocalizedMessage());
-		}
 
-	}
 
 	private List<NonGradReason> getNonGradReasons(List<GradRequirement> nonGradReasons) {
 		List<NonGradReason> nList = new ArrayList<>();
@@ -230,14 +221,7 @@ public class MergeProcess extends BaseProcess{
 		return nList;
 	}
 
-	private void setExtraDataForPackingSlip(ReportRequest packSlipReq, String paperType, int total, int quantity, int currentSlip, String orderType, Long batchId) {
-		packSlipReq.getData().getPackingSlip().setTotal(total);
-		packSlipReq.getData().getPackingSlip().setCurrent(currentSlip);
-		packSlipReq.getData().getPackingSlip().setQuantity(quantity);
-		packSlipReq.getData().getPackingSlip().getOrderType().getPackingSlipType().getPaperType().setCode(paperType);
-		packSlipReq.getData().getPackingSlip().getOrderType().setName(orderType);
-		packSlipReq.getData().getPackingSlip().setOrderNumber(batchId);
-	}
+
 
 	private void mergeCertificates(ReportRequest packSlipReq, CertificatePrintRequest certificatePrintRequest, PackingSlipRequest request,ProcessorData processorData, List<Student> studListNonGrad) {
 		List<StudentCredentialDistribution> scdList = certificatePrintRequest.getCertificateList();

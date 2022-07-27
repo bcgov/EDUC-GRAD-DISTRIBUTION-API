@@ -137,6 +137,77 @@ public class DistributionServiceTest {
 		assertNotNull(arr);
 	}
 
+	@Test
+	public void testdistributeSchoolReport() {
+		DistributionResponse res = testdistributeSchoolReport("PSR","GRAD");
+		assertNotNull(res);
+		res = testdistributeSchoolReport("PSR","NONGRAD");
+		assertNotNull(res);
+		res = testdistributeSchoolReport("PSR","NONGRADPRJ");
+		assertNotNull(res);
+	}
+
+	private DistributionResponse testdistributeSchoolReport(String runType,String reportType) {
+		Long batchId= 9029L;
+		Map<String, DistributionPrintRequest > mapDist= new HashMap<>();
+		String localDownload = null;
+		String accessToken = "123";
+		String mincode = "123123133";
+
+		CommonSchool schObj = new CommonSchool();
+		schObj.setSchlNo(mincode.substring(2,mincode.length()-1));
+		schObj.setDistNo(mincode.substring(0,2));
+		schObj.setPhysAddressLine1("sadadad");
+		schObj.setPhysAddressLine2("adad");
+
+		SchoolReportDistribution obj = new SchoolReportDistribution();
+		obj.setId(UUID.randomUUID());
+		obj.setReportTypeCode(reportType);
+		obj.setSchoolOfRecord(mincode);
+
+		final ResponseObj tokenObject = new ResponseObj();
+		tokenObject.setAccess_token("123");
+		tokenObject.setRefresh_token("456");
+
+		when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+		when(this.requestBodyUriMock.uri(constants.getTokenUrl())).thenReturn(this.requestBodyUriMock);
+		when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+		when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+		when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.bodyToMono(ResponseObj.class)).thenReturn(Mono.just(tokenObject));
+
+
+		SchoolReportPostRequest tPReq = new SchoolReportPostRequest();
+		tPReq.setBatchId(batchId);
+		tPReq.setCount(34);
+		if(reportType.equalsIgnoreCase("GRAD"))
+			tPReq.setGradReport(obj);
+		if(reportType.equalsIgnoreCase("NONGRADPRJ"))
+			tPReq.setNongradprjreport(obj);
+		if(reportType.equalsIgnoreCase("NONGRAD"))
+			tPReq.setNongradReport(obj);
+
+		DistributionPrintRequest printRequest = new DistributionPrintRequest();
+		printRequest.setSchoolReportPostRequest(tPReq);
+		mapDist.put(mincode,printRequest);
+
+		byte[] bytesSAR = "Any String you want".getBytes();
+
+		byte[] greBPack = "Any String you want".getBytes();
+		InputStreamResource inSRPack = new InputStreamResource(new ByteArrayInputStream(greBPack));
+
+		when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+		when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolReport(), obj.getSchoolOfRecord(),obj.getReportTypeCode()))).thenReturn(this.requestHeadersMock);
+		when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.bodyToMono(InputStreamResource.class)).thenReturn(inputResponse);
+		when(this.inputResponse.block()).thenReturn(inSRPack);
+
+
+		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,null,null,accessToken);
+	}
+
 	private DistributionResponse testdistributeCredentials_transcript_blank(String runType) {
 		Long batchId= 9029L;
 		Map<String, DistributionPrintRequest > mapDist= new HashMap<>();
