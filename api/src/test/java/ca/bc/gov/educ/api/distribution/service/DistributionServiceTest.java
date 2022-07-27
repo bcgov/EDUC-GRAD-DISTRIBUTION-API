@@ -17,9 +17,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -39,7 +37,7 @@ public class DistributionServiceTest {
 	@Autowired
 	private ExceptionMessage exception;
 	
-	@MockBean
+	@Autowired
 	private SchoolService schoolService;
 	
 	@Autowired
@@ -65,6 +63,9 @@ public class DistributionServiceTest {
 	@Mock
 	private Mono<ReportData> inputResponseReport;
 
+	@Mock
+	private Mono<CommonSchool> inputResponseSchool;
+
 	@Autowired
 	private EducDistributionApiConstants constants;
 
@@ -73,41 +74,87 @@ public class DistributionServiceTest {
 	
 	@Test
 	public void testdistributeCredentialsMonthly() {
-		DistributionResponse res = testdistributeCredentials_transcript("MER","USERDIST");
+		DistributionResponse res = testdistributeCredentials_transcript("MER","USERDIST",false,null);
 		assertNotNull(res);
-		res = testdistributeCredentials_certificate("MER","USERDIST","YED2");
+		res = testdistributeCredentials_certificate("MER","USERDIST","YED2",null,true);
 		assertNotNull(res);
-		res = testdistributeCredentials_certificate("MER","USERDIST","YEDB");
+		res = testdistributeCredentials_certificate("MER","USERDIST","YEDB",null,false);
 		assertNotNull(res);
-		res = testdistributeCredentials_certificate("MER","USERDIST","YEDR");
+		res = testdistributeCredentials_certificate("MER","USERDIST","YEDR",null,false);
+		assertNotNull(res);
+	}
+
+	@Test
+	public void testdistributeCredentialsMonthlyLocalDownload() {
+		DistributionResponse res = testdistributeCredentials_transcript("MER","USERDIST",false,"Y");
+		assertNotNull(res);
+		res = testdistributeCredentials_certificate("MER","USERDIST","YED2",null,false);
+		assertNotNull(res);
+		res = testdistributeCredentials_certificate("MER","USERDIST","YEDB",null,false);
+		assertNotNull(res);
+		res = testdistributeCredentials_certificate("MER","USERDIST","YEDR",null,false);
+		assertNotNull(res);
+	}
+
+	@Test
+	public void testdistributeCredentialsMonthly_schoolNull() {
+		DistributionResponse res = testdistributeCredentials_transcript("MER","USERDIST",true,null);
+		assertNotNull(res);
+		res = testdistributeCredentials_certificate("MER","USERDIST","YED2",null,false);
+		assertNotNull(res);
+		res = testdistributeCredentials_certificate("MER","USERDIST","YEDB",null,false);
+		assertNotNull(res);
+		res = testdistributeCredentials_certificate("MER","USERDIST","YEDR",null,false);
+		assertNotNull(res);
+	}
+
+	@Test
+	public void testdistributeCredentialsUserReq() {
+		DistributionResponse res = testdistributeCredentials_certificate("MER","USERDISTRC","YED2","John Doe",false);
+		assertNotNull(res);
+		res = testdistributeCredentials_certificate("MER","USERDISTRC","YEDB","John Doe",false);
+		assertNotNull(res);
+		res = testdistributeCredentials_certificate("MER","USERDISTRC","YEDR","John Doe",false);
 		assertNotNull(res);
 	}
 
 	@Test
 	public void testdistributeCredentialsYearly() {
-		DistributionResponse res = testdistributeCredentials_transcript("MERYER","USERDIST");
+		DistributionResponse res = testdistributeCredentials_transcript("MERYER","USERDIST",false,null);
 		assertNotNull(res);
-		res = testdistributeCredentials_certificate("MERYER","USERDIST","YED2");
+		res = testdistributeCredentials_certificate("MERYER","USERDIST","YED2",null,false);
 		assertNotNull(res);
-		res = testdistributeCredentials_certificate("MERYER","USERDIST","YEDB");
+		res = testdistributeCredentials_certificate("MERYER","USERDIST","YEDB",null,false);
 		assertNotNull(res);
-		res = testdistributeCredentials_certificate("MERYER","USERDIST","YEDR");
+		res = testdistributeCredentials_certificate("MERYER","USERDIST","YEDR",null,false);
 		assertNotNull(res);
 	}
 
 	@Test
 	public void testdistributeCredentialsCertReprint() {
-		DistributionResponse res = testdistributeCredentials_certificate_reprint("RPR","USERDIST","YED2");
+		DistributionResponse res = testdistributeCredentials_certificate_reprint("RPR","USERDIST","YED2",true);
 		assertNotNull(res);
-		res = testdistributeCredentials_certificate_reprint("RPR","USERDIST","YEDB");
+		res = testdistributeCredentials_certificate_reprint("RPR","USERDIST","YEDB",false);
 		assertNotNull(res);
-		res = testdistributeCredentials_certificate_reprint("RPR","USERDIST","YEDR");
+		res = testdistributeCredentials_certificate_reprint("RPR","USERDIST","YEDR",false);
+		assertNotNull(res);
+	}
+
+	@Test
+	public void testdistributeCredentialsBlankSchoolNUll() {
+		DistributionResponse res = testdistributeCredentials_transcript_blank("BCPR",false,null);
+		assertNotNull(res);
+		res = testdistributeCredentials_certificate_blank("BCPR","YED2");
+		assertNotNull(res);
+		res = testdistributeCredentials_certificate_blank("BCPR","YEDB");
+		assertNotNull(res);
+		res = testdistributeCredentials_certificate_blank("BCPR","YEDR");
 		assertNotNull(res);
 	}
 
 	@Test
 	public void testdistributeCredentialsBlank() {
-		DistributionResponse res = testdistributeCredentials_transcript_blank("BCPR");
+		DistributionResponse res = testdistributeCredentials_transcript_blank("BCPR",true,"Y");
 		assertNotNull(res);
 		res = testdistributeCredentials_certificate_blank("BCPR","YED2");
 		assertNotNull(res);
@@ -124,7 +171,17 @@ public class DistributionServiceTest {
 		assertNotNull(arr);
 	}
 
-	private DistributionResponse testdistributeCredentials_transcript_blank(String runType) {
+	@Test
+	public void testdistributeSchoolReport() {
+		DistributionResponse res = testdistributeSchoolReport("PSR","GRAD");
+		assertNotNull(res);
+		res = testdistributeSchoolReport("PSR","NONGRAD");
+		assertNotNull(res);
+		res = testdistributeSchoolReport("PSR","NONGRADPRJ");
+		assertNotNull(res);
+	}
+
+	private DistributionResponse testdistributeSchoolReport(String runType,String reportType) {
 		Long batchId= 9029L;
 		Map<String, DistributionPrintRequest > mapDist= new HashMap<>();
 		String localDownload = null;
@@ -136,6 +193,70 @@ public class DistributionServiceTest {
 		schObj.setDistNo(mincode.substring(0,2));
 		schObj.setPhysAddressLine1("sadadad");
 		schObj.setPhysAddressLine2("adad");
+
+		SchoolReportDistribution obj = new SchoolReportDistribution();
+		obj.setId(UUID.randomUUID());
+		obj.setReportTypeCode(reportType);
+		obj.setSchoolOfRecord(mincode);
+
+		final ResponseObj tokenObject = new ResponseObj();
+		tokenObject.setAccess_token("123");
+		tokenObject.setRefresh_token("456");
+
+		when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+		when(this.requestBodyUriMock.uri(constants.getTokenUrl())).thenReturn(this.requestBodyUriMock);
+		when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+		when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+		when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.bodyToMono(ResponseObj.class)).thenReturn(Mono.just(tokenObject));
+
+
+		SchoolReportPostRequest tPReq = new SchoolReportPostRequest();
+		tPReq.setBatchId(batchId);
+		tPReq.setCount(34);
+		if(reportType.equalsIgnoreCase("GRAD"))
+			tPReq.setGradReport(obj);
+		if(reportType.equalsIgnoreCase("NONGRADPRJ"))
+			tPReq.setNongradprjreport(obj);
+		if(reportType.equalsIgnoreCase("NONGRAD"))
+			tPReq.setNongradReport(obj);
+
+		DistributionPrintRequest printRequest = new DistributionPrintRequest();
+		printRequest.setSchoolReportPostRequest(tPReq);
+		mapDist.put(mincode,printRequest);
+
+		byte[] bytesSAR = "Any String you want".getBytes();
+
+		byte[] greBPack = "Any String you want".getBytes();
+		InputStreamResource inSRPack = new InputStreamResource(new ByteArrayInputStream(greBPack));
+
+		when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+		when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolReport(), obj.getSchoolOfRecord(),obj.getReportTypeCode()))).thenReturn(this.requestHeadersMock);
+		when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.bodyToMono(InputStreamResource.class)).thenReturn(inputResponse);
+		when(this.inputResponse.block()).thenReturn(inSRPack);
+
+
+		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,null,null,accessToken);
+	}
+
+	private DistributionResponse testdistributeCredentials_transcript_blank(String runType,boolean schoolNull,String localDownload) {
+		Long batchId= 9029L;
+		Map<String, DistributionPrintRequest > mapDist= new HashMap<>();
+		String accessToken = "123";
+		String mincode = "123123133";
+
+		CommonSchool schObj = null;
+		if(!schoolNull) {
+			schObj = new CommonSchool();
+			schObj.setSchlNo(mincode.substring(2,mincode.length()-1));
+			schObj.setDistNo(mincode.substring(0,2));
+			schObj.setPhysAddressLine1("sadadad");
+			schObj.setPhysAddressLine2("adad");
+		}
+
 
 		List<BlankCredentialDistribution> bcdList = new ArrayList<>();
 		BlankCredentialDistribution bcd = new BlankCredentialDistribution();
@@ -188,8 +309,14 @@ public class DistributionServiceTest {
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(ResponseObj.class)).thenReturn(Mono.just(tokenObject));
 
-		Mockito.when(schoolService.getSchoolDetails(mincode,accessToken,exception)).thenReturn(schObj);
-		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,null,null,accessToken);
+		when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+		when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolDetails(), mincode))).thenReturn(this.requestHeadersMock);
+		when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.bodyToMono(CommonSchool.class)).thenReturn(inputResponseSchool);
+		when(this.inputResponseSchool.block()).thenReturn(schObj);
+
+		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,null,localDownload,accessToken);
 	}
 
 	private DistributionResponse testdistributeCredentials_certificate_blank(String runType,String paperType) {
@@ -265,18 +392,20 @@ public class DistributionServiceTest {
 		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,null,null,accessToken);
 	}
 
-	private DistributionResponse testdistributeCredentials_transcript(String runType, String activityCode) {
+	private DistributionResponse testdistributeCredentials_transcript(String runType, String activityCode,boolean schoolNull,String localDownload) {
 		Long batchId= 9029L;
 		Map<String, DistributionPrintRequest > mapDist= new HashMap<>();
-		String localDownload = null;
 		String accessToken = "123";
 		String mincode = "123123133";
 
-		CommonSchool schObj = new CommonSchool();
-		schObj.setSchlNo(mincode.substring(2,mincode.length()-1));
-		schObj.setDistNo(mincode.substring(0,2));
-		schObj.setPhysAddressLine1("sadadad");
-		schObj.setPhysAddressLine2("adad");
+		CommonSchool schObj = null;
+		if(!schoolNull) {
+			schObj = new CommonSchool();
+			schObj.setSchlNo(mincode.substring(2, mincode.length() - 1));
+			schObj.setDistNo(mincode.substring(0, 2));
+			schObj.setPhysAddressLine1("sadadad");
+			schObj.setPhysAddressLine2("adad");
+		}
 
 		List<StudentCredentialDistribution> scdList = new ArrayList<>();
 		StudentCredentialDistribution scd = new StudentCredentialDistribution();
@@ -361,6 +490,13 @@ public class DistributionServiceTest {
 		when(this.responseMock.bodyToMono(InputStreamResource.class)).thenReturn(inputResponse);
 		when(this.inputResponse.block()).thenReturn(inSRTran);
 
+		when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+		when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolDetails(), mincode))).thenReturn(this.requestHeadersMock);
+		when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.bodyToMono(CommonSchool.class)).thenReturn(inputResponseSchool);
+		when(this.inputResponseSchool.block()).thenReturn(schObj);
+
 		final ResponseObj tokenObject = new ResponseObj();
 		tokenObject.setAccess_token("123");
 		tokenObject.setRefresh_token("456");
@@ -373,12 +509,11 @@ public class DistributionServiceTest {
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(ResponseObj.class)).thenReturn(Mono.just(tokenObject));
 
-		Mockito.when(schoolService.getSchoolDetails(mincode,accessToken,exception)).thenReturn(schObj);
 		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,localDownload,accessToken);
 	}
 
 
-	private DistributionResponse testdistributeCredentials_certificate(String runType, String activityCode,String paperType) {
+	private DistributionResponse testdistributeCredentials_certificate(String runType, String activityCode,String paperType,String properName,boolean noSchoolDis) {
 		Long batchId= 9029L;
 		Map<String, DistributionPrintRequest > mapDist= new HashMap<>();
 		String localDownload = null;
@@ -435,13 +570,18 @@ public class DistributionServiceTest {
 		cReq.setCount(34);
 		cReq.setCertificateList(scdCertList);
 
-		SchoolDistributionRequest sdReq = new SchoolDistributionRequest();
-		sdReq.setCount(34);
-		sdReq.setBatchId(batchId);
-		sdReq.setStudentList(scdList);
+		SchoolDistributionRequest sdReq = null;
+		if(!noSchoolDis) {
+			sdReq = new SchoolDistributionRequest();
+			sdReq.setCount(34);
+			sdReq.setBatchId(batchId);
+			sdReq.setStudentList(scdList);
+		}
 
 		DistributionPrintRequest printRequest = new DistributionPrintRequest();
 		printRequest.setSchoolDistributionRequest(sdReq);
+		if(properName != null)
+			printRequest.setProperName(properName);
 		if(paperType.equalsIgnoreCase("YED2"))
 			printRequest.setYed2CertificatePrintRequest(cReq);
 		if(paperType.equalsIgnoreCase("YEDB"))
@@ -508,22 +648,26 @@ public class DistributionServiceTest {
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(ResponseObj.class)).thenReturn(Mono.just(tokenObject));
 
-		Mockito.when(schoolService.getSchoolDetails(mincode,accessToken,exception)).thenReturn(schObj);
+		if(properName == null)
+			Mockito.when(schoolService.getSchoolDetails(mincode,accessToken,exception)).thenReturn(schObj);
 		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,localDownload,accessToken);
 	}
 
-	private DistributionResponse testdistributeCredentials_certificate_reprint(String runType, String activityCode,String paperType) {
+	private DistributionResponse testdistributeCredentials_certificate_reprint(String runType, String activityCode,String paperType,boolean schoolNull) {
 		Long batchId= 9029L;
 		Map<String, DistributionPrintRequest > mapDist= new HashMap<>();
 		String localDownload = null;
 		String accessToken = "123";
 		String mincode = "123123133";
 
-		CommonSchool schObj = new CommonSchool();
-		schObj.setSchlNo(mincode.substring(2,mincode.length()-1));
-		schObj.setDistNo(mincode.substring(0,2));
-		schObj.setPhysAddressLine1("sadadad");
-		schObj.setPhysAddressLine2("adad");
+		CommonSchool schObj =null;
+		if(!schoolNull) {
+			schObj = new CommonSchool();
+			schObj.setSchlNo(mincode.substring(2, mincode.length() - 1));
+			schObj.setDistNo(mincode.substring(0, 2));
+			schObj.setPhysAddressLine1("sadadad");
+			schObj.setPhysAddressLine2("adad");
+		}
 
 		List<StudentCredentialDistribution> scdList = new ArrayList<>();
 		StudentCredentialDistribution scd = new StudentCredentialDistribution();
@@ -639,6 +783,13 @@ public class DistributionServiceTest {
 		when(this.responseMock.bodyToMono(ReportData.class)).thenReturn(inputResponseReport);
 		when(this.inputResponseReport.block()).thenReturn(data);
 
+		when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+		when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolDetails(), mincode))).thenReturn(this.requestHeadersMock);
+		when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.bodyToMono(CommonSchool.class)).thenReturn(inputResponseSchool);
+		when(this.inputResponseSchool.block()).thenReturn(schObj);
+
 		final ResponseObj tokenObject = new ResponseObj();
 		tokenObject.setAccess_token("123");
 		tokenObject.setRefresh_token("456");
@@ -651,7 +802,6 @@ public class DistributionServiceTest {
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(ResponseObj.class)).thenReturn(Mono.just(tokenObject));
 
-		Mockito.when(schoolService.getSchoolDetails(mincode,accessToken,exception)).thenReturn(schObj);
 		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,localDownload,accessToken);
 	}
 
