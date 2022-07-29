@@ -85,7 +85,7 @@ public class MergeProcess extends BaseProcess{
 			}
 		}
 		createZipFile(batchId);
-		if(processorData.getLocalDownload() == null) {
+		if(processorData.getLocalDownload() == null || !processorData.getLocalDownload().equalsIgnoreCase("Y")) {
 			createControlFile(batchId, numberOfPdfs);
 			sftpUtils.sftpUploadBCMail(batchId);
 		}
@@ -203,6 +203,7 @@ public class MergeProcess extends BaseProcess{
 		} catch (IOException e) {
 			logger.debug(EXCEPTION,e.getLocalizedMessage());
 		}
+		logger.info("Created Control file ");
 
 	}
 
