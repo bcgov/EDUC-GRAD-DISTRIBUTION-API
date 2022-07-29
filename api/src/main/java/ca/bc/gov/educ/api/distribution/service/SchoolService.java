@@ -32,11 +32,12 @@ public class SchoolService {
 		fakeSchoolObj.setSchlNo(String.format("%09d" , 0));
 		fakeSchoolObj.setSchoolName(properName);
 		fakeSchoolObj.setDistNo(String.format("%03d" , 0));
-		fakeSchoolObj.setPhysAddressLine1("4TH FLOOR 620 SUPERIOR");
-		fakeSchoolObj.setPhysAddressLine2("PO BOX 9886 STN PROV GOVT");
-		fakeSchoolObj.setPhysCity("VICTORIA");
-		fakeSchoolObj.setPhysProvinceCode("BC");
+		fakeSchoolObj.setScAddressLine1("4TH FLOOR 620 SUPERIOR");
+		fakeSchoolObj.setScAddressLine2("PO BOX 9886 STN PROV GOVT");
+		fakeSchoolObj.setScCity("VICTORIA");
+		fakeSchoolObj.setScProvinceCode("BC");
 		fakeSchoolObj.setScPostalCode("V8W9T6");
+		fakeSchoolObj.setScCountryCode("CN");
 		return fakeSchoolObj;
 	}
 }

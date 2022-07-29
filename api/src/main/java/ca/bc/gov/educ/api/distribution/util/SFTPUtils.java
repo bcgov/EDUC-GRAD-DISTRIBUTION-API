@@ -68,7 +68,7 @@ public class SFTPUtils {
             channelSftp.exit();
             return true;
         } catch (JSchException | SftpException e) {
-            logger.info("Error {} ",e.getLocalizedMessage());
+            logger.debug("Error {} ",e.getLocalizedMessage());
             return false;
         } finally {
             if (jschSession != null) {
