@@ -5,7 +5,8 @@ public enum DistributionProcessType {
     RPR ("CreateReprintProcess"),
     BCPR ("CreateBlankCredentialProcess"),
     MERYER ("YearlyMergeProcess"),
-    PSR ("PostingSchoolReportProcess");
+    PSR ("PostingSchoolReportProcess"),
+    PSPR ("PSIReportProcess");
 
     private final String value;
 

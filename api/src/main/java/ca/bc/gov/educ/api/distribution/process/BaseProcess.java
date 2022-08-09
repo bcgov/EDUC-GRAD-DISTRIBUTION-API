@@ -2,6 +2,7 @@ package ca.bc.gov.educ.api.distribution.process;
 
 import ca.bc.gov.educ.api.distribution.model.dto.*;
 import ca.bc.gov.educ.api.distribution.service.AccessTokenService;
+import ca.bc.gov.educ.api.distribution.service.PsiService;
 import ca.bc.gov.educ.api.distribution.service.ReportService;
 import ca.bc.gov.educ.api.distribution.service.SchoolService;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
@@ -46,6 +47,9 @@ public abstract class BaseProcess implements DistributionProcess{
 
     @Autowired
     SFTPUtils sftpUtils;
+
+    @Autowired
+    PsiService psiService;
 
     protected CommonSchool getBaseSchoolDetails(DistributionPrintRequest obj, String mincode, ProcessorData processorData, ExceptionMessage exception) {
         if(obj.getProperName() != null)
