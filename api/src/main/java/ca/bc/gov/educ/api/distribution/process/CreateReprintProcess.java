@@ -5,7 +5,6 @@ import ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.SneakyThrows;
 import org.apache.pdfbox.io.MemoryUsageSetting;
 import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import org.slf4j.Logger;
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
 
 import java.io.ByteArrayInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -115,21 +113,6 @@ public class CreateReprintProcess extends BaseProcess {
 		PackingSlipRequest request = PackingSlipRequest.builder().mincode(mincode).currentSlip(currentSlipCount).total(obj.getTotal()).paperType(paperType).build();
 		mergeCertificates(packSlipReq, certificatePrintRequest,request,processorData);
 	}
-
-	@SneakyThrows
-	private void createControlFile(Long batchId, int numberOfPdfs) {
-		try (FileOutputStream fos = new FileOutputStream(LOC + "EDGRAD.BATCH." + batchId + ".txt")) {
-			byte[] contentInBytes = String.valueOf(numberOfPdfs).getBytes();
-			fos.write(contentInBytes);
-			fos.flush();
-		} catch (IOException e) {
-			logger.debug("IO Exp {}", e.getMessage());
-		}
-
-	}
-
-
-
 
 	private void mergeCertificates(ReportRequest packSlipReq, CertificatePrintRequest certificatePrintRequest,PackingSlipRequest request,ProcessorData processorData) {
 		List<StudentCredentialDistribution> scdList = certificatePrintRequest.getCertificateList();

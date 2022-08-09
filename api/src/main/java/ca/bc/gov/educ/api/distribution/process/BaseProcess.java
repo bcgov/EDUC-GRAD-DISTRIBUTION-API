@@ -71,6 +71,18 @@ public abstract class BaseProcess implements DistributionProcess{
 
     }
 
+    protected void createControlFile(Long batchId,int numberOfPdfs) {
+        try(FileOutputStream fos = new FileOutputStream("/tmp/EDGRAD.BATCH." + batchId + ".txt")) {
+            byte[] contentInBytes = String.valueOf(numberOfPdfs).getBytes();
+            fos.write(contentInBytes);
+            fos.flush();
+        } catch (IOException e) {
+            logger.debug(EXCEPTION,e.getLocalizedMessage());
+        }
+        logger.info("Created Control file ");
+
+    }
+
     protected void setExtraDataForPackingSlip(ReportRequest packSlipReq, String paperType, int total, int quantity, int currentSlip, Long batchId) {
         packSlipReq.getData().getPackingSlip().setTotal(total);
         packSlipReq.getData().getPackingSlip().setCurrent(currentSlip);

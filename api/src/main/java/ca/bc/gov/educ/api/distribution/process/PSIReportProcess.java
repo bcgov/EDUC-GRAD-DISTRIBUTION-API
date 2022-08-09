@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Component;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -107,18 +106,6 @@ public class PSIReportProcess extends BaseProcess{
 				logger.debug("*** Failed to Add PDFs {} Current student {}", failedToAdd, scd.getStudentID());
 			}
 		}
-	}
-
-	private void createControlFile(Long batchId,int numberOfPdfs) {
-		try(FileOutputStream fos = new FileOutputStream("/tmp/EDGRAD.BATCH." + batchId + ".txt")) {
-			byte[] contentInBytes = String.valueOf(numberOfPdfs).getBytes();
-			fos.write(contentInBytes);
-			fos.flush();
-		} catch (IOException e) {
-			logger.debug(EXCEPTION,e.getLocalizedMessage());
-		}
-		logger.info("Created Control file ");
-
 	}
 
 	private void mergeDocuments(ProcessorData processorData,String psiCode,String fileName,String paperType,List<InputStream> locations) {
