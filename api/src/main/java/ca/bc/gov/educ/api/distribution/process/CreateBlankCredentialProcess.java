@@ -66,7 +66,7 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 			}
 		}
 		createZipFile(batchId);
-		if(processorData.getLocalDownload() == null) {
+		if(processorData.getLocalDownload() == null || !processorData.getLocalDownload().equalsIgnoreCase("Y")) {
 			createControlFile(batchId, numberOfPdfs);
 			sftpUtils.sftpUploadBCMail(batchId);
 		}
