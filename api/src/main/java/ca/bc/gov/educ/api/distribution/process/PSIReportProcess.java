@@ -58,11 +58,7 @@ public class PSIReportProcess extends BaseProcess{
 				logger.info("PSI {}/{}",counter,mapDist.size());
 			}
 		}
-		createZipFile(batchId);
-		if(processorData.getLocalDownload() == null || !processorData.getLocalDownload().equalsIgnoreCase("Y")) {
-			createControlFile(batchId, numberOfPdfs);
-			sftpUtils.sftpUploadBCMail(batchId);
-		}
+		postingProcess(batchId,processorData,numberOfPdfs);
 		long endTime = System.currentTimeMillis();
 		long diff = (endTime - startTime)/1000;
 		logger.info("************* TIME Taken  ************ {} secs",diff);

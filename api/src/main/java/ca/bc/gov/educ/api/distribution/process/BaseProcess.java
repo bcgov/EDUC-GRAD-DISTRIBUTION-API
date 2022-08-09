@@ -101,4 +101,12 @@ public abstract class BaseProcess implements DistributionProcess{
         packSlipReq.getData().getPackingSlip().setOrderNumber(batchId);
     }
 
+    protected void postingProcess(Long batchId,ProcessorData processorData,Integer numberOfPdfs) {
+        createZipFile(batchId);
+        if(processorData.getLocalDownload() == null || !processorData.getLocalDownload().equalsIgnoreCase("Y")) {
+            createControlFile(batchId, numberOfPdfs);
+            sftpUtils.sftpUploadBCMail(batchId);
+        }
+    }
+
 }
