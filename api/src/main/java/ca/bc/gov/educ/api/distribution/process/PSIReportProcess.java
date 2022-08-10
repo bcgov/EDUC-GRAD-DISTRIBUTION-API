@@ -32,42 +32,41 @@ public class PSIReportProcess extends BaseProcess{
 
 	@Override
 	public ProcessorData fire(ProcessorData processorData) {
-		long startTime = System.currentTimeMillis();
-		logger.info("************* TIME START  ************ {}",startTime);
-		DistributionResponse response = new DistributionResponse();
-		ExceptionMessage exception = new ExceptionMessage();
-		Map<String,DistributionPrintRequest> mapDist = processorData.getMapDistribution();
-		Long batchId = processorData.getBatchId();
-		int numberOfPdfs = 0;
-		int counter=0;
-		for (Map.Entry<String, DistributionPrintRequest> entry : mapDist.entrySet()) {
-			counter++;
+		long sTime = System.currentTimeMillis();
+		logger.info("************* TIME START   ************ {}",sTime);
+		DistributionResponse disRes = new DistributionResponse();
+		Map<String,DistributionPrintRequest> mDist = processorData.getMapDistribution();
+		Long bId = processorData.getBatchId();
+		int numOfPdfs = 0;
+		int cnter=0;
+		for (Map.Entry<String, DistributionPrintRequest> entry : mDist.entrySet()) {
+			cnter++;
 			int currentSlipCount = 0;
 			String psiCode = entry.getKey();
 			DistributionPrintRequest obj = entry.getValue();
-			Psi psiDetails = psiService.getPsiDetails(psiCode,processorData.getAccessToken(),exception);
+			Psi psiDetails = psiService.getPsiDetails(psiCode,processorData.getAccessToken());
 			if(psiDetails != null) {
 				logger.info("*** PSI Details Acquired {}", psiDetails.getPsiName());
 				ReportRequest packSlipReq = reportService.preparePackingSlipDataPSI(psiDetails, processorData.getBatchId());
-				Pair<Integer,Integer> pV = processTranscriptPrintRequest(obj,currentSlipCount,packSlipReq,processorData,psiCode,numberOfPdfs);
-				numberOfPdfs = pV.getRight();
+				Pair<Integer,Integer> pV = processTranscriptPrintRequest(obj,currentSlipCount,packSlipReq,processorData,psiCode,numOfPdfs);
+				numOfPdfs = pV.getRight();
 				logger.info("PDFs Merged {}", psiDetails.getPsiName());
-				if (counter % 50 == 0) {
+				if (cnter % 50 == 0) {
 					accessTokenService.fetchAccessToken(processorData);
 				}
-				logger.info("PSI {}/{}",counter,mapDist.size());
+				logger.info("PSI {}/{}",cnter,mDist.size());
 			}
 		}
-		postingProcess(batchId,processorData,numberOfPdfs);
-		long endTime = System.currentTimeMillis();
-		long diff = (endTime - startTime)/1000;
-		logger.info("************* TIME Taken  ************ {} secs",diff);
-		response.setMergeProcessResponse("Merge Successful and File Uploaded");
-		processorData.setDistributionResponse(response);
+		postingProcess(bId,processorData,numOfPdfs);
+		long eTime = System.currentTimeMillis();
+		long difference = (eTime - sTime)/1000;
+		logger.info("************* TIME Taken  ************ {} secs",difference);
+		disRes.setMergeProcessResponse("Merge Successful and File Uploaded");
+		processorData.setDistributionResponse(disRes);
 		return processorData;
 	}
 
-	private Pair<Integer, Integer> processTranscriptPrintRequest(DistributionPrintRequest obj, int currentSlipCount, ReportRequest packSlipReq, ProcessorData processorData, String psiCode, int numberOfPdfs) {
+	private Pair<Integer, Integer> processTranscriptPrintRequest(DistributionPrintRequest obj, int currentSlipCount, ReportRequest packSlipReq, ProcessorData processorData, String psiCode, int numOfPdfs) {
 		if (obj.getPsiCredentialPrintRequest() != null) {
 			PsiCredentialPrintRequest psiCredentialPrintRequest = obj.getPsiCredentialPrintRequest();
 			List<PsiCredentialDistribution> scdList = psiCredentialPrintRequest.getPsiList();
@@ -79,13 +78,13 @@ public class PSIReportProcess extends BaseProcess{
 				logger.info("*** Packing Slip Added");
 				processStudents(scdList,locations,processorData);
 				mergeDocuments(processorData,psiCode,"/EDGRAD.T.","YED4",locations);
-				numberOfPdfs++;
+				numOfPdfs++;
 				logger.info("*** Transcript Documents Merged");
 			} catch (IOException e) {
 				logger.debug(EXCEPTION,e.getLocalizedMessage());
 			}
 		}
-		return Pair.of(currentSlipCount,numberOfPdfs);
+		return Pair.of(currentSlipCount,numOfPdfs);
 	}
 
 	private void processStudents(List<PsiCredentialDistribution> scdList, List<InputStream> locations, ProcessorData processorData) throws IOException {
