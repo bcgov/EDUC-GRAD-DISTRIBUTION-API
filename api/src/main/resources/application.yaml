@@ -92,6 +92,8 @@ endpoint:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/schoolreport?mincode=%s&reportType=%s
     get-achievement-report:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/studentreport?studentID=%s&reportType=%s&documentStatusCode=%s
+    get-transcript-by-student-id:
+      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/studenttranscript/%s
   grad-student-api:
     get-student-record:
       url: ${GRAD_STUDENT_API}api/v1/student/stdid/%s
@@ -111,3 +113,6 @@ endpoint:
   educ-school-api:
     school-by-min-code:
       url: ${EDUC_SCHOOL_API}api/v1/schools/%s
+  grad-trax-api:
+    psi-by-psi-code:
+      url: ${GRAD_TRAX_API}api/v1/trax/psi/%s

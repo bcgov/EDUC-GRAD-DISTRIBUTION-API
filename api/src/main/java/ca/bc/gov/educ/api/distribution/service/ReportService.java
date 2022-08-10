@@ -36,8 +36,6 @@ public class ReportService {
 	}
 
 	public ReportRequest preparePackingSlipData(CommonSchool schoolDetails,Long batchId) {
-		ReportRequest req = new ReportRequest();
-
 		School schObj = new School();
 		Address addr = new Address();
 		addr.setStreetLine1(schoolDetails.getScAddressLine1());
@@ -51,8 +49,28 @@ public class ReportService {
 		schObj.setName(schoolDetails.getSchoolName());
 		schObj.setSchlno(schoolDetails.getSchlNo());
 		schObj.setMincode(schoolDetails.getDistNo()+schoolDetails.getSchlNo());
+		return  createObj(batchId,schObj);
+	}
 
+	public ReportRequest preparePackingSlipDataPSI(Psi psiDetails,Long batchId) {
+		School schObj = new School();
+		Address addr = new Address();
+		addr.setStreetLine1(psiDetails.getAddress1());
+		addr.setStreetLine2(psiDetails.getAddress2());
+		addr.setCity(psiDetails.getCity());
+		addr.setCode(psiDetails.getPostal());
+		addr.setCountry(psiDetails.getCountryCode());
+		addr.setRegion(psiDetails.getCity());
+		schObj.setAddress(addr);
+		schObj.setDistno("000");
+		schObj.setName(psiDetails.getPsiName());
+		schObj.setSchlno(psiDetails.getPsiCode());
+		schObj.setMincode(schObj.getDistno()+schObj.getSchlno());
+		return createObj(batchId,schObj);
+	}
 
+	private ReportRequest createObj(Long batchId,School schObj) {
+		ReportRequest req = new ReportRequest();
 		ReportOptions options = new ReportOptions();
 		options.setReportFile("Packing Slip");
 		options.setReportName("packingSlip");
