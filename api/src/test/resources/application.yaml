@@ -71,6 +71,7 @@ sftp:
     priv-key: 232
     pub-key: 676
     known-hosts: 45fsdss
+    location: /Index/Dev
   tsw:
     host: 454@tsw.aril.com
     username: tswmail
