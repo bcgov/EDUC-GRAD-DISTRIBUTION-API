@@ -67,6 +67,7 @@ sftp:
     priv-key: ${BCMAIL_SSH_PRIVATE_KEY}
     pub-key: ${BCMAIL_SSH_PUBLIC_KEY}
     known-hosts: ${BCMAIL_KNOWN_HOSTS_ENTRY}
+    location: ${BCMAIL_LOCATION}
   tsw:
     host: ${TSW_SFTP_HOST}
     username: ${TSW_SFTP_USER}

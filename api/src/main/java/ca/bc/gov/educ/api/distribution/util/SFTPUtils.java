@@ -33,6 +33,10 @@ public class SFTPUtils {
     @Value("${sftp.tsw.known-hosts}")
     private String TSW_KNOWN_HOSTS;
 
+
+    @Value("${sftp.bcmail.location}")
+    private String BC_MAIL_LOCATION;
+
     private static final int REMOTE_PORT = 22;
     private static final int SESSION_TIMEOUT = 10000;
     private static final int CHANNEL_TIMEOUT = 5000;
@@ -44,9 +48,9 @@ public class SFTPUtils {
 
     public boolean sftpUploadBCMail(Long batchId) {
         String localFile = "/tmp/EDGRAD.BATCH."+batchId+".zip";
-        String remoteFile = "/Inbox/Dev/EDGRAD.BATCH."+batchId+".zip";
+        String remoteFile = BC_MAIL_LOCATION+"EDGRAD.BATCH."+batchId+".zip";
         String localControlFile = "/tmp/EDGRAD.BATCH."+batchId+".txt";
-        String remoteControlFile = "/Inbox/Dev/EDGRAD.BATCH."+batchId+".txt";
+        String remoteControlFile = BC_MAIL_LOCATION+"EDGRAD.BATCH."+batchId+".txt";
         Session jschSession = null;
 
         setupBCMailSFTP();
