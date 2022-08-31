@@ -9,18 +9,18 @@ env:
   OPENSHIFT_TOKEN: ${{ secrets.OPENSHIFT_TOKEN }}
   OPENSHIFT_NAMESPACE: ${{ secrets.GRAD_NAMESPACE }}-dev
 
-  # 🖊️ EDIT to change the image registry settings.
-  # Registries such as GHCR, Quay.io, and Docker Hub are supported.
-  IMAGE_REGISTRY: ghcr.io/${{ github.repository_owner }}
-  IMAGE_REGISTRY_USER: ${{ github.actor }}
-  IMAGE_REGISTRY_PASSWORD: ${{ github.token }}
-
   SPRING_BOOT_IMAGE_NAME: educ-grad-distribution-api-dc
-  DOCKER_ARTIFACTORY_REPO: docker-remote.artifacts.developer.gov.bc.ca
 
   REPO_NAME: "educ-grad-distribution-api"
+  BRANCH_NAME: "main"
   APP_DOMAIN: ${{ secrets.APP_DOMAIN }}
   TAG: "latest"
+  MIN_CPU: "20m"
+  MAX_CPU: "1024m"
+  MIN_MEM: "100Mi"
+  MAX_MEM: "2048Mi"
+  MIN_REPLICAS: "1"
+  MAX_REPLICAS: "3"
 
 on:
   # https://docs.github.com/en/actions/reference/events-that-trigger-workflows
@@ -33,10 +33,6 @@ jobs:
     runs-on: ubuntu-18.04
     environment: dev
 
-    outputs:
-      ROUTE: ${{ steps.deploy-and-expose.outputs.route }}
-      SELECTOR: ${{ steps.deploy-and-expose.outputs.selector }}
-
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
@@ -46,49 +42,6 @@ jobs:
         run: |
           echo "TAG=latest ${GITHUB_SHA::12}" | tee -a $GITHUB_ENV
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v1
-        with:
-          registry: ${{ env.DOCKER_ARTIFACTORY_REPO }}
-          username: ${{ secrets.DOCKER_ARTIFACTORY_USERNAME }}
-          password: ${{ secrets.DOCKER_ARTIFACTORY_ACCESS_TOKEN }}
-
-      # https://github.com/redhat-actions/buildah-build#readme
-      - name: Build from Dockerfile
-        id: build-image
-        uses: redhat-actions/buildah-build@v2
-        with:
-          image: ${{ env.REPO_NAME }}
-          tags: ${{ env.TAG }}
-
-          # If you don't have a Dockerfile/Containerfile, refer to https://github.com/redhat-actions/buildah-build#scratch-build-inputs
-          # Or, perform a source-to-image build using https://github.com/redhat-actions/s2i-build
-          # Otherwise, point this to your Dockerfile/Containerfile relative to the repository root.
-          dockerfiles: |
-            ./Dockerfile
-
-      # https://github.com/redhat-actions/push-to-registry#readme
-      - name: Push to registry
-        id: push-image
-        uses: redhat-actions/push-to-registry@v2
-        with:
-          image: ${{ steps.build-image.outputs.image }}
-          tags: ${{ steps.build-image.outputs.tags }}
-          registry: ${{ env.IMAGE_REGISTRY }}
-          username: ${{ env.IMAGE_REGISTRY_USER }}
-          password: ${{ env.IMAGE_REGISTRY_PASSWORD }}
-
-      # scan the image for vulnerabilities
-      # TODO: set exit-code to '1' to fail on vulnerabilities
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: '${{ steps.push-image.outputs.registry-path }}'
-          format: 'table'
-          exit-code: '0'
-          ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
 
       # The path the image was pushed to is now stored in ${{ steps.push-image.outputs.registry-path }}
       - name: Install oc
@@ -106,11 +59,16 @@ jobs:
           # Cancel any rollouts in progress
           oc rollout cancel dc/${{ env.SPRING_BOOT_IMAGE_NAME }} 2> /dev/null \
           || true && echo "No rollout in progress"
-          # tag image stream
-          oc -n ${{ env.OPENSHIFT_NAMESPACE }} tag ${{ steps.push-image.outputs.registry-path }} ${{ env.REPO_NAME }}:${{ env.TAG }}
-
+          
+          # run build
+          # apply build config
+          oc process -f https://raw.githubusercontent.com/bcgov/EDUC-GRAD-DISTRIBUTION-API/grad-release/tools/openshift/api.bc.yaml -p REPO_NAME=${{ env.REPO_NAME }} -p BRANCH_NAME=${{ env.BRANCH_NAME }} | oc apply -f -
+  
+          # run build --follow shows log, --wait throws non-zero if fail
+          oc start-build ${{ env.REPO_NAME }}-bc --follow --wait
+          
           # Process and apply deployment template
-          oc process -f tools/openshift/api.dc.yaml -p IS_NAMESPACE=${{ env.OPENSHIFT_NAMESPACE }} -p REPO_NAME=${{ env.REPO_NAME }} -p TAG_NAME=${{ env.TAG }} -p HOST_ROUTE=${{ env.REPO_NAME }}-${{ env.OPENSHIFT_NAMESPACE }}.${{ env.APP_DOMAIN }}  \
+          oc process -f tools/openshift/api.dc.yaml -p IS_NAMESPACE=${{ env.OPENSHIFT_NAMESPACE }} -p REPO_NAME=${{ env.REPO_NAME }} -p TAG_NAME=${{ env.TAG }} -p HOST_ROUTE=${{ env.REPO_NAME }}-${{ env.OPENSHIFT_NAMESPACE }}.${{ env.APP_DOMAIN }} -p MIN_REPLICAS=${{ env.MIN_REPLICAS }} -p MAX_REPLICAS=${{ env.MAX_REPLICAS }} -p MIN_CPU=${{ env.MIN_CPU }} -p MAX_CPU=${{ env.MAX_CPU }} -p MIN_MEM=${{ env.MIN_MEM }} -p MAX_MEM=${{ env.MAX_MEM }}  \
           | oc apply -f -
 
           # Start rollout (if necessary) and follow it
