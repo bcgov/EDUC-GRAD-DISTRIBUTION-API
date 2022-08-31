@@ -70,6 +70,7 @@ jobs:
           
           # run build
           # apply build config
+          echo 'applying ${{ env.REPO_NAME }}'
           oc process -f https://raw.githubusercontent.com/bcgov/EDUC-GRAD-DISTRIBUTION-API/grad-release/tools/openshift/api.bc.yaml -p REPO_NAME=${{ env.REPO_NAME }} -p BRANCH_NAME=${{ env.BRANCH_NAME }} | oc apply -f -
   
           # run build --follow shows log, --wait throws non-zero if fail
