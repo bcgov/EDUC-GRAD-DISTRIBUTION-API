@@ -10,6 +10,7 @@ env:
   OPENSHIFT_NAMESPACE: ${{ secrets.GRAD_NAMESPACE }}-dev
 
   SPRING_BOOT_IMAGE_NAME: educ-grad-distribution-api-dc
+  DOCKER_ARTIFACTORY_REPO: artifacts.developer.gov.bc.ca/docker-remote
 
   REPO_NAME: "educ-grad-distribution-api"
   BRANCH_NAME: "main"
@@ -41,7 +42,6 @@ jobs:
         if: env.TAG == ''
         run: |
           echo "TAG=latest ${GITHUB_SHA::12}" | tee -a $GITHUB_ENV
-
 
       # The path the image was pushed to is now stored in ${{ steps.push-image.outputs.registry-path }}
       - name: Install oc
