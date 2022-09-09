@@ -66,6 +66,9 @@ public class DistributionServiceTest {
 	@Mock
 	private Mono<CommonSchool> inputResponseSchool;
 
+	@Mock
+	private Mono<Psi> inputResponsePsi;
+
 	@Autowired
 	private EducDistributionApiConstants constants;
 
@@ -789,6 +792,85 @@ public class DistributionServiceTest {
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(CommonSchool.class)).thenReturn(inputResponseSchool);
 		when(this.inputResponseSchool.block()).thenReturn(schObj);
+
+		final ResponseObj tokenObject = new ResponseObj();
+		tokenObject.setAccess_token("123");
+		tokenObject.setRefresh_token("456");
+
+		when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+		when(this.requestBodyUriMock.uri(constants.getTokenUrl())).thenReturn(this.requestBodyUriMock);
+		when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+		when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+		when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.bodyToMono(ResponseObj.class)).thenReturn(Mono.just(tokenObject));
+
+		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,localDownload,accessToken);
+	}
+
+	@Test
+	public void testdistributeCredentialsPSI() {
+		DistributionResponse res = testpsidistributeCredential("PSPR",null);
+		assertNotNull(res);
+	}
+
+	private DistributionResponse testpsidistributeCredential(String runType, String localDownload) {
+		String activityCode = null;
+		Long batchId= 9029L;
+		Map<String, DistributionPrintRequest > mapDist= new HashMap<>();
+		String accessToken = "123";
+		String psiCode = "001";
+
+		Psi psiObj = new Psi();
+		psiObj.setPsiCode("001");
+		psiObj.setAddress2("sadasd");
+		psiObj.setAddress1("sadaasdadad");
+		psiObj.setCity("adad");
+
+
+		List<PsiCredentialDistribution> scdList = new ArrayList<>();
+		PsiCredentialDistribution scd = new PsiCredentialDistribution();
+		scd.setPen("123213133");
+		scd.setStudentID(UUID.randomUUID());
+		scd.setPsiCode("001");
+		scdList.add(scd);
+
+
+		PsiCredentialPrintRequest cReq = new PsiCredentialPrintRequest();
+		cReq.setBatchId(batchId);
+		cReq.setCount(34);
+		cReq.setPsiList(scdList);
+
+
+		DistributionPrintRequest printRequest = new DistributionPrintRequest();
+		printRequest.setPsiCredentialPrintRequest(cReq);
+		mapDist.put(psiCode,printRequest);
+
+		byte[] bytesSAR = "Any String you want".getBytes();
+		InputStreamResource inSRCert = new InputStreamResource(new ByteArrayInputStream(bytesSAR));
+		when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+		when(this.requestHeadersUriMock.uri(String.format(constants.getTranscriptUsingStudentID(), scd.getStudentID()))).thenReturn(this.requestHeadersMock);
+		when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.bodyToMono(InputStreamResource.class)).thenReturn(inputResponse);
+		when(this.inputResponse.block()).thenReturn(inSRCert);
+
+		byte[] greBPack = "Any String you want".getBytes();
+		when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+		when(this.requestBodyUriMock.uri(constants.getPackingSlip())).thenReturn(this.requestBodyUriMock);
+		when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+		when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+		when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.bodyToMono(byte[].class)).thenReturn(Mono.just(greBPack));
+
+
+		when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+		when(this.requestHeadersUriMock.uri(String.format(constants.getPsiDetails(), psiCode))).thenReturn(this.requestHeadersMock);
+		when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.bodyToMono(Psi.class)).thenReturn(inputResponsePsi);
+		when(this.inputResponsePsi.block()).thenReturn(psiObj);
 
 		final ResponseObj tokenObject = new ResponseObj();
 		tokenObject.setAccess_token("123");

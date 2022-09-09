@@ -17,7 +17,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
 
 import java.io.ByteArrayInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -84,11 +83,7 @@ public class MergeProcess extends BaseProcess{
 				logger.info("School {}/{}",counter,mapDist.size());
 			}
 		}
-		createZipFile(batchId);
-		if(processorData.getLocalDownload() == null || !processorData.getLocalDownload().equalsIgnoreCase("Y")) {
-			createControlFile(batchId, numberOfPdfs);
-			sftpUtils.sftpUploadBCMail(batchId);
-		}
+		postingProcess(batchId,processorData,numberOfPdfs);
 		long endTime = System.currentTimeMillis();
 		long diff = (endTime - startTime)/1000;
 		logger.info("************* TIME Taken  ************ {} secs",diff);
@@ -195,19 +190,6 @@ public class MergeProcess extends BaseProcess{
 		}
 		return null;
 	}
-	private void createControlFile(Long batchId,int numberOfPdfs) {
-		try(FileOutputStream fos = new FileOutputStream("/tmp/EDGRAD.BATCH." + batchId + ".txt")) {
-			byte[] contentInBytes = String.valueOf(numberOfPdfs).getBytes();
-			fos.write(contentInBytes);
-			fos.flush();
-		} catch (IOException e) {
-			logger.debug(EXCEPTION,e.getLocalizedMessage());
-		}
-		logger.info("Created Control file ");
-
-	}
-
-
 
 	private List<NonGradReason> getNonGradReasons(List<GradRequirement> nonGradReasons) {
 		List<NonGradReason> nList = new ArrayList<>();

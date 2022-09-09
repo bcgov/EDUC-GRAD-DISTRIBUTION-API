@@ -71,6 +71,7 @@ sftp:
     priv-key: 232
     pub-key: 676
     known-hosts: 45fsdss
+    location: /Index/Dev
   tsw:
     host: 454@tsw.aril.com
     username: tswmail
@@ -97,6 +98,8 @@ endpoint:
       url: https://educ-grad-graduation-report-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/schoolreport?mincode=%s&reportType=%s
     get-achievement-report:
       url: https://educ-grad-graduation-report-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/studentreport?studentID=%s&reportType=%s&documentStatusCode=%s
+    get-transcript-by-student-id:
+      url: https://educ-grad-graduation-report-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/psi/studenttranscript/%s
   grad-student-api:
     get-student-record:
       url: https://educ-grad-student-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v1/student/stdid/%s
@@ -110,12 +113,12 @@ endpoint:
     transcript_report:
       url: https://educ-grad-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/reports/transcriptreport
     student_non_grad: https://educ-grad-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/reports/studentnongrad
-  grad-trax-api:
-    school-by-min-code:
-      url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/trax/school/%s
   grad-graduation-api:
     report-by-pen:
       url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduate/report/data/%s?type=CERT
   educ-school-api:
     school-by-min-code:
       url: https://educ-school-api-75e61b-dev.apps.silver.devops.gov.bc.ca/api/v1/schools/%s
+  grad-trax-api:
+    psi-by-psi-code:
+      url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/trax/psi/%s

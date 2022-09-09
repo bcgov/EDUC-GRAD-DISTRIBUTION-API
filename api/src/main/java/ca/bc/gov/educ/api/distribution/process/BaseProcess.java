@@ -2,6 +2,7 @@ package ca.bc.gov.educ.api.distribution.process;
 
 import ca.bc.gov.educ.api.distribution.model.dto.*;
 import ca.bc.gov.educ.api.distribution.service.AccessTokenService;
+import ca.bc.gov.educ.api.distribution.service.PsiService;
 import ca.bc.gov.educ.api.distribution.service.ReportService;
 import ca.bc.gov.educ.api.distribution.service.SchoolService;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
@@ -47,6 +48,9 @@ public abstract class BaseProcess implements DistributionProcess{
     @Autowired
     SFTPUtils sftpUtils;
 
+    @Autowired
+    PsiService psiService;
+
     protected CommonSchool getBaseSchoolDetails(DistributionPrintRequest obj, String mincode, ProcessorData processorData, ExceptionMessage exception) {
         if(obj.getProperName() != null)
             return schoolService.getDetailsForPackingSlip(obj.getProperName());
@@ -67,6 +71,18 @@ public abstract class BaseProcess implements DistributionProcess{
 
     }
 
+    protected void createControlFile(Long batchId,int numberOfPdfs) {
+        try(FileOutputStream fos = new FileOutputStream("/tmp/EDGRAD.BATCH." + batchId + ".txt")) {
+            byte[] contentInBytes = String.valueOf(numberOfPdfs).getBytes();
+            fos.write(contentInBytes);
+            fos.flush();
+        } catch (IOException e) {
+            logger.debug(EXCEPTION,e.getLocalizedMessage());
+        }
+        logger.info("Created Control file ");
+
+    }
+
     protected void setExtraDataForPackingSlip(ReportRequest packSlipReq, String paperType, int total, int quantity, int currentSlip, Long batchId) {
         packSlipReq.getData().getPackingSlip().setTotal(total);
         packSlipReq.getData().getPackingSlip().setCurrent(currentSlip);
@@ -83,6 +99,14 @@ public abstract class BaseProcess implements DistributionProcess{
         packSlipReq.getData().getPackingSlip().getOrderType().getPackingSlipType().getPaperType().setCode(paperType);
         packSlipReq.getData().getPackingSlip().getOrderType().setName(orderType);
         packSlipReq.getData().getPackingSlip().setOrderNumber(batchId);
+    }
+
+    protected void postingProcess(Long batchId,ProcessorData processorData,Integer numberOfPdfs) {
+        createZipFile(batchId);
+        if(processorData.getLocalDownload() == null || !processorData.getLocalDownload().equalsIgnoreCase("Y")) {
+            createControlFile(batchId, numberOfPdfs);
+            sftpUtils.sftpUploadBCMail(batchId);
+        }
     }
 
 }
