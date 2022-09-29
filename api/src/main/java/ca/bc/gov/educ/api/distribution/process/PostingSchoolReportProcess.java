@@ -44,7 +44,7 @@ public class PostingSchoolReportProcess extends BaseProcess {
 			DistributionPrintRequest obj = entry.getValue();
 			if (obj.getSchoolReportPostRequest() != null) {
 				SchoolReportPostRequest schoolRepPostReq = obj.getSchoolReportPostRequest();
-				numberOfPdfs = processFile(schoolRepPostReq.getGradReport(),mincode,year,month,"GRAD",numberOfPdfs,processorData);
+				numberOfPdfs = processFile(schoolRepPostReq.getGradReport(),mincode,year,month,"GRADDIST",numberOfPdfs,processorData);
 				numberOfPdfs = processFile(schoolRepPostReq.getNongradReport(),mincode,year,month,"NONGRAD",numberOfPdfs,processorData);
 				numberOfPdfs = processFile(schoolRepPostReq.getNongradprjreport(),mincode,year,"00","NONGRADPRJ",numberOfPdfs,processorData);
 			}
@@ -75,7 +75,7 @@ public class PostingSchoolReportProcess extends BaseProcess {
 				} else {
 					logger.debug("*** Failed to Add PDFs Current Report Type {}", scdReport.getReportTypeCode());
 				}
-				logger.info("*** GRAD Report Created");
+				logger.info("*** GRADDIST Report Created");
 			} catch (IOException e) {
 				logger.debug(EXCEPTION, e.getLocalizedMessage());
 			}

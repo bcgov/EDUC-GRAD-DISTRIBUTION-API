@@ -176,7 +176,7 @@ public class DistributionServiceTest {
 
 	@Test
 	public void testdistributeSchoolReport() {
-		DistributionResponse res = testdistributeSchoolReport("PSR","GRAD");
+		DistributionResponse res = testdistributeSchoolReport("PSR","GRADDIST");
 		assertNotNull(res);
 		res = testdistributeSchoolReport("PSR","NONGRAD");
 		assertNotNull(res);
@@ -218,7 +218,7 @@ public class DistributionServiceTest {
 		SchoolReportPostRequest tPReq = new SchoolReportPostRequest();
 		tPReq.setBatchId(batchId);
 		tPReq.setCount(34);
-		if(reportType.equalsIgnoreCase("GRAD"))
+		if(reportType.equalsIgnoreCase("GRADDIST"))
 			tPReq.setGradReport(obj);
 		if(reportType.equalsIgnoreCase("NONGRADPRJ"))
 			tPReq.setNongradprjreport(obj);
