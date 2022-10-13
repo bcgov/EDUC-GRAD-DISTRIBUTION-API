@@ -2,16 +2,13 @@ package ca.bc.gov.educ.api.distribution.process;
 
 import ca.bc.gov.educ.api.distribution.model.dto.*;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils;
-import ca.bc.gov.educ.api.distribution.util.JsonTransformer;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.SneakyThrows;
 import org.apache.pdfbox.io.MemoryUsageSetting;
 import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
 
@@ -33,10 +30,6 @@ public class CreateReprintProcess extends BaseProcess {
 	
 	private static Logger logger = LoggerFactory.getLogger(CreateReprintProcess.class);
 
-	@Autowired
-	JsonTransformer jsonTransformer;
-
-	@SneakyThrows
 	@Override
 	public ProcessorData fire(ProcessorData processorData) {
 		long startTime = System.currentTimeMillis();
@@ -55,15 +48,11 @@ public class CreateReprintProcess extends BaseProcess {
 			CommonSchool schoolDetails = getBaseSchoolDetails(obj,mincode,processorData,exception);
 			if(schoolDetails != null) {
 				logger.info("*** School Details Acquired {}", schoolDetails.getSchoolName());
+
 				ReportRequest packSlipReq = reportService.preparePackingSlipData(schoolDetails, processorData.getBatchId());
-				String packingSlipJson = jsonTransformer.marshall(packSlipReq);
-				logger.info("PackingSlip Request:");
-				logger.info(packingSlipJson);
+
 				if(obj.getSchoolDistributionRequest() != null) {
 					ReportRequest schoolDistributionReportRequest = reportService.prepareSchoolDistributionReportData(obj.getSchoolDistributionRequest(), processorData.getBatchId(),schoolDetails);
-					String schoolDistributionJson = jsonTransformer.marshall(schoolDistributionReportRequest);
-					logger.info("School Distribution Request:");
-					logger.info(schoolDistributionJson);
 					createAndSaveDistributionReport(schoolDistributionReportRequest,mincode,processorData);
 					numberOfPdfs++;
 				}
@@ -121,8 +110,7 @@ public class CreateReprintProcess extends BaseProcess {
 		mergeCertificates(packSlipReq, certificatePrintRequest,request,processorData);
 	}
 
-	@SneakyThrows
-	private void mergeCertificates(ReportRequest packSlipReq, CertificatePrintRequest certificatePrintRequest, PackingSlipRequest request, ProcessorData processorData) {
+	private void mergeCertificates(ReportRequest packSlipReq, CertificatePrintRequest certificatePrintRequest,PackingSlipRequest request,ProcessorData processorData) {
 		List<StudentCredentialDistribution> scdList = certificatePrintRequest.getCertificateList();
 		String mincode = request.getMincode();
 		String paperType = request.getPaperType();
@@ -145,9 +133,6 @@ public class CreateReprintProcess extends BaseProcess {
 				ReportRequest reportParams = new ReportRequest();
 				reportParams.setOptions(options);
 				reportParams.setData(data);
-				String certificateJson = jsonTransformer.marshall(reportParams);
-				logger.info("Certificate Request:");
-				logger.info(certificateJson);
 				byte[] bytesSAR = webClient.post().uri(educDistributionApiConstants.getCertificateReport()).headers(h -> h.setBearerAuth(processorData.getAccessToken())).body(BodyInserters.fromValue(reportParams)).retrieve().bodyToMono(byte[].class).block();
 				if (bytesSAR != null) {
 					locations.add(new ByteArrayInputStream(bytesSAR));

@@ -2,11 +2,9 @@ package ca.bc.gov.educ.api.distribution.process;
 
 import ca.bc.gov.educ.api.distribution.model.dto.*;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils;
-import ca.bc.gov.educ.api.distribution.util.JsonTransformer;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.SneakyThrows;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pdfbox.io.MemoryUsageSetting;
@@ -14,7 +12,6 @@ import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import org.modelmapper.internal.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -39,10 +36,6 @@ public class MergeProcess extends BaseProcess{
 	
 	private static Logger logger = LoggerFactory.getLogger(MergeProcess.class);
 
-	@Autowired
-	JsonTransformer jsonTransformer;
-
-	@SneakyThrows
 	@Override
 	public ProcessorData fire(ProcessorData processorData) {
 		long startTime = System.currentTimeMillis();
@@ -63,14 +56,9 @@ public class MergeProcess extends BaseProcess{
 				logger.info("*** School Details Acquired {}", schoolDetails.getSchoolName());
 				List<Student> studListNonGrad = new ArrayList<>();
 				ReportRequest packSlipReq = reportService.preparePackingSlipData(schoolDetails, processorData.getBatchId());
-				String packingSlipJson = jsonTransformer.marshall(packSlipReq);
-				logger.info("PackingSlip Request:");
-				logger.info(packingSlipJson);
+
 				if(obj.getSchoolDistributionRequest() != null) {
 					ReportRequest schoolDistributionReportRequest = reportService.prepareSchoolDistributionReportData(obj.getSchoolDistributionRequest(), processorData.getBatchId(),schoolDetails);
-					String schoolDistributionJson = jsonTransformer.marshall(schoolDistributionReportRequest);
-					logger.info("School Distribution Request:");
-					logger.info(schoolDistributionJson);
 					createAndSaveDistributionReport(schoolDistributionReportRequest,mincode,processorData);
 					numberOfPdfs++;
 				}
