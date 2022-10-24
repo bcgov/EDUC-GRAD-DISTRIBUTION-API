@@ -23,7 +23,7 @@ public class ReportService {
 	
 	@Autowired
 	EducDistributionApiConstants educDistributionApiConstants;
-	
+
 	public InputStreamResource getPackingSlip(ReportRequest packingSlipReq, String accessToken) {
 		try
 		{
