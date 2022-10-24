@@ -3,12 +3,16 @@ package ca.bc.gov.educ.api.distribution.service;
 import ca.bc.gov.educ.api.distribution.model.dto.CommonSchool;
 import ca.bc.gov.educ.api.distribution.model.dto.ExceptionMessage;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
 public class SchoolService {
+
+	private static Logger logger = LoggerFactory.getLogger(SchoolService.class);
 
 	@Autowired
     WebClient webClient;
@@ -23,6 +27,7 @@ public class SchoolService {
 		} catch (Exception e) {
 			exception.setExceptionName("SCHOOL-API IS DOWN");
 			exception.setExceptionDetails(e.getLocalizedMessage());
+			logger.error(exception.getExceptionName(), e);
 			return null;
 		}
 	}
