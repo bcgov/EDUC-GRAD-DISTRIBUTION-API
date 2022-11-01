@@ -29,7 +29,7 @@ import java.util.Map;
 public class CreateReprintProcess extends BaseProcess {
 	
 	private static Logger logger = LoggerFactory.getLogger(CreateReprintProcess.class);
-	
+
 	@Override
 	public ProcessorData fire(ProcessorData processorData) {
 		long startTime = System.currentTimeMillis();
