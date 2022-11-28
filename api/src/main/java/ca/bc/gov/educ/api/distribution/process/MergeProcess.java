@@ -16,7 +16,9 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -222,11 +224,7 @@ public class MergeProcess extends BaseProcess{
 				}
 				InputStreamResource certificatePdf = webClient.get().uri(String.format(educDistributionApiConstants.getCertificate(),scd.getStudentID(),scd.getCredentialTypeCode(),scd.getDocumentStatusCode())).headers(h -> h.setBearerAuth(processorData.getAccessToken())).retrieve().bodyToMono(InputStreamResource.class).block();
 				if(certificatePdf != null) {
-					byte[] bytesSAR = certificatePdf.getInputStream().readAllBytes();
-					try (OutputStream out = new FileOutputStream("target/Certificate_" + scd.getCredentialTypeCode() + "_" + scd.getDocumentStatusCode() + ".pdf")) {
-						out.write(bytesSAR);
-					}
-					locations.add(new ByteArrayInputStream(bytesSAR));
+					locations.add(certificatePdf.getInputStream());
 					currentCertificate++;
 					logger.debug("*** Added PDFs {}/{} Current student {}",currentCertificate,scdList.size(),scd.getStudentID());
 				}else {

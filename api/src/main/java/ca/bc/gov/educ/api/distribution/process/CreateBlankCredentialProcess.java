@@ -2,7 +2,6 @@ package ca.bc.gov.educ.api.distribution.process;
 
 import ca.bc.gov.educ.api.distribution.model.dto.*;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils;
-import ca.bc.gov.educ.api.distribution.util.JsonTransformer;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -12,11 +11,12 @@ import org.apache.pdfbox.io.MemoryUsageSetting;
 import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -31,9 +31,6 @@ import java.util.Map;
 public class CreateBlankCredentialProcess extends BaseProcess {
 	
 	private static Logger logger = LoggerFactory.getLogger(CreateBlankCredentialProcess.class);
-
-	@Autowired
-	JsonTransformer jsonTransformer;
 
 	@Override
 	public ProcessorData fire(ProcessorData processorData) {
@@ -172,15 +169,8 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 				ReportRequest reportParams = new ReportRequest();
 				reportParams.setOptions(options);
 				reportParams.setData(data);
-				String json = jsonTransformer.marshall(reportParams);
-				System.out.println(educDistributionApiConstants.getCertificateReport());
-				System.out.println();
-				System.out.println(json);
 				byte[] bytesSAR = webClient.post().uri(educDistributionApiConstants.getCertificateReport()).headers(h -> h.setBearerAuth(processorData.getAccessToken())).body(BodyInserters.fromValue(reportParams)).retrieve().bodyToMono(byte[].class).block();
 				if (bytesSAR != null) {
-					try (OutputStream out = new FileOutputStream("target/" + reportParams.getOptions().getReportFile() + "_" + bcd.getCredentialTypeCode() + ".pdf")) {
-						out.write(bytesSAR);
-					}
 					for(int i=1;i<=bcd.getQuantity();i++) {
 						locations.add(new ByteArrayInputStream(bytesSAR));
 					}
