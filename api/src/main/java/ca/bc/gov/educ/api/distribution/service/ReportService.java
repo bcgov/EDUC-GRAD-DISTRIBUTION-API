@@ -127,6 +127,15 @@ public class ReportService {
 			gradData.setGraduationDate(sc.getProgramCompletionDate() != null ? EducDistributionApiUtils.parsingTraxDate(sc.getProgramCompletionDate()):null);
 			gradData.setHonorsFlag(sc.getHonoursStanding() != null && sc.getHonoursStanding().equalsIgnoreCase("Y"));
 			std.setGraduationData(gradData);
+
+			std.setGraduationStatus(GraduationStatus.builder()
+					.programCompletionDate(sc.getProgramCompletionDate())
+					.honours(sc.getHonoursStanding())
+					.programName(sc.getProgram())
+					.studentGrade(sc.getStudentGrade())
+					.schoolOfRecord(sc.getSchoolOfRecord())
+					.build());
+
 			stdList.add(std);
 		}
 		schObj.setStudents(stdList);

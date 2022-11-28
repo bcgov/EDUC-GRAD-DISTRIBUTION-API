@@ -2,19 +2,20 @@ package ca.bc.gov.educ.api.distribution.process;
 
 import ca.bc.gov.educ.api.distribution.model.dto.*;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils;
+import ca.bc.gov.educ.api.distribution.util.JsonTransformer;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.SneakyThrows;
 import org.apache.pdfbox.io.MemoryUsageSetting;
 import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -29,6 +30,9 @@ import java.util.Map;
 public class CreateReprintProcess extends BaseProcess {
 	
 	private static Logger logger = LoggerFactory.getLogger(CreateReprintProcess.class);
+
+	@Autowired
+	JsonTransformer jsonTransformer;
 
 	@Override
 	public ProcessorData fire(ProcessorData processorData) {
@@ -110,7 +114,8 @@ public class CreateReprintProcess extends BaseProcess {
 		mergeCertificates(packSlipReq, certificatePrintRequest,request,processorData);
 	}
 
-	private void mergeCertificates(ReportRequest packSlipReq, CertificatePrintRequest certificatePrintRequest,PackingSlipRequest request,ProcessorData processorData) {
+	@SneakyThrows
+	private void mergeCertificates(ReportRequest packSlipReq, CertificatePrintRequest certificatePrintRequest, PackingSlipRequest request, ProcessorData processorData) {
 		List<StudentCredentialDistribution> scdList = certificatePrintRequest.getCertificateList();
 		String mincode = request.getMincode();
 		String paperType = request.getPaperType();
@@ -133,8 +138,17 @@ public class CreateReprintProcess extends BaseProcess {
 				ReportRequest reportParams = new ReportRequest();
 				reportParams.setOptions(options);
 				reportParams.setData(data);
+				if(logger.isDebugEnabled()) {
+					String json = jsonTransformer.marshall(reportParams);
+					System.out.println(educDistributionApiConstants.getCertificateReport());
+					System.out.println();
+					System.out.println(json);
+				}
 				byte[] bytesSAR = webClient.post().uri(educDistributionApiConstants.getCertificateReport()).headers(h -> h.setBearerAuth(processorData.getAccessToken())).body(BodyInserters.fromValue(reportParams)).retrieve().bodyToMono(byte[].class).block();
 				if (bytesSAR != null) {
+					try (OutputStream out = new FileOutputStream("target/" + reportParams.getOptions().getReportFile() + "_" + scd.getCredentialTypeCode() + ".pdf")) {
+						out.write(bytesSAR);
+					}
 					locations.add(new ByteArrayInputStream(bytesSAR));
 					currentCertificate++;
 					logger.debug("*** Added PDFs {}/{} Current student {}", currentCertificate, scdList.size(), scd.getStudentID());
