@@ -175,6 +175,7 @@ public class MergeProcess extends BaseProcess{
 			std.setFirstName(scd.getLegalFirstName());
 			std.setLastName(scd.getLegalLastName());
 			std.setMiddleName(scd.getLegalMiddleNames());
+			std.setCitizenship(scd.getStudentCitizenship());
 			Pen pen = new Pen();
 			pen.setPen(scd.getPen());
 			std.setPen(pen);

@@ -2,6 +2,8 @@ package ca.bc.gov.educ.api.distribution.service;
 
 import ca.bc.gov.educ.api.distribution.model.dto.*;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
+import ca.bc.gov.educ.api.distribution.util.JsonTransformer;
+import lombok.SneakyThrows;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -39,6 +41,9 @@ public class DistributionServiceTest {
 	
 	@Autowired
 	private SchoolService schoolService;
+
+	@Autowired
+	JsonTransformer jsonTransformer;
 	
 	@Autowired
 	private ReportService reportService;
@@ -184,7 +189,8 @@ public class DistributionServiceTest {
 		assertNotNull(res);
 	}
 
-	private DistributionResponse testdistributeSchoolReport(String runType,String reportType) {
+	@SneakyThrows
+	private DistributionResponse testdistributeSchoolReport(String runType, String reportType) {
 		Long batchId= 9029L;
 		Map<String, DistributionPrintRequest > mapDist= new HashMap<>();
 		String localDownload = null;
@@ -241,6 +247,7 @@ public class DistributionServiceTest {
 		when(this.responseMock.bodyToMono(InputStreamResource.class)).thenReturn(inputResponse);
 		when(this.inputResponse.block()).thenReturn(inSRPack);
 
+		System.out.println(jsonTransformer.marshall(printRequest));
 
 		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,null,null,accessToken);
 	}

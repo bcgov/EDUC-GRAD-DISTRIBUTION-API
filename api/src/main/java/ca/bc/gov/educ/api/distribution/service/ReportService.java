@@ -119,6 +119,7 @@ public class ReportService {
 			std.setFirstName(sc.getLegalFirstName());
 			std.setLastName(sc.getLegalLastName());
 			std.setMiddleName(sc.getLegalMiddleNames());
+			std.setCitizenship(sc.getStudentCitizenship());
 			Pen pen = new Pen();
 			pen.setPen(sc.getPen());
 			std.setPen(pen);
