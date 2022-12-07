@@ -19,6 +19,7 @@ public class StudentCredentialDistribution {
 	private String legalFirstName;
 	private String legalMiddleNames;
 	private String legalLastName;
+	private String studentCitizenship;
 	private String programCompletionDate;
 	private String honoursStanding;
 	private String program;

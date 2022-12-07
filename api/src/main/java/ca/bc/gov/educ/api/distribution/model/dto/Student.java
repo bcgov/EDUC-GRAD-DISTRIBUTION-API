@@ -16,6 +16,7 @@ public class Student implements Serializable {
     private String middleName;
     private String lastName;
     private String gender;
+    private String citizenship;
     private Date birthdate;
     private Address address;
     private String grade;
@@ -77,6 +78,14 @@ public class Student implements Serializable {
 
     public void setGender(String value) {
         this.gender = value;
+    }
+
+    public String getCitizenship() {
+        return citizenship;
+    }
+
+    public void setCitizenship(String citizenship) {
+        this.citizenship = citizenship;
     }
 
     @JsonFormat(pattern="yyyy-MM-dd")
