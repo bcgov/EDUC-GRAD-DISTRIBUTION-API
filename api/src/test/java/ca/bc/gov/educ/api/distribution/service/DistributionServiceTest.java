@@ -181,9 +181,9 @@ public class DistributionServiceTest {
 
 	@Test
 	public void testdistributeSchoolReport() {
-		DistributionResponse res = testdistributeSchoolReport("PSR","GRADDIST");
+		DistributionResponse res = testdistributeSchoolReport("PSR","DISTREP_SC");
 		assertNotNull(res);
-		res = testdistributeSchoolReport("PSR","NONGRAD");
+		res = testdistributeSchoolReport("PSR","NONGRADDISTREP_SC");
 		assertNotNull(res);
 		res = testdistributeSchoolReport("PSR","NONGRADPRJ");
 		assertNotNull(res);
@@ -224,11 +224,11 @@ public class DistributionServiceTest {
 		SchoolReportPostRequest tPReq = new SchoolReportPostRequest();
 		tPReq.setBatchId(batchId);
 		tPReq.setCount(34);
-		if(reportType.equalsIgnoreCase("GRADDIST"))
+		if(reportType.equalsIgnoreCase("DISTREP_SC"))
 			tPReq.setGradReport(obj);
 		if(reportType.equalsIgnoreCase("NONGRADPRJ"))
 			tPReq.setNongradprjreport(obj);
-		if(reportType.equalsIgnoreCase("NONGRAD"))
+		if(reportType.equalsIgnoreCase("NONGRADDISTREP_SC"))
 			tPReq.setNongradReport(obj);
 
 		DistributionPrintRequest printRequest = new DistributionPrintRequest();

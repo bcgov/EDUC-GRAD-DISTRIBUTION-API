@@ -44,8 +44,8 @@ public class PostingSchoolReportProcess extends BaseProcess {
 			DistributionPrintRequest obj = entry.getValue();
 			if (obj.getSchoolReportPostRequest() != null) {
 				SchoolReportPostRequest schoolRepPostReq = obj.getSchoolReportPostRequest();
-				numberOfPdfs = processFile(schoolRepPostReq.getGradReport(),mincode,year,month,"GRADDIST",numberOfPdfs,processorData);
-				numberOfPdfs = processFile(schoolRepPostReq.getNongradReport(),mincode,year,month,"NONGRAD",numberOfPdfs,processorData);
+				numberOfPdfs = processFile(schoolRepPostReq.getGradReport(),mincode,year,month,"DISTREP_SC",numberOfPdfs,processorData);
+				numberOfPdfs = processFile(schoolRepPostReq.getNongradReport(),mincode,year,month,"NONGRADDISTREP_SC",numberOfPdfs,processorData);
 				numberOfPdfs = processFile(schoolRepPostReq.getNongradprjreport(),mincode,year,"00","NONGRADPRJ",numberOfPdfs,processorData);
 			}
 			if (counter % 50 == 0) {
