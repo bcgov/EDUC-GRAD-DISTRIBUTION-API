@@ -265,7 +265,7 @@ public class MergeProcess extends BaseProcess{
 				byte[] encoded = Base64.encodeBase64(bytesSAR);
 				String encodedPdf= new String(encoded, StandardCharsets.US_ASCII);
 				if(!processorData.getActivityCode().contains("USERDIST"))
-					saveSchoolDistributionReport(encodedPdf,mincode,processorData.getAccessToken(),"GRADDIST");
+					saveSchoolDistributionReport(encodedPdf,mincode,processorData.getAccessToken(),"DISTREP_SC");
 			}
 			mergeDocuments(processorData,mincode,"/EDGRAD.R.","324W",locations);
 		} catch (Exception e) {
@@ -297,7 +297,7 @@ public class MergeProcess extends BaseProcess{
 		byte[] encoded = Base64.encodeBase64(bytesSAR);
 		assert encoded != null;
 		String encodedPdf = new String(encoded, StandardCharsets.US_ASCII);
-		saveSchoolDistributionReport(encodedPdf,mincode,accessToken, "NONGRAD");
+		saveSchoolDistributionReport(encodedPdf,mincode,accessToken, "NONGRADDISTREP_SC");
 	}
 
 	private void saveSchoolDistributionReport(String encodedPdf, String mincode, String accessToken, String reportType) {
