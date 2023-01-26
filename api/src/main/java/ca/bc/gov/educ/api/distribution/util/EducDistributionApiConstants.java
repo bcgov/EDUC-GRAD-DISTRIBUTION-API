@@ -15,6 +15,7 @@ public class EducDistributionApiConstants {
     public static final String API_VERSION = "v1";
     public static final String DISTRIBUTION_API_ROOT_MAPPING = "/api/" + API_VERSION + "/distribute";
 
+    public static final String CORRELATION_ID = "correlationID";
 
     public static final String DISTRIBUTION_RUN = "/run/{runType}";
     public static final String LOCAL_DOWNLOAD = "/download/{batchId}";
@@ -82,5 +83,9 @@ public class EducDistributionApiConstants {
 
     @Value("${endpoint.grad-graduation-report-api.school-report.url}")
     private String schoolReport;
+
+    // Splunk LogHelper Enabled
+    @Value("${splunk.log-helper.enabled}")
+    private boolean splunkLogHelperEnabled;
 
 }
