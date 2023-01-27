@@ -167,7 +167,6 @@ objects:
       resources:
         requests:
           storage: 5Gi
-      storageClassName: default
 parameters:
   - name: REPO_NAME
     description: Application repository name
