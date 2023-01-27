@@ -122,8 +122,8 @@ objects:
               configMap:
                 name: "${REPO_NAME}-flb-sc-config-map"
             - name: distribution-data
-                persistentVolumeClaim:
-                  claimName: distribution-data
+              persistentVolumeClaim:
+                claimName: distribution-data
       test: false
   - apiVersion: v1
     kind: Service
