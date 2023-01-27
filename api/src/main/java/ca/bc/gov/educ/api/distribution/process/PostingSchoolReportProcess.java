@@ -70,7 +70,9 @@ public class PostingSchoolReportProcess extends BaseProcess {
 				if (gradReportPdf != null) {
 					locations.add(gradReportPdf.getInputStream());
 					logger.debug("*** Added PDFs Current Report Type {}", scdReport.getReportTypeCode());
-					mergeDocuments(processorData, mincode, EducDistributionApiUtils.getFileNameSchoolReports(mincode, year, month, type), locations);
+					String fileName = EducDistributionApiUtils.getFileNameSchoolReports(mincode, year, month, type);
+					mergeDocuments(processorData, mincode, fileName, null, locations);
+					sftpUtils.sftpUploadTSW(processorData.getBatchId(),mincode,fileName);
 					numberOfPdfs++;
 				} else {
 					logger.debug("*** Failed to Add PDFs Current Report Type {}", scdReport.getReportTypeCode());
@@ -83,21 +85,4 @@ public class PostingSchoolReportProcess extends BaseProcess {
 		return numberOfPdfs;
 	}
 
-	private void mergeDocuments(ProcessorData processorData,String mincode,String fileName,List<InputStream> locations) {
-		try {
-			PDFMergerUtility objs = new PDFMergerUtility();
-			StringBuilder pBuilder = new StringBuilder();
-			pBuilder.append(LOC).append(processorData.getBatchId()).append(DEL).append(mincode).append(DEL);
-			Path path = Paths.get(pBuilder.toString());
-			Files.createDirectories(path);
-			pBuilder = new StringBuilder();
-			pBuilder.append(LOC).append(processorData.getBatchId()).append(DEL).append(mincode).append(DEL).append(fileName).append(".pdf");
-			objs.setDestinationFileName(pBuilder.toString());
-			objs.addSources(locations);
-			objs.mergeDocuments(MemoryUsageSetting.setupMainMemoryOnly());
-			sftpUtils.sftpUploadTSW(processorData.getBatchId(),mincode,fileName);
-		}catch (Exception e) {
-			logger.debug(EXCEPTION,e.getLocalizedMessage());
-		}
-	}
 }
