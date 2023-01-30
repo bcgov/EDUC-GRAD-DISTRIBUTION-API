@@ -2,6 +2,7 @@ package ca.bc.gov.educ.api.distribution.service;
 
 import ca.bc.gov.educ.api.distribution.model.dto.*;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
+import ca.bc.gov.educ.api.distribution.util.IOUtils;
 import ca.bc.gov.educ.api.distribution.util.JsonTransformer;
 import lombok.SneakyThrows;
 import org.junit.Test;
@@ -47,6 +48,9 @@ public class DistributionServiceTest {
 	
 	@Autowired
 	private ReportService reportService;
+
+	@Autowired
+	private IOUtils ioUtils;
 	
 	@MockBean
 	WebClient webClient;
@@ -175,7 +179,7 @@ public class DistributionServiceTest {
 	@Test
 	public void testGetDownload() {
 		Long batchId= 9029L;
-		byte[] arr = gradDistributionService.getDownload(batchId);
+		byte[] arr = ioUtils.getDownload(batchId);
 		assertNotNull(arr);
 	}
 

@@ -3,6 +3,7 @@ package ca.bc.gov.educ.api.distribution.controller;
 import ca.bc.gov.educ.api.distribution.model.dto.*;
 import ca.bc.gov.educ.api.distribution.service.GradDistributionService;
 import ca.bc.gov.educ.api.distribution.util.GradValidation;
+import ca.bc.gov.educ.api.distribution.util.IOUtils;
 import ca.bc.gov.educ.api.distribution.util.MessageHelper;
 import ca.bc.gov.educ.api.distribution.util.ResponseHelper;
 import org.junit.jupiter.api.Test;
@@ -36,6 +37,9 @@ class DistributionControllerTest {
 	
 	@Mock
 	SecurityContextHolder securityContextHolder;
+
+	@Mock
+	IOUtils ioUtils;
 	
 	@Test
 	void testDistributeCredentials() {
@@ -103,9 +107,9 @@ class DistributionControllerTest {
 	void testDownloadZipFile() {
 		Long batchId= 9029L;
 		byte[] bytesSAR = "Any String you want".getBytes();
-		Mockito.when(gradDistributionService.getDownload(batchId)).thenReturn(bytesSAR);
+		Mockito.when(ioUtils.getDownload(batchId)).thenReturn(bytesSAR);
 		distributionController.downloadZipFile(batchId);
-		Mockito.verify(gradDistributionService).getDownload(batchId);
+		Mockito.verify(ioUtils).getDownload(batchId);
 	}
 	
 }

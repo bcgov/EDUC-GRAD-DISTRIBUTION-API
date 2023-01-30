@@ -3,10 +3,7 @@ package ca.bc.gov.educ.api.distribution.controller;
 import ca.bc.gov.educ.api.distribution.model.dto.DistributionPrintRequest;
 import ca.bc.gov.educ.api.distribution.model.dto.DistributionResponse;
 import ca.bc.gov.educ.api.distribution.service.GradDistributionService;
-import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
-import ca.bc.gov.educ.api.distribution.util.GradValidation;
-import ca.bc.gov.educ.api.distribution.util.PermissionsConstants;
-import ca.bc.gov.educ.api.distribution.util.ResponseHelper;
+import ca.bc.gov.educ.api.distribution.util.*;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.info.Info;
@@ -32,19 +29,24 @@ import java.util.Map;
 @OpenAPIDefinition(info = @Info(title = "API for Distributing Credentials to Schools.", description = "This API is for Distributing Credentials to Schools.", version = "1"), security = {@SecurityRequirement(name = "OAUTH2", scopes = {"GRAD_GRADUATE_STUDENT"})})
 public class DistributionController {
 
-    private static Logger logger = LoggerFactory.getLogger(DistributionController.class);
+    private static final Logger logger = LoggerFactory.getLogger(DistributionController.class);
 
     private static final String CONTENT_DISPOSITION = "Content-Disposition";
     private static final String ZIP_FILE_NAME = "inline; filename=userdistributionbatch_%s.zip";
 
-    @Autowired
     GradDistributionService gradDistributionService;
-
-    @Autowired
     GradValidation validation;
 
-    @Autowired
     ResponseHelper response;
+    IOUtils ioUtils;
+
+    @Autowired
+    public DistributionController(GradDistributionService gradDistributionService, GradValidation validation, ResponseHelper response, IOUtils ioUtils) {
+        this.gradDistributionService = gradDistributionService;
+        this.validation = validation;
+        this.response = response;
+        this.ioUtils = ioUtils;
+    }
 
     @PostMapping(EducDistributionApiConstants.DISTRIBUTION_RUN)
     @PreAuthorize(PermissionsConstants.GRADUATE_STUDENT)
@@ -62,7 +64,7 @@ public class DistributionController {
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK")})
     public ResponseEntity<byte[]> downloadZipFile(@PathVariable(value = "batchId") Long batchId) {
         logger.debug("downloadZipFile : ");
-        byte[] resultBinary = gradDistributionService.getDownload(batchId);
+        byte[] resultBinary = ioUtils.getDownload(batchId);
         byte[] encoded = Base64.encodeBase64(resultBinary);
         return handleBinaryResponse(encoded,MediaType.TEXT_PLAIN,batchId);
     }
