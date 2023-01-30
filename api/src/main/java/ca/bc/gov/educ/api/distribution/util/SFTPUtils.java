@@ -3,11 +3,14 @@ package ca.bc.gov.educ.api.distribution.util;
 import com.jcraft.jsch.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.FileWriter;
 import java.io.IOException;
+
+import static ca.bc.gov.educ.api.distribution.util.IOUtils.LOC;
 
 @Component
 public class SFTPUtils {
@@ -44,13 +47,20 @@ public class SFTPUtils {
     private static final String RSA_PUB = "/.ssh/id_rsa.pub";
     private static final String RSA_PRV = "/.ssh/id_rsa";
 
+    IOUtils ioUtils;
+
+    @Autowired
+    public SFTPUtils(IOUtils ioUtils) {
+        this.ioUtils = ioUtils;
+    }
+
     private static Logger logger = LoggerFactory.getLogger(SFTPUtils.class);
 
     public boolean sftpUploadBCMail(Long batchId) {
-        String localFile = "/tmp/EDGRAD.BATCH."+batchId+".zip";
-        String remoteFile = BC_MAIL_LOCATION+"EDGRAD.BATCH."+batchId+".zip";
-        String localControlFile = "/tmp/EDGRAD.BATCH."+batchId+".txt";
-        String remoteControlFile = BC_MAIL_LOCATION+"EDGRAD.BATCH."+batchId+".txt";
+        String localFile = ioUtils.createFileNameFromBatchId(LOC, batchId, IOUtils.SUPPORTED_FILE_EXTENSIONS.ZIP);
+        String remoteFile = ioUtils.createFileNameFromBatchId(BC_MAIL_LOCATION, batchId, IOUtils.SUPPORTED_FILE_EXTENSIONS.ZIP);
+        String localControlFile = ioUtils.createFileNameFromBatchId(LOC, batchId, IOUtils.SUPPORTED_FILE_EXTENSIONS.TXT);
+        String remoteControlFile = ioUtils.createFileNameFromBatchId(BC_MAIL_LOCATION, batchId, IOUtils.SUPPORTED_FILE_EXTENSIONS.TXT);
         Session jschSession = null;
 
         setupBCMailSFTP();

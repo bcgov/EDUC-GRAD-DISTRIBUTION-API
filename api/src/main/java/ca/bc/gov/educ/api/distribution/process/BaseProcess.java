@@ -5,10 +5,7 @@ import ca.bc.gov.educ.api.distribution.service.AccessTokenService;
 import ca.bc.gov.educ.api.distribution.service.PsiService;
 import ca.bc.gov.educ.api.distribution.service.ReportService;
 import ca.bc.gov.educ.api.distribution.service.SchoolService;
-import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
-import ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils;
-import ca.bc.gov.educ.api.distribution.util.GradValidation;
-import ca.bc.gov.educ.api.distribution.util.SFTPUtils;
+import ca.bc.gov.educ.api.distribution.util.*;
 import org.apache.pdfbox.io.MemoryUsageSetting;
 import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import org.slf4j.Logger;
@@ -26,12 +23,13 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.zip.ZipOutputStream;
 
+import static ca.bc.gov.educ.api.distribution.util.IOUtils.DEL;
+import static ca.bc.gov.educ.api.distribution.util.IOUtils.LOC;
+
 public abstract class BaseProcess implements DistributionProcess{
 
     private static final Logger logger = LoggerFactory.getLogger(BaseProcess.class);
 
-    protected static final String LOC = "/tmp/";
-    protected static final String DEL = "/";
     protected static final String EXCEPTION = "Error {} ";
 
     @Autowired
@@ -58,6 +56,10 @@ public abstract class BaseProcess implements DistributionProcess{
     @Autowired
     PsiService psiService;
 
+    @Autowired
+    IOUtils ioUtils;
+
+
     protected CommonSchool getBaseSchoolDetails(DistributionPrintRequest obj, String mincode, ProcessorData processorData, ExceptionMessage exception) {
         if(obj.getProperName() != null)
             return schoolService.getDetailsForPackingSlip(obj.getProperName());
@@ -67,7 +69,7 @@ public abstract class BaseProcess implements DistributionProcess{
 
     protected void createZipFile(Long batchId) {
         StringBuilder sourceFileBuilder = new StringBuilder().append(LOC).append(batchId);
-        try(FileOutputStream fos = new FileOutputStream(LOC+"EDGRAD.BATCH." + batchId + ".zip")) {
+        try(FileOutputStream fos = new FileOutputStream(ioUtils.createFileNameFromBatchId(LOC, batchId, IOUtils.SUPPORTED_FILE_EXTENSIONS.TXT))) {
             ZipOutputStream zipOut = new ZipOutputStream(fos);
             File fileToZip = new File(sourceFileBuilder.toString());
             EducDistributionApiUtils.zipFile(fileToZip, fileToZip.getName(), zipOut);
@@ -79,7 +81,7 @@ public abstract class BaseProcess implements DistributionProcess{
     }
 
     protected void createControlFile(Long batchId,int numberOfPdfs) {
-        try(FileOutputStream fos = new FileOutputStream("/tmp/EDGRAD.BATCH." + batchId + ".txt")) {
+        try(FileOutputStream fos = new FileOutputStream(ioUtils.createFileNameFromBatchId(LOC, batchId, IOUtils.SUPPORTED_FILE_EXTENSIONS.TXT))) {
             byte[] contentInBytes = String.valueOf(numberOfPdfs).getBytes();
             fos.write(contentInBytes);
             fos.flush();

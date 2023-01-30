@@ -5,11 +5,13 @@ import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import ca.bc.gov.educ.api.distribution.util.IOUtils;
 import ca.bc.gov.educ.api.distribution.util.JsonTransformer;
 import lombok.SneakyThrows;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.InputStreamResource;
@@ -54,6 +56,9 @@ public class DistributionServiceTest {
 	
 	@MockBean
 	WebClient webClient;
+
+	@Value("${sftp.bcmail.location}")
+	private String BC_MAIL_LOCATION;
 
 	@Mock
 	private WebClient.RequestHeadersSpec requestHeadersMock;
@@ -825,6 +830,17 @@ public class DistributionServiceTest {
 		assertNotNull(res);
 	}
 
+	@Test
+	public void testCreateFileNameFromBatchId(){
+		Long batchId= 9028L;
+		String zipFile = "/tmp/EDGRAD.BATCH." + batchId + ".zip";
+		String bcmpTxtFile = "/Index/Dev/EDGRAD.BATCH."  + batchId + ".txt";
+		String zipFileNameForLOC = ioUtils.createFileNameFromBatchId(IOUtils.LOC, batchId, IOUtils.SUPPORTED_FILE_EXTENSIONS.ZIP);
+		String controlFileBcmpLOC = ioUtils.createFileNameFromBatchId(BC_MAIL_LOCATION, batchId, IOUtils.SUPPORTED_FILE_EXTENSIONS.TXT);
+		Assert.assertEquals(zipFile, zipFileNameForLOC);
+		Assert.assertEquals(bcmpTxtFile, controlFileBcmpLOC);
+	}
+
 	private DistributionResponse testpsidistributeCredential(String runType, String localDownload) {
 		String activityCode = null;
 		Long batchId= 9029L;
@@ -897,5 +913,7 @@ public class DistributionServiceTest {
 
 		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,localDownload,accessToken);
 	}
+
+
 
 }
