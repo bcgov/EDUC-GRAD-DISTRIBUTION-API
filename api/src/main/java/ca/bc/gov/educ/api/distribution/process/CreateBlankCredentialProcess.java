@@ -217,7 +217,7 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 	private ReportData prepareBlankTranscriptData(BlankCredentialDistribution bcd, String mincode) {
 		ReportData data = new ReportData();
 		Transcript tran = new Transcript();
-		tran.setInterim("true");
+		tran.setInterim("false");
 		Code code = new Code();
 		code.setCode(bcd.getCredentialTypeCode());
 		tran.setTranscriptTypeCode(code);
