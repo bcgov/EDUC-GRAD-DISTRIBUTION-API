@@ -54,6 +54,8 @@ objects:
               volumeMounts:
                 - name: log-storage
                   mountPath: /logs
+                - name: distribution-data
+                  mountPath: /tmp
               ports:
                 - containerPort: ${{CONTAINER_PORT}}
                   protocol: TCP
@@ -119,6 +121,9 @@ objects:
             - name: flb-sc-config-volume
               configMap:
                 name: "${REPO_NAME}-flb-sc-config-map"
+            - name: distribution-data
+              persistentVolumeClaim:
+                claimName: distribution-data
       test: false
   - apiVersion: v1
     kind: Service
@@ -152,6 +157,16 @@ objects:
             target:
               averageUtilization: 600
               type: Utilization
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: distribution-data
+    spec:
+      accessModes:
+        - ReadWriteMany
+      resources:
+        requests:
+          storage: 5Gi
 parameters:
   - name: REPO_NAME
     description: Application repository name
