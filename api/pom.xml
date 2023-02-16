@@ -27,12 +27,12 @@
             src/main/java/ca/bc/gov/educ/api/distribution/model/**,
             src/main/java/ca/bc/gov/educ/api/distribution/util/**
         </sonar.coverage.exclusions>
-        <java.version>11</java.version>
+        <java.version>18</java.version>
         <maven.compiler.version>3.10.1</maven.compiler.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <org.mapstruct.version>1.5.2.Final</org.mapstruct.version>
-        <springdoc.version>1.6.9</springdoc.version>
+        <springdoc.version>2.0.2</springdoc.version>
         <junit>4.12</junit>
         <log4j.version>2.18.0</log4j.version>
     </properties>
@@ -40,7 +40,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.1</version>
+        <version>3.0.2</version>
     </parent>
 
     <dependencies>
@@ -82,8 +82,8 @@
             <artifactId>commons-lang3</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.persistence</groupId>
-            <artifactId>javax.persistence-api</artifactId>
+            <groupId>jakarta.persistence</groupId>
+            <artifactId>jakarta.persistence-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -102,17 +102,7 @@
         </dependency>
         <dependency>
             <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-webmvc-core</artifactId>
-            <version>${springdoc.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-core</artifactId>
-            <version>5.7.5</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-ui</artifactId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>${springdoc.version}</version>
         </dependency>
         <dependency>
