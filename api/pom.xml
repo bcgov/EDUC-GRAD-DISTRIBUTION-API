@@ -35,6 +35,7 @@
         <springdoc.version>2.0.2</springdoc.version>
         <junit>4.12</junit>
         <log4j.version>2.18.0</log4j.version>
+        <resilience4j.version>1.7.1</resilience4j.version>
     </properties>
 
     <parent>
@@ -194,6 +195,11 @@
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
             <version>20220320</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.resilience4j</groupId>
+            <artifactId>resilience4j-spring-boot2</artifactId>
+            <version>${resilience4j.version}</version>
         </dependency>
     </dependencies>
 

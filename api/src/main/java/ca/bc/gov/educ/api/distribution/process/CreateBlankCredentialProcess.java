@@ -60,7 +60,7 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 				logger.info("PDFs Merged {}", schoolDetails.getSchoolName());
 				logger.info("School {}/{}",counter,mapDist.size());
 				if (counter % 50 == 0) {
-					accessTokenService.fetchAccessToken(processorData);
+					restUtils.fetchAccessToken(processorData);
 				}
 			}
 		}

@@ -78,7 +78,7 @@ public class MergeProcess extends BaseProcess{
 				}
 				logger.info("PDFs Merged {}", schoolDetails.getSchoolName());
 				if (counter % 50 == 0) {
-					accessTokenService.fetchAccessToken(processorData);
+					restUtils.fetchAccessToken(processorData);
 				}
 				logger.info("School {}/{}",counter,mapDist.size());
 			}

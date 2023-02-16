@@ -1,14 +1,10 @@
 package ca.bc.gov.educ.api.distribution.process;
 
 import ca.bc.gov.educ.api.distribution.model.dto.*;
-import ca.bc.gov.educ.api.distribution.service.AccessTokenService;
 import ca.bc.gov.educ.api.distribution.service.PsiService;
 import ca.bc.gov.educ.api.distribution.service.ReportService;
 import ca.bc.gov.educ.api.distribution.service.SchoolService;
-import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
-import ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils;
-import ca.bc.gov.educ.api.distribution.util.GradValidation;
-import ca.bc.gov.educ.api.distribution.util.SFTPUtils;
+import ca.bc.gov.educ.api.distribution.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +33,7 @@ public abstract class BaseProcess implements DistributionProcess{
     EducDistributionApiConstants educDistributionApiConstants;
 
     @Autowired
-    AccessTokenService accessTokenService;
+    RestUtils restUtils;
 
     @Autowired
     SchoolService schoolService;

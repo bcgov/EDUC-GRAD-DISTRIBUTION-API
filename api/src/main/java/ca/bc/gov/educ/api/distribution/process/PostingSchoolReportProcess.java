@@ -49,7 +49,7 @@ public class PostingSchoolReportProcess extends BaseProcess {
 				numberOfPdfs = processFile(schoolRepPostReq.getNongradprjreport(),mincode,year,"00","NONGRADPRJ",numberOfPdfs,processorData);
 			}
 			if (counter % 50 == 0) {
-				accessTokenService.fetchAccessToken(processorData);
+				restUtils.fetchAccessToken(processorData);
 			}
 			logger.info("School {}/{} Number of Reports {}",counter,mapDist.size(),numberOfPdfs);
 

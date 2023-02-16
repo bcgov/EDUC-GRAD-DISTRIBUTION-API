@@ -52,7 +52,7 @@ public class PSIReportProcess extends BaseProcess{
 				numOfPdfs = pV.getRight();
 				logger.info("PDFs Merged {}", psiDetails.getPsiName());
 				if (cnter % 50 == 0) {
-					accessTokenService.fetchAccessToken(processorData);
+					restUtils.fetchAccessToken(processorData);
 				}
 				logger.info("PSI {}/{}",cnter,mDist.size());
 			}
