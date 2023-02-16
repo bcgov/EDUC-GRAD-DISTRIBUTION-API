@@ -88,4 +88,7 @@ public class EducDistributionApiConstants {
     @Value("${splunk.log-helper.enabled}")
     private boolean splunkLogHelperEnabled;
 
+    @Value("${TOKEN_EXPIRY_OFFSET}")
+    private int tokenExpiryOffset;
+
 }

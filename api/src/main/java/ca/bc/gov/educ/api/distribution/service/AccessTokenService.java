@@ -35,7 +35,6 @@ public class AccessTokenService {
                 constants.getUserName(), constants.getPassword());
         MultiValueMap<String, String> map= new LinkedMultiValueMap<>();
         map.add("grant_type", "client_credentials");
-        System.out.println("url = " + constants.getTokenUrl());
         return this.webClient.post().uri(constants.getTokenUrl())
                 .headers(h -> h.addAll(httpHeadersKC))
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)

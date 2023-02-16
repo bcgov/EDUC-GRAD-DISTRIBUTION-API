@@ -6,7 +6,7 @@ import ca.bc.gov.educ.api.distribution.service.GradDistributionService;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import ca.bc.gov.educ.api.distribution.util.GradValidation;
 import ca.bc.gov.educ.api.distribution.util.PermissionsConstants;
-import ca.bc.gov.educ.api.distribution.util.ResponseHelper;
+import ca.bc.gov.educ.api.distribution.util.RestUtils;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.info.Info;
@@ -44,7 +44,7 @@ public class DistributionController {
     GradValidation validation;
 
     @Autowired
-    ResponseHelper response;
+    RestUtils response;
 
     @PostMapping(EducDistributionApiConstants.DISTRIBUTION_RUN)
     @PreAuthorize(PermissionsConstants.GRADUATE_STUDENT)
