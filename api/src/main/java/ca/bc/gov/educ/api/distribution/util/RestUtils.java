@@ -56,6 +56,9 @@ public class RestUtils {
 		}
 		return responseObjCache.getResponseObj();
 	}
+	public String fetchAccessToken() {
+		return this.getTokenResponseObject().getAccess_token();
+	}
 
 	public void fetchAccessToken(ProcessorData data) {
 		LOGGER.debug("Fetching the access token from KeyCloak API");

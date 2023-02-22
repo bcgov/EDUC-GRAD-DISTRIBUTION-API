@@ -63,6 +63,7 @@ springdoc:
 authorization:
   user: batch-api
   password: dsfs3434fddf
+  token-expiry-offset: '30'
 
 sftp:
   bcmail:
