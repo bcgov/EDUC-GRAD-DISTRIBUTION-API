@@ -29,7 +29,7 @@ public class ResponseObjCache {
     public boolean isExpired(){
         // tokenExpiry-[seconds] provides a slight offset, if token WILL expire in
         // 10 seconds, obtain a new one
-        return (tokenExpiry-offset) < (System.currentTimeMillis() / 1000);
+        return (responseObj == null) || (tokenExpiry-offset) < (System.currentTimeMillis() / 1000);
     }
 
     private void setTokenExpiry(ResponseObj responseObj){
