@@ -59,7 +59,7 @@ public class MergeProcess extends BaseProcess{
 
 				if(obj.getSchoolDistributionRequest() != null) {
 					ReportRequest schoolDistributionReportRequest = reportService.prepareSchoolDistributionReportData(obj.getSchoolDistributionRequest(), processorData.getBatchId(),schoolDetails);
-					createAndSaveDistributionReport(schoolDistributionReportRequest,mincode,processorData);
+					createAndSaveSchoolDistributionReport(schoolDistributionReportRequest,mincode,processorData);
 					numberOfPdfs++;
 				}
 				Pair<Integer,Integer> pV = processTranscriptPrintRequest(obj,currentSlipCount,packSlipReq,studListNonGrad,processorData,mincode,numberOfPdfs);
@@ -205,8 +205,6 @@ public class MergeProcess extends BaseProcess{
 		return nList;
 	}
 
-
-
 	private void mergeCertificates(ReportRequest packSlipReq, CertificatePrintRequest certificatePrintRequest, PackingSlipRequest request,ProcessorData processorData, List<Student> studListNonGrad) {
 		List<StudentCredentialDistribution> scdList = certificatePrintRequest.getCertificateList();
 		String mincode = request.getMincode();
@@ -251,15 +249,15 @@ public class MergeProcess extends BaseProcess{
 			objs.setDestinationFileName(pBuilder.toString());
 			objs.addSources(locations);
 			objs.mergeDocuments(MemoryUsageSetting.setupMainMemoryOnly());
-		}catch (Exception e) {
+		} catch (Exception e) {
 			logger.debug(EXCEPTION,e.getLocalizedMessage());
 		}
 	}
-	private void createAndSaveDistributionReport(ReportRequest distributionRequest,String mincode,ProcessorData processorData) {
+
+	private void createAndSaveSchoolDistributionReport(ReportRequest distributionRequest, String mincode, ProcessorData processorData) {
 		List<InputStream> locations=new ArrayList<>();
 		try {
-
-			byte[] bytesSAR = webClient.post().uri(educDistributionApiConstants.getDistributionReport()).headers(h -> h.setBearerAuth(processorData.getAccessToken())).body(BodyInserters.fromValue(distributionRequest)).retrieve().bodyToMono(byte[].class).block();
+			byte[] bytesSAR = webClient.post().uri(educDistributionApiConstants.getSchoolDistributionReport()).headers(h -> h.setBearerAuth(processorData.getAccessToken())).body(BodyInserters.fromValue(distributionRequest)).retrieve().bodyToMono(byte[].class).block();
 			if(bytesSAR != null) {
 				locations.add(new ByteArrayInputStream(bytesSAR));
 				byte[] encoded = Base64.encodeBase64(bytesSAR);

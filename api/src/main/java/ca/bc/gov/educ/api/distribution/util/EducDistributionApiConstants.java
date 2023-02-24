@@ -64,7 +64,7 @@ public class EducDistributionApiConstants {
     private String psiDetails;
 
     @Value("${endpoint.grad-report-api.get-school-distribution-report.url}")
-    private String distributionReport;
+    private String schoolDistributionReport;
 
     @Value("${endpoint.grad-graduation-api.report-by-pen.url}")
     private String certDataReprint;
