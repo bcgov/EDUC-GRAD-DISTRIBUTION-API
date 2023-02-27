@@ -94,7 +94,7 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 					ReportRequest reportParams = new ReportRequest();
 					reportParams.setOptions(options);
 					reportParams.setData(data);
-					byte[] bytesSAR = webClient.post().uri(educDistributionApiConstants.getTranscriptReport()).headers(h -> h.setBearerAuth(processorData.getAccessToken())).body(BodyInserters.fromValue(reportParams)).retrieve().bodyToMono(byte[].class).block();
+					byte[] bytesSAR = webClient.post().uri(educDistributionApiConstants.getTranscriptReport()).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).body(BodyInserters.fromValue(reportParams)).retrieve().bodyToMono(byte[].class).block();
 					if (bytesSAR != null) {
 						for(int i=1;i<=bcd.getQuantity();i++) {
 							locations.add(new ByteArrayInputStream(bytesSAR));
@@ -169,7 +169,7 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 				ReportRequest reportParams = new ReportRequest();
 				reportParams.setOptions(options);
 				reportParams.setData(data);
-				byte[] bytesSAR = webClient.post().uri(educDistributionApiConstants.getCertificateReport()).headers(h -> h.setBearerAuth(processorData.getAccessToken())).body(BodyInserters.fromValue(reportParams)).retrieve().bodyToMono(byte[].class).block();
+				byte[] bytesSAR = webClient.post().uri(educDistributionApiConstants.getCertificateReport()).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).body(BodyInserters.fromValue(reportParams)).retrieve().bodyToMono(byte[].class).block();
 				if (bytesSAR != null) {
 					for(int i=1;i<=bcd.getQuantity();i++) {
 						locations.add(new ByteArrayInputStream(bytesSAR));

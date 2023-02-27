@@ -66,7 +66,7 @@ public class PostingSchoolReportProcess extends BaseProcess {
 		if(scdReport != null) {
 			List<InputStream> locations = new ArrayList<>();
 			try {
-				InputStreamResource gradReportPdf = webClient.get().uri(String.format(educDistributionApiConstants.getSchoolReport(), scdReport.getSchoolOfRecord(), scdReport.getReportTypeCode())).headers(h -> h.setBearerAuth(processorData.getAccessToken())).retrieve().bodyToMono(InputStreamResource.class).block();
+				InputStreamResource gradReportPdf = webClient.get().uri(String.format(educDistributionApiConstants.getSchoolReport(), scdReport.getSchoolOfRecord(), scdReport.getReportTypeCode())).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).retrieve().bodyToMono(InputStreamResource.class).block();
 				if (gradReportPdf != null) {
 					locations.add(gradReportPdf.getInputStream());
 					logger.debug("*** Added PDFs Current Report Type {}", scdReport.getReportTypeCode());
