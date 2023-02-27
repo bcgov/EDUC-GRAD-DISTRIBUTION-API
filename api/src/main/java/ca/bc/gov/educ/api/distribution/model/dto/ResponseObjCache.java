@@ -11,7 +11,7 @@ public class ResponseObjCache {
 
     // tokenExpiry-[seconds] provides a slight offset, if token WILL expire in
     // [seconds], obtain a new one
-    private int offset = 10;
+    private int offset;
 
     public ResponseObjCache(int offset) {
         this.offset = offset;
