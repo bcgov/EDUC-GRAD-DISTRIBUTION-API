@@ -7,8 +7,6 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.pdfbox.io.MemoryUsageSetting;
-import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -17,9 +15,6 @@ import org.springframework.web.reactive.function.BodyInserters;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -82,7 +77,7 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 			int totalQuantity = transcriptPrintRequest.getBlankTranscriptList().get(0).getQuantity() * bcdList.size();
 			setExtraDataForPackingSlip(packSlipReq, "YED4", obj.getTotal(), totalQuantity, currentSlipCount, transcriptPrintRequest.getBatchId());
 			try {
-				locations.add(reportService.getPackingSlip(packSlipReq, processorData.getAccessToken()).getInputStream());
+				locations.add(reportService.getPackingSlip(packSlipReq, restUtils.getAccessToken()).getInputStream());
 				logger.info("*** Packing Slip Added");
 				int currentTranscript = 0;
 				int failedToAdd = 0;
@@ -158,7 +153,7 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 		int totalQuantity = certificatePrintRequest.getBlankCertificateList().get(0).getQuantity() * bcdList.size();
 		setExtraDataForPackingSlip(packSlipReq,paperType,request.getTotal(),totalQuantity,request.getCurrentSlip(),certificatePrintRequest.getBatchId());
 		try {
-			locations.add(reportService.getPackingSlip(packSlipReq,processorData.getAccessToken()).getInputStream());
+			locations.add(reportService.getPackingSlip(packSlipReq,restUtils.getAccessToken()).getInputStream());
 			int currentCertificate = 0;
 			int failedToAdd = 0;
 			for (BlankCredentialDistribution bcd : bcdList) {
@@ -233,21 +228,4 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 		return data;
 	}
 
-
-	private void mergeDocuments(ProcessorData processorData,String mincode,String fileName,String paperType,List<InputStream> locations) {
-		try {
-			PDFMergerUtility objs = new PDFMergerUtility();
-			StringBuilder pBuilder = new StringBuilder();
-			pBuilder.append(LOC).append(processorData.getBatchId()).append(DEL).append(mincode).append(DEL);
-			Path path = Paths.get(pBuilder.toString());
-			Files.createDirectories(path);
-			pBuilder = new StringBuilder();
-			pBuilder.append(LOC).append(processorData.getBatchId()).append(DEL).append(mincode).append(fileName).append(paperType).append(".").append(EducDistributionApiUtils.getFileName()).append(".pdf");
-			objs.setDestinationFileName(pBuilder.toString());
-			objs.addSources(locations);
-			objs.mergeDocuments(MemoryUsageSetting.setupMainMemoryOnly());
-		}catch (Exception e) {
-			logger.debug(EXCEPTION,e.getLocalizedMessage());
-		}
-	}
 }

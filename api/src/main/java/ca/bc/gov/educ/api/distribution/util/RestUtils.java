@@ -69,6 +69,10 @@ public class RestUtils {
 		}
 	}
 
+	public String getAccessToken() {
+		return this.fetchAccessToken();
+	}
+
 	@Retry(name = "rt-getToken", fallbackMethod = "rtGetTokenFallback")
 	private ResponseObj getResponseObj() {
 		LOGGER.debug("Fetch token");

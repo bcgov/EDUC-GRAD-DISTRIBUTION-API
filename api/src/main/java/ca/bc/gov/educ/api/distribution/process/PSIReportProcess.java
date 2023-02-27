@@ -1,12 +1,9 @@
 package ca.bc.gov.educ.api.distribution.process;
 
 import ca.bc.gov.educ.api.distribution.model.dto.*;
-import ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.apache.pdfbox.io.MemoryUsageSetting;
-import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import org.modelmapper.internal.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,9 +12,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +38,7 @@ public class PSIReportProcess extends BaseProcess{
 			int currentSlipCount = 0;
 			String psiCode = entry.getKey();
 			DistributionPrintRequest obj = entry.getValue();
-			Psi psiDetails = psiService.getPsiDetails(psiCode,processorData.getAccessToken());
+			Psi psiDetails = psiService.getPsiDetails(psiCode,restUtils.getAccessToken());
 			if(psiDetails != null) {
 				logger.info("*** PSI Details Acquired {}", psiDetails.getPsiName());
 				ReportRequest packSlipReq = reportService.preparePackingSlipDataPSI(psiDetails, processorData.getBatchId());
@@ -74,7 +68,7 @@ public class PSIReportProcess extends BaseProcess{
 			currentSlipCount++;
 			setExtraDataForPackingSlip(packSlipReq, "YED4", obj.getTotal(), scdList.size(), 1, "Transcript", psiCredentialPrintRequest.getBatchId());
 			try {
-				locations.add(reportService.getPackingSlip(packSlipReq, processorData.getAccessToken()).getInputStream());
+				locations.add(reportService.getPackingSlip(packSlipReq, restUtils.getAccessToken()).getInputStream());
 				logger.info("*** Packing Slip Added");
 				processStudents(scdList,locations,processorData);
 				mergeDocuments(processorData,psiCode,"/EDGRAD.T.","YED4",locations);
@@ -103,20 +97,4 @@ public class PSIReportProcess extends BaseProcess{
 		}
 	}
 
-	private void mergeDocuments(ProcessorData processorData,String psiCode,String fileName,String paperType,List<InputStream> locations) {
-		try {
-			PDFMergerUtility objs = new PDFMergerUtility();
-			StringBuilder pBuilder = new StringBuilder();
-			pBuilder.append(LOC).append(processorData.getBatchId()).append(DEL).append(psiCode).append(DEL);
-			Path path = Paths.get(pBuilder.toString());
-			Files.createDirectories(path);
-			pBuilder = new StringBuilder();
-			pBuilder.append(LOC).append(processorData.getBatchId()).append(DEL).append(psiCode).append(fileName).append(paperType).append(".").append(EducDistributionApiUtils.getFileName()).append(".pdf");
-			objs.setDestinationFileName(pBuilder.toString());
-			objs.addSources(locations);
-			objs.mergeDocuments(MemoryUsageSetting.setupMainMemoryOnly());
-		}catch (Exception e) {
-			logger.debug(EXCEPTION,e.getLocalizedMessage());
-		}
-	}
 }

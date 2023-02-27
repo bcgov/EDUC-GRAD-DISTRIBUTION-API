@@ -7,8 +7,6 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.pdfbox.io.MemoryUsageSetting;
-import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import org.modelmapper.internal.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,9 +18,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -74,7 +69,7 @@ public class MergeProcess extends BaseProcess{
 				pV = processYedrCertificatePrintRequest(obj,currentSlipCount,packSlipReq,studListNonGrad,processorData,mincode,numberOfPdfs);
 				numberOfPdfs = pV.getRight();
 				if(!studListNonGrad.isEmpty()) {
-					createAndSaveNonGradReport(schoolDetails,studListNonGrad,mincode,processorData.getAccessToken());
+					createAndSaveNonGradReport(schoolDetails,studListNonGrad,mincode,restUtils.getAccessToken());
 				}
 				logger.info("PDFs Merged {}", schoolDetails.getSchoolName());
 				if (counter % 50 == 0) {
@@ -135,7 +130,7 @@ public class MergeProcess extends BaseProcess{
 			currentSlipCount++;
 			setExtraDataForPackingSlip(packSlipReq, "YED4", obj.getTotal(), scdList.size(), 1, "Transcript", transcriptPrintRequest.getBatchId());
 			try {
-				locations.add(reportService.getPackingSlip(packSlipReq, processorData.getAccessToken()).getInputStream());
+				locations.add(reportService.getPackingSlip(packSlipReq, restUtils.getAccessToken()).getInputStream());
 				logger.info("*** Packing Slip Added");
 				processStudents(scdList,studListNonGrad,locations,processorData);
 				mergeDocuments(processorData,mincode,"/EDGRAD.T.","YED4",locations);
@@ -214,7 +209,7 @@ public class MergeProcess extends BaseProcess{
 		List<InputStream> locations=new ArrayList<>();
 		setExtraDataForPackingSlip(packSlipReq,paperType,request.getTotal(),scdList.size(),request.getCurrentSlip(),"Certificate", certificatePrintRequest.getBatchId());
 		try {
-			locations.add(reportService.getPackingSlip(packSlipReq,processorData.getAccessToken()).getInputStream());
+			locations.add(reportService.getPackingSlip(packSlipReq,restUtils.getAccessToken()).getInputStream());
 			int currentCertificate = 0;
 			int failedToAdd = 0;
 			for (StudentCredentialDistribution scd : scdList) {
@@ -239,22 +234,6 @@ public class MergeProcess extends BaseProcess{
 		}
 	}
 
-	private void mergeDocuments(ProcessorData processorData,String mincode,String fileName,String paperType,List<InputStream> locations) {
-		try {
-			PDFMergerUtility objs = new PDFMergerUtility();
-			StringBuilder pBuilder = new StringBuilder();
-			pBuilder.append(LOC).append(processorData.getBatchId()).append(DEL).append(mincode).append(DEL);
-			Path path = Paths.get(pBuilder.toString());
-			Files.createDirectories(path);
-			pBuilder = new StringBuilder();
-			pBuilder.append(LOC).append(processorData.getBatchId()).append(DEL).append(mincode).append(fileName).append(paperType).append(".").append(EducDistributionApiUtils.getFileName()).append(".pdf");
-			objs.setDestinationFileName(pBuilder.toString());
-			objs.addSources(locations);
-			objs.mergeDocuments(MemoryUsageSetting.setupMainMemoryOnly());
-		}catch (Exception e) {
-			logger.debug(EXCEPTION,e.getLocalizedMessage());
-		}
-	}
 	private void createAndSaveDistributionReport(ReportRequest distributionRequest,String mincode,ProcessorData processorData) {
 		List<InputStream> locations=new ArrayList<>();
 		try {
@@ -265,7 +244,7 @@ public class MergeProcess extends BaseProcess{
 				byte[] encoded = Base64.encodeBase64(bytesSAR);
 				String encodedPdf= new String(encoded, StandardCharsets.US_ASCII);
 				if(!processorData.getActivityCode().contains("USERDIST"))
-					saveSchoolDistributionReport(encodedPdf,mincode,processorData.getAccessToken(),"DISTREP_SC");
+					saveSchoolDistributionReport(encodedPdf,mincode,restUtils.getAccessToken(),"DISTREP_SC");
 			}
 			mergeDocuments(processorData,mincode,"/EDGRAD.R.","324W",locations);
 		} catch (Exception e) {
