@@ -1,14 +1,12 @@
 package ca.bc.gov.educ.api.distribution.process;
 
 import ca.bc.gov.educ.api.distribution.model.dto.*;
-import ca.bc.gov.educ.api.distribution.service.AccessTokenService;
 import ca.bc.gov.educ.api.distribution.service.PsiService;
 import ca.bc.gov.educ.api.distribution.service.ReportService;
 import ca.bc.gov.educ.api.distribution.service.SchoolService;
-import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
-import ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils;
-import ca.bc.gov.educ.api.distribution.util.GradValidation;
-import ca.bc.gov.educ.api.distribution.util.SFTPUtils;
+import ca.bc.gov.educ.api.distribution.util.*;
+import org.apache.pdfbox.io.MemoryUsageSetting;
+import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,11 +15,16 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
 import java.util.zip.ZipOutputStream;
 
 public abstract class BaseProcess implements DistributionProcess{
 
-    private static Logger logger = LoggerFactory.getLogger(BaseProcess.class);
+    private static final Logger logger = LoggerFactory.getLogger(BaseProcess.class);
 
     protected static final String LOC = "/tmp/";
     protected static final String DEL = "/";
@@ -37,7 +40,7 @@ public abstract class BaseProcess implements DistributionProcess{
     EducDistributionApiConstants educDistributionApiConstants;
 
     @Autowired
-    AccessTokenService accessTokenService;
+    RestUtils restUtils;
 
     @Autowired
     SchoolService schoolService;
@@ -55,7 +58,7 @@ public abstract class BaseProcess implements DistributionProcess{
         if(obj.getProperName() != null)
             return schoolService.getDetailsForPackingSlip(obj.getProperName());
         else
-            return schoolService.getSchoolDetails(mincode,processorData.getAccessToken(),exception);
+            return schoolService.getSchoolDetails(mincode,restUtils.getAccessToken(),exception);
     }
 
     protected void createZipFile(Long batchId) {
@@ -106,6 +109,23 @@ public abstract class BaseProcess implements DistributionProcess{
         if(processorData.getLocalDownload() == null || !processorData.getLocalDownload().equalsIgnoreCase("Y")) {
             createControlFile(batchId, numberOfPdfs);
             sftpUtils.sftpUploadBCMail(batchId);
+        }
+    }
+
+    protected void mergeDocuments(ProcessorData processorData, String code, String fileName, String paperType, List<InputStream> locations) {
+        try {
+            PDFMergerUtility objs = new PDFMergerUtility();
+            StringBuilder pBuilder = new StringBuilder();
+            pBuilder.append(LOC).append(processorData.getBatchId()).append(DEL).append(code).append(DEL);
+            Path path = Paths.get(pBuilder.toString());
+            Files.createDirectories(path);
+            pBuilder = new StringBuilder();
+            pBuilder.append(LOC).append(processorData.getBatchId()).append(DEL).append(code).append(fileName).append(paperType).append(".").append(EducDistributionApiUtils.getFileName()).append(".pdf");
+            objs.setDestinationFileName(pBuilder.toString());
+            objs.addSources(locations);
+            objs.mergeDocuments(MemoryUsageSetting.setupMainMemoryOnly());
+        }catch (Exception e) {
+            logger.debug(EXCEPTION,e.getLocalizedMessage());
         }
     }
 

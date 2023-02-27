@@ -7,8 +7,6 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.pdfbox.io.MemoryUsageSetting;
-import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import org.modelmapper.internal.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,9 +18,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -74,11 +69,11 @@ public class MergeProcess extends BaseProcess{
 				pV = processYedrCertificatePrintRequest(obj,currentSlipCount,packSlipReq,studListNonGrad,processorData,mincode,numberOfPdfs);
 				numberOfPdfs = pV.getRight();
 				if(!studListNonGrad.isEmpty()) {
-					createAndSaveNonGradReport(schoolDetails,studListNonGrad,mincode,processorData.getAccessToken());
+					createAndSaveNonGradReport(schoolDetails,studListNonGrad,mincode,restUtils.getAccessToken());
 				}
 				logger.info("PDFs Merged {}", schoolDetails.getSchoolName());
 				if (counter % 50 == 0) {
-					accessTokenService.fetchAccessToken(processorData);
+					restUtils.fetchAccessToken(processorData);
 				}
 				logger.info("School {}/{}",counter,mapDist.size());
 			}
@@ -135,7 +130,7 @@ public class MergeProcess extends BaseProcess{
 			currentSlipCount++;
 			setExtraDataForPackingSlip(packSlipReq, "YED4", obj.getTotal(), scdList.size(), 1, "Transcript", transcriptPrintRequest.getBatchId());
 			try {
-				locations.add(reportService.getPackingSlip(packSlipReq, processorData.getAccessToken()).getInputStream());
+				locations.add(reportService.getPackingSlip(packSlipReq, restUtils.getAccessToken()).getInputStream());
 				logger.info("*** Packing Slip Added");
 				processStudents(scdList,studListNonGrad,locations,processorData);
 				mergeDocuments(processorData,mincode,"/EDGRAD.T.","YED4",locations);
@@ -157,7 +152,7 @@ public class MergeProcess extends BaseProcess{
 				if(objStd != null)
 					studListNonGrad.add(objStd);
 			}
-			InputStreamResource transcriptPdf = webClient.get().uri(String.format(educDistributionApiConstants.getTranscript(), scd.getStudentID(), scd.getCredentialTypeCode(), scd.getDocumentStatusCode())).headers(h -> h.setBearerAuth(processorData.getAccessToken())).retrieve().bodyToMono(InputStreamResource.class).block();
+			InputStreamResource transcriptPdf = webClient.get().uri(String.format(educDistributionApiConstants.getTranscript(), scd.getStudentID(), scd.getCredentialTypeCode(), scd.getDocumentStatusCode())).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).retrieve().bodyToMono(InputStreamResource.class).block();
 			if (transcriptPdf != null) {
 				locations.add(transcriptPdf.getInputStream());
 				currentTranscript++;
@@ -214,7 +209,7 @@ public class MergeProcess extends BaseProcess{
 		List<InputStream> locations=new ArrayList<>();
 		setExtraDataForPackingSlip(packSlipReq,paperType,request.getTotal(),scdList.size(),request.getCurrentSlip(),"Certificate", certificatePrintRequest.getBatchId());
 		try {
-			locations.add(reportService.getPackingSlip(packSlipReq,processorData.getAccessToken()).getInputStream());
+			locations.add(reportService.getPackingSlip(packSlipReq,restUtils.getAccessToken()).getInputStream());
 			int currentCertificate = 0;
 			int failedToAdd = 0;
 			for (StudentCredentialDistribution scd : scdList) {
@@ -223,7 +218,7 @@ public class MergeProcess extends BaseProcess{
 					if(objStd != null)
 						studListNonGrad.add(objStd);
 				}
-				InputStreamResource certificatePdf = webClient.get().uri(String.format(educDistributionApiConstants.getCertificate(),scd.getStudentID(),scd.getCredentialTypeCode(),scd.getDocumentStatusCode())).headers(h -> h.setBearerAuth(processorData.getAccessToken())).retrieve().bodyToMono(InputStreamResource.class).block();
+				InputStreamResource certificatePdf = webClient.get().uri(String.format(educDistributionApiConstants.getCertificate(),scd.getStudentID(),scd.getCredentialTypeCode(),scd.getDocumentStatusCode())).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).retrieve().bodyToMono(InputStreamResource.class).block();
 				if(certificatePdf != null) {
 					locations.add(certificatePdf.getInputStream());
 					currentCertificate++;
@@ -239,33 +234,17 @@ public class MergeProcess extends BaseProcess{
 		}
 	}
 
-	private void mergeDocuments(ProcessorData processorData,String mincode,String fileName,String paperType,List<InputStream> locations) {
-		try {
-			PDFMergerUtility objs = new PDFMergerUtility();
-			StringBuilder pBuilder = new StringBuilder();
-			pBuilder.append(LOC).append(processorData.getBatchId()).append(DEL).append(mincode).append(DEL);
-			Path path = Paths.get(pBuilder.toString());
-			Files.createDirectories(path);
-			pBuilder = new StringBuilder();
-			pBuilder.append(LOC).append(processorData.getBatchId()).append(DEL).append(mincode).append(fileName).append(paperType).append(".").append(EducDistributionApiUtils.getFileName()).append(".pdf");
-			objs.setDestinationFileName(pBuilder.toString());
-			objs.addSources(locations);
-			objs.mergeDocuments(MemoryUsageSetting.setupMainMemoryOnly());
-		}catch (Exception e) {
-			logger.debug(EXCEPTION,e.getLocalizedMessage());
-		}
-	}
 	private void createAndSaveDistributionReport(ReportRequest distributionRequest,String mincode,ProcessorData processorData) {
 		List<InputStream> locations=new ArrayList<>();
 		try {
 
-			byte[] bytesSAR = webClient.post().uri(educDistributionApiConstants.getDistributionReport()).headers(h -> h.setBearerAuth(processorData.getAccessToken())).body(BodyInserters.fromValue(distributionRequest)).retrieve().bodyToMono(byte[].class).block();
+			byte[] bytesSAR = webClient.post().uri(educDistributionApiConstants.getDistributionReport()).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).body(BodyInserters.fromValue(distributionRequest)).retrieve().bodyToMono(byte[].class).block();
 			if(bytesSAR != null) {
 				locations.add(new ByteArrayInputStream(bytesSAR));
 				byte[] encoded = Base64.encodeBase64(bytesSAR);
 				String encodedPdf= new String(encoded, StandardCharsets.US_ASCII);
 				if(!processorData.getActivityCode().contains("USERDIST"))
-					saveSchoolDistributionReport(encodedPdf,mincode,processorData.getAccessToken(),"DISTREP_SC");
+					saveSchoolDistributionReport(encodedPdf,mincode,restUtils.getAccessToken(),"DISTREP_SC");
 			}
 			mergeDocuments(processorData,mincode,"/EDGRAD.R.","324W",locations);
 		} catch (Exception e) {
@@ -293,7 +272,7 @@ public class MergeProcess extends BaseProcess{
 		reportParams.setData(nongradProjected);
 
 		byte[] bytesSAR = webClient.post().uri(educDistributionApiConstants.getNonGrad())
-				.headers(h -> h.setBearerAuth(accessToken)).body(BodyInserters.fromValue(reportParams)).retrieve().bodyToMono(byte[].class).block();
+				.headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).body(BodyInserters.fromValue(reportParams)).retrieve().bodyToMono(byte[].class).block();
 		byte[] encoded = Base64.encodeBase64(bytesSAR);
 		assert encoded != null;
 		String encodedPdf = new String(encoded, StandardCharsets.US_ASCII);
@@ -305,6 +284,6 @@ public class MergeProcess extends BaseProcess{
 		requestObj.setReport(encodedPdf);
 		requestObj.setSchoolOfRecord(mincode);
 		requestObj.setReportTypeCode(reportType);
-		webClient.post().uri(educDistributionApiConstants.getUpdateSchoolReport()).headers(h ->h.setBearerAuth(accessToken)).body(BodyInserters.fromValue(requestObj)).retrieve().bodyToMono(SchoolReports.class).block();
+		webClient.post().uri(educDistributionApiConstants.getUpdateSchoolReport()).headers(h ->h.setBearerAuth(restUtils.fetchAccessToken())).body(BodyInserters.fromValue(requestObj)).retrieve().bodyToMono(SchoolReports.class).block();
 	}
 }

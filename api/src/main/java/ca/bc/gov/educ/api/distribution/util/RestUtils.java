@@ -9,21 +9,89 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import ca.bc.gov.educ.api.distribution.model.dto.BaseModel;
+import ca.bc.gov.educ.api.distribution.model.dto.ProcessorData;
+import ca.bc.gov.educ.api.distribution.model.dto.ResponseObj;
+import ca.bc.gov.educ.api.distribution.model.dto.ResponseObjCache;
+import io.github.resilience4j.retry.annotation.Retry;
 import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  * Utility class used to construct {@link ResponseEntity} for various HTTP methods.
  */
 @Component
-public class ResponseHelper {
+public class RestUtils {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(RestUtils.class);
+
+	private ModelMapper modelMapper;
+	private ResponseObjCache responseObjCache;
+	private final EducDistributionApiConstants constants;
+	private final WebClient webClient;
 
 	@Autowired
-	protected ModelMapper modelMapper;
+	public RestUtils(ModelMapper modelMapper, ResponseObjCache responseObjCache, EducDistributionApiConstants constants, WebClient webClient) {
+		this.modelMapper = modelMapper;
+		this.responseObjCache = responseObjCache;
+		this.constants = constants;
+		this.webClient = webClient;
+	}
+
+	public ResponseObj getTokenResponseObject() {
+		if(responseObjCache.isExpired()){
+			responseObjCache.setResponseObj(getResponseObj());
+		}
+		return responseObjCache.getResponseObj();
+	}
+	public String fetchAccessToken() {
+		return this.getTokenResponseObject().getAccess_token();
+	}
+
+	public void fetchAccessToken(ProcessorData data) {
+		LOGGER.debug("Fetching the access token from KeyCloak API");
+		ResponseObj res = getTokenResponseObject();
+		if (res != null) {
+			data.setAccessToken(res.getAccess_token());
+			LOGGER.debug("Setting the new access token in summaryDTO.");
+		}
+	}
+
+	public String getAccessToken() {
+		return this.fetchAccessToken();
+	}
+
+	@Retry(name = "rt-getToken", fallbackMethod = "rtGetTokenFallback")
+	private ResponseObj getResponseObj() {
+		LOGGER.debug("Fetch token");
+		HttpHeaders httpHeadersKC = EducDistributionApiUtils.getHeaders(
+				constants.getUserName(), constants.getPassword());
+		MultiValueMap<String, String> map= new LinkedMultiValueMap<>();
+		map.add("grant_type", "client_credentials");
+		return this.webClient.post().uri(constants.getTokenUrl())
+				.headers(h -> h.addAll(httpHeadersKC))
+				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
+				.body(BodyInserters.fromFormData(map))
+				.retrieve()
+				.bodyToMono(ResponseObj.class).block();
+	}
+
+	public ResponseObj rtGetTokenFallBack(HttpServerErrorException exception){
+		LOGGER.error("{} NOT REACHABLE after many attempts.", constants.getTokenUrl(), exception);
+		return null;
+	}
 
 	public ResponseEntity<Void> FORBIDDEN() {
 		return new ResponseEntity<>(HttpStatus.FORBIDDEN);
@@ -60,8 +128,6 @@ public class ResponseHelper {
 	/**
 	 * Get Response Entity using a LIST of JPA Entity Sources
 	 * @param <T>
-	 * @param optional - the JPA entity Source LIST
-	 * @param type - The API model type to map to.
 	 * @return
 	 */
 	public <T> ResponseEntity<List<T>> GET(Collection<?> entitySet, Type T) {
@@ -78,7 +144,6 @@ public class ResponseHelper {
 	 * should only be used when you need fine-grained control over the model
 	 * mapping and the mapping gets performed within the API.
 	 * @param <T>
-	 * @param optional - the JPA entity Source LIST
 	 * @return
 	 */
 	public <T> ResponseEntity<List<T>> GET(List<T> list) {

@@ -4,7 +4,7 @@ import ca.bc.gov.educ.api.distribution.model.dto.*;
 import ca.bc.gov.educ.api.distribution.service.GradDistributionService;
 import ca.bc.gov.educ.api.distribution.util.GradValidation;
 import ca.bc.gov.educ.api.distribution.util.MessageHelper;
-import ca.bc.gov.educ.api.distribution.util.ResponseHelper;
+import ca.bc.gov.educ.api.distribution.util.RestUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,7 +23,7 @@ class DistributionControllerTest {
 	private GradDistributionService gradDistributionService;
 	
 	@Mock
-	ResponseHelper response;
+    RestUtils response;
 	
 	@InjectMocks
 	private DistributionController distributionController;
