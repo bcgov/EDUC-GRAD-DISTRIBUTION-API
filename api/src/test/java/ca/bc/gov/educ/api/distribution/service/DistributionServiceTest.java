@@ -3,6 +3,7 @@ package ca.bc.gov.educ.api.distribution.service;
 import ca.bc.gov.educ.api.distribution.model.dto.*;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import ca.bc.gov.educ.api.distribution.util.JsonTransformer;
+import ca.bc.gov.educ.api.distribution.util.RestUtils;
 import lombok.SneakyThrows;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -76,6 +77,11 @@ public class DistributionServiceTest {
 
 	@Autowired
 	private EducDistributionApiConstants constants;
+
+	@Mock
+	private RestUtils restUtilsMock;
+	
+	private static final String MOCK_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NzcxMDM0NzYsImlhdCI6MTY3NzEwMzE3NiwiYXV0aF90aW1lIjoxNjc3MTAyMjk0LCJqdGkiOiJkNWE5MTQ1Ny1mYzVjLTQ4YmItODNiZC1hYjMyYmEwMzQ1MzIiLCJpc3MiOiJodHRwczovL3NvYW0tZGV2LmFwcHMuc2lsdmVyLmRldm9wcy5nb3YuYmMuY2EvYXV0aC9yZWFsbXMvbWFzdGVyIiwiYXVkIjoiYWNjb3VudCIsInN1YiI6IjIzZGYxMzJlLTE3NTQtNDYzYi05MGI1LWIyN2E4ODIxMjM0NSIsInR5cCI6IkJlYXJlciIsImF6cCI6ImZha2VfY2xpZW50Iiwic2Vzc2lvbl9zdGF0ZSI6IjUzY2UxNDBiLTMzMTctNDA3NC04YmEzLWIwYWE3MTIzMjQ1NCIsImFjciI6IjAiLCJhbGxvd2VkLW9yaWdpbnMiOlsiaHR0cHM6Ly9kZXYuZ3JhZC5nb3YuYmMuY2EiLCJodHRwczovL2dyYWQuZ292LmJjLmNhIl0sInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJyb2xlXzEiLCJyb2xlXzIiXX0sInJlc291cmNlX2FjY2VzcyI6eyJhY2NvdW50Ijp7InJvbGVzIjpbInJvbGVfMSJdfX0sInNjb3BlIjoiTVlfU0NPUEUifQ.D57DWJJuLPFIj84A14EmRlKSKcLVOG9HLvc-OCWTTeM";
 
 	@Mock
 	Path path;
@@ -194,7 +200,7 @@ public class DistributionServiceTest {
 		Long batchId= 9029L;
 		Map<String, DistributionPrintRequest > mapDist= new HashMap<>();
 		String localDownload = null;
-		String accessToken = "123";
+		String accessToken = MOCK_TOKEN;
 		String mincode = "123123133";
 
 		CommonSchool schObj = new CommonSchool();
@@ -209,9 +215,10 @@ public class DistributionServiceTest {
 		obj.setSchoolOfRecord(mincode);
 
 		final ResponseObj tokenObject = new ResponseObj();
-		tokenObject.setAccess_token("123");
+		tokenObject.setAccess_token(MOCK_TOKEN);
 		tokenObject.setRefresh_token("456");
 
+		when(this.restUtilsMock.getTokenResponseObject()).thenReturn(getMockResponseObject());
 		when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
 		when(this.requestBodyUriMock.uri(constants.getTokenUrl())).thenReturn(this.requestBodyUriMock);
 		when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
@@ -252,10 +259,17 @@ public class DistributionServiceTest {
 		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,null,null,accessToken);
 	}
 
+	private ResponseObj getMockResponseObject(){
+		ResponseObj obj = new ResponseObj();
+		obj.setAccess_token(MOCK_TOKEN);
+		obj.setRefresh_token(MOCK_TOKEN);
+		return obj;
+	}
+
 	private DistributionResponse testdistributeCredentials_transcript_blank(String runType,boolean schoolNull,String localDownload) {
 		Long batchId= 9029L;
 		Map<String, DistributionPrintRequest > mapDist= new HashMap<>();
-		String accessToken = "123";
+		String accessToken = MOCK_TOKEN;
 		String mincode = "123123133";
 
 		CommonSchool schObj = null;
@@ -308,7 +322,7 @@ public class DistributionServiceTest {
 		when(this.responseMock.bodyToMono(byte[].class)).thenReturn(Mono.just(bytesSAR));
 
 		final ResponseObj tokenObject = new ResponseObj();
-		tokenObject.setAccess_token("123");
+		tokenObject.setAccess_token(MOCK_TOKEN);
 		tokenObject.setRefresh_token("456");
 
 		when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
@@ -333,7 +347,7 @@ public class DistributionServiceTest {
 		Long batchId= 9029L;
 		Map<String, DistributionPrintRequest > mapDist= new HashMap<>();
 		String localDownload = null;
-		String accessToken = "123";
+		String accessToken = MOCK_TOKEN;
 		String mincode = "123123133";
 
 		CommonSchool schObj = new CommonSchool();
@@ -387,7 +401,7 @@ public class DistributionServiceTest {
 		when(this.responseMock.bodyToMono(byte[].class)).thenReturn(Mono.just(bytesSAR));
 
 		final ResponseObj tokenObject = new ResponseObj();
-		tokenObject.setAccess_token("123");
+		tokenObject.setAccess_token(MOCK_TOKEN);
 		tokenObject.setRefresh_token("456");
 
 		when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
@@ -405,7 +419,7 @@ public class DistributionServiceTest {
 	private DistributionResponse testdistributeCredentials_transcript(String runType, String activityCode,boolean schoolNull,String localDownload) {
 		Long batchId= 9029L;
 		Map<String, DistributionPrintRequest > mapDist= new HashMap<>();
-		String accessToken = "123";
+		String accessToken = MOCK_TOKEN;
 		String mincode = "123123133";
 
 		CommonSchool schObj = null;
@@ -508,7 +522,7 @@ public class DistributionServiceTest {
 		when(this.inputResponseSchool.block()).thenReturn(schObj);
 
 		final ResponseObj tokenObject = new ResponseObj();
-		tokenObject.setAccess_token("123");
+		tokenObject.setAccess_token(MOCK_TOKEN);
 		tokenObject.setRefresh_token("456");
 
 		when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
@@ -527,7 +541,7 @@ public class DistributionServiceTest {
 		Long batchId= 9029L;
 		Map<String, DistributionPrintRequest > mapDist= new HashMap<>();
 		String localDownload = null;
-		String accessToken = "123";
+		String accessToken = MOCK_TOKEN;
 		String mincode = "123123133";
 
 		CommonSchool schObj = new CommonSchool();
@@ -647,7 +661,7 @@ public class DistributionServiceTest {
 		when(this.inputResponse.block()).thenReturn(inSRCert);
 
 		final ResponseObj tokenObject = new ResponseObj();
-		tokenObject.setAccess_token("123");
+		tokenObject.setAccess_token(MOCK_TOKEN);
 		tokenObject.setRefresh_token("456");
 
 		when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
@@ -667,7 +681,7 @@ public class DistributionServiceTest {
 		Long batchId= 9029L;
 		Map<String, DistributionPrintRequest > mapDist= new HashMap<>();
 		String localDownload = null;
-		String accessToken = "123";
+		String accessToken = MOCK_TOKEN;
 		String mincode = "123123133";
 
 		CommonSchool schObj =null;
@@ -801,7 +815,7 @@ public class DistributionServiceTest {
 		when(this.inputResponseSchool.block()).thenReturn(schObj);
 
 		final ResponseObj tokenObject = new ResponseObj();
-		tokenObject.setAccess_token("123");
+		tokenObject.setAccess_token(MOCK_TOKEN);
 		tokenObject.setRefresh_token("456");
 
 		when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
@@ -825,7 +839,7 @@ public class DistributionServiceTest {
 		String activityCode = null;
 		Long batchId= 9029L;
 		Map<String, DistributionPrintRequest > mapDist= new HashMap<>();
-		String accessToken = "123";
+		String accessToken = MOCK_TOKEN;
 		String psiCode = "001";
 
 		Psi psiObj = new Psi();
@@ -880,7 +894,7 @@ public class DistributionServiceTest {
 		when(this.inputResponsePsi.block()).thenReturn(psiObj);
 
 		final ResponseObj tokenObject = new ResponseObj();
-		tokenObject.setAccess_token("123");
+		tokenObject.setAccess_token(MOCK_TOKEN);
 		tokenObject.setRefresh_token("456");
 
 		when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
