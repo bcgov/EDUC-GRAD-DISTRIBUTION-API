@@ -30,7 +30,7 @@ public class PostingSchoolReportProcess extends BaseProcess {
 	@Override
 	public ProcessorData fire(ProcessorData processorData) {
 		long startTime = System.currentTimeMillis();
-		logger.info("************* TIME START  ************ {}",startTime);
+		logger.debug("************* TIME START  ************ {}",startTime);
 		DistributionResponse response = new DistributionResponse();
 		Map<String,DistributionPrintRequest> mapDist = processorData.getMapDistribution();
 		int numberOfPdfs = 0;
@@ -51,12 +51,12 @@ public class PostingSchoolReportProcess extends BaseProcess {
 			if (counter % 50 == 0) {
 				restUtils.fetchAccessToken(processorData);
 			}
-			logger.info("School {}/{} Number of Reports {}",counter,mapDist.size(),numberOfPdfs);
+			logger.debug("School {}/{} Number of Reports {}",counter,mapDist.size(),numberOfPdfs);
 
 		}
 		long endTime = System.currentTimeMillis();
 		long diff = (endTime - startTime)/1000;
-		logger.info("************* TIME Taken  ************ {} secs",diff);
+		logger.debug("************* TIME Taken  ************ {} secs",diff);
 		response.setMergeProcessResponse("Read Successful and Posting Done");
 		processorData.setDistributionResponse(response);
 		return processorData;
@@ -75,7 +75,7 @@ public class PostingSchoolReportProcess extends BaseProcess {
 				} else {
 					logger.debug("*** Failed to Add PDFs Current Report Type {}", scdReport.getReportTypeCode());
 				}
-				logger.info("*** GRADDIST Report Created");
+				logger.debug("*** GRADDIST Report Created");
 			} catch (IOException e) {
 				logger.debug(EXCEPTION, e.getLocalizedMessage());
 			}

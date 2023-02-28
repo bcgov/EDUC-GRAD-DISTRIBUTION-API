@@ -28,7 +28,7 @@ public class CreateReprintProcess extends BaseProcess {
 	@Override
 	public ProcessorData fire(ProcessorData processorData) {
 		long startTime = System.currentTimeMillis();
-		logger.info("************* TIME START  ************ {}",startTime);
+		logger.debug("************* TIME START  ************ {}",startTime);
 		DistributionResponse response = new DistributionResponse();
 		ExceptionMessage exception = new ExceptionMessage();
 		Map<String,DistributionPrintRequest> mapDist = processorData.getMapDistribution();
@@ -42,7 +42,7 @@ public class CreateReprintProcess extends BaseProcess {
 			DistributionPrintRequest obj = entry.getValue();
 			CommonSchool schoolDetails = getBaseSchoolDetails(obj,mincode,processorData,exception);
 			if(schoolDetails != null) {
-				logger.info("*** School Details Acquired {}", schoolDetails.getSchoolName());
+				logger.debug("*** School Details Acquired {}", schoolDetails.getSchoolName());
 
 				ReportRequest packSlipReq = reportService.preparePackingSlipData(schoolDetails, processorData.getBatchId());
 
@@ -55,8 +55,8 @@ public class CreateReprintProcess extends BaseProcess {
 				numberOfPdfs = processYedbCertificate(obj,currentSlipCount,packSlipReq,mincode,processorData,numberOfPdfs);
 				numberOfPdfs = processYedrCertificate(obj,currentSlipCount,packSlipReq,mincode,processorData,numberOfPdfs);
 
-				logger.info("PDFs Merged {}", schoolDetails.getSchoolName());
-				logger.info("School {}/{}",counter,mapDist.size());
+				logger.debug("PDFs Merged {}", schoolDetails.getSchoolName());
+				logger.debug("School {}/{}",counter,mapDist.size());
 				if (counter % 50 == 0) {
 					restUtils.fetchAccessToken(processorData);
 				}
@@ -65,7 +65,7 @@ public class CreateReprintProcess extends BaseProcess {
 		postingProcess(batchId,processorData,numberOfPdfs);
 		long endTime = System.currentTimeMillis();
 		long diff = (endTime - startTime)/1000;
-		logger.info("************* TIME Taken  ************ {} secs",diff);
+		logger.debug("************* TIME Taken  ************ {} secs",diff);
 		response.setMergeProcessResponse("Merge Successful and File Uploaded");
 		processorData.setDistributionResponse(response);
 		return processorData;
@@ -76,7 +76,7 @@ public class CreateReprintProcess extends BaseProcess {
 			currentSlipCount++;
 			processCertificatePrintFile(packSlipReq,obj.getYedrCertificatePrintRequest(),mincode,currentSlipCount,obj,processorData,"YEDR");
 			numberOfPdfs++;
-			logger.info("*** YEDR Documents Merged");
+			logger.debug("*** YEDR Documents Merged");
 		}
 		return numberOfPdfs;
 	}
@@ -86,7 +86,7 @@ public class CreateReprintProcess extends BaseProcess {
 			currentSlipCount++;
 			processCertificatePrintFile(packSlipReq,obj.getYedbCertificatePrintRequest(),mincode,currentSlipCount,obj,processorData,"YEDB");
 			numberOfPdfs++;
-			logger.info("*** YEDB Documents Merged");
+			logger.debug("*** YEDB Documents Merged");
 		}
 		return numberOfPdfs;
 	}
@@ -96,7 +96,7 @@ public class CreateReprintProcess extends BaseProcess {
 			currentSlipCount++;
 			processCertificatePrintFile(packSlipReq,obj.getYed2CertificatePrintRequest(),mincode,currentSlipCount,obj,processorData,"YED2");
 			numberOfPdfs++;
-			logger.info("*** YED2 Documents Merged");
+			logger.debug("*** YED2 Documents Merged");
 		}
 		return numberOfPdfs;
 	}

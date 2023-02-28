@@ -34,7 +34,7 @@ public class MergeProcess extends BaseProcess{
 	@Override
 	public ProcessorData fire(ProcessorData processorData) {
 		long startTime = System.currentTimeMillis();
-		logger.info("************* TIME START  ************ {}",startTime);
+		logger.debug("************* TIME START  ************ {}",startTime);
 		DistributionResponse response = new DistributionResponse();
 		ExceptionMessage exception = new ExceptionMessage();
 		Map<String,DistributionPrintRequest> mapDist = processorData.getMapDistribution();
@@ -48,7 +48,7 @@ public class MergeProcess extends BaseProcess{
 			DistributionPrintRequest obj = entry.getValue();
 			CommonSchool schoolDetails = getBaseSchoolDetails(obj,mincode,processorData,exception);
 			if(schoolDetails != null) {
-				logger.info("*** School Details Acquired {}", schoolDetails.getSchoolName());
+				logger.debug("*** School Details Acquired {}", schoolDetails.getSchoolName());
 				List<Student> studListNonGrad = new ArrayList<>();
 				ReportRequest packSlipReq = reportService.preparePackingSlipData(schoolDetails, processorData.getBatchId());
 
@@ -71,17 +71,17 @@ public class MergeProcess extends BaseProcess{
 				if(!studListNonGrad.isEmpty()) {
 					createAndSaveNonGradReport(schoolDetails,studListNonGrad,mincode,restUtils.getAccessToken());
 				}
-				logger.info("PDFs Merged {}", schoolDetails.getSchoolName());
+				logger.debug("PDFs Merged {}", schoolDetails.getSchoolName());
 				if (counter % 50 == 0) {
 					restUtils.fetchAccessToken(processorData);
 				}
-				logger.info("School {}/{}",counter,mapDist.size());
+				logger.debug("School {}/{}",counter,mapDist.size());
 			}
 		}
 		postingProcess(batchId,processorData,numberOfPdfs);
 		long endTime = System.currentTimeMillis();
 		long diff = (endTime - startTime)/1000;
-		logger.info("************* TIME Taken  ************ {} secs",diff);
+		logger.debug("************* TIME Taken  ************ {} secs",diff);
 		response.setMergeProcessResponse("Merge Successful and File Uploaded");
 		processorData.setDistributionResponse(response);
 		return processorData;
@@ -94,7 +94,7 @@ public class MergeProcess extends BaseProcess{
 			PackingSlipRequest request = PackingSlipRequest.builder().mincode(mincode).currentSlip(currentSlipCount).total(obj.getTotal()).paperType("YEDR").build();
 			mergeCertificates(packSlipReq, certificatePrintRequest, request,processorData,studListNonGrad);
 			numberOfPdfs++;
-			logger.info("*** YEDR Documents Merged");
+			logger.debug("*** YEDR Documents Merged");
 		}
 		return Pair.of(currentSlipCount,numberOfPdfs);
 	}
@@ -106,7 +106,7 @@ public class MergeProcess extends BaseProcess{
 			PackingSlipRequest request = PackingSlipRequest.builder().mincode(mincode).currentSlip(currentSlipCount).total(obj.getTotal()).paperType("YEDB").build();
 			mergeCertificates(packSlipReq, certificatePrintRequest, request,processorData,studListNonGrad);
 			numberOfPdfs++;
-			logger.info("*** YEDB Documents Merged");
+			logger.debug("*** YEDB Documents Merged");
 		}
 		return Pair.of(currentSlipCount,numberOfPdfs);
 	}
@@ -118,7 +118,7 @@ public class MergeProcess extends BaseProcess{
 			PackingSlipRequest request = PackingSlipRequest.builder().mincode(mincode).currentSlip(currentSlipCount).total(obj.getTotal()).paperType("YED2").build();
 			mergeCertificates(packSlipReq, certificatePrintRequest, request,processorData,studListNonGrad);
 			numberOfPdfs++;
-			logger.info("*** YED2 Documents Merged");
+			logger.debug("*** YED2 Documents Merged");
 		}
 		return Pair.of(currentSlipCount,numberOfPdfs);
 	}
@@ -131,11 +131,11 @@ public class MergeProcess extends BaseProcess{
 			setExtraDataForPackingSlip(packSlipReq, "YED4", obj.getTotal(), scdList.size(), 1, "Transcript", transcriptPrintRequest.getBatchId());
 			try {
 				locations.add(reportService.getPackingSlip(packSlipReq, restUtils.getAccessToken()).getInputStream());
-				logger.info("*** Packing Slip Added");
+				logger.debug("*** Packing Slip Added");
 				processStudents(scdList,studListNonGrad,locations,processorData);
 				mergeDocuments(processorData,mincode,"/EDGRAD.T.","YED4",locations);
 				numberOfPdfs++;
-				logger.info("*** Transcript Documents Merged");
+				logger.debug("*** Transcript Documents Merged");
 			} catch (IOException e) {
 				logger.debug(EXCEPTION,e.getLocalizedMessage());
 			}

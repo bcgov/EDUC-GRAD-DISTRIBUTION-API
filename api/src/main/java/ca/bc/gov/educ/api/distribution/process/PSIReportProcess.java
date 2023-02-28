@@ -27,7 +27,7 @@ public class PSIReportProcess extends BaseProcess{
 	@Override
 	public ProcessorData fire(ProcessorData processorData) {
 		long sTime = System.currentTimeMillis();
-		logger.info("************* TIME START   ************ {}",sTime);
+		logger.debug("************* TIME START   ************ {}",sTime);
 		DistributionResponse disRes = new DistributionResponse();
 		Map<String,DistributionPrintRequest> mDist = processorData.getMapDistribution();
 		Long bId = processorData.getBatchId();
@@ -40,21 +40,21 @@ public class PSIReportProcess extends BaseProcess{
 			DistributionPrintRequest obj = entry.getValue();
 			Psi psiDetails = psiService.getPsiDetails(psiCode,restUtils.getAccessToken());
 			if(psiDetails != null) {
-				logger.info("*** PSI Details Acquired {}", psiDetails.getPsiName());
+				logger.debug("*** PSI Details Acquired {}", psiDetails.getPsiName());
 				ReportRequest packSlipReq = reportService.preparePackingSlipDataPSI(psiDetails, processorData.getBatchId());
 				Pair<Integer,Integer> pV = processTranscriptPrintRequest(obj,currentSlipCount,packSlipReq,processorData,psiCode,numOfPdfs);
 				numOfPdfs = pV.getRight();
-				logger.info("PDFs Merged {}", psiDetails.getPsiName());
+				logger.debug("PDFs Merged {}", psiDetails.getPsiName());
 				if (cnter % 50 == 0) {
 					restUtils.fetchAccessToken(processorData);
 				}
-				logger.info("PSI {}/{}",cnter,mDist.size());
+				logger.debug("PSI {}/{}",cnter,mDist.size());
 			}
 		}
 		postingProcess(bId,processorData,numOfPdfs);
 		long eTime = System.currentTimeMillis();
 		long difference = (eTime - sTime)/1000;
-		logger.info("************* TIME Taken  ************ {} secs",difference);
+		logger.debug("************* TIME Taken  ************ {} secs",difference);
 		disRes.setMergeProcessResponse("Merge Successful and File Uploaded");
 		processorData.setDistributionResponse(disRes);
 		return processorData;
@@ -69,11 +69,11 @@ public class PSIReportProcess extends BaseProcess{
 			setExtraDataForPackingSlip(packSlipReq, "YED4", obj.getTotal(), scdList.size(), 1, "Transcript", psiCredentialPrintRequest.getBatchId());
 			try {
 				locations.add(reportService.getPackingSlip(packSlipReq, restUtils.getAccessToken()).getInputStream());
-				logger.info("*** Packing Slip Added");
+				logger.debug("*** Packing Slip Added");
 				processStudents(scdList,locations,processorData);
 				mergeDocuments(processorData,psiCode,"/EDGRAD.T.","YED4",locations);
 				numOfPdfs++;
-				logger.info("*** Transcript Documents Merged");
+				logger.debug("*** Transcript Documents Merged");
 			} catch (IOException e) {
 				logger.debug(EXCEPTION,e.getLocalizedMessage());
 			}
