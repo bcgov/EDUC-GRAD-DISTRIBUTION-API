@@ -35,7 +35,6 @@ public class EducDistributionApiConstants {
     @Value("${endpoint.grad-graduation-report-api.get-transcript-by-student-id.url}")
     private String transcriptUsingStudentID;
 
-
     @Value("${endpoint.grad-graduation-report-api.get-achievement-report.url}")
     private String achievementReport;
 
@@ -83,6 +82,9 @@ public class EducDistributionApiConstants {
 
     @Value("${endpoint.grad-graduation-report-api.school-report.url}")
     private String schoolReport;
+
+    @Value("${endpoint.grad-graduation-report-api.school-report-by-report-type.url}")
+    private String schoolReportsByReportType;
 
     // Splunk LogHelper Enabled
     @Value("${splunk.log-helper.enabled}")
