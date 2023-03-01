@@ -82,7 +82,7 @@ public abstract class BaseProcess implements DistributionProcess{
         } catch (IOException e) {
             logger.debug(EXCEPTION,e.getLocalizedMessage());
         }
-        logger.info("Created Control file ");
+        logger.debug("Created Control file ");
 
     }
 
