@@ -30,7 +30,7 @@ public class PostingSchoolReportProcess extends BaseProcess {
 	@Override
 	public ProcessorData fire(ProcessorData processorData) {
 		long startTime = System.currentTimeMillis();
-		logger.info("************* TIME START  ************ {}",startTime);
+		logger.debug("************* TIME START  ************ {}",startTime);
 		DistributionResponse response = new DistributionResponse();
 		Map<String,DistributionPrintRequest> mapDist = processorData.getMapDistribution();
 		int numberOfPdfs = 0;
@@ -49,14 +49,14 @@ public class PostingSchoolReportProcess extends BaseProcess {
 				numberOfPdfs = processFile(schoolRepPostReq.getNongradprjreport(),mincode,year,"00","NONGRADPRJ",numberOfPdfs,processorData);
 			}
 			if (counter % 50 == 0) {
-				accessTokenService.fetchAccessToken(processorData);
+				restUtils.fetchAccessToken(processorData);
 			}
-			logger.info("School {}/{} Number of Reports {}",counter,mapDist.size(),numberOfPdfs);
+			logger.debug("School {}/{} Number of Reports {}",counter,mapDist.size(),numberOfPdfs);
 
 		}
 		long endTime = System.currentTimeMillis();
 		long diff = (endTime - startTime)/1000;
-		logger.info("************* TIME Taken  ************ {} secs",diff);
+		logger.debug("************* TIME Taken  ************ {} secs",diff);
 		response.setMergeProcessResponse("Read Successful and Posting Done");
 		processorData.setDistributionResponse(response);
 		return processorData;
@@ -66,7 +66,7 @@ public class PostingSchoolReportProcess extends BaseProcess {
 		if(scdReport != null) {
 			List<InputStream> locations = new ArrayList<>();
 			try {
-				InputStreamResource gradReportPdf = webClient.get().uri(String.format(educDistributionApiConstants.getSchoolReport(), scdReport.getSchoolOfRecord(), scdReport.getReportTypeCode())).headers(h -> h.setBearerAuth(processorData.getAccessToken())).retrieve().bodyToMono(InputStreamResource.class).block();
+				InputStreamResource gradReportPdf = webClient.get().uri(String.format(educDistributionApiConstants.getSchoolReport(), scdReport.getSchoolOfRecord(), scdReport.getReportTypeCode())).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).retrieve().bodyToMono(InputStreamResource.class).block();
 				if (gradReportPdf != null) {
 					locations.add(gradReportPdf.getInputStream());
 					logger.debug("*** Added PDFs Current Report Type {}", scdReport.getReportTypeCode());
@@ -75,7 +75,7 @@ public class PostingSchoolReportProcess extends BaseProcess {
 				} else {
 					logger.debug("*** Failed to Add PDFs Current Report Type {}", scdReport.getReportTypeCode());
 				}
-				logger.info("*** GRADDIST Report Created");
+				logger.debug("*** GRADDIST Report Created");
 			} catch (IOException e) {
 				logger.debug(EXCEPTION, e.getLocalizedMessage());
 			}

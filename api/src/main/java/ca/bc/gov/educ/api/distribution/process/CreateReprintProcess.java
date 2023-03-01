@@ -1,13 +1,10 @@
 package ca.bc.gov.educ.api.distribution.process;
 
 import ca.bc.gov.educ.api.distribution.model.dto.*;
-import ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
-import org.apache.pdfbox.io.MemoryUsageSetting;
-import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -16,9 +13,6 @@ import org.springframework.web.reactive.function.BodyInserters;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +28,7 @@ public class CreateReprintProcess extends BaseProcess {
 	@Override
 	public ProcessorData fire(ProcessorData processorData) {
 		long startTime = System.currentTimeMillis();
-		logger.info("************* TIME START  ************ {}",startTime);
+		logger.debug("************* TIME START  ************ {}",startTime);
 		DistributionResponse response = new DistributionResponse();
 		ExceptionMessage exception = new ExceptionMessage();
 		Map<String,DistributionPrintRequest> mapDist = processorData.getMapDistribution();
@@ -48,7 +42,7 @@ public class CreateReprintProcess extends BaseProcess {
 			DistributionPrintRequest obj = entry.getValue();
 			CommonSchool schoolDetails = getBaseSchoolDetails(obj,mincode,processorData,exception);
 			if(schoolDetails != null) {
-				logger.info("*** School Details Acquired {}", schoolDetails.getSchoolName());
+				logger.debug("*** School Details Acquired {}", schoolDetails.getSchoolName());
 
 				ReportRequest packSlipReq = reportService.preparePackingSlipData(schoolDetails, processorData.getBatchId());
 
@@ -61,17 +55,17 @@ public class CreateReprintProcess extends BaseProcess {
 				numberOfPdfs = processYedbCertificate(obj,currentSlipCount,packSlipReq,mincode,processorData,numberOfPdfs);
 				numberOfPdfs = processYedrCertificate(obj,currentSlipCount,packSlipReq,mincode,processorData,numberOfPdfs);
 
-				logger.info("PDFs Merged {}", schoolDetails.getSchoolName());
-				logger.info("School {}/{}",counter,mapDist.size());
+				logger.debug("PDFs Merged {}", schoolDetails.getSchoolName());
+				logger.debug("School {}/{}",counter,mapDist.size());
 				if (counter % 50 == 0) {
-					accessTokenService.fetchAccessToken(processorData);
+					restUtils.fetchAccessToken(processorData);
 				}
 			}
 		}
 		postingProcess(batchId,processorData,numberOfPdfs);
 		long endTime = System.currentTimeMillis();
 		long diff = (endTime - startTime)/1000;
-		logger.info("************* TIME Taken  ************ {} secs",diff);
+		logger.debug("************* TIME Taken  ************ {} secs",diff);
 		response.setMergeProcessResponse("Merge Successful and File Uploaded");
 		processorData.setDistributionResponse(response);
 		return processorData;
@@ -82,7 +76,7 @@ public class CreateReprintProcess extends BaseProcess {
 			currentSlipCount++;
 			processCertificatePrintFile(packSlipReq,obj.getYedrCertificatePrintRequest(),mincode,currentSlipCount,obj,processorData,"YEDR");
 			numberOfPdfs++;
-			logger.info("*** YEDR Documents Merged");
+			logger.debug("*** YEDR Documents Merged");
 		}
 		return numberOfPdfs;
 	}
@@ -92,7 +86,7 @@ public class CreateReprintProcess extends BaseProcess {
 			currentSlipCount++;
 			processCertificatePrintFile(packSlipReq,obj.getYedbCertificatePrintRequest(),mincode,currentSlipCount,obj,processorData,"YEDB");
 			numberOfPdfs++;
-			logger.info("*** YEDB Documents Merged");
+			logger.debug("*** YEDB Documents Merged");
 		}
 		return numberOfPdfs;
 	}
@@ -102,7 +96,7 @@ public class CreateReprintProcess extends BaseProcess {
 			currentSlipCount++;
 			processCertificatePrintFile(packSlipReq,obj.getYed2CertificatePrintRequest(),mincode,currentSlipCount,obj,processorData,"YED2");
 			numberOfPdfs++;
-			logger.info("*** YED2 Documents Merged");
+			logger.debug("*** YED2 Documents Merged");
 		}
 		return numberOfPdfs;
 	}
@@ -119,11 +113,11 @@ public class CreateReprintProcess extends BaseProcess {
 		List<InputStream> locations=new ArrayList<>();
 		setExtraDataForPackingSlip(packSlipReq,paperType,request.getTotal(),scdList.size(),request.getCurrentSlip(), certificatePrintRequest.getBatchId());
 		try {
-			locations.add(reportService.getPackingSlip(packSlipReq,processorData.getAccessToken()).getInputStream());
+			locations.add(reportService.getPackingSlip(packSlipReq,restUtils.getAccessToken()).getInputStream());
 			int currentCertificate = 0;
 			int failedToAdd = 0;
 			for (StudentCredentialDistribution scd : scdList) {
-				ReportData data = webClient.get().uri(String.format(educDistributionApiConstants.getCertDataReprint(), scd.getPen())).headers(h -> h.setBearerAuth(processorData.getAccessToken())).retrieve().bodyToMono(ReportData.class).block();
+				ReportData data = webClient.get().uri(String.format(educDistributionApiConstants.getCertDataReprint(), scd.getPen())).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).retrieve().bodyToMono(ReportData.class).block();
 				if(data != null) {
 					data.getCertificate().setCertStyle("Reprint");
 					data.getCertificate().getOrderType().getCertificateType().setReportName(scd.getCredentialTypeCode());
@@ -135,7 +129,7 @@ public class CreateReprintProcess extends BaseProcess {
 				ReportRequest reportParams = new ReportRequest();
 				reportParams.setOptions(options);
 				reportParams.setData(data);
-				byte[] bytesSAR = webClient.post().uri(educDistributionApiConstants.getCertificateReport()).headers(h -> h.setBearerAuth(processorData.getAccessToken())).body(BodyInserters.fromValue(reportParams)).retrieve().bodyToMono(byte[].class).block();
+				byte[] bytesSAR = webClient.post().uri(educDistributionApiConstants.getCertificateReport()).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).body(BodyInserters.fromValue(reportParams)).retrieve().bodyToMono(byte[].class).block();
 				if (bytesSAR != null) {
 					locations.add(new ByteArrayInputStream(bytesSAR));
 					currentCertificate++;
@@ -151,27 +145,10 @@ public class CreateReprintProcess extends BaseProcess {
 		}
 	}
 
-	private void mergeDocuments(ProcessorData processorData,String mincode,String fileName,String paperType,List<InputStream> locations) {
-		try {
-			PDFMergerUtility objs = new PDFMergerUtility();
-			StringBuilder pBuilder = new StringBuilder();
-			pBuilder.append(LOC).append(processorData.getBatchId()).append(DEL).append(mincode).append(DEL);
-			Path path = Paths.get(pBuilder.toString());
-			Files.createDirectories(path);
-			pBuilder = new StringBuilder();
-			pBuilder.append(LOC).append(processorData.getBatchId()).append(DEL).append(mincode).append(fileName).append(paperType).append(".").append(EducDistributionApiUtils.getFileName()).append(".pdf");
-			objs.setDestinationFileName(pBuilder.toString());
-			objs.addSources(locations);
-			objs.mergeDocuments(MemoryUsageSetting.setupMainMemoryOnly());
-		}catch (Exception e) {
-			logger.debug(EXCEPTION,e.getLocalizedMessage());
-		}
-	}
-
 	private void createAndSaveDistributionReport(ReportRequest distributionRequest,String mincode,ProcessorData processorData) {
 		List<InputStream> locations=new ArrayList<>();
 		try {
-			byte[] bytesSAR = webClient.post().uri(educDistributionApiConstants.getDistributionReport()).headers(h -> h.setBearerAuth(processorData.getAccessToken())).body(BodyInserters.fromValue(distributionRequest)).retrieve().bodyToMono(byte[].class).block();
+			byte[] bytesSAR = webClient.post().uri(educDistributionApiConstants.getDistributionReport()).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).body(BodyInserters.fromValue(distributionRequest)).retrieve().bodyToMono(byte[].class).block();
 			if(bytesSAR != null) {
 				locations.add(new ByteArrayInputStream(bytesSAR));
 			}

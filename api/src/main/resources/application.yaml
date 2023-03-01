@@ -61,6 +61,7 @@ springdoc:
 authorization:
   user: ${GRAD_CLIENT_NAME}
   password: ${GRAD_CLIENT_SECRET}
+  token-expiry-offset: '30'
 
 sftp:
   bcmail:

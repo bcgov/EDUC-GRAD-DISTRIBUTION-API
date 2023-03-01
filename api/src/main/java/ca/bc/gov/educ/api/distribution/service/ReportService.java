@@ -3,6 +3,7 @@ package ca.bc.gov.educ.api.distribution.service;
 import ca.bc.gov.educ.api.distribution.model.dto.*;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils;
+import ca.bc.gov.educ.api.distribution.util.RestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
@@ -18,16 +19,23 @@ import java.util.List;
 @Service
 public class ReportService {
 
-	@Autowired
     WebClient webClient;
-	
-	@Autowired
+
+	RestUtils restUtils;
+
 	EducDistributionApiConstants educDistributionApiConstants;
+
+	@Autowired
+	public ReportService(WebClient webClient, RestUtils restUtils, EducDistributionApiConstants educDistributionApiConstants) {
+		this.webClient = webClient;
+		this.restUtils = restUtils;
+		this.educDistributionApiConstants = educDistributionApiConstants;
+	}
 
 	public InputStreamResource getPackingSlip(ReportRequest packingSlipReq, String accessToken) {
 		try
 		{
-			byte[] packingSlip = webClient.post().uri(educDistributionApiConstants.getPackingSlip()).headers(h -> h.setBearerAuth(accessToken)).body(BodyInserters.fromValue(packingSlipReq)).retrieve().bodyToMono(byte[].class).block();
+			byte[] packingSlip = webClient.post().uri(educDistributionApiConstants.getPackingSlip()).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).body(BodyInserters.fromValue(packingSlipReq)).retrieve().bodyToMono(byte[].class).block();
 			ByteArrayInputStream bis = new ByteArrayInputStream(packingSlip);
 			return new InputStreamResource(bis);
 		} catch (Exception e) {
