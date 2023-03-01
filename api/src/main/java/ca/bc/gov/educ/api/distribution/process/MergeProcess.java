@@ -125,7 +125,7 @@ public class MergeProcess extends BaseProcess {
 					locations.add(gradReportPdf.getInputStream());
 					logger.debug("*** Added PDFs Current Report Type {}", report.getReportTypeCode());
 					mergeDocuments(processorData, report.getSchoolOfRecord(),
-                            "/EDGRAD.L." + EducDistributionApiUtils.getFileNameSchoolReports(report.getSchoolOfRecord(), LocalDate.now().getYear(), "12", report.getReportTypeCode()),
+                            "/EDGRAD.L.",
 							"324W", locations);
 					numberOfPdfs++;
 				} else {
