@@ -289,7 +289,7 @@ public class MergeProcess extends BaseProcess{
 		List<InputStream> locations=new ArrayList<>();
 		try {
 
-			byte[] bytesSAR = webClient.post().uri(educDistributionApiConstants.getDistributionReport()).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).body(BodyInserters.fromValue(distributionRequest)).retrieve().bodyToMono(byte[].class).block();
+			byte[] bytesSAR = webClient.post().uri(educDistributionApiConstants.getSchoolDistributionReport()).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).body(BodyInserters.fromValue(distributionRequest)).retrieve().bodyToMono(byte[].class).block();
 			if(bytesSAR != null) {
 				locations.add(new ByteArrayInputStream(bytesSAR));
 				byte[] encoded = Base64.encodeBase64(bytesSAR);
