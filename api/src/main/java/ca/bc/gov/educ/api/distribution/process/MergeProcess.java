@@ -80,7 +80,7 @@ public class MergeProcess extends BaseProcess {
                 logger.info("School {}/{}", counter, mapDist.size());
             }
         }
-        numberOfPdfs += processDistrictSchoolYearEndDistribution(batchId, processorData);
+        numberOfPdfs += processDistrictSchoolYearEndDistribution(processorData);
         postingProcess(batchId, processorData, numberOfPdfs);
         long endTime = System.currentTimeMillis();
         long diff = (endTime - startTime) / 1000;
@@ -90,7 +90,7 @@ public class MergeProcess extends BaseProcess {
         return processorData;
     }
 
-    private int processDistrictSchoolYearEndDistribution(Long batchId, ProcessorData processorData) {
+    private int processDistrictSchoolYearEndDistribution(ProcessorData processorData) {
         int numberOfPdfs = 0;
         if (YEARENDDIST.equalsIgnoreCase(processorData.getActivityCode())) {
             //DISTREP_YE_SC
