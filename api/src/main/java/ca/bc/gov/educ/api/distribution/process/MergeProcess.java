@@ -97,9 +97,9 @@ public class MergeProcess extends BaseProcess{
 			//DISTREP_YE_SD
 			String accessTokenSd = restUtils.getAccessToken();
 			List<SchoolReports> yeDistrictReports = webClient.get().uri(String.format(educDistributionApiConstants.getSchoolReportsByReportType(), "DISTREP_YE_SD") + "?skipBody=true")
-					.headers(h -> {
-						h.setBearerAuth(accessTokenSd);
-					}).retrieve().bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
+					.headers(h ->
+						h.setBearerAuth(accessTokenSd)
+					).retrieve().bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
 					}).block();
 			assert yeDistrictReports != null;
 			numberOfPdfs += processDistrictSchoolEndYearReports(yeDistrictReports, processorData, accessTokenSd);
