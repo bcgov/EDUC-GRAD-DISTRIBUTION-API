@@ -119,19 +119,19 @@ public class MergeProcess extends BaseProcess{
 		int numberOfPdfs = 0;
 		for (SchoolReports report : schoolReports) {
 			try {
-				InputStreamResource gradReportPdf = webClient.get().uri(String.format(educDistributionApiConstants.getSchoolReport(), report.getSchoolOfRecord(), report.getReportTypeCode())).headers(h -> h.setBearerAuth(accessToken)).retrieve().bodyToMono(InputStreamResource.class).block();
+				byte[] gradReportPdf = webClient.get().uri(String.format(educDistributionApiConstants.getSchoolReport(), report.getSchoolOfRecord(), report.getReportTypeCode())).headers(h -> h.setBearerAuth(accessToken)).retrieve().bodyToMono(byte[].class).block();
 				if (gradReportPdf != null) {
 					logger.debug("*** Added PDFs Current Report Type {}", report.getReportTypeCode());
 					uploadSchoolYearEndDocuments(
 							processorData.getBatchId(),
 							report.getSchoolOfRecord(),
 							report.getSchoolCategory(),
-							gradReportPdf.getInputStream().readAllBytes());
+							gradReportPdf);
 					numberOfPdfs++;
 				} else {
 					logger.debug("*** Failed to Add PDFs Current Report Type {}", report.getReportTypeCode());
 				}
-			} catch (IOException e) {
+			} catch (Exception e) {
 				logger.debug(EXCEPTION, e.getLocalizedMessage());
 			}
 		}
