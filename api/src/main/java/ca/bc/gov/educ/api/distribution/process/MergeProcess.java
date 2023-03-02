@@ -95,14 +95,6 @@ public class MergeProcess extends BaseProcess {
         if (YEARENDDIST.equalsIgnoreCase(processorData.getActivityCode())) {
             //DISTREP_YE_SC
             //DISTREP_YE_SD
-			String accessTokenSc = restUtils.getAccessToken();
-            List<SchoolReports> yeSchoolReports = webClient.get().uri(String.format(educDistributionApiConstants.getSchoolReportsByReportType(), "DISTREP_YE_SC") + "?skipBody=true")
-                    .headers(
-                            h -> h.setBearerAuth(accessTokenSc)
-                    ).retrieve().bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
-                    }).block();
-            assert yeSchoolReports != null;
-            numberOfPdfs += processDistrictSchoolEndYearReports(yeSchoolReports, processorData, accessTokenSc);
             String accessTokenSd = restUtils.getAccessToken();
             List<SchoolReports> yeDistrictReports = webClient.get().uri(String.format(educDistributionApiConstants.getSchoolReportsByReportType(), "DISTREP_YE_SD") + "?skipBody=true")
                     .headers(h -> {
@@ -111,22 +103,30 @@ public class MergeProcess extends BaseProcess {
                     }).block();
             assert yeDistrictReports != null;
             numberOfPdfs += processDistrictSchoolEndYearReports(yeDistrictReports, processorData, accessTokenSd);
+            String accessTokenSc = restUtils.getAccessToken();
+            List<SchoolReports> yeSchoolReports = webClient.get().uri(String.format(educDistributionApiConstants.getSchoolReportsByReportType(), "DISTREP_YE_SC") + "?skipBody=true")
+                    .headers(
+                            h -> h.setBearerAuth(accessTokenSc)
+                    ).retrieve().bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
+                    }).block();
+            assert yeSchoolReports != null;
+            numberOfPdfs += processDistrictSchoolEndYearReports(yeSchoolReports, processorData, accessTokenSc);
         }
         return numberOfPdfs;
     }
 
     private int processDistrictSchoolEndYearReports(List<SchoolReports> schoolReports, ProcessorData processorData, String accessToken) {
 		int numberOfPdfs = 0;
-		List<InputStream> locations = new ArrayList<>();
 		for (SchoolReports report : schoolReports) {
 			try {
 				InputStreamResource gradReportPdf = webClient.get().uri(String.format(educDistributionApiConstants.getSchoolReport(), report.getSchoolOfRecord(), report.getReportTypeCode())).headers(h -> h.setBearerAuth(accessToken)).retrieve().bodyToMono(InputStreamResource.class).block();
 				if (gradReportPdf != null) {
-					locations.add(gradReportPdf.getInputStream());
 					logger.debug("*** Added PDFs Current Report Type {}", report.getReportTypeCode());
-					mergeDocuments(processorData, report.getSchoolOfRecord(),
-                            "/EDGRAD.L.",
-							"324W", locations);
+					uploadSchoolYearEndDocuments(
+					        processorData.getBatchId(),
+                            report.getSchoolOfRecord(),
+                            report.getSchoolCategory(),
+                            gradReportPdf.getInputStream().readAllBytes());
 					numberOfPdfs++;
 				} else {
 					logger.debug("*** Failed to Add PDFs Current Report Type {}", report.getReportTypeCode());
