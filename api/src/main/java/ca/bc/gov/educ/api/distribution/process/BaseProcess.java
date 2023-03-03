@@ -27,6 +27,7 @@ public abstract class BaseProcess implements DistributionProcess{
     protected static final String LOC = "/tmp/";
     protected static final String DEL = "/";
     protected static final String EXCEPTION = "Error {} ";
+    protected static final String SCHOOL_LABELS_CODE = "000000000";
 
     @Autowired
     GradValidation validation;
@@ -115,7 +116,7 @@ public abstract class BaseProcess implements DistributionProcess{
         String districtCode = StringUtils.substring(mincode, 0, 3);
         try {
             StringBuilder fileLocBuilder = new StringBuilder();
-            if("000000000".equalsIgnoreCase(mincode)) {
+            if(SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode)) {
                 fileLocBuilder.append(LOC).append(batchId);
             } else if(isDistrict) {
                 fileLocBuilder.append(LOC).append(batchId).append(DEL).append(districtCode);
@@ -127,7 +128,7 @@ public abstract class BaseProcess implements DistributionProcess{
             Path path = Paths.get(fileLocBuilder.toString());
             Files.createDirectories(path);
             StringBuilder fileNameBuilder = new StringBuilder();
-            if("000000000".equalsIgnoreCase(mincode)) {
+            if(SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode)) {
                 fileNameBuilder.append(LOC).append(batchId);
             } else if(isDistrict) {
                 fileNameBuilder.append(LOC).append(batchId).append(DEL).append(districtCode);
@@ -136,7 +137,7 @@ public abstract class BaseProcess implements DistributionProcess{
             } else {
                 fileNameBuilder.append(LOC).append(batchId).append(DEL).append(districtCode).append(DEL).append(mincode);
             }
-            if("000000000".equalsIgnoreCase(mincode)) {
+            if(SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode)) {
                 fileNameBuilder.append("/EDGRAD.L.").append("Labels");
             } else {
                 fileNameBuilder.append("/EDGRAD.R.").append("324W");
