@@ -261,6 +261,24 @@ public class DistributionServiceTest {
 
 		if("DISTRUN_YE".equalsIgnoreCase(reportType)) {
 
+			SchoolReports schoolLabelsReports = new SchoolReports();
+			schoolLabelsReports.setSchoolOfRecord("000000000");
+			schoolLabelsReports.setReportTypeCode("ADDRESS_LABEL_YE");
+			schoolLabelsReports.setId(UUID.randomUUID());
+
+			when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+			when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolReportsByReportType(), schoolLabelsReports.getReportTypeCode()) + "?skipBody=true")).thenReturn(this.requestHeadersMock);
+			when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+			when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+			when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
+			})).thenReturn(Mono.just(List.of(schoolLabelsReports)));
+
+			when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+			when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolReport(), "000000000", "ADDRESS_LABEL_YE"))).thenReturn(this.requestHeadersMock);
+			when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+			when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+			when(this.responseMock.bodyToMono(byte[].class)).thenReturn(Mono.just(UUID.randomUUID().toString().getBytes()));
+
 			SchoolReports districtReports = new SchoolReports();
 			districtReports.setSchoolOfRecord("005");
 			districtReports.setReportTypeCode("DISTREP_YE_SD");

@@ -32,6 +32,7 @@ public class MergeProcess extends BaseProcess{
 	
 	private static Logger logger = LoggerFactory.getLogger(MergeProcess.class);
 	private static final String YEARENDDIST = "YEARENDDIST";
+	private static final String SKIP_BODY_TRUE = "?skipBody=true";
 
 	@Override
 	public ProcessorData fire(ProcessorData processorData) {
@@ -93,10 +94,19 @@ public class MergeProcess extends BaseProcess{
 	private int processDistrictSchoolYearEndDistribution(ProcessorData processorData) {
 		int numberOfPdfs = 0;
 		if (YEARENDDIST.equalsIgnoreCase(processorData.getActivityCode())) {
+			//ADDRESS_LABEL_YE
 			//DISTREP_YE_SC
 			//DISTREP_YE_SD
+			String accessTokenSl = restUtils.getAccessToken();
+			List<SchoolReports> yeSchooLabelsReports = webClient.get().uri(String.format(educDistributionApiConstants.getSchoolReportsByReportType(), "ADDRESS_LABEL_YE") + SKIP_BODY_TRUE)
+					.headers(h ->
+							h.setBearerAuth(accessTokenSl)
+					).retrieve().bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
+					}).block();
+			assert yeSchooLabelsReports != null;
+			numberOfPdfs += processDistrictSchoolEndYearReports(yeSchooLabelsReports, processorData, accessTokenSl);
 			String accessTokenSd = restUtils.getAccessToken();
-			List<SchoolReports> yeDistrictReports = webClient.get().uri(String.format(educDistributionApiConstants.getSchoolReportsByReportType(), "DISTREP_YE_SD") + "?skipBody=true")
+			List<SchoolReports> yeDistrictReports = webClient.get().uri(String.format(educDistributionApiConstants.getSchoolReportsByReportType(), "DISTREP_YE_SD") + SKIP_BODY_TRUE)
 					.headers(h ->
 						h.setBearerAuth(accessTokenSd)
 					).retrieve().bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
@@ -104,7 +114,7 @@ public class MergeProcess extends BaseProcess{
 			assert yeDistrictReports != null;
 			numberOfPdfs += processDistrictSchoolEndYearReports(yeDistrictReports, processorData, accessTokenSd);
 			String accessTokenSc = restUtils.getAccessToken();
-			List<SchoolReports> yeSchoolReports = webClient.get().uri(String.format(educDistributionApiConstants.getSchoolReportsByReportType(), "DISTREP_YE_SC") + "?skipBody=true")
+			List<SchoolReports> yeSchoolReports = webClient.get().uri(String.format(educDistributionApiConstants.getSchoolReportsByReportType(), "DISTREP_YE_SC") + SKIP_BODY_TRUE)
 					.headers(
 							h -> h.setBearerAuth(accessTokenSc)
 					).retrieve().bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
