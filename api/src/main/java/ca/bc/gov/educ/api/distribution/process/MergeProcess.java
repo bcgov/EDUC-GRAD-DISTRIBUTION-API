@@ -168,7 +168,7 @@ public class MergeProcess extends BaseProcess{
 				byte[] gradReportPdf = webClient.get().uri(String.format(educDistributionApiConstants.getSchoolReport(), report.getSchoolOfRecord(), report.getReportTypeCode())).headers(h -> h.setBearerAuth(accessToken)).retrieve().bodyToMono(byte[].class).block();
 				if (gradReportPdf != null) {
 					logger.debug("*** Added PDFs Current Report Type {}", report.getReportTypeCode());
-					uploadSchoolYearEndDocuments(
+					uploadSchoolReportDocuments(
 							processorData.getBatchId(),
 							report.getSchoolOfRecord(),
 							report.getSchoolCategory(),

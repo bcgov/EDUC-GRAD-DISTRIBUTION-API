@@ -111,7 +111,7 @@ public abstract class BaseProcess implements DistributionProcess{
         }
     }
 
-    protected void uploadSchoolYearEndDocuments(Long batchId, String mincode, String schoolCategory, byte[] gradReportPdf) {
+    protected void uploadSchoolReportDocuments(Long batchId, String mincode, String schoolCategory, byte[] gradReportPdf) {
         boolean isDistrict = StringUtils.isNotBlank(mincode) && StringUtils.length(mincode) == 3;
         String districtCode = StringUtils.substring(mincode, 0, 3);
         try {
