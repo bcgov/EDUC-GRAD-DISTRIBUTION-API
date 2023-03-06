@@ -82,8 +82,12 @@ public class MergeProcess extends BaseProcess{
 				logger.debug("School {}/{}",counter,mapDist.size());
 			}
 		}
-		numberOfPdfs += processDistrictSchoolDistribution(processorData);
-		numberOfPdfs += processDistrictSchoolYearEndDistribution(processorData);
+		if(MONTHLYDIST.equalsIgnoreCase(processorData.getActivityCode())) {
+			numberOfPdfs += processDistrictSchoolDistribution(processorData, "ADDRESS_LABEL", "DISTREP_SD", "DISTREP_SC");
+		}
+		if (YEARENDDIST.equalsIgnoreCase(processorData.getActivityCode())) {
+			numberOfPdfs += processDistrictSchoolDistribution(processorData, "ADDRESS_LABEL_YE", "DISTREP_YE_SD", "DISTREP_YE_SC");
+		}
 		postingProcess(batchId,processorData,numberOfPdfs);
 		long endTime = System.currentTimeMillis();
 		long diff = (endTime - startTime)/1000;
@@ -93,14 +97,10 @@ public class MergeProcess extends BaseProcess{
 		return processorData;
 	}
 
-	private int processDistrictSchoolYearEndDistribution(ProcessorData processorData) {
+	private int processDistrictSchoolDistribution(ProcessorData processorData, String schooLabelReportType, String districtReportType, String schoolReportType) {
 		int numberOfPdfs = 0;
-		if (YEARENDDIST.equalsIgnoreCase(processorData.getActivityCode())) {
-			//ADDRESS_LABEL_YE
-			//DISTREP_YE_SC
-			//DISTREP_YE_SD
 			String accessTokenSl = restUtils.getAccessToken();
-			List<SchoolReports> yeSchooLabelsReports = webClient.get().uri(String.format(educDistributionApiConstants.getSchoolReportsByReportType(), "ADDRESS_LABEL_YE") + SKIP_BODY_TRUE)
+			List<SchoolReports> yeSchooLabelsReports = webClient.get().uri(String.format(educDistributionApiConstants.getSchoolReportsByReportType(), schooLabelReportType) + SKIP_BODY_TRUE)
 					.headers(h ->
 							h.setBearerAuth(accessTokenSl)
 					).retrieve().bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
@@ -108,41 +108,7 @@ public class MergeProcess extends BaseProcess{
 			assert yeSchooLabelsReports != null;
 			numberOfPdfs += processDistrictSchoolReports(yeSchooLabelsReports, processorData, accessTokenSl);
 			String accessTokenSd = restUtils.getAccessToken();
-			List<SchoolReports> yeDistrictReports = webClient.get().uri(String.format(educDistributionApiConstants.getSchoolReportsByReportType(), "DISTREP_YE_SD") + SKIP_BODY_TRUE)
-					.headers(h ->
-						h.setBearerAuth(accessTokenSd)
-					).retrieve().bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
-					}).block();
-			assert yeDistrictReports != null;
-			numberOfPdfs += processDistrictSchoolReports(yeDistrictReports, processorData, accessTokenSd);
-			String accessTokenSc = restUtils.getAccessToken();
-			List<SchoolReports> yeSchoolReports = webClient.get().uri(String.format(educDistributionApiConstants.getSchoolReportsByReportType(), "DISTREP_YE_SC") + SKIP_BODY_TRUE)
-					.headers(
-							h -> h.setBearerAuth(accessTokenSc)
-					).retrieve().bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
-					}).block();
-			assert yeSchoolReports != null;
-			numberOfPdfs += processDistrictSchoolReports(yeSchoolReports, processorData, accessTokenSc);
-		}
-		return numberOfPdfs;
-	}
-
-	private int processDistrictSchoolDistribution(ProcessorData processorData) {
-		int numberOfPdfs = 0;
-		if (MONTHLYDIST.equalsIgnoreCase(processorData.getActivityCode())) {
-			//ADDRESS_LABEL
-			//DISTREP_SC
-			//DISTREP_SD
-			String accessTokenSl = restUtils.getAccessToken();
-			List<SchoolReports> yeSchooLabelsReports = webClient.get().uri(String.format(educDistributionApiConstants.getSchoolReportsByReportType(), "ADDRESS_LABEL") + SKIP_BODY_TRUE)
-					.headers(h ->
-							h.setBearerAuth(accessTokenSl)
-					).retrieve().bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
-					}).block();
-			assert yeSchooLabelsReports != null;
-			numberOfPdfs += processDistrictSchoolReports(yeSchooLabelsReports, processorData, accessTokenSl);
-			String accessTokenSd = restUtils.getAccessToken();
-			List<SchoolReports> yeDistrictReports = webClient.get().uri(String.format(educDistributionApiConstants.getSchoolReportsByReportType(), "DISTREP_SD") + SKIP_BODY_TRUE)
+			List<SchoolReports> yeDistrictReports = webClient.get().uri(String.format(educDistributionApiConstants.getSchoolReportsByReportType(), districtReportType) + SKIP_BODY_TRUE)
 					.headers(h ->
 							h.setBearerAuth(accessTokenSd)
 					).retrieve().bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
@@ -150,14 +116,13 @@ public class MergeProcess extends BaseProcess{
 			assert yeDistrictReports != null;
 			numberOfPdfs += processDistrictSchoolReports(yeDistrictReports, processorData, accessTokenSd);
 			String accessTokenSc = restUtils.getAccessToken();
-			List<SchoolReports> yeSchoolReports = webClient.get().uri(String.format(educDistributionApiConstants.getSchoolReportsByReportType(), "DISTREP_SC") + SKIP_BODY_TRUE)
+			List<SchoolReports> yeSchoolReports = webClient.get().uri(String.format(educDistributionApiConstants.getSchoolReportsByReportType(), schoolReportType) + SKIP_BODY_TRUE)
 					.headers(
 							h -> h.setBearerAuth(accessTokenSc)
 					).retrieve().bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
 					}).block();
 			assert yeSchoolReports != null;
 			numberOfPdfs += processDistrictSchoolReports(yeSchoolReports, processorData, accessTokenSc);
-		}
 		return numberOfPdfs;
 	}
 
