@@ -150,12 +150,19 @@ objects:
         name: "${REPO_NAME}-dc"
       minReplicas: ${{MIN_REPLICAS}}
       maxReplicas: ${{MAX_REPLICAS}}
+      #GRAD2-1947 Resource Optimization
       metrics:
         - type: Resource
           resource:
             name: cpu
             target:
-              averageUtilization: 600
+              averageUtilization: 1000
+              type: Utilization
+        - type: Resource
+          resource:
+            name: memory
+            target:
+              averageUtilization: 1800
               type: Utilization
   - apiVersion: v1
     kind: PersistentVolumeClaim

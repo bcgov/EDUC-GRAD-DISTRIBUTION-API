@@ -48,7 +48,7 @@ server:
     threads:
       worker: 128
       io: 16
-  #port: ${HTTP_PORT}
+  #port: {HTTP_PORT}
 
 #API Documentation
 springdoc:
