@@ -20,8 +20,9 @@ env:
   MAX_CPU: "250m"
   MIN_MEM: "100Mi"
   MAX_MEM: "2048Mi"
-  MIN_REPLICAS: "2"
-  MAX_REPLICAS: "3"
+  #GRAD2-1947 Resource Optimization
+  MIN_REPLICAS: "3"
+  MAX_REPLICAS: "5"
 
 on:
   # https://docs.github.com/en/actions/reference/events-that-trigger-workflows
