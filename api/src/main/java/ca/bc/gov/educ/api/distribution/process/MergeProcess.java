@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.distribution.process;
 
 import ca.bc.gov.educ.api.distribution.model.dto.*;
+import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -34,7 +35,6 @@ public class MergeProcess extends BaseProcess{
 	private static Logger logger = LoggerFactory.getLogger(MergeProcess.class);
 	private static final String YEARENDDIST = "YEARENDDIST";
 	private static final String MONTHLYDIST = "MONTHLYDIST";
-	private static final String SKIP_BODY_TRUE = "?skipBody=true";
 
 	@Override
 	public ProcessorData fire(ProcessorData processorData) {
@@ -115,7 +115,7 @@ public class MergeProcess extends BaseProcess{
 		Integer reportCount = 0;
 		final UUID correlationID = UUID.randomUUID();
 		reportCount += webClient.get().uri(educDistributionApiConstants.getSchoolDistrictYearEndReport())
-				.headers(h -> { h.setBearerAuth(accessToken); h.set(educDistributionApiConstants.CORRELATION_ID, correlationID.toString()); })
+				.headers(h -> { h.setBearerAuth(accessToken); h.set(EducDistributionApiConstants.CORRELATION_ID, correlationID.toString()); })
 				.retrieve().bodyToMono(Integer.class).block();
 		return reportCount;
 	}
@@ -124,7 +124,7 @@ public class MergeProcess extends BaseProcess{
 		Integer reportCount = 0;
 		final UUID correlationID = UUID.randomUUID();
 		reportCount += webClient.get().uri(educDistributionApiConstants.getSchoolDistrictMonthReport())
-				.headers(h -> { h.setBearerAuth(accessToken); h.set(educDistributionApiConstants.CORRELATION_ID, correlationID.toString()); })
+				.headers(h -> { h.setBearerAuth(accessToken); h.set(EducDistributionApiConstants.CORRELATION_ID, correlationID.toString()); })
 				.retrieve().bodyToMono(Integer.class).block();
 		return reportCount;
 	}
@@ -132,7 +132,7 @@ public class MergeProcess extends BaseProcess{
 	private int processDistrictSchoolDistribution(ProcessorData processorData, String schooLabelReportType, String districtReportType, String schoolReportType) {
 		int numberOfPdfs = 0;
 			String accessTokenSl = restUtils.getAccessToken();
-			List<SchoolReports> yeSchooLabelsReports = webClient.get().uri(String.format(educDistributionApiConstants.getSchoolReportsByReportType(), schooLabelReportType) + SKIP_BODY_TRUE)
+			List<SchoolReports> yeSchooLabelsReports = webClient.get().uri(String.format(educDistributionApiConstants.getSchoolReportsByReportType(), schooLabelReportType))
 					.headers(h ->
 							h.setBearerAuth(accessTokenSl)
 					).retrieve().bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
@@ -140,7 +140,7 @@ public class MergeProcess extends BaseProcess{
 			assert yeSchooLabelsReports != null;
 			numberOfPdfs += processDistrictSchoolReports(yeSchooLabelsReports, processorData, accessTokenSl);
 			String accessTokenSd = restUtils.getAccessToken();
-			List<SchoolReports> yeDistrictReports = webClient.get().uri(String.format(educDistributionApiConstants.getSchoolReportsByReportType(), districtReportType) + SKIP_BODY_TRUE)
+			List<SchoolReports> yeDistrictReports = webClient.get().uri(String.format(educDistributionApiConstants.getSchoolReportsByReportType(), districtReportType))
 					.headers(h ->
 							h.setBearerAuth(accessTokenSd)
 					).retrieve().bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
@@ -148,7 +148,7 @@ public class MergeProcess extends BaseProcess{
 			assert yeDistrictReports != null;
 			numberOfPdfs += processDistrictSchoolReports(yeDistrictReports, processorData, accessTokenSd);
 			String accessTokenSc = restUtils.getAccessToken();
-			List<SchoolReports> yeSchoolReports = webClient.get().uri(String.format(educDistributionApiConstants.getSchoolReportsByReportType(), schoolReportType) + SKIP_BODY_TRUE)
+			List<SchoolReports> yeSchoolReports = webClient.get().uri(String.format(educDistributionApiConstants.getSchoolReportsByReportType(), schoolReportType))
 					.headers(
 							h -> h.setBearerAuth(accessTokenSc)
 					).retrieve().bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
