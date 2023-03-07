@@ -6,13 +6,13 @@ env:
   # To get a permanent token, refer to https://github.com/redhat-actions/oc-login/wiki/Using-a-Service-Account-for-GitHub-Actions
   OPENSHIFT_SERVER: ${{ secrets.OPENSHIFT_SERVER }}
   OPENSHIFT_TOKEN: ${{ secrets.OPENSHIFT_TOKEN }}
-  OPENSHIFT_NAMESPACE: ${{ secrets.GRAD_NAMESPACE }}-prod
+  OPENSHIFT_NAMESPACE: ${{ secrets.GRAD_BUSINESS_NAMESPACE }}-prod
 
   SPRING_BOOT_IMAGE_NAME: educ-grad-distribution-api-dc
 
   REPO_NAME: "educ-grad-distribution-api"
   APP_DOMAIN: ${{ secrets.APP_DOMAIN }}
-  NAMESPACE: ${{ secrets.GRAD_NAMESPACE }}
+  NAMESPACE: ${{ secrets.GRAD_BUSINESS_NAMESPACE }}
   TAG: "latest"
 
   MIN_CPU: "20m"
