@@ -116,6 +116,10 @@ endpoint:
   grad-graduation-api:
     report-by-pen:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/report/data/%s?type=CERT
+    school_district_year_end_report:
+      url: ${GRAD_GRADUATION_API}api/v1/graduate/report/schooldistrictyearend
+    school_district_month_report:
+      url: ${GRAD_GRADUATION_API}api/v1/graduate/report/schooldistrictmonth
   educ-school-api:
     school-by-min-code:
       url: ${EDUC_SCHOOL_API}api/v1/schools/%s
