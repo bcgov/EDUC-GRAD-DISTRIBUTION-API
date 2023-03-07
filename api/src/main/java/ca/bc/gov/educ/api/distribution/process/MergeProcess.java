@@ -111,7 +111,7 @@ public class MergeProcess extends BaseProcess{
 		return processorData;
 	}
 
-	public Integer createDistrictSchoolYearEndReport(String accessToken) {
+	private Integer createDistrictSchoolYearEndReport(String accessToken) {
 		Integer reportCount = 0;
 		final UUID correlationID = UUID.randomUUID();
 		reportCount += webClient.get().uri(educDistributionApiConstants.getSchoolDistrictYearEndReport())
@@ -120,7 +120,7 @@ public class MergeProcess extends BaseProcess{
 		return reportCount;
 	}
 
-	public Integer createDistrictSchoolMonthReport(String accessToken) {
+	private Integer createDistrictSchoolMonthReport(String accessToken) {
 		Integer reportCount = 0;
 		final UUID correlationID = UUID.randomUUID();
 		reportCount += webClient.get().uri(educDistributionApiConstants.getSchoolDistrictMonthReport())

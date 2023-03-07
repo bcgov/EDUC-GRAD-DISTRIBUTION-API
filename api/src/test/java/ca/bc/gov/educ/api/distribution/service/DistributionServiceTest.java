@@ -259,8 +259,6 @@ public class DistributionServiceTest {
 
 		System.out.println(jsonTransformer.marshall(printRequest));
 
-		if("DISTRUN_YE".equalsIgnoreCase(reportType)) {
-
 			SchoolReports schoolLabelsReports = new SchoolReports();
 			schoolLabelsReports.setSchoolOfRecord("000000000");
 			schoolLabelsReports.setReportTypeCode("ADDRESS_LABEL_YE");
@@ -318,7 +316,19 @@ public class DistributionServiceTest {
 			when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 			when(this.responseMock.bodyToMono(byte[].class)).thenReturn(Mono.just(UUID.randomUUID().toString().getBytes()));
 
-		}
+			when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+			when(this.requestHeadersUriMock.uri(constants.getSchoolDistrictYearEndReport())).thenReturn(this.requestHeadersMock);
+			when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+			when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+			when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(4));
+
+			when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+			when(this.requestHeadersUriMock.uri(constants.getSchoolDistrictMonthReport())).thenReturn(this.requestHeadersMock);
+			when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+			when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+			when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(4));
+
+
 		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,null,accessToken);
 	}
 
