@@ -94,6 +94,8 @@ endpoint:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/schoolreport
     school-report:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/schoolreport?mincode=%s&reportType=%s
+    school-report-by-report-type:
+      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/schoolreport/type/%s
     get-achievement-report:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/studentreport?studentID=%s&reportType=%s&documentStatusCode=%s
     get-transcript-by-student-id:

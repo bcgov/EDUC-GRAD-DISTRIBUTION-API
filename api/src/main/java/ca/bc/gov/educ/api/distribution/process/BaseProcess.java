@@ -5,6 +5,7 @@ import ca.bc.gov.educ.api.distribution.service.PsiService;
 import ca.bc.gov.educ.api.distribution.service.ReportService;
 import ca.bc.gov.educ.api.distribution.service.SchoolService;
 import ca.bc.gov.educ.api.distribution.util.*;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.pdfbox.io.MemoryUsageSetting;
 import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import org.slf4j.Logger;
@@ -12,10 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -29,6 +27,7 @@ public abstract class BaseProcess implements DistributionProcess{
     protected static final String LOC = "/tmp/";
     protected static final String DEL = "/";
     protected static final String EXCEPTION = "Error {} ";
+    protected static final String SCHOOL_LABELS_CODE = "000000000";
 
     @Autowired
     GradValidation validation;
@@ -109,6 +108,46 @@ public abstract class BaseProcess implements DistributionProcess{
         if(processorData.getLocalDownload() == null || !processorData.getLocalDownload().equalsIgnoreCase("Y")) {
             createControlFile(batchId, numberOfPdfs);
             sftpUtils.sftpUploadBCMail(batchId);
+        }
+    }
+
+    protected void uploadSchoolReportDocuments(Long batchId, String mincode, String schoolCategory, byte[] gradReportPdf) {
+        boolean isDistrict = StringUtils.isNotBlank(mincode) && StringUtils.length(mincode) == 3;
+        String districtCode = StringUtils.substring(mincode, 0, 3);
+        try {
+            StringBuilder fileLocBuilder = new StringBuilder();
+            if(SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode)) {
+                fileLocBuilder.append(LOC).append(batchId);
+            } else if(isDistrict) {
+                fileLocBuilder.append(LOC).append(batchId).append(DEL).append(districtCode);
+            } else if("02".equalsIgnoreCase(schoolCategory)) {
+                fileLocBuilder.append(LOC).append(batchId).append(DEL).append(mincode);
+            } else {
+                fileLocBuilder.append(LOC).append(batchId).append(DEL).append(districtCode).append(DEL).append(mincode);
+            }
+            Path path = Paths.get(fileLocBuilder.toString());
+            Files.createDirectories(path);
+            StringBuilder fileNameBuilder = new StringBuilder();
+            if(SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode)) {
+                fileNameBuilder.append(LOC).append(batchId);
+            } else if(isDistrict) {
+                fileNameBuilder.append(LOC).append(batchId).append(DEL).append(districtCode);
+            } else if("02".equalsIgnoreCase(schoolCategory)) {
+                fileNameBuilder.append(LOC).append(batchId).append(DEL).append(mincode);
+            } else {
+                fileNameBuilder.append(LOC).append(batchId).append(DEL).append(districtCode).append(DEL).append(mincode);
+            }
+            if(SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode)) {
+                fileNameBuilder.append("/EDGRAD.L.").append("Labels");
+            } else {
+                fileNameBuilder.append("/EDGRAD.R.").append("324W");
+            }
+            fileNameBuilder.append(".").append(EducDistributionApiUtils.getFileName()).append(".pdf");
+            try (OutputStream out = new FileOutputStream(fileNameBuilder.toString())) {
+                        out.write(gradReportPdf);
+            }
+        } catch (Exception e) {
+            logger.debug(EXCEPTION,e.getLocalizedMessage());
         }
     }
 

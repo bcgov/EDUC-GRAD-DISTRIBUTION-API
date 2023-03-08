@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.internal.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -30,6 +31,9 @@ import java.util.Map;
 public class MergeProcess extends BaseProcess{
 	
 	private static Logger logger = LoggerFactory.getLogger(MergeProcess.class);
+	private static final String YEARENDDIST = "YEARENDDIST";
+	private static final String MONTHLYDIST = "MONTHLYDIST";
+	private static final String SKIP_BODY_TRUE = "?skipBody=true";
 
 	@Override
 	public ProcessorData fire(ProcessorData processorData) {
@@ -78,6 +82,12 @@ public class MergeProcess extends BaseProcess{
 				logger.debug("School {}/{}",counter,mapDist.size());
 			}
 		}
+		if(MONTHLYDIST.equalsIgnoreCase(processorData.getActivityCode())) {
+			numberOfPdfs += processDistrictSchoolDistribution(processorData, "ADDRESS_LABEL", "DISTREP_SD", "DISTREP_SC");
+		}
+		if (YEARENDDIST.equalsIgnoreCase(processorData.getActivityCode())) {
+			numberOfPdfs += processDistrictSchoolDistribution(processorData, "ADDRESS_LABEL_YE", "DISTREP_YE_SD", "DISTREP_YE_SC");
+		}
 		postingProcess(batchId,processorData,numberOfPdfs);
 		long endTime = System.currentTimeMillis();
 		long diff = (endTime - startTime)/1000;
@@ -85,6 +95,58 @@ public class MergeProcess extends BaseProcess{
 		response.setMergeProcessResponse("Merge Successful and File Uploaded");
 		processorData.setDistributionResponse(response);
 		return processorData;
+	}
+
+	private int processDistrictSchoolDistribution(ProcessorData processorData, String schooLabelReportType, String districtReportType, String schoolReportType) {
+		int numberOfPdfs = 0;
+			String accessTokenSl = restUtils.getAccessToken();
+			List<SchoolReports> yeSchooLabelsReports = webClient.get().uri(String.format(educDistributionApiConstants.getSchoolReportsByReportType(), schooLabelReportType) + SKIP_BODY_TRUE)
+					.headers(h ->
+							h.setBearerAuth(accessTokenSl)
+					).retrieve().bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
+					}).block();
+			assert yeSchooLabelsReports != null;
+			numberOfPdfs += processDistrictSchoolReports(yeSchooLabelsReports, processorData, accessTokenSl);
+			String accessTokenSd = restUtils.getAccessToken();
+			List<SchoolReports> yeDistrictReports = webClient.get().uri(String.format(educDistributionApiConstants.getSchoolReportsByReportType(), districtReportType) + SKIP_BODY_TRUE)
+					.headers(h ->
+							h.setBearerAuth(accessTokenSd)
+					).retrieve().bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
+					}).block();
+			assert yeDistrictReports != null;
+			numberOfPdfs += processDistrictSchoolReports(yeDistrictReports, processorData, accessTokenSd);
+			String accessTokenSc = restUtils.getAccessToken();
+			List<SchoolReports> yeSchoolReports = webClient.get().uri(String.format(educDistributionApiConstants.getSchoolReportsByReportType(), schoolReportType) + SKIP_BODY_TRUE)
+					.headers(
+							h -> h.setBearerAuth(accessTokenSc)
+					).retrieve().bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
+					}).block();
+			assert yeSchoolReports != null;
+			numberOfPdfs += processDistrictSchoolReports(yeSchoolReports, processorData, accessTokenSc);
+		return numberOfPdfs;
+	}
+
+	private int processDistrictSchoolReports(List<SchoolReports> schoolReports, ProcessorData processorData, String accessToken) {
+		int numberOfPdfs = 0;
+		for (SchoolReports report : schoolReports) {
+			try {
+				byte[] gradReportPdf = webClient.get().uri(String.format(educDistributionApiConstants.getSchoolReport(), report.getSchoolOfRecord(), report.getReportTypeCode())).headers(h -> h.setBearerAuth(accessToken)).retrieve().bodyToMono(byte[].class).block();
+				if (gradReportPdf != null) {
+					logger.debug("*** Added PDFs Current Report Type {}", report.getReportTypeCode());
+					uploadSchoolReportDocuments(
+							processorData.getBatchId(),
+							report.getSchoolOfRecord(),
+							report.getSchoolCategory(),
+							gradReportPdf);
+					numberOfPdfs++;
+				} else {
+					logger.debug("*** Failed to Add PDFs Current Report Type {}", report.getReportTypeCode());
+				}
+			} catch (Exception e) {
+				logger.debug(EXCEPTION, e.getLocalizedMessage());
+			}
+		}
+		return numberOfPdfs;
 	}
 
 	private Pair<Integer,Integer> processYedrCertificatePrintRequest(DistributionPrintRequest obj, int currentSlipCount, ReportRequest packSlipReq, List<Student> studListNonGrad, ProcessorData processorData, String mincode, int numberOfPdfs) {
@@ -238,7 +300,7 @@ public class MergeProcess extends BaseProcess{
 		List<InputStream> locations=new ArrayList<>();
 		try {
 
-			byte[] bytesSAR = webClient.post().uri(educDistributionApiConstants.getDistributionReport()).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).body(BodyInserters.fromValue(distributionRequest)).retrieve().bodyToMono(byte[].class).block();
+			byte[] bytesSAR = webClient.post().uri(educDistributionApiConstants.getSchoolDistributionReport()).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).body(BodyInserters.fromValue(distributionRequest)).retrieve().bodyToMono(byte[].class).block();
 			if(bytesSAR != null) {
 				locations.add(new ByteArrayInputStream(bytesSAR));
 				byte[] encoded = Base64.encodeBase64(bytesSAR);
