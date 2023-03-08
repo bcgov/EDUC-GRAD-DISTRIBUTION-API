@@ -149,7 +149,7 @@ public class DistributionServiceTest {
 	public void testdistributeSchoolReports() {
 		DistributionResponse res = testdistributeSchoolReport("MERYER","DISTRUN_YE", "YEARENDDIST");
 		assertNotNull(res);
-		res = testdistributeSchoolReport("MERYER","DISTRUN", "MONTHLYDIST");
+		res = testdistributeSchoolReport("MER","DISTRUN", "MONTHLYDIST");
 		assertNotNull(res);
 	}
 
@@ -374,10 +374,16 @@ public class DistributionServiceTest {
 			when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(4));
 
 			when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-			when(this.requestHeadersUriMock.uri(constants.getSchoolDistrictMonthReport())).thenReturn(this.requestHeadersMock);
+			when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolDistrictMonthReport(), "ADDRESS_LABEL", null, null))).thenReturn(this.requestHeadersMock);
 			when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
 			when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 			when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(2));
+
+		when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+		when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolDistrictYearEndReport(), "ADDRESS_LABEL_YE", "DISTREP_YE_SD", "DISTREP_YE_SC"))).thenReturn(this.requestHeadersMock);
+		when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(2));
 
 		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,null,accessToken);
 	}
