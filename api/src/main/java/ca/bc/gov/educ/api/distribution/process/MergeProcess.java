@@ -63,7 +63,7 @@ public class MergeProcess extends BaseProcess{
 				List<Student> studListNonGrad = new ArrayList<>();
 				ReportRequest packSlipReq = reportService.preparePackingSlipData(schoolDetails, processorData.getBatchId());
 
-				if(obj.getSchoolDistributionRequest() != null) {
+				if(obj.getSchoolDistributionRequest() != null && MONTHLYDIST.equalsIgnoreCase(processorData.getActivityCode())) {
 					ReportRequest schoolDistributionReportRequest = reportService.prepareSchoolDistributionReportData(obj.getSchoolDistributionRequest(), processorData.getBatchId(),schoolDetails);
 					createAndSaveDistributionReport(schoolDistributionReportRequest,mincode,processorData);
 					numberOfPdfs++;
