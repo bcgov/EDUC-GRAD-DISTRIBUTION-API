@@ -7,7 +7,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
+import java.util.Objects;
 
 public class Student implements Serializable {
 
@@ -208,5 +208,18 @@ public class Student implements Serializable {
 
     public void setNonGradReasons(List<NonGradReason> nonGradReasons) {
         this.nonGradReasons = nonGradReasons;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Student student = (Student) o;
+        return Objects.equals(pen, student.pen);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(pen);
     }
 }

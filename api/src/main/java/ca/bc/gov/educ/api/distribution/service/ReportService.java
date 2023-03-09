@@ -14,6 +14,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 @Service
@@ -110,13 +111,6 @@ public class ReportService {
 		ReportRequest req = new ReportRequest();
 		ReportData data = new ReportData();
 
-		ReportOptions options = new ReportOptions();
-		options.setReportFile("school distribution");
-		options.setReportName("schoolDistribution");
-		options.setConvertTo("pdf");
-		options.setCacheReport(false);
-		options.setOverwrite(false);
-
 		List<StudentCredentialDistribution> schoolReportList = schoolDistributionRequest.getStudentList();
 		List<Student> stdList = new ArrayList<>();
 		School schObj = new School();
@@ -148,11 +142,21 @@ public class ReportService {
 
 			stdList.add(std);
 		}
-		schObj.setStudents(stdList);
+		//No dups for school report
+		List<Student> uniqueStudentList = new ArrayList<>(new LinkedHashSet<>(stdList));
+		schObj.setStudents(uniqueStudentList);
 		data.setSchool(schObj);
 		data.setOrgCode(StringUtils.startsWith(data.getSchool().getMincode(), "098") ? "YU" : "BC");
 		data.setReportNumber(data.getOrgCode()+"-"+batchId);
 		req.setData(data);
+
+		ReportOptions options = new ReportOptions();
+		options.setConvertTo("pdf");
+		options.setCacheReport(false);
+		options.setOverwrite(false);
+		options.setReportFile(String.format("%s School distribution.%s", schObj.getMincode(), options.getConvertTo()));
+		options.setReportName("SchoolDistribution");
+
 		req.setOptions(options);
 
 		return req;
