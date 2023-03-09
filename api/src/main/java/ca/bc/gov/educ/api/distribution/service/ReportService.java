@@ -130,6 +130,7 @@ public class ReportService {
 			std.setCitizenship(sc.getStudentCitizenship());
 			Pen pen = new Pen();
 			pen.setPen(sc.getPen());
+			pen.setEntityID("" + sc.getId());
 			std.setPen(pen);
 			std.setGradProgram(sc.getProgram());
 			GraduationData gradData = new GraduationData();

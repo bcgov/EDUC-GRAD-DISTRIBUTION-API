@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.distribution.process;
 
 import ca.bc.gov.educ.api.distribution.model.dto.*;
+import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -23,6 +24,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Data
 @Component
@@ -33,7 +35,12 @@ public class MergeProcess extends BaseProcess{
 	private static Logger logger = LoggerFactory.getLogger(MergeProcess.class);
 	private static final String YEARENDDIST = "YEARENDDIST";
 	private static final String MONTHLYDIST = "MONTHLYDIST";
-	private static final String SKIP_BODY_TRUE = "?skipBody=true";
+	private static final String ADDRESS_LABEL_YE = "ADDRESS_LABEL_YE";
+	private static final String DISTREP_YE_SD = "DISTREP_YE_SD";
+	private static final String DISTREP_YE_SC = "DISTREP_YE_SC";
+	private static final String ADDRESS_LABEL = "ADDRESS_LABEL";
+	private static final String DISTREP_SD = "DISTREP_SD";
+	private static final String DISTREP_SC = "DISTREP_SC";
 
 	@Override
 	public ProcessorData fire(ProcessorData processorData) {
@@ -56,11 +63,12 @@ public class MergeProcess extends BaseProcess{
 				List<Student> studListNonGrad = new ArrayList<>();
 				ReportRequest packSlipReq = reportService.preparePackingSlipData(schoolDetails, processorData.getBatchId());
 
-				if(obj.getSchoolDistributionRequest() != null) {
+				if(obj.getSchoolDistributionRequest() != null && MONTHLYDIST.equalsIgnoreCase(processorData.getActivityCode())) {
 					ReportRequest schoolDistributionReportRequest = reportService.prepareSchoolDistributionReportData(obj.getSchoolDistributionRequest(), processorData.getBatchId(),schoolDetails);
 					createAndSaveDistributionReport(schoolDistributionReportRequest,mincode,processorData);
 					numberOfPdfs++;
 				}
+
 				Pair<Integer,Integer> pV = processTranscriptPrintRequest(obj,currentSlipCount,packSlipReq,studListNonGrad,processorData,mincode,numberOfPdfs);
 				currentSlipCount = pV.getLeft();
 				numberOfPdfs = pV.getRight();
@@ -82,12 +90,25 @@ public class MergeProcess extends BaseProcess{
 				logger.debug("School {}/{}",counter,mapDist.size());
 			}
 		}
+		int numberOfCreatedSchoolReports = 0;
+		int numberOfProcessedSchoolReports = 0;
 		if(MONTHLYDIST.equalsIgnoreCase(processorData.getActivityCode())) {
-			numberOfPdfs += processDistrictSchoolDistribution(processorData, "ADDRESS_LABEL", "DISTREP_SD", "DISTREP_SC");
+			logger.debug("***** Create and Store Monthly school reports *****");
+			numberOfCreatedSchoolReports += createDistrictSchoolMonthReport(restUtils.getAccessToken(), ADDRESS_LABEL, null, null);
+			logger.debug("***** Number of created Monthly school reports {} *****", numberOfCreatedSchoolReports);
+			logger.debug("***** Distribute Monthly school reports *****");
+			numberOfProcessedSchoolReports += processDistrictSchoolDistribution(processorData, ADDRESS_LABEL, null, null);
+			logger.debug("***** Number of distributed Monthly school reports {} *****", numberOfProcessedSchoolReports);
 		}
 		if (YEARENDDIST.equalsIgnoreCase(processorData.getActivityCode())) {
-			numberOfPdfs += processDistrictSchoolDistribution(processorData, "ADDRESS_LABEL_YE", "DISTREP_YE_SD", "DISTREP_YE_SC");
+			logger.debug("***** Create and Store Year End school reports *****");
+			numberOfCreatedSchoolReports += createDistrictSchoolYearEndReport(restUtils.getAccessToken(), ADDRESS_LABEL_YE, DISTREP_YE_SD, DISTREP_YE_SC);
+			logger.debug("***** Number of created Year End school reports {} *****", numberOfCreatedSchoolReports);
+			logger.debug("***** Distribute Year End school reports *****");
+			numberOfProcessedSchoolReports += processDistrictSchoolDistribution(processorData, ADDRESS_LABEL_YE, DISTREP_YE_SD, DISTREP_YE_SC);
+			logger.debug("***** Number of distributed Year End school reports {} *****", numberOfProcessedSchoolReports);
 		}
+		numberOfPdfs += numberOfProcessedSchoolReports;
 		postingProcess(batchId,processorData,numberOfPdfs);
 		long endTime = System.currentTimeMillis();
 		long diff = (endTime - startTime)/1000;
@@ -97,32 +118,56 @@ public class MergeProcess extends BaseProcess{
 		return processorData;
 	}
 
+	private Integer createDistrictSchoolYearEndReport(String accessToken, String schooLabelReportType, String districtReportType, String schoolReportType) {
+		Integer reportCount = 0;
+		final UUID correlationID = UUID.randomUUID();
+		reportCount += webClient.get().uri(String.format(educDistributionApiConstants.getSchoolDistrictYearEndReport(),schooLabelReportType,districtReportType,schoolReportType))
+				.headers(h -> { h.setBearerAuth(accessToken); h.set(EducDistributionApiConstants.CORRELATION_ID, correlationID.toString()); })
+				.retrieve().bodyToMono(Integer.class).block();
+		return reportCount;
+	}
+
+	private Integer createDistrictSchoolMonthReport(String accessToken, String schooLabelReportType, String districtReportType, String schoolReportType) {
+		Integer reportCount = 0;
+		final UUID correlationID = UUID.randomUUID();
+		reportCount += webClient.get().uri(String.format(educDistributionApiConstants.getSchoolDistrictMonthReport(),schooLabelReportType,districtReportType,schoolReportType))
+				.headers(h -> { h.setBearerAuth(accessToken); h.set(EducDistributionApiConstants.CORRELATION_ID, correlationID.toString()); })
+				.retrieve().bodyToMono(Integer.class).block();
+		return reportCount;
+	}
+
 	private int processDistrictSchoolDistribution(ProcessorData processorData, String schooLabelReportType, String districtReportType, String schoolReportType) {
 		int numberOfPdfs = 0;
+		if(StringUtils.isNotBlank(schooLabelReportType)) {
 			String accessTokenSl = restUtils.getAccessToken();
-			List<SchoolReports> yeSchooLabelsReports = webClient.get().uri(String.format(educDistributionApiConstants.getSchoolReportsByReportType(), schooLabelReportType) + SKIP_BODY_TRUE)
+			List<SchoolReports> yeSchooLabelsReports = webClient.get().uri(String.format(educDistributionApiConstants.getSchoolReportsByReportType(), schooLabelReportType))
 					.headers(h ->
 							h.setBearerAuth(accessTokenSl)
 					).retrieve().bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
 					}).block();
 			assert yeSchooLabelsReports != null;
 			numberOfPdfs += processDistrictSchoolReports(yeSchooLabelsReports, processorData, accessTokenSl);
+		}
+		if(StringUtils.isNotBlank(districtReportType)) {
 			String accessTokenSd = restUtils.getAccessToken();
-			List<SchoolReports> yeDistrictReports = webClient.get().uri(String.format(educDistributionApiConstants.getSchoolReportsByReportType(), districtReportType) + SKIP_BODY_TRUE)
+			List<SchoolReports> yeDistrictReports = webClient.get().uri(String.format(educDistributionApiConstants.getSchoolReportsByReportType(), districtReportType))
 					.headers(h ->
 							h.setBearerAuth(accessTokenSd)
 					).retrieve().bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
 					}).block();
 			assert yeDistrictReports != null;
 			numberOfPdfs += processDistrictSchoolReports(yeDistrictReports, processorData, accessTokenSd);
+		}
+		if(StringUtils.isNotBlank(schoolReportType)) {
 			String accessTokenSc = restUtils.getAccessToken();
-			List<SchoolReports> yeSchoolReports = webClient.get().uri(String.format(educDistributionApiConstants.getSchoolReportsByReportType(), schoolReportType) + SKIP_BODY_TRUE)
+			List<SchoolReports> yeSchoolReports = webClient.get().uri(String.format(educDistributionApiConstants.getSchoolReportsByReportType(), schoolReportType))
 					.headers(
 							h -> h.setBearerAuth(accessTokenSc)
 					).retrieve().bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
 					}).block();
 			assert yeSchoolReports != null;
 			numberOfPdfs += processDistrictSchoolReports(yeSchoolReports, processorData, accessTokenSc);
+		}
 		return numberOfPdfs;
 	}
 
@@ -262,8 +307,6 @@ public class MergeProcess extends BaseProcess{
 		return nList;
 	}
 
-
-
 	private void mergeCertificates(ReportRequest packSlipReq, CertificatePrintRequest certificatePrintRequest, PackingSlipRequest request,ProcessorData processorData, List<Student> studListNonGrad) {
 		List<StudentCredentialDistribution> scdList = certificatePrintRequest.getCertificateList();
 		String mincode = request.getMincode();
@@ -299,7 +342,6 @@ public class MergeProcess extends BaseProcess{
 	private void createAndSaveDistributionReport(ReportRequest distributionRequest,String mincode,ProcessorData processorData) {
 		List<InputStream> locations=new ArrayList<>();
 		try {
-
 			byte[] bytesSAR = webClient.post().uri(educDistributionApiConstants.getSchoolDistributionReport()).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).body(BodyInserters.fromValue(distributionRequest)).retrieve().bodyToMono(byte[].class).block();
 			if(bytesSAR != null) {
 				locations.add(new ByteArrayInputStream(bytesSAR));
