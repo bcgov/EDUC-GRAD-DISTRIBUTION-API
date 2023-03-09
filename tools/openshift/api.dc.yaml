@@ -173,7 +173,7 @@ objects:
         - ReadWriteMany
       resources:
         requests:
-          storage: 5Gi
+          storage: 1Gi
 parameters:
   - name: REPO_NAME
     description: Application repository name
