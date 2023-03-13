@@ -132,4 +132,4 @@ endpoint:
 #Splunk LogHelper
 splunk:
   log-helper:
-    enabled: ${ENABLE_SPLUNK_LOG_HELPER}
+    enabled: ${ENABLE_SPLUNK_LOG_HELPER} 

@@ -12,7 +12,7 @@ RUN mkdir /.ssh \
     && echo "Known hosts entry" > /.ssh/known_hosts \
     && echo "Private Key" > /.ssh/id_rsa \
     && echo "Public Key" > /.ssh/id_rsa.pub
-RUN chown -R 1002710000:1002710000 /.ssh /.ssh/known_hosts /.ssh/id_rsa /.ssh/id_rsa.pub \
+RUN chown -R 1012810000:1012810000 /.ssh /.ssh/known_hosts /.ssh/id_rsa /.ssh/id_rsa.pub \
     && chmod 700 /.ssh/id_rsa
 EXPOSE 22
 
@@ -22,7 +22,7 @@ ARG DEPENDENCY=/workspace/app/target/dependency
 COPY --from=build ${DEPENDENCY}/BOOT-INF/lib /app/lib
 COPY --from=build ${DEPENDENCY}/META-INF /app/META-INF
 COPY --from=build ${DEPENDENCY}/BOOT-INF/classes /app
-ENTRYPOINT ["java","-Duser.name=EDUC_GRAD_DISTRIBUTION_API","-Xms1500m","-Xmx1500m","-noverify","-XX:TieredStopAtLevel=1",\
+ENTRYPOINT ["java","-Duser.name=EDUC_GRAD_DISTRIBUTION_API","-Xms1800m","-Xmx1800m","-noverify","-XX:TieredStopAtLevel=1",\
             "-XX:+UseParallelGC","-XX:MinHeapFreeRatio=20","-XX:MaxHeapFreeRatio=40","-XX:GCTimeRatio=4",\
             "-XX:AdaptiveSizePolicyWeight=90","-XX:MaxMetaspaceSize=300m","-XX:ParallelGCThreads=1",\
             "-Djava.util.concurrent.ForkJoinPool.common.parallelism=1","-XX:CICompilerCount=2",\
