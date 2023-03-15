@@ -23,6 +23,7 @@ import java.util.Map;
 public class PSIReportProcess extends BaseProcess{
 	
 	private static Logger logger = LoggerFactory.getLogger(PSIReportProcess.class);
+	private static final String ADDRESS_LABEL_PSI = "ADDRESS_LABEL_PSI";
 
 	@Override
 	public ProcessorData fire(ProcessorData processorData) {
@@ -33,6 +34,7 @@ public class PSIReportProcess extends BaseProcess{
 		Long bId = processorData.getBatchId();
 		int numOfPdfs = 0;
 		int cnter=0;
+		List<School> schoolsForLabels = new ArrayList<>();
 		for (Map.Entry<String, DistributionPrintRequest> entry : mDist.entrySet()) {
 			cnter++;
 			int currentSlipCount = 0;
@@ -45,12 +47,21 @@ public class PSIReportProcess extends BaseProcess{
 				Pair<Integer,Integer> pV = processTranscriptPrintRequest(obj,currentSlipCount,packSlipReq,processorData,psiCode,numOfPdfs);
 				numOfPdfs = pV.getRight();
 				logger.debug("PDFs Merged {}", psiDetails.getPsiName());
+				processSchoolsForLabels(schoolsForLabels, psiDetails);
 				if (cnter % 50 == 0) {
 					restUtils.fetchAccessToken(processorData);
 				}
 				logger.debug("PSI {}/{}",cnter,mDist.size());
 			}
 		}
+		restUtils.fetchAccessToken(processorData);
+		logger.debug("***** Create and Store school labels reports *****");
+		int numberOfCreatedSchoolLabelReports = createSchoolLabelsReport(schoolsForLabels, processorData.getAccessToken(), ADDRESS_LABEL_PSI );
+		logger.debug("***** Number of created school labels reports {} *****", numberOfCreatedSchoolLabelReports);
+		logger.debug("***** Distribute school labels reports *****");
+		int numberOfProcessedSchoolLabelsReports = processDistrictSchoolDistribution(processorData, ADDRESS_LABEL_PSI, null, null);
+		logger.debug("***** Number of distributed school labels reports {} *****", numberOfProcessedSchoolLabelsReports);
+		numOfPdfs += numberOfProcessedSchoolLabelsReports;
 		postingProcess(bId,processorData,numOfPdfs);
 		long eTime = System.currentTimeMillis();
 		long difference = (eTime - sTime)/1000;
@@ -95,6 +106,21 @@ public class PSIReportProcess extends BaseProcess{
 				logger.debug("*** Failed to Add PDFs {} Current student {}", failedToAdd, scd.getStudentID());
 			}
 		}
+	}
+
+	private void processSchoolsForLabels(List<School> schools, Psi psi) {
+		School school = new School();
+		school.setMincode(psi.getPsiCode());
+		school.setName(psi.getPsiName());
+		Address address = new Address();
+		address.setStreetLine1(psi.getAddress1());
+		address.setStreetLine2(psi.getAddress2());
+		address.setCity(psi.getCity());
+		address.setRegion(psi.getProvinceCode());
+		address.setCountry(psi.getCountryName());
+		address.setCode(psi.getPostal());
+		school.setAddress(address);
+		schools.add(school);
 	}
 
 }
