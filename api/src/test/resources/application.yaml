@@ -123,6 +123,8 @@ endpoint:
       url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduate/report/schooldistrictyearend?slrt=%s&drt=%s&srt=%s
     school_district_month_report:
       url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduate/report/schooldistrictmonth?slrt=%s&drt=%s&srt=%s
+    school_labels_report:
+      url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.caapi/v1/graduate/report/school/labels?reportType=%s
   educ-school-api:
     school-by-min-code:
       url: https://educ-school-api-75e61b-dev.apps.silver.devops.gov.bc.ca/api/v1/schools/%s
