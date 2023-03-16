@@ -112,9 +112,11 @@ public class PSIReportProcess extends BaseProcess{
 		School school = new School();
 		school.setMincode(psi.getPsiCode());
 		school.setName(psi.getPsiName());
+		school.setTypeBanner(psi.getAttentionName());
 		Address address = new Address();
 		address.setStreetLine1(psi.getAddress1());
 		address.setStreetLine2(psi.getAddress2());
+		address.setStreetLine3(psi.getAddress3());
 		address.setCity(psi.getCity());
 		address.setRegion(psi.getProvinceCode());
 		address.setCountry(psi.getCountryName());
