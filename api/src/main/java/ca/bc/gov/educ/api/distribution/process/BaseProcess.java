@@ -226,11 +226,11 @@ public abstract class BaseProcess implements DistributionProcess{
                 fileNameBuilder.append(LOC).append(batchId).append(DEL).append(districtCode).append(DEL).append(mincode);
             }
             if(SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode)) {
-                fileNameBuilder.append("/EDGRAD.L.").append("Labels");
+                fileNameBuilder.append("/EDGRAD.L.");
             } else {
-                fileNameBuilder.append("/EDGRAD.R.").append("324W");
+                fileNameBuilder.append("/EDGRAD.R.").append("324W.");
             }
-            fileNameBuilder.append(".").append(EducDistributionApiUtils.getFileName()).append(".pdf");
+            fileNameBuilder.append(EducDistributionApiUtils.getFileName()).append(".pdf");
             try (OutputStream out = new FileOutputStream(fileNameBuilder.toString())) {
                         out.write(gradReportPdf);
             }
