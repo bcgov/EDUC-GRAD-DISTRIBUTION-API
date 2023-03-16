@@ -119,7 +119,7 @@ public class PSIReportProcess extends BaseProcess{
 		address.setStreetLine3(psi.getAddress3());
 		address.setCity(psi.getCity());
 		address.setRegion(psi.getProvinceCode());
-		address.setCountry(psi.getCountryName());
+		address.setCountry(psi.getCountryCode());
 		address.setCode(psi.getPostal());
 		school.setAddress(address);
 		schools.add(school);
