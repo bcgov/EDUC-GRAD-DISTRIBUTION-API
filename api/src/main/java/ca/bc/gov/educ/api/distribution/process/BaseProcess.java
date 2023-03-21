@@ -226,7 +226,7 @@ public abstract class BaseProcess implements DistributionProcess{
                 fileNameBuilder.append(LOC).append(batchId).append(DEL).append(districtCode).append(DEL).append(mincode);
             }
             if(SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode)) {
-                fileNameBuilder.append("/EDGRAD.L.");
+                fileNameBuilder.append("/EDGRAD.L.").append("3L14.");
             } else {
                 fileNameBuilder.append("/EDGRAD.R.").append("324W.");
             }
