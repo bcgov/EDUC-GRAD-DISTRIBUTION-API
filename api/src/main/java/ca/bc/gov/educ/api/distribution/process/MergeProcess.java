@@ -108,7 +108,7 @@ public class MergeProcess extends BaseProcess{
 		}
 		if (SUPPDIST.equalsIgnoreCase(processorData.getActivityCode())) {
 			logger.debug("***** Create and Store Supplemental school reports *****");
-			numberOfCreatedSchoolReports += createDistrictSchoolMonthReport(restUtils.getAccessToken(), ADDRESS_LABEL_SCHL, null, DISTREP_SC);
+			numberOfCreatedSchoolReports += createDistrictSchoolSuppReport(restUtils.getAccessToken(), ADDRESS_LABEL_SCHL, null, DISTREP_SC);
 			logger.debug("***** Number of created Supplemental school reports {} *****", numberOfCreatedSchoolReports);
 			logger.debug("***** Distribute Supplemental school reports *****");
 			numberOfProcessedSchoolReports += processDistrictSchoolDistribution(processorData, ADDRESS_LABEL_SCHL, null, DISTREP_SC);
