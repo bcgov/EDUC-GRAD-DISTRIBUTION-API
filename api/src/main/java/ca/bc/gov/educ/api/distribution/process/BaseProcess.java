@@ -141,6 +141,15 @@ public abstract class BaseProcess implements DistributionProcess{
         return reportCount;
     }
 
+    protected Integer createDistrictSchoolSuppReport(String accessToken, String schooLabelReportType, String districtReportType, String schoolReportType) {
+        Integer reportCount = 0;
+        final UUID correlationID = UUID.randomUUID();
+        reportCount += webClient.get().uri(String.format(educDistributionApiConstants.getSchoolDistrictMonthReport(),schooLabelReportType,districtReportType,schoolReportType))
+                .headers(h -> { h.setBearerAuth(accessToken); h.set(EducDistributionApiConstants.CORRELATION_ID, correlationID.toString()); })
+                .retrieve().bodyToMono(Integer.class).block();
+        return reportCount;
+    }
+
     protected int processDistrictSchoolDistribution(ProcessorData processorData, String schooLabelReportType, String districtReportType, String schoolReportType) {
         int numberOfPdfs = 0;
         if(StringUtils.isNotBlank(schooLabelReportType)) {

@@ -5,6 +5,7 @@ public enum DistributionProcessType {
     RPR ("CreateReprintProcess"),
     BCPR ("CreateBlankCredentialProcess"),
     MERYER ("YearlyMergeProcess"),
+    MERSUPP ("SupplementalMergeProcess"),
     PSR ("PostingSchoolReportProcess"),
     PSPR ("PSIReportProcess");
 

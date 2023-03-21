@@ -44,6 +44,10 @@ public class DistributionProcessFactory {
                 logger.debug("\n************* MERGE PROCESS (MERYER) START  ************");
                 pcs = mergeProcess;
                 break;
+            case "MERSUPP":
+                logger.debug("\n************* MERGE PROCESS (MERSUPP) START  ************");
+                pcs = mergeProcess;
+                break;
             case "PSR":
                 logger.debug("\n************* POSTING SCHOOL REPORT PROCESS (PSR) START  ************");
                 pcs = postingSchoolReportProcess;
