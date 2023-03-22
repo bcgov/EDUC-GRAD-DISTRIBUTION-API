@@ -32,10 +32,11 @@ public class MergeProcess extends BaseProcess{
 	private static Logger logger = LoggerFactory.getLogger(MergeProcess.class);
 	private static final String YEARENDDIST = "YEARENDDIST";
 	private static final String MONTHLYDIST = "MONTHLYDIST";
-	private static final String ADDRESS_LABEL_YE = "ADDRESS_LABEL_YE";
+	private static final String SUPPDIST = "SUPPDIST";
 	private static final String DISTREP_YE_SD = "DISTREP_YE_SD";
 	private static final String DISTREP_YE_SC = "DISTREP_YE_SC";
-	private static final String ADDRESS_LABEL = "ADDRESS_LABEL";
+	private static final String ADDRESS_LABEL_SCHL = "ADDRESS_LABEL_SCHL";
+	private static final String ADDRESS_LABEL_YE = "ADDRESS_LABEL_YE";
 	private static final String DISTREP_SD = "DISTREP_SD";
 	private static final String DISTREP_SC = "DISTREP_SC";
 
@@ -91,10 +92,10 @@ public class MergeProcess extends BaseProcess{
 		int numberOfProcessedSchoolReports = 0;
 		if(MONTHLYDIST.equalsIgnoreCase(processorData.getActivityCode())) {
 			logger.debug("***** Create and Store Monthly school reports *****");
-			numberOfCreatedSchoolReports += createDistrictSchoolMonthReport(restUtils.getAccessToken(), ADDRESS_LABEL, null, null);
+			numberOfCreatedSchoolReports += createDistrictSchoolMonthReport(restUtils.getAccessToken(), ADDRESS_LABEL_SCHL, null, null);
 			logger.debug("***** Number of created Monthly school reports {} *****", numberOfCreatedSchoolReports);
 			logger.debug("***** Distribute Monthly school reports *****");
-			numberOfProcessedSchoolReports += processDistrictSchoolDistribution(processorData, ADDRESS_LABEL, null, null);
+			numberOfProcessedSchoolReports += processDistrictSchoolDistribution(processorData, ADDRESS_LABEL_SCHL, null, null);
 			logger.debug("***** Number of distributed Monthly school reports {} *****", numberOfProcessedSchoolReports);
 		}
 		if (YEARENDDIST.equalsIgnoreCase(processorData.getActivityCode())) {
@@ -104,6 +105,14 @@ public class MergeProcess extends BaseProcess{
 			logger.debug("***** Distribute Year End school reports *****");
 			numberOfProcessedSchoolReports += processDistrictSchoolDistribution(processorData, ADDRESS_LABEL_YE, DISTREP_YE_SD, DISTREP_YE_SC);
 			logger.debug("***** Number of distributed Year End school reports {} *****", numberOfProcessedSchoolReports);
+		}
+		if (SUPPDIST.equalsIgnoreCase(processorData.getActivityCode())) {
+			logger.debug("***** Create and Store Supplemental school reports *****");
+			numberOfCreatedSchoolReports += createDistrictSchoolSuppReport(restUtils.getAccessToken(), ADDRESS_LABEL_SCHL, null, DISTREP_SC);
+			logger.debug("***** Number of created Supplemental school reports {} *****", numberOfCreatedSchoolReports);
+			logger.debug("***** Distribute Supplemental school reports *****");
+			numberOfProcessedSchoolReports += processDistrictSchoolDistribution(processorData, ADDRESS_LABEL_SCHL, null, DISTREP_SC);
+			logger.debug("***** Number of distributed Supplemental school reports {} *****", numberOfProcessedSchoolReports);
 		}
 		numberOfPdfs += numberOfProcessedSchoolReports;
 		postingProcess(batchId,processorData,numberOfPdfs);

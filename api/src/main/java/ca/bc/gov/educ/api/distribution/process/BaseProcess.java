@@ -141,6 +141,15 @@ public abstract class BaseProcess implements DistributionProcess{
         return reportCount;
     }
 
+    protected Integer createDistrictSchoolSuppReport(String accessToken, String schooLabelReportType, String districtReportType, String schoolReportType) {
+        Integer reportCount = 0;
+        final UUID correlationID = UUID.randomUUID();
+        reportCount += webClient.get().uri(String.format(educDistributionApiConstants.getSchoolDistrictSupplementalReport(),schooLabelReportType,districtReportType,schoolReportType))
+                .headers(h -> { h.setBearerAuth(accessToken); h.set(EducDistributionApiConstants.CORRELATION_ID, correlationID.toString()); })
+                .retrieve().bodyToMono(Integer.class).block();
+        return reportCount;
+    }
+
     protected int processDistrictSchoolDistribution(ProcessorData processorData, String schooLabelReportType, String districtReportType, String schoolReportType) {
         int numberOfPdfs = 0;
         if(StringUtils.isNotBlank(schooLabelReportType)) {
@@ -226,11 +235,11 @@ public abstract class BaseProcess implements DistributionProcess{
                 fileNameBuilder.append(LOC).append(batchId).append(DEL).append(districtCode).append(DEL).append(mincode);
             }
             if(SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode)) {
-                fileNameBuilder.append("/EDGRAD.L.").append("Labels");
+                fileNameBuilder.append("/EDGRAD.L.").append("3L14.");
             } else {
-                fileNameBuilder.append("/EDGRAD.R.").append("324W");
+                fileNameBuilder.append("/EDGRAD.R.").append("324W.");
             }
-            fileNameBuilder.append(".").append(EducDistributionApiUtils.getFileName()).append(".pdf");
+            fileNameBuilder.append(EducDistributionApiUtils.getFileName()).append(".pdf");
             try (OutputStream out = new FileOutputStream(fileNameBuilder.toString())) {
                         out.write(gradReportPdf);
             }
