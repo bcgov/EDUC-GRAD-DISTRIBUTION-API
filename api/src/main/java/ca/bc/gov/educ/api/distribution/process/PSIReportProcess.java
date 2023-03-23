@@ -82,7 +82,7 @@ public class PSIReportProcess extends BaseProcess{
 				locations.add(reportService.getPackingSlip(packSlipReq, restUtils.getAccessToken()).getInputStream());
 				logger.debug("*** Packing Slip Added");
 				processStudents(scdList,locations,processorData);
-				mergeDocuments(processorData,psiCode,"/EDGRAD.T.","YED4",locations);
+				mergeDocuments(processorData,psiCode,"02","/EDGRAD.T.","YED4",locations);
 				numOfPdfs++;
 				logger.debug("*** Transcript Documents Merged");
 			} catch (IOException e) {
@@ -106,23 +106,6 @@ public class PSIReportProcess extends BaseProcess{
 				logger.debug("*** Failed to Add PDFs {} Current student {}", failedToAdd, scd.getStudentID());
 			}
 		}
-	}
-
-	private void processSchoolsForLabels(List<School> schools, Psi psi) {
-		School school = new School();
-		school.setMincode(psi.getPsiCode());
-		school.setName(psi.getPsiName());
-		school.setTypeBanner(psi.getAttentionName());
-		Address address = new Address();
-		address.setStreetLine1(psi.getAddress1());
-		address.setStreetLine2(psi.getAddress2());
-		address.setStreetLine3(psi.getAddress3());
-		address.setCity(psi.getCity());
-		address.setRegion(psi.getProvinceCode());
-		address.setCountry(psi.getCountryCode());
-		address.setCode(psi.getPostal());
-		school.setAddress(address);
-		schools.add(school);
 	}
 
 }

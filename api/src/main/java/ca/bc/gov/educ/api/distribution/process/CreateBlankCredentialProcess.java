@@ -101,7 +101,7 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 						logger.debug("*** Failed to Add PDFs {} Current Credential {}", failedToAdd, bcd.getCredentialTypeCode());
 					}
 				}
-				mergeDocuments(processorData,mincode,"/EDGRAD.T.","YED4",locations);
+				mergeDocuments(processorData,mincode,"02","/EDGRAD.T.","YED4",locations);
 				numberOfPdfs++;
 				logger.debug("*** Transcript Documents Merged");
 			} catch (IOException e) {
@@ -176,7 +176,7 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 					logger.debug("*** Failed to Add PDFs {} Current Credential {}", failedToAdd, bcd.getCredentialTypeCode());
 				}
 			}
-			mergeDocuments(processorData,mincode,"/EDGRAD.C.",paperType,locations);
+			mergeDocuments(processorData,mincode,"02","/EDGRAD.C.",paperType,locations);
 		} catch (IOException e) {
 			logger.debug(EXCEPTION,e.getMessage());
 		}
