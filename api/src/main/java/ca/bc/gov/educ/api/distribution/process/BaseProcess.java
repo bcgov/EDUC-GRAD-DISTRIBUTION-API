@@ -32,6 +32,16 @@ public abstract class BaseProcess implements DistributionProcess{
     protected static final String EXCEPTION = "Error {} ";
     protected static final String SCHOOL_LABELS_CODE = "000000000";
 
+    protected static final String YEARENDDIST = "YEARENDDIST";
+    protected static final String MONTHLYDIST = "MONTHLYDIST";
+    protected static final String SUPPDIST = "SUPPDIST";
+    protected static final String DISTREP_YE_SD = "DISTREP_YE_SD";
+    protected static final String DISTREP_YE_SC = "DISTREP_YE_SC";
+    protected static final String ADDRESS_LABEL_SCHL = "ADDRESS_LABEL_SCHL";
+    protected static final String ADDRESS_LABEL_YE = "ADDRESS_LABEL_YE";
+    protected static final String DISTREP_SD = "DISTREP_SD";
+    protected static final String DISTREP_SC = "DISTREP_SC";
+
     @Autowired
     GradValidation validation;
 
@@ -160,7 +170,7 @@ public abstract class BaseProcess implements DistributionProcess{
                     ).retrieve().bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
                     }).block();
             assert yeSchooLabelsReports != null;
-            numberOfPdfs += processDistrictSchoolReports(yeSchooLabelsReports, processorData, accessTokenSl);
+            numberOfPdfs += processDistrictSchoolReports(yeSchooLabelsReports, processorData);
         }
         if(StringUtils.isNotBlank(districtReportType)) {
             String accessTokenSd = restUtils.getAccessToken();
@@ -170,7 +180,7 @@ public abstract class BaseProcess implements DistributionProcess{
                     ).retrieve().bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
                     }).block();
             assert yeDistrictReports != null;
-            numberOfPdfs += processDistrictSchoolReports(yeDistrictReports, processorData, accessTokenSd);
+            numberOfPdfs += processDistrictSchoolReports(yeDistrictReports, processorData);
         }
         if(StringUtils.isNotBlank(schoolReportType)) {
             String accessTokenSc = restUtils.getAccessToken();
@@ -180,18 +190,19 @@ public abstract class BaseProcess implements DistributionProcess{
                     ).retrieve().bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
                     }).block();
             assert yeSchoolReports != null;
-            numberOfPdfs += processDistrictSchoolReports(yeSchoolReports, processorData, accessTokenSc);
+            numberOfPdfs += processDistrictSchoolReports(yeSchoolReports, processorData);
         }
         return numberOfPdfs;
     }
 
-    protected int processDistrictSchoolReports(List<SchoolReports> schoolReports, ProcessorData processorData, String accessToken) {
+    protected int processDistrictSchoolReports(List<SchoolReports> schoolReports, ProcessorData processorData) {
         int numberOfPdfs = 0;
+        String accessToken = restUtils.getAccessToken();
         for (SchoolReports report : schoolReports) {
             try {
                 byte[] gradReportPdf = webClient.get().uri(String.format(educDistributionApiConstants.getSchoolReport(), report.getSchoolOfRecord(), report.getReportTypeCode())).headers(h -> h.setBearerAuth(accessToken)).retrieve().bodyToMono(byte[].class).block();
                 if (gradReportPdf != null) {
-                    logger.debug("*** Added PDFs Current Report Type {}", report.getReportTypeCode());
+                    logger.debug("*** Added PDFs Current Report Type {} for school {} category {}", report.getReportTypeCode(), report.getSchoolOfRecord(), report.getSchoolCategory());
                     uploadSchoolReportDocuments(
                             processorData.getBatchId(),
                             report.getSchoolOfRecord(),
@@ -199,7 +210,7 @@ public abstract class BaseProcess implements DistributionProcess{
                             gradReportPdf);
                     numberOfPdfs++;
                 } else {
-                    logger.debug("*** Failed to Add PDFs Current Report Type {}", report.getReportTypeCode());
+                    logger.debug("*** Failed to Add PDFs Current Report Type {} for school {} category {}", report.getReportTypeCode(), report.getSchoolOfRecord(), report.getSchoolCategory());
                 }
             } catch (Exception e) {
                 logger.debug(EXCEPTION, e.getLocalizedMessage());
@@ -248,21 +259,64 @@ public abstract class BaseProcess implements DistributionProcess{
         }
     }
 
-    protected void mergeDocuments(ProcessorData processorData, String code, String fileName, String paperType, List<InputStream> locations) {
+    protected void mergeDocuments(ProcessorData processorData, String mincode, String schoolCategoryCode, String fileName, String paperType, List<InputStream> locations) {
+        String districtCode = StringUtils.substring(mincode, 0, 3);
+        String activityCode = processorData.getActivityCode();
         try {
             PDFMergerUtility objs = new PDFMergerUtility();
-            StringBuilder pBuilder = new StringBuilder();
-            pBuilder.append(LOC).append(processorData.getBatchId()).append(DEL).append(code).append(DEL);
-            Path path = Paths.get(pBuilder.toString());
+            StringBuilder directoryPathBuilder = new StringBuilder();
+            if(MONTHLYDIST.equalsIgnoreCase(activityCode) || "02".equalsIgnoreCase(schoolCategoryCode)) {
+                directoryPathBuilder.append(LOC).append(processorData.getBatchId()).append(DEL).append(mincode).append(DEL);
+            } else {
+                directoryPathBuilder.append(LOC).append(processorData.getBatchId()).append(DEL).append(districtCode).append(DEL).append(mincode);
+            }
+            Path path = Paths.get(directoryPathBuilder.toString());
             Files.createDirectories(path);
-            pBuilder = new StringBuilder();
-            pBuilder.append(LOC).append(processorData.getBatchId()).append(DEL).append(code).append(fileName).append(paperType).append(".").append(EducDistributionApiUtils.getFileName()).append(".pdf");
-            objs.setDestinationFileName(pBuilder.toString());
+            StringBuilder filePathBuilder = new StringBuilder();
+            if(MONTHLYDIST.equalsIgnoreCase(activityCode) || "02".equalsIgnoreCase(schoolCategoryCode)) {
+                filePathBuilder.append(LOC).append(processorData.getBatchId()).append(DEL).append(mincode);
+            } else {
+                filePathBuilder.append(LOC).append(processorData.getBatchId()).append(DEL).append(districtCode).append(DEL).append(mincode);
+            }
+            filePathBuilder.append(fileName).append(paperType).append(".").append(EducDistributionApiUtils.getFileName()).append(".pdf");
+            objs.setDestinationFileName(filePathBuilder.toString());
             objs.addSources(locations);
             objs.mergeDocuments(MemoryUsageSetting.setupMainMemoryOnly());
-        }catch (Exception e) {
+        } catch (Exception e) {
             logger.debug(EXCEPTION,e.getLocalizedMessage());
         }
+    }
+
+    protected void processSchoolsForLabels(List<School> schools, Psi psi) {
+        School school = new School();
+        school.setMincode(psi.getPsiCode());
+        school.setName(psi.getPsiName());
+        school.setTypeBanner(psi.getAttentionName());
+        Address address = new Address();
+        address.setStreetLine1(psi.getAddress1());
+        address.setStreetLine2(psi.getAddress2());
+        address.setStreetLine3(psi.getAddress3());
+        address.setCity(psi.getCity());
+        address.setRegion(psi.getProvinceCode());
+        address.setCountry(psi.getCountryCode());
+        address.setCode(psi.getPostal());
+        school.setAddress(address);
+        schools.add(school);
+    }
+
+    protected void processSchoolsForLabels(List<School> schools, CommonSchool commonSchool) {
+        School school = new School();
+        school.setMincode(commonSchool.getDistNo() + commonSchool.getSchlNo());
+        school.setName(commonSchool.getSchoolName());
+        Address address = new Address();
+        address.setStreetLine1(commonSchool.getScAddressLine1());
+        address.setStreetLine2(commonSchool.getScAddressLine2());
+        address.setCity(commonSchool.getScCity());
+        address.setRegion(commonSchool.getScProvinceCode());
+        address.setCountry(commonSchool.getScCountryCode());
+        address.setCode(commonSchool.getScPostalCode());
+        school.setAddress(address);
+        schools.add(school);
     }
 
 }
