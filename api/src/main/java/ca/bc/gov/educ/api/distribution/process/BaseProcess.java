@@ -85,7 +85,6 @@ public abstract class BaseProcess implements DistributionProcess{
         } catch (IOException e) {
             logger.debug(EXCEPTION,e.getLocalizedMessage());
         }
-
     }
 
     protected void createControlFile(Long batchId,int numberOfPdfs) {
@@ -265,8 +264,7 @@ public abstract class BaseProcess implements DistributionProcess{
         String districtCode = StringUtils.substring(mincode, 0, 3);
         String activityCode = processorData.getActivityCode();
         try {
-            // set up buffer
-            ensureBufferDirectoryExists();
+            File bufferDirectory = IOUtils.createTempDirectory(LOC, "buffer");
             PDFMergerUtility pdfMergerUtility = new PDFMergerUtility();
             StringBuilder directoryPathBuilder = new StringBuilder();
             if(MONTHLYDIST.equalsIgnoreCase(activityCode) || "02".equalsIgnoreCase(schoolCategoryCode)) {
@@ -286,17 +284,11 @@ public abstract class BaseProcess implements DistributionProcess{
             pdfMergerUtility.setDestinationFileName(filePathBuilder.toString());
             pdfMergerUtility.addSources(locations);
             MemoryUsageSetting memoryUsageSetting = MemoryUsageSetting.setupMixed(50000000)
-                            .setTempDir(new File(BUFFER_LOC));
+                            .setTempDir(bufferDirectory);
             pdfMergerUtility.mergeDocuments(memoryUsageSetting);
+            IOUtils.removeDirectory(bufferDirectory);
         } catch (Exception e) {
             logger.error(EXCEPTION,e.getLocalizedMessage());
-        }
-    }
-
-    protected void ensureBufferDirectoryExists() throws IOException {
-        Path bufferDir = Paths.get(BUFFER_LOC);
-        if(!Files.exists(bufferDir)){
-            Files.createDirectory(bufferDir);
         }
     }
 
