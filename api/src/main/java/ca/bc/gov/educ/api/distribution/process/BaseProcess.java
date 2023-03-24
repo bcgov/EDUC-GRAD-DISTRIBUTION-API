@@ -28,6 +28,7 @@ public abstract class BaseProcess implements DistributionProcess{
     private static final Logger logger = LoggerFactory.getLogger(BaseProcess.class);
 
     protected static final String LOC = "/tmp/";
+
     protected static final String DEL = "/";
     protected static final String EXCEPTION = "Error {} ";
     protected static final String SCHOOL_LABELS_CODE = "000000000";
@@ -83,7 +84,6 @@ public abstract class BaseProcess implements DistributionProcess{
         } catch (IOException e) {
             logger.debug(EXCEPTION,e.getLocalizedMessage());
         }
-
     }
 
     protected void createControlFile(Long batchId,int numberOfPdfs) {
@@ -263,7 +263,8 @@ public abstract class BaseProcess implements DistributionProcess{
         String districtCode = StringUtils.substring(mincode, 0, 3);
         String activityCode = processorData.getActivityCode();
         try {
-            PDFMergerUtility objs = new PDFMergerUtility();
+            File bufferDirectory = IOUtils.createTempDirectory(LOC, "buffer");
+            PDFMergerUtility pdfMergerUtility = new PDFMergerUtility();
             StringBuilder directoryPathBuilder = new StringBuilder();
             if(MONTHLYDIST.equalsIgnoreCase(activityCode) || "02".equalsIgnoreCase(schoolCategoryCode)) {
                 directoryPathBuilder.append(LOC).append(processorData.getBatchId()).append(DEL).append(mincode).append(DEL);
@@ -279,11 +280,14 @@ public abstract class BaseProcess implements DistributionProcess{
                 filePathBuilder.append(LOC).append(processorData.getBatchId()).append(DEL).append(districtCode).append(DEL).append(mincode);
             }
             filePathBuilder.append(fileName).append(paperType).append(".").append(EducDistributionApiUtils.getFileName()).append(".pdf");
-            objs.setDestinationFileName(filePathBuilder.toString());
-            objs.addSources(locations);
-            objs.mergeDocuments(MemoryUsageSetting.setupMainMemoryOnly());
+            pdfMergerUtility.setDestinationFileName(filePathBuilder.toString());
+            pdfMergerUtility.addSources(locations);
+            MemoryUsageSetting memoryUsageSetting = MemoryUsageSetting.setupMixed(50000000)
+                            .setTempDir(bufferDirectory);
+            pdfMergerUtility.mergeDocuments(memoryUsageSetting);
+            IOUtils.removeDirectory(bufferDirectory);
         } catch (Exception e) {
-            logger.debug(EXCEPTION,e.getLocalizedMessage());
+            logger.error(EXCEPTION,e.getLocalizedMessage());
         }
     }
 
