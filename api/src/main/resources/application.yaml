@@ -134,4 +134,7 @@ endpoint:
 #Splunk LogHelper
 splunk:
   log-helper:
-    enabled: ${ENABLE_SPLUNK_LOG_HELPER} 
+    enabled: ${ENABLE_SPLUNK_LOG_HELPER}
+
+scheduler:
+  clean-tmp-cache-cron: ${CLEAN_TMP_CACHE_CRON}

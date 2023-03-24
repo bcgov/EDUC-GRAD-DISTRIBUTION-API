@@ -15,11 +15,11 @@ import java.util.Set;
 
 public class IOUtils {
 
-    private IOUtils() {}
+    private IOUtils(){}
 
     /**
      * Creates a secured temp dir for processing files, it is up to
-     * calling method to also remove directory (see removeDirectory
+     * calling method to also remove directory (see removeFileOrDirectory
      * method in this class)
      *
      * @param location
@@ -43,7 +43,7 @@ public class IOUtils {
     }
 
     /**
-     * Removes a directory
+     * Removes a directory or file recursively
      * @param file
      */
     public static void removeFileOrDirectory(File file) {

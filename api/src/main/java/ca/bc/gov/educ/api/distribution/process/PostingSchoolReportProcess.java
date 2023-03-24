@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.distribution.process;
 
 import ca.bc.gov.educ.api.distribution.model.dto.*;
+import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -87,11 +88,11 @@ public class PostingSchoolReportProcess extends BaseProcess {
 		try {
 			PDFMergerUtility objs = new PDFMergerUtility();
 			StringBuilder pBuilder = new StringBuilder();
-			pBuilder.append(LOC).append(processorData.getBatchId()).append(DEL).append(mincode).append(DEL);
+			pBuilder.append(EducDistributionApiConstants.TMP_DIR).append(processorData.getBatchId()).append(DEL).append(mincode).append(DEL);
 			Path path = Paths.get(pBuilder.toString());
 			Files.createDirectories(path);
 			pBuilder = new StringBuilder();
-			pBuilder.append(LOC).append(processorData.getBatchId()).append(DEL).append(mincode).append(DEL).append(fileName).append(".pdf");
+			pBuilder.append(EducDistributionApiConstants.TMP_DIR).append(processorData.getBatchId()).append(DEL).append(mincode).append(DEL).append(fileName).append(".pdf");
 			objs.setDestinationFileName(pBuilder.toString());
 			objs.addSources(locations);
 			objs.mergeDocuments(MemoryUsageSetting.setupMainMemoryOnly());
