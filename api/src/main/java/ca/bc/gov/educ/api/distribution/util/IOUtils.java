@@ -1,5 +1,6 @@
 package ca.bc.gov.educ.api.distribution.util;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.SystemUtils;
 
 import java.io.File;
@@ -45,11 +46,14 @@ public class IOUtils {
      * Removes a directory
      * @param file
      */
-    public static void removeDirectory(File file) {
+    public static void removeFileOrDirectory(File file) {
         try {
-            Files.deleteIfExists(Path.of(file.getAbsolutePath()));
-        } catch (IOException e) {// ignore
-        }
+            if(file.isDirectory()){
+                FileUtils.deleteDirectory(file);
+            } else {
+                Files.deleteIfExists(Path.of(file.getAbsolutePath()));
+            }
+        } catch (IOException e) {}
     }
 
 }

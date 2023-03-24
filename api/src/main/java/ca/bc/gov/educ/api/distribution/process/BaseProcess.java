@@ -285,7 +285,7 @@ public abstract class BaseProcess implements DistributionProcess{
             MemoryUsageSetting memoryUsageSetting = MemoryUsageSetting.setupMixed(50000000)
                             .setTempDir(bufferDirectory);
             pdfMergerUtility.mergeDocuments(memoryUsageSetting);
-            IOUtils.removeDirectory(bufferDirectory);
+            IOUtils.removeFileOrDirectory(bufferDirectory);
         } catch (Exception e) {
             logger.error(EXCEPTION,e.getLocalizedMessage());
         }
