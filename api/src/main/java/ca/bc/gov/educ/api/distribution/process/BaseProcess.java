@@ -29,7 +29,6 @@ public abstract class BaseProcess implements DistributionProcess{
 
     protected static final String LOC = "/tmp/";
 
-    protected static final String BUFFER_LOC = LOC + "buffer";
     protected static final String DEL = "/";
     protected static final String EXCEPTION = "Error {} ";
     protected static final String SCHOOL_LABELS_CODE = "000000000";
