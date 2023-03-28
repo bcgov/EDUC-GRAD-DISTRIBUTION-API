@@ -138,3 +138,6 @@ endpoint:
 splunk:
   log-helper:
     enabled: false
+
+scheduler:
+  clean-tmp-cache-cron: 0 0 */4 * * *
