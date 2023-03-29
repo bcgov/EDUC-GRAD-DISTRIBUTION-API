@@ -1,6 +1,9 @@
 package ca.bc.gov.educ.api.distribution.process;
 
 import ca.bc.gov.educ.api.distribution.model.dto.*;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -10,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -97,13 +101,67 @@ public class PSIReportProcess extends BaseProcess{
 		int failedToAdd = 0;
 		for (PsiCredentialDistribution scd : scdList) {
 			InputStreamResource transcriptPdf = webClient.get().uri(String.format(educDistributionApiConstants.getTranscriptUsingStudentID(), scd.getStudentID())).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).retrieve().bodyToMono(InputStreamResource.class).block();
-			if (transcriptPdf != null) {
-				locations.add(transcriptPdf.getInputStream());
+            //Grad2-1931
+			if(processorData.getTransmissionMode().equalsIgnoreCase("FTP")) {
+				ReportData transciptCsv = webClient.get().uri(String.format(educDistributionApiConstants.getTranscriptCSVData(), scd.getPen())).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).retrieve().bodyToMono(ReportData.class).block();
+
+				if(transciptCsv !=null) {
+				Student studentDetails = transciptCsv.getStudent();
+				School schoolDetails = transciptCsv.getSchool();
+				List<TranscriptResult> courses = transciptCsv.getTranscript().getResults();
+
+				String[] studentInfo = null;
+				String[] schoolinfo = null;
+				String[] coursesInfo = null;
+
+				File file = new File("C:\\Users\\mchintha\\IdeaProjects\\EDUC-GRAD-DISTRIBUTION-API\\api\\src\\main\\resources\\myCSV.csv");
+				CsvMapper csvMapper = new CsvMapper();
+				CsvSchema schema = CsvSchema.emptySchema()
+						.withLineSeparator("\r\n");// instead of \n
+
+				List<String[]> studentTranscriptdata = new ArrayList<>();
+				if(studentDetails != null) {
+					studentInfo = new String[]{
+							scd.getPen(), "A", studentDetails.getLastName(), studentDetails.getFirstName(), studentDetails.getMiddleName(), studentDetails.getBirthdate().toString(),
+							studentDetails.getGender(), studentDetails.getCitizenship(), studentDetails.getGrade(), "", studentDetails.getLocalId(), "", "", "", "", "", "", "", "", studentDetails.getGradProgram()};
+				}
+				if(schoolDetails != null) {
+					schoolinfo = new String[]{
+							scd.getPen(), "B", schoolDetails.getAddress().getStreetLine1(), schoolDetails.getAddress().getStreetLine2(), schoolDetails.getAddress().getCity(),
+							schoolDetails.getAddress().getCode(), schoolDetails.getAddress().getCountry(), ""};
+				}
+				if(courses != null) {
+				for (TranscriptResult course : courses) {
+					coursesInfo = new String[]{
+							scd.getPen(), "C", course.getCourse().getCode(), course.getCourse().getLevel(), course.getCourse().getSessionDate(),
+							course.getMark().getInterimLetterGrade(), "", course.getMark().getSchoolPercent(), "", course.getMark().getExamPercent(),
+							course.getMark().getFinalPercent(), course.getMark().getFinalLetterGrade(), course.getMark().getInterimPercent(), "", "", ""};
+				}
+				}
+				studentTranscriptdata.add(studentInfo);
+				studentTranscriptdata.add(schoolinfo);
+				studentTranscriptdata.add(coursesInfo);
+
+				csvMapper.writer(schema).writeValue(file, studentTranscriptdata);
 				currentTranscript++;
-				logger.debug("*** Added PDFs {}/{} Current student {}", currentTranscript, scdList.size(), scd.getStudentID());
-			} else {
-				failedToAdd++;
-				logger.debug("*** Failed to Add PDFs {} Current student {}", failedToAdd, scd.getStudentID());
+				logger.debug("*** Added csvs {}/{} Current student {}", currentTranscript, scdList.size(), scd.getPen());
+				}
+				else {
+					failedToAdd++;
+					logger.debug("*** Failed to Add {} Current student {}", failedToAdd, scd.getPen());
+				}
+
+			}
+			else {
+
+				if (transcriptPdf != null) {
+					locations.add(transcriptPdf.getInputStream());
+					currentTranscript++;
+					logger.debug("*** Added PDFs {}/{} Current student {}", currentTranscript, scdList.size(), scd.getStudentID());
+				} else {
+					failedToAdd++;
+					logger.debug("*** Failed to Add PDFs {} Current student {}", failedToAdd, scd.getStudentID());
+				}
 			}
 		}
 	}

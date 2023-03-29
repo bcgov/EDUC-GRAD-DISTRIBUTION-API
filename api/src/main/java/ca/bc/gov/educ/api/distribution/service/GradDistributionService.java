@@ -32,9 +32,9 @@ public class GradDistributionService {
         this.distributionProcessFactory = distributionProcessFactory;
         this.restUtils = restUtils;
     }
-
-    public DistributionResponse distributeCredentials(String runType, Long batchId, Map<String, DistributionPrintRequest> mapDist, String activityCode, String localDownload, String accessToken) {
-        ProcessorData data = ProcessorData.builder().batchId(batchId).accessToken(accessToken).distributionResponse(null).mapDistribution(mapDist).activityCode(activityCode).localDownload(localDownload).build();
+    //grad2-1931
+    public DistributionResponse distributeCredentials(String runType, Long batchId, Map<String, DistributionPrintRequest> mapDist, String activityCode, String transmissionMode,String localDownload, String accessToken) {
+        ProcessorData data = ProcessorData.builder().batchId(batchId).accessToken(accessToken).distributionResponse(null).mapDistribution(mapDist).activityCode(activityCode).transmissionMode(transmissionMode).localDownload(localDownload).build();
         DistributionResponse disRes = new DistributionResponse();
         disRes.setMergeProcessResponse(processDistribution(runType,data).getMergeProcessResponse());
         return disRes;

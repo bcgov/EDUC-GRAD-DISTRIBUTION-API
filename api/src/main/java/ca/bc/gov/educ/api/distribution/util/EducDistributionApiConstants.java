@@ -70,6 +70,9 @@ public class EducDistributionApiConstants {
     @Value("${endpoint.grad-graduation-api.report-by-pen.url}")
     private String certDataReprint;
 
+    @Value("${endpoint.grad-graduation-api.student-report-by-pen.url}")
+    private String transcriptCSVData;
+
     @Value("${endpoint.grad-report-api.certificate_report.url}")
     private String certificateReport;
 
