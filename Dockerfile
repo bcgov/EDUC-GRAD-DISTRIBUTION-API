@@ -12,8 +12,8 @@ RUN mkdir /.ssh \
     && echo "Known hosts entry" > /.ssh/known_hosts \
     && echo "Private Key" > /.ssh/id_rsa \
     && echo "Public Key" > /.ssh/id_rsa.pub
-RUN chown -R 1012810000:1012810000 /.ssh /.ssh/known_hosts /.ssh/id_rsa /.ssh/id_rsa.pub \
-    && chmod 700 /.ssh/id_rsa
+RUN chmod a+rwx /.ssh/known_hosts /.ssh/id_rsa.pub \
+    && chmod a+rw /.ssh/id_rsa
 EXPOSE 22
 
 USER spring
