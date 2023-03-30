@@ -22,6 +22,8 @@ public class EducDistributionApiConstants {
     //Default Date format constants
     public static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd";
     public static final String SECONDARY_DATE_FORMAT = "yyyy/MM/dd";
+    //Grad2-1931
+    public static final String DATE_FORMAT = "yyyyMMdd";
 
     public static final String TMP_DIR = "/tmp/";
 

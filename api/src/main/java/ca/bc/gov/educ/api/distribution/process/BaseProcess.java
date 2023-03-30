@@ -277,7 +277,13 @@ public abstract class BaseProcess implements DistributionProcess{
             } else {
                 filePathBuilder.append(EducDistributionApiConstants.TMP_DIR).append(processorData.getBatchId()).append(DEL).append(districtCode).append(DEL).append(mincode);
             }
-            filePathBuilder.append(fileName).append(paperType).append(".").append(EducDistributionApiUtils.getFileName()).append(".pdf");
+            if(processorData.getTransmissionMode().equalsIgnoreCase("FTP")){
+                filePathBuilder.append(fileName).append(mincode).append(paperType).append(".").append(EducDistributionApiUtils.getFileName()).append(".csv");
+               // Files.copy(csvFile, filePathBuilder, StandardCopyOption.REPLACE_EXISTING);
+            }
+            else {
+                filePathBuilder.append(fileName).append(paperType).append(".").append(EducDistributionApiUtils.getFileName()).append(".pdf");
+            }
             pdfMergerUtility.setDestinationFileName(filePathBuilder.toString());
             pdfMergerUtility.addSources(locations);
             MemoryUsageSetting memoryUsageSetting = MemoryUsageSetting.setupMixed(50000000)
