@@ -6,7 +6,7 @@
 
     <groupId>ca.bc.gov.educ</groupId>
     <artifactId>educ-grad-distribution-api</artifactId>
-    <version>1.8.25</version>
+    <version>1.8.30</version>
     <name>educ-grad-distribution-api</name>
     <description>Ministry of Education GRAD DISTRIBUTION API</description>
 
@@ -184,7 +184,7 @@
         <dependency>
             <groupId>org.apache.pdfbox</groupId>
             <artifactId>pdfbox</artifactId>
-            <version>2.0.26</version>
+            <version>2.0.27</version>
         </dependency>
         <dependency>
             <groupId>com.jcraft</groupId>

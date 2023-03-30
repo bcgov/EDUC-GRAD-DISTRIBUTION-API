@@ -9,14 +9,14 @@ import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
 
+import java.io.FileFilter;
+
 @Configuration
 public class EducDistributionApiConfig {
 
     @Bean
     public ModelMapper modelMapper() {
-
-        ModelMapper modelMapper = new ModelMapper();
-        return modelMapper;
+        return new ModelMapper();
     }
 
     @Bean
@@ -33,5 +33,16 @@ public class EducDistributionApiConfig {
     @Bean
     public RestTemplate restTemplate(RestTemplateBuilder builder) {
         return builder.build();
+    }
+
+
+    @Bean
+    public FileFilter createFileFilter(){
+        return pathname -> {
+            String name = pathname.getName();
+            return !name.startsWith(".") &&
+                    !name.contains("undertow") &&
+                    !name.contains("hsperfdata");
+        };
     }
 }

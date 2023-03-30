@@ -139,7 +139,7 @@ public class CreateReprintProcess extends BaseProcess {
 					logger.debug("*** Failed to Add PDFs {} Current student {}", failedToAdd, scd.getStudentID());
 				}
 			}
-			mergeDocuments(processorData,mincode,"/EDGRAD.C.",paperType,locations);
+			mergeDocuments(processorData,mincode,"02","/EDGRAD.C.",paperType,locations);
 		} catch (IOException e) {
 			logger.debug(EXCEPTION,e.getMessage());
 		}
@@ -152,7 +152,7 @@ public class CreateReprintProcess extends BaseProcess {
 			if(bytesSAR != null) {
 				locations.add(new ByteArrayInputStream(bytesSAR));
 			}
-			mergeDocuments(processorData,mincode,"/EDGRAD.R.","324W",locations);
+			mergeDocuments(processorData,mincode,"02","/EDGRAD.R.","324W",locations);
 		} catch (Exception e) {
 			logger.debug(EXCEPTION,e.getMessage());
 		}

@@ -173,7 +173,7 @@ objects:
         - ReadWriteMany
       resources:
         requests:
-          storage: 1Gi
+          storage: ${{STORAGE_LIMIT}}
 parameters:
   - name: REPO_NAME
     description: Application repository name
@@ -213,4 +213,7 @@ parameters:
     required: true
   - name: MAX_MEM
     description: The maximum amount of memory
+    required: true
+  - name: STORAGE_LIMIT
+    description: Max storage
     required: true
