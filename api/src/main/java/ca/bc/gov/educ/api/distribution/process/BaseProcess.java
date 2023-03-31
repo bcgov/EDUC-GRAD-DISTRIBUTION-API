@@ -295,6 +295,40 @@ public abstract class BaseProcess implements DistributionProcess{
         }
     }
 
+    protected void mergeDocumentscsv(ProcessorData processorData, String mincode, String schoolCategoryCode, String fileName, String paperType, String csvFile) {
+        String districtCode = StringUtils.substring(mincode, 0, 3);
+        String activityCode = processorData.getActivityCode();
+        try {
+
+            File bufferDirectory = IOUtils.createTempDirectory("D:\\PSIFTP", "buffer");
+            StringBuilder directoryPathBuilder = new StringBuilder();
+            if(MONTHLYDIST.equalsIgnoreCase(activityCode) || "02".equalsIgnoreCase(schoolCategoryCode)) {
+                directoryPathBuilder.append("D:\\PSIFTP").append(DEL).append(processorData.getBatchId()).append(DEL).append(mincode).append(DEL);
+            } else {
+                directoryPathBuilder.append("D:\\PSIFTP").append(DEL).append(processorData.getBatchId()).append(DEL).append(districtCode).append(DEL).append(mincode);
+            }
+            Path path = Paths.get(directoryPathBuilder.toString());
+            Files.createDirectories(path);
+            StringBuilder filePathBuilder = new StringBuilder();
+            if(MONTHLYDIST.equalsIgnoreCase(activityCode) || "02".equalsIgnoreCase(schoolCategoryCode)) {
+                filePathBuilder.append("D:\\PSIFTP").append(DEL).append(processorData.getBatchId()).append(DEL).append(mincode);
+            } else {
+                filePathBuilder.append("D:\\PSIFTP").append(DEL).append(processorData.getBatchId()).append(DEL).append(districtCode).append(DEL).append(mincode);
+            }
+            filePathBuilder.append(fileName).append(mincode).append(paperType).append(".").append(EducDistributionApiUtils.getFileName()).append(".csv");
+            Path path2 = Paths.get(filePathBuilder.toString());
+            File f= new File(Files.createFile(path2).toUri());
+            FileWriter writer = new FileWriter(f);
+            writer.write(csvFile);
+            writer.close();
+
+           IOUtils.removeFileOrDirectory(bufferDirectory);
+        } catch (Exception e) {
+            logger.error(EXCEPTION,e.getLocalizedMessage());
+        }
+    }
+
+
     protected void processSchoolsForLabels(List<School> schools, Psi psi) {
         School school = new School();
         school.setMincode(psi.getPsiCode());
