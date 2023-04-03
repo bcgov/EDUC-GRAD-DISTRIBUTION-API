@@ -182,7 +182,7 @@ public class MergeProcess extends BaseProcess {
 				if(objStd != null)
 					studListNonGrad.add(objStd);
 			}
-			InputStreamResource transcriptPdf = webClient.get().uri(String.format(educDistributionApiConstants.getTranscript(), scd.getStudentID(), scd.getCredentialTypeCode(), scd.getDocumentStatusCode())).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).retrieve().bodyToMono(InputStreamResource.class).block();
+			InputStreamResource transcriptPdf = webClient.get().uri(String.format(educDistributionApiConstants.getTranscriptUsingStudentID(), scd.getStudentID())).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).retrieve().bodyToMono(InputStreamResource.class).block();
 			if (transcriptPdf != null) {
 				locations.add(transcriptPdf.getInputStream());
 				currentTranscript++;

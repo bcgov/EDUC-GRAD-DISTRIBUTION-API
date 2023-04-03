@@ -101,8 +101,10 @@ endpoint:
       url: https://educ-grad-graduation-report-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/schoolreport/type/%s
     get-achievement-report:
       url: https://educ-grad-graduation-report-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/studentreport?studentID=%s&reportType=%s&documentStatusCode=%s
-    get-transcript-by-student-id:
+    get-transcript-psi-by-student-id:
       url: https://educ-grad-graduation-report-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/psi/studenttranscript/%s
+    get-transcript-by-student-id:
+      url: https://educ-grad-graduation-report-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/studenttranscript/%s
   grad-student-api:
     get-student-record:
       url: https://educ-grad-student-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v1/student/stdid/%s

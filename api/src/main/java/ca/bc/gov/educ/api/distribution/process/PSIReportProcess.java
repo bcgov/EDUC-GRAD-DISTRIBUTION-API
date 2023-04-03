@@ -96,7 +96,7 @@ public class PSIReportProcess extends BaseProcess{
 		int currentTranscript = 0;
 		int failedToAdd = 0;
 		for (PsiCredentialDistribution scd : scdList) {
-			InputStreamResource transcriptPdf = webClient.get().uri(String.format(educDistributionApiConstants.getTranscriptUsingStudentID(), scd.getStudentID())).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).retrieve().bodyToMono(InputStreamResource.class).block();
+			InputStreamResource transcriptPdf = webClient.get().uri(String.format(educDistributionApiConstants.getTranscriptPsiUsingStudentID(), scd.getStudentID())).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).retrieve().bodyToMono(InputStreamResource.class).block();
 			if (transcriptPdf != null) {
 				locations.add(transcriptPdf.getInputStream());
 				currentTranscript++;
