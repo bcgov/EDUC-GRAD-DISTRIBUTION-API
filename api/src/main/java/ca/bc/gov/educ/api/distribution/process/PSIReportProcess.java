@@ -86,14 +86,14 @@ public class PSIReportProcess extends BaseProcess{
 			try {
 				locations.add(reportService.getPackingSlip(packSlipReq, restUtils.getAccessToken()).getInputStream());
 				logger.debug("*** Packing Slip Added");
-
+				//Grad2-1931 : processing students transcripts, merging them and placing in tmp location for transmission mode FTP to generate CSV files- mchintha
 				if (processorData.getTransmissionMode().equalsIgnoreCase("FTP")) {
-					String csvFile = processStudentsCSV(scdList,locations,processorData);
-					mergeDocumentscsv(processorData, psiCode, "02", "/GRAD_INT", "_RESULTS", csvFile);
+					String csvFile = processStudentsForCSVs(scdList,processorData);
+					mergeDocumentsCSVs(processorData, psiCode, "02", "/GRAD_INT", "_RESULTS", csvFile);
 				}
 				else {
-					processStudents(scdList,locations,processorData);
-					mergeDocuments(processorData, psiCode, "02", "/EDGRAD.T.", "YED4", locations);
+					processStudentsForPDFs(scdList,locations,processorData);
+					mergeDocumentsPDFs(processorData, psiCode, "02", "/EDGRAD.T.", "YED4", locations);
 				}
 				numOfPdfs++;
 				logger.debug("*** Transcript Documents Merged");
@@ -106,90 +106,25 @@ public class PSIReportProcess extends BaseProcess{
 
 
 
-	private void processStudents(List<PsiCredentialDistribution> scdList, List<InputStream> locations, ProcessorData processorData) throws IOException {
+	private void processStudentsForPDFs(List<PsiCredentialDistribution> scdList, List<InputStream> locations, ProcessorData processorData) throws IOException {
 		int currentTranscript = 0;
 		int failedToAdd = 0;
-		String[] studentInfo = null;
-		String[] schoolInfo = null;
-		String[] coursesInfo = null;
-		String[] assessmentsInfo = null;
-		File file = new File("C:\\Users\\mchintha\\IdeaProjects\\EDUC-GRAD-DISTRIBUTION-API\\api\\src\\main\\resources\\myCSV.csv");
-		CsvMapper csvMapper = new CsvMapper();
-		CsvSchema schema = CsvSchema.emptySchema().withLineSeparator("\r\n");
-		List<String[]> studentTranscriptdata = new ArrayList<>();
+
 		for (PsiCredentialDistribution scd : scdList) {
-
-            //Grad2-1931
-
-			if(processorData.getTransmissionMode().equalsIgnoreCase("FTP")) {
-				ReportData transcriptCsv = webClient.get().uri(String.format(educDistributionApiConstants.getTranscriptCSVData(), scd.getPen())).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).retrieve().bodyToMono(ReportData.class).block();
-				if(transcriptCsv !=null) {
-				Student studentDetails = transcriptCsv.getStudent();
-				School schoolDetails = transcriptCsv.getSchool();
-				List<TranscriptResult> courseDetails = transcriptCsv.getTranscript().getResults();
-
-
-				if(studentDetails != null) {
-					SimpleDateFormat simpleDateFormat = new SimpleDateFormat(educDistributionApiConstants.DATE_FORMAT);
-					studentInfo = new String[]{
-							scd.getPen(), "A", studentDetails.getLastName(), studentDetails.getFirstName(), studentDetails.getMiddleName(),simpleDateFormat.format(studentDetails.getBirthdate()),
-							studentDetails.getGender(), studentDetails.getCitizenship(), studentDetails.getGrade(), "", studentDetails.getLocalId(), "", "", "", "", "", "", "", "", studentDetails.getGradProgram()};
-					studentTranscriptdata.add(studentInfo);
-					}
-				if(schoolDetails != null) {
-					schoolInfo = new String[]{
-							scd.getPen(), "B", schoolDetails.getAddress().getStreetLine1(), schoolDetails.getAddress().getStreetLine2(), schoolDetails.getAddress().getCity(),
-							schoolDetails.getAddress().getCode(), schoolDetails.getAddress().getCountry(), ""};
-					studentTranscriptdata.add(schoolInfo);
-					}
-				if(courseDetails != null) {
-					for (TranscriptResult course : courseDetails) {
-						if(!course.getCourse().getType().equals("3")) {
-							coursesInfo = new String[]{
-									scd.getPen(), "C", course.getCourse().getCode(), course.getCourse().getLevel(), course.getCourse().getSessionDate(),
-									course.getMark().getInterimLetterGrade(), "", course.getMark().getSchoolPercent(), "", course.getMark().getExamPercent(),
-									course.getMark().getFinalPercent(), course.getMark().getFinalLetterGrade(), course.getMark().getInterimPercent(), "", "", ""};
-							studentTranscriptdata.add(coursesInfo);
-							}
-						}
-					}
-				if(courseDetails != null) {
-					for (TranscriptResult assessment : courseDetails) {
-						if(assessment.getCourse().getType().equals("3")) {
-							assessmentsInfo = new String[]{
-									scd.getPen(), "D", assessment.getCourse().getCode(), assessment.getCourse().getLevel(), assessment.getCourse().getSessionDate(),
-									assessment.getMark().getInterimLetterGrade(), "", assessment.getMark().getSchoolPercent(), "", assessment.getMark().getExamPercent(),
-									assessment.getMark().getFinalPercent(), assessment.getMark().getFinalLetterGrade(), assessment.getMark().getInterimPercent(), "", "", ""};
-							studentTranscriptdata.add(assessmentsInfo);
-							}
-						}
-					}
-
-				csvMapper.writer(schema).writeValueAsString(studentTranscriptdata);
+			InputStreamResource transcriptPdf = webClient.get().uri(String.format(educDistributionApiConstants.getTranscriptUsingStudentID(), scd.getStudentID())).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).retrieve().bodyToMono(InputStreamResource.class).block();
+			if (transcriptPdf != null) {
+				locations.add(transcriptPdf.getInputStream());
 				currentTranscript++;
-				logger.debug("*** Added csv {}/{} Current student {}", currentTranscript, scdList.size(), scd.getPen());
+				logger.debug("*** Added PDFs {}/{} Current student {}", currentTranscript, scdList.size(), scd.getStudentID());
 				}
-				else {
-					failedToAdd++;
-					logger.debug("*** Failed to Add {} Current student {}", failedToAdd, scd.getPen());
-				}
-
-			}
 			else {
-				InputStreamResource transcriptPdf = webClient.get().uri(String.format(educDistributionApiConstants.getTranscriptUsingStudentID(), scd.getStudentID())).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).retrieve().bodyToMono(InputStreamResource.class).block();
-				if (transcriptPdf != null) {
-					locations.add(transcriptPdf.getInputStream());
-					currentTranscript++;
-					logger.debug("*** Added PDFs {}/{} Current student {}", currentTranscript, scdList.size(), scd.getStudentID());
-				} else {
-					failedToAdd++;
-					logger.debug("*** Failed to Add PDFs {} Current student {}", failedToAdd, scd.getStudentID());
+				failedToAdd++;
+				logger.debug("*** Failed to Add PDFs {} Current student {}", failedToAdd, scd.getStudentID());
 				}
-			}
 		}
 	}
-
-	private String processStudentsCSV(List<PsiCredentialDistribution> scdList, List<InputStream> locations, ProcessorData processorData) throws IOException {
+	//Grad2-1931 : Writes students transcripts data on CSV and formatting them - mchintha
+	private String processStudentsForCSVs(List<PsiCredentialDistribution> scdList, ProcessorData processorData) throws IOException {
 		int currentTranscript = 0;
 		int failedToAdd = 0;
 		String[] studentInfo = null;
@@ -212,7 +147,7 @@ public class PSIReportProcess extends BaseProcess{
 					School schoolDetails = transcriptCsv.getSchool();
 					List<TranscriptResult> courseDetails = transcriptCsv.getTranscript().getResults();
 
-
+                    //Writes the A's row's data on CSV
 					if(studentDetails != null) {
 						SimpleDateFormat simpleDateFormat = new SimpleDateFormat(educDistributionApiConstants.DATE_FORMAT);
 						studentInfo = new String[]{
@@ -220,15 +155,17 @@ public class PSIReportProcess extends BaseProcess{
 								studentDetails.getGender(), studentDetails.getCitizenship(), studentDetails.getGrade(), "", studentDetails.getLocalId(), "", "", "", "", "", "", "", "", studentDetails.getGradProgram()};
 						studentTranscriptdata.add(studentInfo);
 					}
+					//Writes the B's row's data on CSV
 					if(schoolDetails != null) {
 						schoolInfo = new String[]{
 								scd.getPen(), "B", schoolDetails.getAddress().getStreetLine1(), schoolDetails.getAddress().getStreetLine2(), schoolDetails.getAddress().getCity(),
 								schoolDetails.getAddress().getCode(), schoolDetails.getAddress().getCountry(), ""};
 						studentTranscriptdata.add(schoolInfo);
 					}
+					//Writes the C's rows data on CSV
 					if(courseDetails != null) {
 						for (TranscriptResult course : courseDetails) {
-							if(!course.getCourse().getType().equals("3")) {
+							if(course.getCourse().getType().equals("1") && course.getCourse().getType().equals("3")) {
 								coursesInfo = new String[]{
 										scd.getPen(), "C", course.getCourse().getCode(), course.getCourse().getLevel(), course.getCourse().getSessionDate(),
 										course.getMark().getInterimLetterGrade(), "", course.getMark().getSchoolPercent(), "", course.getMark().getExamPercent(),
@@ -237,9 +174,10 @@ public class PSIReportProcess extends BaseProcess{
 							}
 						}
 					}
+					//Writes the D's rows data on CSV
 					if(courseDetails != null) {
 						for (TranscriptResult assessment : courseDetails) {
-							if(assessment.getCourse().getType().equals("3")) {
+							if(assessment.getCourse().getType().equals("2")) {
 								assessmentsInfo = new String[]{
 										scd.getPen(), "D", assessment.getCourse().getCode(), assessment.getCourse().getLevel(), assessment.getCourse().getSessionDate(),
 										assessment.getMark().getInterimLetterGrade(), "", assessment.getMark().getSchoolPercent(), "", assessment.getMark().getExamPercent(),
@@ -248,7 +186,7 @@ public class PSIReportProcess extends BaseProcess{
 							}
 						}
 					}
-
+					csvMapper.writer(schema).writeValue(file, studentTranscriptdata);
 					csv = csvMapper.writer(schema).writeValueAsString(studentTranscriptdata);
 					currentTranscript++;
 					logger.debug("*** Added csv {}/{} Current student {}", currentTranscript, scdList.size(), scd.getPen());

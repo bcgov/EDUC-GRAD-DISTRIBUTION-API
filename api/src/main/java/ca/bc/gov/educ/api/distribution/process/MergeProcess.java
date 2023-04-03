@@ -163,7 +163,7 @@ public class MergeProcess extends BaseProcess {
 				locations.add(reportService.getPackingSlip(packSlipReq, restUtils.getAccessToken()).getInputStream());
 				logger.debug("*** Packing Slip Added");
 				processStudents(scdList,studListNonGrad,locations,processorData);
-				mergeDocuments(processorData,mincode,schoolCategoryCode,"/EDGRAD.T.","YED4",locations);
+				mergeDocumentsPDFs(processorData,mincode,schoolCategoryCode,"/EDGRAD.T.","YED4",locations);
 				numberOfPdfs++;
 				logger.debug("*** Transcript Documents Merged");
 			} catch (IOException e) {
@@ -256,7 +256,7 @@ public class MergeProcess extends BaseProcess {
 					logger.debug("*** Failed to Add PDFs {} Current student {} papertype : {}",failedToAdd,scd.getStudentID(),paperType);
 				}
 			}
-			mergeDocuments(processorData,mincode,schoolCategoryCode,"/EDGRAD.C.",paperType,locations);
+			mergeDocumentsPDFs(processorData,mincode,schoolCategoryCode,"/EDGRAD.C.",paperType,locations);
 		} catch (IOException e) {
 			logger.debug(EXCEPTION,e.getLocalizedMessage());
 		}
@@ -273,7 +273,7 @@ public class MergeProcess extends BaseProcess {
 				if(!processorData.getActivityCode().contains("USERDIST"))
 					saveSchoolDistributionReport(encodedPdf,mincode,restUtils.getAccessToken(),"DISTREP_SC");
 			}
-			mergeDocuments(processorData,mincode,schoolCategoryCode,"/EDGRAD.R.","324W",locations);
+			mergeDocumentsPDFs(processorData,mincode,schoolCategoryCode,"/EDGRAD.R.","324W",locations);
 		} catch (Exception e) {
 			logger.debug(EXCEPTION,e.getLocalizedMessage());
 		}

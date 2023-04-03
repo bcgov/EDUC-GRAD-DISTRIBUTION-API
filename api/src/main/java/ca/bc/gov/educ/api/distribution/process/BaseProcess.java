@@ -257,77 +257,74 @@ public abstract class BaseProcess implements DistributionProcess{
         }
     }
 
-    protected void mergeDocuments(ProcessorData processorData, String mincode, String schoolCategoryCode, String fileName, String paperType, List<InputStream> locations) {
-        String districtCode = StringUtils.substring(mincode, 0, 3);
-        String activityCode = processorData.getActivityCode();
+    protected void mergeDocumentsPDFs(ProcessorData processorData, String mincode, String schoolCategoryCode, String fileName, String paperType, List<InputStream> locations) {
+
         try {
             File bufferDirectory = IOUtils.createTempDirectory(EducDistributionApiConstants.TMP_DIR, "buffer");
+            StringBuilder filePathBuilder = createTempDirectories(processorData, mincode, schoolCategoryCode, bufferDirectory);
             PDFMergerUtility pdfMergerUtility = new PDFMergerUtility();
+            //Naming the file with extension
+            filePathBuilder.append(fileName).append(paperType).append(".").append(EducDistributionApiUtils.getFileName()).append(".pdf");
+            pdfMergerUtility.setDestinationFileName(filePathBuilder.toString());
+            pdfMergerUtility.addSources(locations);
+            MemoryUsageSetting memoryUsageSetting = MemoryUsageSetting.setupMixed(50000000)
+                    .setTempDir(bufferDirectory);
+            pdfMergerUtility.mergeDocuments(memoryUsageSetting);
+            IOUtils.removeFileOrDirectory(bufferDirectory);
+            }
+        catch (Exception e) {
+            logger.error(EXCEPTION,e.getLocalizedMessage());
+        }
+    }
+    //Grad2-1931 : Writes students transcripts on CSV under a folder structure and naming them- mchintha
+    protected void mergeDocumentsCSVs(ProcessorData processorData, String mincode, String schoolCategoryCode, String fileName, String paperType, String csvFile) {
+
+       try {
+           File bufferDirectory = IOUtils.createTempDirectory(EducDistributionApiConstants.TMP_DIR, "buffer");
+           StringBuilder filePathBuilder = createTempDirectories(processorData, mincode, schoolCategoryCode, bufferDirectory);
+           //Naming the file with extension
+           filePathBuilder.append(fileName).append(mincode).append(paperType).append(".").append(EducDistributionApiUtils.getFileName()).append(".DAT");
+           Path path = Paths.get(filePathBuilder.toString());
+           File newFile = new File(Files.createFile(path).toUri());
+           FileWriter writer = new FileWriter(newFile);
+           writer.write(csvFile);
+           writer.close();
+           IOUtils.removeFileOrDirectory(bufferDirectory);
+           }
+       catch (Exception e) {
+            logger.error(EXCEPTION,e.getLocalizedMessage());
+        }
+
+    }
+    //Grad2-1931 : Creates folder structure for files at temporary location - mchintha
+    protected StringBuilder createTempDirectories(ProcessorData processorData, String mincode, String schoolCategoryCode, File bufferDirectory) {
+        String districtCode = StringUtils.substring(mincode, 0, 3);
+        String activityCode = processorData.getActivityCode();
+        StringBuilder filePathBuilder = new StringBuilder();
+        try {
+
+
             StringBuilder directoryPathBuilder = new StringBuilder();
-            if(MONTHLYDIST.equalsIgnoreCase(activityCode) || "02".equalsIgnoreCase(schoolCategoryCode)) {
+            if (MONTHLYDIST.equalsIgnoreCase(activityCode) || "02".equalsIgnoreCase(schoolCategoryCode)) {
                 directoryPathBuilder.append(EducDistributionApiConstants.TMP_DIR).append(processorData.getBatchId()).append(DEL).append(mincode).append(DEL);
             } else {
                 directoryPathBuilder.append(EducDistributionApiConstants.TMP_DIR).append(processorData.getBatchId()).append(DEL).append(districtCode).append(DEL).append(mincode);
             }
             Path path = Paths.get(directoryPathBuilder.toString());
             Files.createDirectories(path);
-            StringBuilder filePathBuilder = new StringBuilder();
-            if(MONTHLYDIST.equalsIgnoreCase(activityCode) || "02".equalsIgnoreCase(schoolCategoryCode)) {
+
+            if (MONTHLYDIST.equalsIgnoreCase(activityCode) || "02".equalsIgnoreCase(schoolCategoryCode)) {
                 filePathBuilder.append(EducDistributionApiConstants.TMP_DIR).append(processorData.getBatchId()).append(DEL).append(mincode);
             } else {
                 filePathBuilder.append(EducDistributionApiConstants.TMP_DIR).append(processorData.getBatchId()).append(DEL).append(districtCode).append(DEL).append(mincode);
             }
-            if(processorData.getTransmissionMode().equalsIgnoreCase("FTP")){
-                filePathBuilder.append(fileName).append(mincode).append(paperType).append(".").append(EducDistributionApiUtils.getFileName()).append(".csv");
-               // Files.copy(csvFile, filePathBuilder, StandardCopyOption.REPLACE_EXISTING);
-            }
-            else {
-                filePathBuilder.append(fileName).append(paperType).append(".").append(EducDistributionApiUtils.getFileName()).append(".pdf");
-            }
-            pdfMergerUtility.setDestinationFileName(filePathBuilder.toString());
-            pdfMergerUtility.addSources(locations);
-            MemoryUsageSetting memoryUsageSetting = MemoryUsageSetting.setupMixed(50000000)
-                            .setTempDir(bufferDirectory);
-            pdfMergerUtility.mergeDocuments(memoryUsageSetting);
-            IOUtils.removeFileOrDirectory(bufferDirectory);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             logger.error(EXCEPTION,e.getLocalizedMessage());
         }
+
+        return filePathBuilder;
     }
-
-    protected void mergeDocumentscsv(ProcessorData processorData, String mincode, String schoolCategoryCode, String fileName, String paperType, String csvFile) {
-        String districtCode = StringUtils.substring(mincode, 0, 3);
-        String activityCode = processorData.getActivityCode();
-        try {
-
-            File bufferDirectory = IOUtils.createTempDirectory("D:\\PSIFTP", "buffer");
-            StringBuilder directoryPathBuilder = new StringBuilder();
-            if(MONTHLYDIST.equalsIgnoreCase(activityCode) || "02".equalsIgnoreCase(schoolCategoryCode)) {
-                directoryPathBuilder.append("D:\\PSIFTP").append(DEL).append(processorData.getBatchId()).append(DEL).append(mincode).append(DEL);
-            } else {
-                directoryPathBuilder.append("D:\\PSIFTP").append(DEL).append(processorData.getBatchId()).append(DEL).append(districtCode).append(DEL).append(mincode);
-            }
-            Path path = Paths.get(directoryPathBuilder.toString());
-            Files.createDirectories(path);
-            StringBuilder filePathBuilder = new StringBuilder();
-            if(MONTHLYDIST.equalsIgnoreCase(activityCode) || "02".equalsIgnoreCase(schoolCategoryCode)) {
-                filePathBuilder.append("D:\\PSIFTP").append(DEL).append(processorData.getBatchId()).append(DEL).append(mincode);
-            } else {
-                filePathBuilder.append("D:\\PSIFTP").append(DEL).append(processorData.getBatchId()).append(DEL).append(districtCode).append(DEL).append(mincode);
-            }
-            filePathBuilder.append(fileName).append(mincode).append(paperType).append(".").append(EducDistributionApiUtils.getFileName()).append(".csv");
-            Path path2 = Paths.get(filePathBuilder.toString());
-            File f= new File(Files.createFile(path2).toUri());
-            FileWriter writer = new FileWriter(f);
-            writer.write(csvFile);
-            writer.close();
-
-           IOUtils.removeFileOrDirectory(bufferDirectory);
-        } catch (Exception e) {
-            logger.error(EXCEPTION,e.getLocalizedMessage());
-        }
-    }
-
 
     protected void processSchoolsForLabels(List<School> schools, Psi psi) {
         School school = new School();
