@@ -152,6 +152,7 @@ public class MergeProcess extends BaseProcess {
 		}
 		return Pair.of(currentSlipCount,numberOfPdfs);
 	}
+
 	private Pair<Integer, Integer> processTranscriptPrintRequest(DistributionPrintRequest obj, int currentSlipCount, ReportRequest packSlipReq, List<Student> studListNonGrad, ProcessorData processorData, String mincode, String schoolCategoryCode, int numberOfPdfs) {
 		if (obj.getTranscriptPrintRequest() != null) {
 			TranscriptPrintRequest transcriptPrintRequest = obj.getTranscriptPrintRequest();
