@@ -33,6 +33,7 @@ public abstract class BaseProcess implements DistributionProcess{
 
     protected static final String YEARENDDIST = "YEARENDDIST";
     protected static final String MONTHLYDIST = "MONTHLYDIST";
+    protected static final String NONGRADDIST = "NONGRADDIST";
     protected static final String SUPPDIST = "SUPPDIST";
     protected static final String DISTREP_YE_SD = "DISTREP_YE_SD";
     protected static final String DISTREP_YE_SC = "DISTREP_YE_SC";

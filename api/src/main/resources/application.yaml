@@ -124,6 +124,8 @@ endpoint:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/report/schooldistrictmonth?slrt=%s&drt=%s&srt=%s
     school_district_supplemental_report:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/report/schooldistrictsupp?slrt=%s&drt=%s&srt=%s
+    school_district_student_nongrad_report:
+      url: ${GRAD_GRADUATION_API}api/v1/graduate/report/schooldistrictstudentnongrad?slrt=%s&drt=%s&srt=%s
     school_labels_report:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/report/school/labels?reportType=%s
   educ-school-api:
