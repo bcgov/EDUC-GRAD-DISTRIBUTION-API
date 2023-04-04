@@ -8,6 +8,7 @@ import ca.bc.gov.educ.api.distribution.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pdfbox.io.MemoryUsageSetting;
 import org.apache.pdfbox.multipdf.PDFMergerUtility;
+import org.modelmapper.internal.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -277,7 +278,7 @@ public abstract class BaseProcess implements DistributionProcess{
         }
     }
     //Grad2-1931 : Writes students transcripts on CSV under a folder structure and naming them- mchintha
-    protected void mergeDocumentsCSVs(ProcessorData processorData, String mincode, String schoolCategoryCode, String fileName, String paperType, String csvFile) {
+    protected void mergeDocumentsCSVs(ProcessorData processorData, String mincode, String schoolCategoryCode, String fileName, String paperType, String csvfile) {
 
        try {
            File bufferDirectory = IOUtils.createTempDirectory(EducDistributionApiConstants.TMP_DIR, "buffer");
@@ -286,10 +287,10 @@ public abstract class BaseProcess implements DistributionProcess{
            filePathBuilder.append(fileName).append(mincode).append(paperType).append(".").append(EducDistributionApiUtils.getFileName()).append(".DAT");
            Path path = Paths.get(filePathBuilder.toString());
            File newFile = new File(Files.createFile(path).toUri());
-           FileWriter writer = new FileWriter(newFile);
-           writer.write(csvFile);
+           PrintWriter writer = new PrintWriter(newFile);
+           writer.write(csvfile);
            writer.close();
-           IOUtils.removeFileOrDirectory(bufferDirectory);
+               IOUtils.removeFileOrDirectory(bufferDirectory);
            }
        catch (Exception e) {
             logger.error(EXCEPTION,e.getLocalizedMessage());
