@@ -33,6 +33,7 @@ public abstract class BaseProcess implements DistributionProcess{
 
     protected static final String YEARENDDIST = "YEARENDDIST";
     protected static final String MONTHLYDIST = "MONTHLYDIST";
+    protected static final String NONGRADDIST = "NONGRADDIST";
     protected static final String SUPPDIST = "SUPPDIST";
     protected static final String DISTREP_YE_SD = "DISTREP_YE_SD";
     protected static final String DISTREP_YE_SC = "DISTREP_YE_SC";
@@ -153,6 +154,15 @@ public abstract class BaseProcess implements DistributionProcess{
         Integer reportCount = 0;
         final UUID correlationID = UUID.randomUUID();
         reportCount += webClient.get().uri(String.format(educDistributionApiConstants.getSchoolDistrictSupplementalReport(),schooLabelReportType,districtReportType,schoolReportType))
+                .headers(h -> { h.setBearerAuth(accessToken); h.set(EducDistributionApiConstants.CORRELATION_ID, correlationID.toString()); })
+                .retrieve().bodyToMono(Integer.class).block();
+        return reportCount;
+    }
+
+    protected Integer createDistrictSchoolNonGradReport(String accessToken, String schooLabelReportType, String districtReportType, String schoolReportType) {
+        Integer reportCount = 0;
+        final UUID correlationID = UUID.randomUUID();
+        reportCount += webClient.get().uri(String.format(educDistributionApiConstants.getSchoolDistrictStudentNonGradReport(),schooLabelReportType,districtReportType,schoolReportType))
                 .headers(h -> { h.setBearerAuth(accessToken); h.set(EducDistributionApiConstants.CORRELATION_ID, correlationID.toString()); })
                 .retrieve().bodyToMono(Integer.class).block();
         return reportCount;
