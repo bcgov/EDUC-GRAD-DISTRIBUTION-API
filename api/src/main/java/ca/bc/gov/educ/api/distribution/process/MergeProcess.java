@@ -108,14 +108,6 @@ public class MergeProcess extends BaseProcess {
 			numberOfProcessedSchoolReports += processDistrictSchoolDistribution(processorData, ADDRESS_LABEL_SCHL, null, DISTREP_SC);
 			logger.debug("***** Number of distributed Supplemental school reports {} *****", numberOfProcessedSchoolReports);
 		}
-		if (NONGRADDIST.equalsIgnoreCase(processorData.getActivityCode())) {
-			logger.debug("***** Create and Store Supplemental school reports *****");
-			numberOfCreatedSchoolReports += createDistrictSchoolNonGradReport(restUtils.getAccessToken(), ADDRESS_LABEL_YE, DISTREP_YE_SD, DISTREP_YE_SC);
-			logger.debug("***** Number of created Supplemental school reports {} *****", numberOfCreatedSchoolReports);
-			logger.debug("***** Distribute Supplemental school reports *****");
-			numberOfProcessedSchoolReports += processDistrictSchoolDistribution(processorData, ADDRESS_LABEL_SCHL, null, DISTREP_SC);
-			logger.debug("***** Number of distributed Supplemental school reports {} *****", numberOfProcessedSchoolReports);
-		}
 		numberOfPdfs += numberOfProcessedSchoolReports;
 		postingProcess(batchId,processorData,numberOfPdfs);
 		long endTime = System.currentTimeMillis();
