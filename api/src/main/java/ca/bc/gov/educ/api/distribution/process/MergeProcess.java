@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.internal.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -152,6 +153,7 @@ public class MergeProcess extends BaseProcess {
 		}
 		return Pair.of(currentSlipCount,numberOfPdfs);
 	}
+
 	private Pair<Integer, Integer> processTranscriptPrintRequest(DistributionPrintRequest obj, int currentSlipCount, ReportRequest packSlipReq, List<Student> studListNonGrad, ProcessorData processorData, String mincode, String schoolCategoryCode, int numberOfPdfs) {
 		if (obj.getTranscriptPrintRequest() != null) {
 			TranscriptPrintRequest transcriptPrintRequest = obj.getTranscriptPrintRequest();
@@ -182,9 +184,11 @@ public class MergeProcess extends BaseProcess {
 				if(objStd != null)
 					studListNonGrad.add(objStd);
 			}
-			InputStreamResource transcriptPdf = webClient.get().uri(String.format(educDistributionApiConstants.getTranscript(), scd.getStudentID(), scd.getCredentialTypeCode(), scd.getDocumentStatusCode())).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).retrieve().bodyToMono(InputStreamResource.class).block();
-			if (transcriptPdf != null) {
-				locations.add(transcriptPdf.getInputStream());
+			List<GradStudentTranscripts> studentTranscripts = webClient.get().uri(String.format(educDistributionApiConstants.getTranscriptUsingStudentID(), scd.getStudentID())).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).retrieve().bodyToMono(new ParameterizedTypeReference<List<GradStudentTranscripts>>() {}).block();
+			if(studentTranscripts != null && !studentTranscripts.isEmpty() ) {
+				GradStudentTranscripts studentTranscript = studentTranscripts.get(0);
+				byte[] transcriptPdf = Base64.decodeBase64(studentTranscript.getTranscript());
+				locations.add(new ByteArrayInputStream(transcriptPdf));
 				currentTranscript++;
 				logger.debug("*** Added PDFs {}/{} Current student {}", currentTranscript, scdList.size(), scd.getStudentID());
 			} else {
@@ -269,7 +273,7 @@ public class MergeProcess extends BaseProcess {
 			if(bytesSAR != null) {
 				locations.add(new ByteArrayInputStream(bytesSAR));
 				byte[] encoded = Base64.encodeBase64(bytesSAR);
-				String encodedPdf= new String(encoded, StandardCharsets.US_ASCII);
+				String encodedPdf = new String(encoded, StandardCharsets.US_ASCII);
 				if(!processorData.getActivityCode().contains("USERDIST"))
 					saveSchoolDistributionReport(encodedPdf,mincode,restUtils.getAccessToken(),"DISTREP_SC");
 			}

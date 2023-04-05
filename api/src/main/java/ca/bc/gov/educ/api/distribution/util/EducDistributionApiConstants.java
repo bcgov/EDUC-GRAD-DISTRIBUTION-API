@@ -34,6 +34,9 @@ public class EducDistributionApiConstants {
     @Value("${endpoint.grad-graduation-report-api.get-transcript.url}")
     private String transcript;
 
+    @Value("${endpoint.grad-graduation-report-api.get-transcript-psi-by-student-id.url}")
+    private String transcriptPsiUsingStudentID;
+
     @Value("${endpoint.grad-graduation-report-api.get-transcript-by-student-id.url}")
     private String transcriptUsingStudentID;
 
@@ -96,6 +99,9 @@ public class EducDistributionApiConstants {
 
     @Value("${endpoint.grad-graduation-api.school_district_supplemental_report.url}")
     private String schoolDistrictSupplementalReport;
+
+    @Value("${endpoint.grad-graduation-api.school_district_student_nongrad_report.url}")
+    private String schoolDistrictStudentNonGradReport;
 
     @Value("${endpoint.grad-graduation-api.school_labels_report.url}")
     private String schoolLabelsReport;

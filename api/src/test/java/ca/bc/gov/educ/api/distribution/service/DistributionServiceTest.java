@@ -5,6 +5,7 @@ import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import ca.bc.gov.educ.api.distribution.util.JsonTransformer;
 import ca.bc.gov.educ.api.distribution.util.RestUtils;
 import lombok.SneakyThrows;
+import org.apache.commons.codec.binary.Base64;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -388,6 +389,12 @@ public class DistributionServiceTest {
 		when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(2));
 
 		when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+		when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolDistrictStudentNonGradReport(), "ADDRESS_LABEL_YE", null, null))).thenReturn(this.requestHeadersMock);
+		when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(1));
+
+		when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
 		when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolDistrictYearEndReport(), "ADDRESS_LABEL_YE", "DISTREP_YE_SD", "DISTREP_YE_SC"))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
@@ -654,12 +661,16 @@ public class DistributionServiceTest {
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(InputStreamResource.class)).thenReturn(Mono.just(inSRPack));
 
+		GradStudentTranscripts studentTranscripts = new GradStudentTranscripts();
+		studentTranscripts.setStudentID(scd.getStudentID());
+		studentTranscripts.setTranscript(Base64.encodeBase64String(greBPack));
+
 		when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-		when(this.requestHeadersUriMock.uri(String.format(constants.getTranscript(), scd.getStudentID(),scd.getCredentialTypeCode(),scd.getDocumentStatusCode()))).thenReturn(this.requestHeadersMock);
+		when(this.requestHeadersUriMock.uri(String.format(constants.getTranscriptUsingStudentID(), scd.getStudentID()))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-		when(this.responseMock.bodyToMono(InputStreamResource.class)).thenReturn(inputResponse);
-		when(this.inputResponse.block()).thenReturn(inSRTran);
+		when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<GradStudentTranscripts>>() {
+		})).thenReturn(Mono.just(List.of(studentTranscripts)));
 
 		when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
 		when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolDetails(), mincode))).thenReturn(this.requestHeadersMock);
@@ -1017,7 +1028,7 @@ public class DistributionServiceTest {
 		byte[] bytesSAR = "Any String you want".getBytes();
 		InputStreamResource inSRCert = new InputStreamResource(new ByteArrayInputStream(bytesSAR));
 		when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-		when(this.requestHeadersUriMock.uri(String.format(constants.getTranscriptUsingStudentID(), scd.getStudentID()))).thenReturn(this.requestHeadersMock);
+		when(this.requestHeadersUriMock.uri(String.format(constants.getTranscriptPsiUsingStudentID(), scd.getStudentID()))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(InputStreamResource.class)).thenReturn(inputResponse);

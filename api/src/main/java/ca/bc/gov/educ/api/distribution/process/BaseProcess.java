@@ -33,6 +33,7 @@ public abstract class BaseProcess implements DistributionProcess{
 
     protected static final String YEARENDDIST = "YEARENDDIST";
     protected static final String MONTHLYDIST = "MONTHLYDIST";
+    protected static final String NONGRADDIST = "NONGRADDIST";
     protected static final String SUPPDIST = "SUPPDIST";
     protected static final String DISTREP_YE_SD = "DISTREP_YE_SD";
     protected static final String DISTREP_YE_SC = "DISTREP_YE_SC";
@@ -260,8 +261,9 @@ public abstract class BaseProcess implements DistributionProcess{
     protected void mergeDocuments(ProcessorData processorData, String mincode, String schoolCategoryCode, String fileName, String paperType, List<InputStream> locations) {
         String districtCode = StringUtils.substring(mincode, 0, 3);
         String activityCode = processorData.getActivityCode();
+        File bufferDirectory = null;
         try {
-            File bufferDirectory = IOUtils.createTempDirectory(EducDistributionApiConstants.TMP_DIR, "buffer");
+            bufferDirectory = IOUtils.createTempDirectory(EducDistributionApiConstants.TMP_DIR, "buffer");
             PDFMergerUtility pdfMergerUtility = new PDFMergerUtility();
             StringBuilder directoryPathBuilder = new StringBuilder();
             if(MONTHLYDIST.equalsIgnoreCase(activityCode) || "02".equalsIgnoreCase(schoolCategoryCode)) {
@@ -283,9 +285,12 @@ public abstract class BaseProcess implements DistributionProcess{
             MemoryUsageSetting memoryUsageSetting = MemoryUsageSetting.setupMixed(50000000)
                             .setTempDir(bufferDirectory);
             pdfMergerUtility.mergeDocuments(memoryUsageSetting);
-            IOUtils.removeFileOrDirectory(bufferDirectory);
         } catch (Exception e) {
             logger.error(EXCEPTION,e.getLocalizedMessage());
+        } finally {
+            if(bufferDirectory != null) {
+                IOUtils.removeFileOrDirectory(bufferDirectory);
+            }
         }
     }
 
