@@ -146,7 +146,7 @@ public class PSIReportProcess extends BaseProcess{
 		int[] rowDallColumnsWidths;
 		String csv = null;
 		List<String[]> studentTranscriptdata = new ArrayList<>();
-		List<String[]> updatedStudentTranscriptdataList = new ArrayList<>();
+		List<String> updatedStudentTranscriptdataList = new ArrayList<>();
 		File bufferDirectory = null;
 		ICSVWriter csvWriter = null;
 		try {
@@ -157,15 +157,16 @@ public class PSIReportProcess extends BaseProcess{
 			Path path = Paths.get(filePathBuilder.toString());
 			File newFile = new File(Files.createFile(path).toUri());
 			FileWriter fWriter = new FileWriter(newFile);
-            csvWriter = new CSVWriter(fWriter, ',',
+            /*csvWriter = new CSVWriter(fWriter, ',',
 					ICSVWriter.NO_QUOTE_CHARACTER,
 					ICSVWriter.DEFAULT_ESCAPE_CHARACTER,
-					ICSVWriter.RFC4180_LINE_END);
+					ICSVWriter.RFC4180_LINE_END);*/
 			CsvMapper csvMapper = new CsvMapper();
-			CsvSchema schema = CsvSchema.emptySchema().withColumnSeparator('').withLineSeparator("\r\n");
+			//CsvSchema schema = CsvSchema.emptySchema().withLineSeparator("\r\n");
 			for (PsiCredentialDistribution scd : scdList) {
 
 				ReportData transcriptCsv = webClient.get().uri(String.format(educDistributionApiConstants.getTranscriptCSVData(), scd.getPen())).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).retrieve().bodyToMono(ReportData.class).block();
+
 				if (transcriptCsv != null) {
 					Student studentDetails = transcriptCsv.getStudent();
 					School schoolDetails = transcriptCsv.getSchool();
@@ -177,7 +178,7 @@ public class PSIReportProcess extends BaseProcess{
 						studentInfo = new String[]{
 								scd.getPen(), "A", studentDetails.getLastName(), studentDetails.getFirstName(), studentDetails.getMiddleName(),
 								simpleDateFormat.format(studentDetails.getBirthdate()), studentDetails.getGender(), studentDetails.getCitizenship(),
-								studentDetails.getGrade(), studentDetails.getGraduationStatus().getSchoolOfRecord(), studentDetails.getLocalId(), studentDetails.getHasOtherProgram(),"" , "", "", "", "", "", "", studentDetails.getGradProgram()};
+								studentDetails.getGrade(), studentDetails.getGraduationStatus().getSchoolOfRecord(), studentDetails.getLocalId(), studentDetails.getHasOtherProgram(), "", "", "", "", "", "", "", studentDetails.getGradProgram()};
 
 						rowAallColumnsWidths = IntStream.of(10, 1, 25, 25, 25, 8, 1, 1, 2, 8, 12, 2, 1, 4, 6, 1, 1, 15, 18, 4).toArray();
 						setColumnsWidths(studentInfo, rowAallColumnsWidths, studentTranscriptdata);
@@ -222,7 +223,7 @@ public class PSIReportProcess extends BaseProcess{
 						}
 					}
 					//retrieving each string from string arrays of list and getting rid of double quotes after performing the null check
-					updatedStudentTranscriptdataList = studentTranscriptdata.stream()
+					/*updatedStudentTranscriptdataList = studentTranscriptdata.stream()
 							.map(arr -> Arrays.stream(arr)
 									.map(s -> {
 										if (s != null && s.startsWith("\"") && s.endsWith("\"")) {
@@ -231,8 +232,17 @@ public class PSIReportProcess extends BaseProcess{
 											return s;
 										}
 									}).toArray(String[]::new))
-							.collect(Collectors.toList());
-					csvMapper.writer(schema).writeValueAsString(updatedStudentTranscriptdataList);
+							.collect(Collectors.toList());*/
+					/*for (String[] studentData : studentTranscriptdata) {
+						for (int i = 0; i < studentData.length; i++) {
+							if (studentData[i] != null && studentData[i].startsWith("\"") && studentData[i].endsWith("\"")) {
+								studentData[i] = studentData[i].substring(1, studentData[i].length() - 1);
+							}
+						}
+					}*/
+
+					//String	listAsString = new String;
+
 					currentTranscript++;
 					logger.debug("*** Added csv {}/{} Current student {}", currentTranscript, scdList.size(), scd.getPen());
 				} else {
@@ -241,15 +251,21 @@ public class PSIReportProcess extends BaseProcess{
 				}
 
 			}
+			for (String[] studentData : studentTranscriptdata) {
+				String listAsString = String.join("", studentData);
+				updatedStudentTranscriptdataList.add(listAsString);
+			}
+
+			csv = csvMapper.writeValueAsString(updatedStudentTranscriptdataList);
+			csv.replaceAll("\"","").replaceAll(",", "\r\n");
+			fWriter.write(csv);
+			fWriter.close();
+			IOUtils.removeFileOrDirectory(bufferDirectory);
 		}
 		catch (Exception e) {
 			logger.error(EXCEPTION,e.getLocalizedMessage());
 		}
-		finally {
-			csvWriter.writeAll(studentTranscriptdata);
-			csvWriter.close();
-			IOUtils.removeFileOrDirectory(bufferDirectory);
-		}
+
 	}
 
 	private void setColumnsWidths(String[] allCSVRowsInfo, int[] eachRowsColumnsWidths, List<String[]> studentTranscriptdata) {

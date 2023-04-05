@@ -26,7 +26,7 @@ public class EducDistributionApiConstants {
     public static final String DATE_FORMAT = "yyyyMMdd";
     //public static final char EMPTY_CHARACTER = '';
 
-    public static final String TMP_DIR = "/tmp/batch/psi/";
+    public static final String TMP_DIR = "/tmp/";
 
     @Value("${endpoint.grad-graduation-report-api.get-transcript-list.url}")
     private String transcriptDistributionList;

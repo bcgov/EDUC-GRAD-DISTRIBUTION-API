@@ -289,17 +289,21 @@ public abstract class BaseProcess implements DistributionProcess{
 
             StringBuilder directoryPathBuilder = new StringBuilder();
             if (MONTHLYDIST.equalsIgnoreCase(activityCode) || "02".equalsIgnoreCase(schoolCategoryCode)) {
-                directoryPathBuilder.append(EducDistributionApiConstants.TMP_DIR).append(transmissionMode).append(processorData.getBatchId()).append(DEL).append(minCode).append(DEL);
+                //directoryPathBuilder.append(EducDistributionApiConstants.TMP_DIR).append("Batch").append(DEL).append("PSI").append(DEL).append(transmissionMode).append(DEL).append(processorData.getBatchId()).append(DEL).append(minCode).append(DEL);
+                directoryPathBuilder.append(EducDistributionApiConstants.TMP_DIR).append(processorData.getBatchId()).append(DEL).append(minCode).append(DEL);
             } else {
-                directoryPathBuilder.append(EducDistributionApiConstants.TMP_DIR).append(transmissionMode).append(processorData.getBatchId()).append(DEL).append(districtCode).append(DEL).append(minCode);
+               // directoryPathBuilder.append(EducDistributionApiConstants.TMP_DIR).append("Batch").append(DEL).append("PSI").append(DEL).append(transmissionMode).append(DEL).append(processorData.getBatchId()).append(DEL).append(districtCode).append(DEL).append(minCode);
+                directoryPathBuilder.append(EducDistributionApiConstants.TMP_DIR).append(processorData.getBatchId()).append(DEL).append(districtCode).append(DEL).append(minCode);
             }
             Path path = Paths.get(directoryPathBuilder.toString());
             Files.createDirectories(path);
 
             if (MONTHLYDIST.equalsIgnoreCase(activityCode) || "02".equalsIgnoreCase(schoolCategoryCode)) {
-                filePathBuilder.append(EducDistributionApiConstants.TMP_DIR).append(transmissionMode).append(processorData.getBatchId()).append(DEL).append(minCode);
+                //filePathBuilder.append(EducDistributionApiConstants.TMP_DIR).append("Batch").append(DEL).append("PSI").append(DEL).append(transmissionMode).append(DEL).append(processorData.getBatchId()).append(DEL).append(minCode);
+                filePathBuilder.append(EducDistributionApiConstants.TMP_DIR).append(processorData.getBatchId()).append(DEL).append(minCode).append(DEL);
             } else {
-                filePathBuilder.append(EducDistributionApiConstants.TMP_DIR).append(transmissionMode).append(processorData.getBatchId()).append(DEL).append(districtCode).append(DEL).append(minCode);
+                //filePathBuilder.append(EducDistributionApiConstants.TMP_DIR).append("Batch").append(DEL).append("PSI").append(DEL).append(transmissionMode).append(DEL).append(processorData.getBatchId()).append(DEL).append(districtCode).append(DEL).append(minCode);
+                filePathBuilder.append(EducDistributionApiConstants.TMP_DIR).append(processorData.getBatchId()).append(DEL).append(districtCode).append(DEL).append(minCode);
             }
         }
         catch (Exception e) {
