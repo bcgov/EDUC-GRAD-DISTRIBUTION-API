@@ -24,8 +24,9 @@ public class EducDistributionApiConstants {
     public static final String SECONDARY_DATE_FORMAT = "yyyy/MM/dd";
     //Grad2-1931
     public static final String DATE_FORMAT = "yyyyMMdd";
+    //public static final char EMPTY_CHARACTER = '';
 
-    public static final String TMP_DIR = "/tmp/";
+    public static final String TMP_DIR = "/tmp/batch/psi/";
 
     @Value("${endpoint.grad-graduation-report-api.get-transcript-list.url}")
     private String transcriptDistributionList;

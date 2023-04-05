@@ -262,7 +262,7 @@ public abstract class BaseProcess implements DistributionProcess{
 
         try {
             File bufferDirectory = IOUtils.createTempDirectory(EducDistributionApiConstants.TMP_DIR, "buffer");
-            StringBuilder filePathBuilder = createTempDirectories(processorData, mincode, schoolCategoryCode, bufferDirectory);
+            StringBuilder filePathBuilder = createTempDirectories(processorData, mincode, schoolCategoryCode);
             PDFMergerUtility pdfMergerUtility = new PDFMergerUtility();
             //Naming the file with extension
             filePathBuilder.append(fileName).append(paperType).append(".").append(EducDistributionApiUtils.getFileName()).append(".pdf");
@@ -277,47 +277,29 @@ public abstract class BaseProcess implements DistributionProcess{
             logger.error(EXCEPTION,e.getLocalizedMessage());
         }
     }
-    //Grad2-1931 : Writes students transcripts on CSV under a folder structure and naming them- mchintha
-    protected void mergeDocumentsCSVs(ProcessorData processorData, String mincode, String schoolCategoryCode, String fileName, String paperType, String csvfile) {
 
-       try {
-           File bufferDirectory = IOUtils.createTempDirectory(EducDistributionApiConstants.TMP_DIR, "buffer");
-           StringBuilder filePathBuilder = createTempDirectories(processorData, mincode, schoolCategoryCode, bufferDirectory);
-           //Naming the file with extension
-           filePathBuilder.append(fileName).append(mincode).append(paperType).append(".").append(EducDistributionApiUtils.getFileName()).append(".DAT");
-           Path path = Paths.get(filePathBuilder.toString());
-           File newFile = new File(Files.createFile(path).toUri());
-           PrintWriter writer = new PrintWriter(newFile);
-           writer.write(csvfile);
-           writer.close();
-               IOUtils.removeFileOrDirectory(bufferDirectory);
-           }
-       catch (Exception e) {
-            logger.error(EXCEPTION,e.getLocalizedMessage());
-        }
-
-    }
     //Grad2-1931 : Creates folder structure for files at temporary location - mchintha
-    protected StringBuilder createTempDirectories(ProcessorData processorData, String mincode, String schoolCategoryCode, File bufferDirectory) {
-        String districtCode = StringUtils.substring(mincode, 0, 3);
+    protected StringBuilder createTempDirectories(ProcessorData processorData, String minCode, String schoolCategoryCode) {
+        String districtCode = StringUtils.substring(minCode, 0, 3);
         String activityCode = processorData.getActivityCode();
+        String transmissionMode = processorData.getTransmissionMode();
         StringBuilder filePathBuilder = new StringBuilder();
         try {
 
 
             StringBuilder directoryPathBuilder = new StringBuilder();
             if (MONTHLYDIST.equalsIgnoreCase(activityCode) || "02".equalsIgnoreCase(schoolCategoryCode)) {
-                directoryPathBuilder.append(EducDistributionApiConstants.TMP_DIR).append(processorData.getBatchId()).append(DEL).append(mincode).append(DEL);
+                directoryPathBuilder.append(EducDistributionApiConstants.TMP_DIR).append(transmissionMode).append(processorData.getBatchId()).append(DEL).append(minCode).append(DEL);
             } else {
-                directoryPathBuilder.append(EducDistributionApiConstants.TMP_DIR).append(processorData.getBatchId()).append(DEL).append(districtCode).append(DEL).append(mincode);
+                directoryPathBuilder.append(EducDistributionApiConstants.TMP_DIR).append(transmissionMode).append(processorData.getBatchId()).append(DEL).append(districtCode).append(DEL).append(minCode);
             }
             Path path = Paths.get(directoryPathBuilder.toString());
             Files.createDirectories(path);
 
             if (MONTHLYDIST.equalsIgnoreCase(activityCode) || "02".equalsIgnoreCase(schoolCategoryCode)) {
-                filePathBuilder.append(EducDistributionApiConstants.TMP_DIR).append(processorData.getBatchId()).append(DEL).append(mincode);
+                filePathBuilder.append(EducDistributionApiConstants.TMP_DIR).append(transmissionMode).append(processorData.getBatchId()).append(DEL).append(minCode);
             } else {
-                filePathBuilder.append(EducDistributionApiConstants.TMP_DIR).append(processorData.getBatchId()).append(DEL).append(districtCode).append(DEL).append(mincode);
+                filePathBuilder.append(EducDistributionApiConstants.TMP_DIR).append(transmissionMode).append(processorData.getBatchId()).append(DEL).append(districtCode).append(DEL).append(minCode);
             }
         }
         catch (Exception e) {
