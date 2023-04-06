@@ -167,7 +167,7 @@ public class PSIReportProcess extends BaseProcess{
 			// TODO path has null
 			Path path = Paths.get(filePathBuilder.toString());
 			File newFile = new File(Files.createFile(path).toUri());
-			FileWriter fWriter = new FileWriter(newFile);
+
             /*csvWriter = new CSVWriter(fWriter, ',',
 					ICSVWriter.NO_QUOTE_CHARACTER,
 					ICSVWriter.DEFAULT_ESCAPE_CHARACTER,
@@ -192,8 +192,11 @@ public class PSIReportProcess extends BaseProcess{
 								studentDetails.getGrade(), studentDetails.getGraduationStatus().getSchoolOfRecord(), studentDetails.getLocalId(), studentDetails.getHasOtherProgram(), "", "", "", "", "", "", "", studentDetails.getGradProgram()};
 
 						// TODO create function for column widths or declare in method signature
-						rowAallColumnsWidths = IntStream.of(10, 1, 25, 25, 25, 8, 1, 1, 2, 8, 12, 2, 1, 4, 6, 1, 1, 15, 18, 4).toArray();
-						setColumnsWidths(studentInfo, rowAallColumnsWidths, studentTranscriptdata);
+						//rowAallColumnsWidths = IntStream.of(10, 1, 25, 25, 25, 8, 1, 1, 2, 8, 12, 2, 1, 4, 6, 1, 1, 15, 18, 4).toArray();
+						setColumnsWidths(
+								studentInfo,
+								IntStream.of(10, 1, 25, 25, 25, 8, 1, 1, 2, 8, 12, 2, 1, 4, 6, 1, 1, 15, 18, 4).toArray(),
+								studentTranscriptdata);
 					}
 					//Writes the B's row's data on CSV
 					if (schoolDetails != null) {
@@ -270,7 +273,8 @@ public class PSIReportProcess extends BaseProcess{
 
 			csv = csvMapper.writeValueAsString(updatedStudentTranscriptdataList);
 			csv = csv.replaceAll("\"","").replaceAll(",", "\r\n");
-			// TODO Use try with resources
+			// TODO Use try with resources (https://www.educative.io/answers/what-is-try-with-resources-in-java?utm_campaign=brand_educative&utm_source=google&utm_medium=ppc&utm_content=performance_max&eid=5082902844932096&utm_term=&utm_campaign=%5BNew%5D+Performance+Max&utm_source=adwords&utm_medium=ppc&hsa_acc=5451446008&hsa_cam=18511913007&hsa_grp=&hsa_ad=&hsa_src=x&hsa_tgt=&hsa_kw=&hsa_mt=&hsa_net=adwords&hsa_ver=3&gclid=Cj0KCQjw27mhBhC9ARIsAIFsETGlXWGBk5pP1C4IGd_J24fVthHnLwfGpTNt_JgbgGpFSd7pN9_BOHUaAm11EALw_wcB)
+			FileWriter fWriter = new FileWriter(newFile);
 			fWriter.write(csv);
 			fWriter.close();
 			//IOUtils.removeFileOrDirectory(bufferDirectory);
