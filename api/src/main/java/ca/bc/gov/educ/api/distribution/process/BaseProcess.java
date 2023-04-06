@@ -280,6 +280,7 @@ public abstract class BaseProcess implements DistributionProcess{
 
     //Grad2-1931 : Creates folder structure for files at temporary location - mchintha
     protected StringBuilder createTempDirectories(ProcessorData processorData, String minCode, String schoolCategoryCode) {
+        // TODO move method to IOUtils
         String districtCode = StringUtils.substring(minCode, 0, 3);
         String activityCode = processorData.getActivityCode();
         String transmissionMode = processorData.getTransmissionMode();

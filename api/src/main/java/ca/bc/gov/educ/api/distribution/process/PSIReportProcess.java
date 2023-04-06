@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.distribution.process;
 
 import ca.bc.gov.educ.api.distribution.model.dto.*;
+import ca.bc.gov.educ.api.distribution.service.GraduationService;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils;
 import ca.bc.gov.educ.api.distribution.util.IOUtils;
@@ -14,6 +15,7 @@ import lombok.NoArgsConstructor;
 import org.modelmapper.internal.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Component;
 
@@ -39,6 +41,13 @@ public class PSIReportProcess extends BaseProcess{
 	
 	private static Logger logger = LoggerFactory.getLogger(PSIReportProcess.class);
 	private static final String ADDRESS_LABEL_PSI = "ADDRESS_LABEL_PSI";
+
+	GraduationService graduationService;
+
+	@Autowired
+	public PSIReportProcess(GraduationService graduationService) {
+		this.graduationService = graduationService;
+	}
 
 	@Override
 	public ProcessorData fire(ProcessorData processorData) {
@@ -150,10 +159,12 @@ public class PSIReportProcess extends BaseProcess{
 		File bufferDirectory = null;
 		ICSVWriter csvWriter = null;
 		try {
-			bufferDirectory = IOUtils.createTempDirectory(EducDistributionApiConstants.TMP_DIR, "buffer");
+			// TODO bufferDirectory not used
+			//bufferDirectory = IOUtils.createTempDirectory(EducDistributionApiConstants.TMP_DIR, "buffer");
 			StringBuilder filePathBuilder = createTempDirectories(processorData, psiCode, "02");
 
 			filePathBuilder.append("/GRAD_INT").append(psiCode).append("_RESULTS").append(".").append(EducDistributionApiUtils.getFileName()).append(".DAT");
+			// TODO path has null
 			Path path = Paths.get(filePathBuilder.toString());
 			File newFile = new File(Files.createFile(path).toUri());
 			FileWriter fWriter = new FileWriter(newFile);
@@ -165,7 +176,7 @@ public class PSIReportProcess extends BaseProcess{
 			//CsvSchema schema = CsvSchema.emptySchema().withLineSeparator("\r\n");
 			for (PsiCredentialDistribution scd : scdList) {
 
-				ReportData transcriptCsv = webClient.get().uri(String.format(educDistributionApiConstants.getTranscriptCSVData(), scd.getPen())).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).retrieve().bodyToMono(ReportData.class).block();
+				ReportData transcriptCsv = graduationService.getReportData(scd.getPen());
 
 				if (transcriptCsv != null) {
 					Student studentDetails = transcriptCsv.getStudent();
@@ -180,6 +191,7 @@ public class PSIReportProcess extends BaseProcess{
 								simpleDateFormat.format(studentDetails.getBirthdate()), studentDetails.getGender(), studentDetails.getCitizenship(),
 								studentDetails.getGrade(), studentDetails.getGraduationStatus().getSchoolOfRecord(), studentDetails.getLocalId(), studentDetails.getHasOtherProgram(), "", "", "", "", "", "", "", studentDetails.getGradProgram()};
 
+						// TODO create function for column widths or declare in method signature
 						rowAallColumnsWidths = IntStream.of(10, 1, 25, 25, 25, 8, 1, 1, 2, 8, 12, 2, 1, 4, 6, 1, 1, 15, 18, 4).toArray();
 						setColumnsWidths(studentInfo, rowAallColumnsWidths, studentTranscriptdata);
 					}
@@ -257,10 +269,11 @@ public class PSIReportProcess extends BaseProcess{
 			}
 
 			csv = csvMapper.writeValueAsString(updatedStudentTranscriptdataList);
-			csv.replaceAll("\"","").replaceAll(",", "\r\n");
+			csv = csv.replaceAll("\"","").replaceAll(",", "\r\n");
+			// TODO Use try with resources
 			fWriter.write(csv);
 			fWriter.close();
-			IOUtils.removeFileOrDirectory(bufferDirectory);
+			//IOUtils.removeFileOrDirectory(bufferDirectory);
 		}
 		catch (Exception e) {
 			logger.error(EXCEPTION,e.getLocalizedMessage());
