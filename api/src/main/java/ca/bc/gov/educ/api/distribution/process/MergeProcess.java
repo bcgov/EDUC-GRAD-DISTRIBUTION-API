@@ -108,6 +108,14 @@ public class MergeProcess extends BaseProcess {
 			numberOfProcessedSchoolReports += processDistrictSchoolDistribution(processorData, ADDRESS_LABEL_SCHL, null, DISTREP_SC);
 			logger.debug("***** Number of distributed Supplemental school reports {} *****", numberOfProcessedSchoolReports);
 		}
+		if (NONGRADDIST.equalsIgnoreCase(processorData.getActivityCode())) {
+			logger.debug("***** Create and Store Student NonGrad School Report *****");
+			numberOfCreatedSchoolReports += createSchoolLabelsReport(schoolsForLabels, processorData.getAccessToken(), ADDRESS_LABEL_SCHL );
+			logger.debug("***** Number of created Student NonGrad School Reports {} *****", numberOfCreatedSchoolReports);
+			logger.debug("***** Distribute Student NonGrad School Reports *****");
+			numberOfProcessedSchoolReports += processDistrictSchoolDistribution(processorData, ADDRESS_LABEL_SCHL, null, NONGRADDISTREP_SC);
+			logger.debug("***** Number of distributed Student NonGrad School Reports {} *****", numberOfProcessedSchoolReports);
+		}
 		numberOfPdfs += numberOfProcessedSchoolReports;
 		postingProcess(batchId,processorData,numberOfPdfs);
 		long endTime = System.currentTimeMillis();
@@ -307,7 +315,7 @@ public class MergeProcess extends BaseProcess {
 		byte[] encoded = Base64.encodeBase64(bytesSAR);
 		assert encoded != null;
 		String encodedPdf = new String(encoded, StandardCharsets.US_ASCII);
-		saveSchoolDistributionReport(encodedPdf,mincode,accessToken, "NONGRADDISTREP_SC");
+		saveSchoolDistributionReport(encodedPdf,mincode,accessToken, NONGRADDISTREP_SC);
 	}
 
 	private void saveSchoolDistributionReport(String encodedPdf, String mincode, String accessToken, String reportType) {
