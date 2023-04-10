@@ -1,5 +1,10 @@
 package ca.bc.gov.educ.api.distribution.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -10,11 +15,6 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 
 public class EducDistributionApiUtils {
 
@@ -97,14 +97,14 @@ public class EducDistributionApiUtils {
 		return httpHeaders;
 	}
 
-	public static String getFileName() {
+	private static String getFileName() {
 		Date date = new Date();
 		SimpleDateFormat month = new SimpleDateFormat("MMM.dd.yyyy.hh.mm.ss");
 		return month.format(date);
 	}
 
-	public static String getFileNameSchoolReports(String mincode, int year, String month, String type) {
-		return mincode + "_" + year + month + "_" + type;
+	public static String getFileNameSchoolReports(String mincode) {
+		return getFileName() + "." + mincode;
 	}
 
 	public static String formatDateForReport(String updatedTimestamp) {
