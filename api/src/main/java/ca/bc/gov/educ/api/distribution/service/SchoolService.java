@@ -27,7 +27,7 @@ public class SchoolService {
 		this.educDistributionApiConstants = educDistributionApiConstants;
 	}
 
-	public CommonSchool getCommonSchoolDetails(String mincode, String accessToken, ExceptionMessage exception) {
+	public CommonSchool getCommonSchoolDetails(String mincode, ExceptionMessage exception) {
 		try
 		{
 			return webClient.get().uri(String.format(educDistributionApiConstants.getCommonSchoolByMincode(),mincode)).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).retrieve().bodyToMono(CommonSchool.class).block();

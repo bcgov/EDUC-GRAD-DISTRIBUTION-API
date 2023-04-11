@@ -73,7 +73,7 @@ public abstract class BaseProcess implements DistributionProcess{
         if(obj.getProperName() != null)
             return schoolService.getCommonSchoolDetailsForPackingSlip(obj.getProperName());
         else
-            return schoolService.getCommonSchoolDetails(mincode,restUtils.getAccessToken(),exception);
+            return schoolService.getCommonSchoolDetails(mincode, exception);
     }
 
     protected void createZipFile(Long batchId) {
