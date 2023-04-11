@@ -88,8 +88,32 @@ public abstract class BaseProcess implements DistributionProcess{
         }
     }
 
+    protected void createZipFile(Long batchId, String mincode) {
+        StringBuilder sourceFileBuilder = new StringBuilder().append(EducDistributionApiConstants.TMP_DIR).append(batchId);
+        try(FileOutputStream fos = new FileOutputStream(EducDistributionApiConstants.TMP_DIR +"EDGRAD.BATCH." + batchId + "." + mincode + ".zip")) {
+            ZipOutputStream zipOut = new ZipOutputStream(fos);
+            File fileToZip = new File(sourceFileBuilder.toString());
+            EducDistributionApiUtils.zipFile(fileToZip, fileToZip.getName(), zipOut);
+            zipOut.close();
+        } catch (IOException e) {
+            logger.debug(EXCEPTION,e.getLocalizedMessage());
+        }
+    }
+
     protected void createControlFile(Long batchId,int numberOfPdfs) {
         try(FileOutputStream fos = new FileOutputStream("/tmp/EDGRAD.BATCH." + batchId + ".txt")) {
+            byte[] contentInBytes = String.valueOf(numberOfPdfs).getBytes();
+            fos.write(contentInBytes);
+            fos.flush();
+        } catch (IOException e) {
+            logger.debug(EXCEPTION,e.getLocalizedMessage());
+        }
+        logger.debug("Created Control file ");
+
+    }
+
+    protected void createControlFile(Long batchId,int numberOfPdfs, String mincode) {
+        try(FileOutputStream fos = new FileOutputStream("/tmp/EDGRAD.BATCH." + batchId + "." + mincode + ".txt")) {
             byte[] contentInBytes = String.valueOf(numberOfPdfs).getBytes();
             fos.write(contentInBytes);
             fos.flush();
@@ -123,6 +147,14 @@ public abstract class BaseProcess implements DistributionProcess{
         if(processorData.getLocalDownload() == null || !processorData.getLocalDownload().equalsIgnoreCase("Y")) {
             createControlFile(batchId, numberOfPdfs);
             sftpUtils.sftpUploadBCMail(batchId);
+        }
+    }
+
+    protected void postingProcess(Long batchId,ProcessorData processorData,Integer numberOfPdfs, String mincode) {
+        createZipFile(batchId, mincode);
+        if(processorData.getLocalDownload() == null || !processorData.getLocalDownload().equalsIgnoreCase("Y")) {
+            createControlFile(batchId, numberOfPdfs, mincode);
+            sftpUtils.sftpUploadBCMail(batchId, mincode);
         }
     }
 

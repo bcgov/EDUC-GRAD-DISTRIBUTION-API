@@ -28,9 +28,9 @@ import java.util.Map;
 @Component
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class MergeProcess extends BaseProcess {
+public class YearEndMergeProcess extends BaseProcess {
 	
-	private static Logger logger = LoggerFactory.getLogger(MergeProcess.class);
+	private static Logger logger = LoggerFactory.getLogger(YearEndMergeProcess.class);
 
 	@Override
 	public ProcessorData fire(ProcessorData processorData) {
@@ -54,12 +54,6 @@ public class MergeProcess extends BaseProcess {
 				logger.debug("*** School Details Acquired {} category {}", mincode, schoolCategoryCode);
 				List<Student> studListNonGrad = new ArrayList<>();
 				ReportRequest packSlipReq = reportService.preparePackingSlipData(schoolDetails, processorData.getBatchId());
-
-				if(distributionPrintRequest.getSchoolDistributionRequest() != null && MONTHLYDIST.equalsIgnoreCase(processorData.getActivityCode())) {
-					ReportRequest schoolDistributionReportRequest = reportService.prepareSchoolDistributionReportData(distributionPrintRequest.getSchoolDistributionRequest(), processorData.getBatchId(),schoolDetails);
-					createAndSaveDistributionReport(schoolDistributionReportRequest,mincode,schoolCategoryCode,processorData);
-					numberOfPdfs++;
-				}
 				Pair<Integer,Integer> pV = processTranscriptPrintRequest(distributionPrintRequest,currentSlipCount,packSlipReq,studListNonGrad,processorData,mincode,schoolCategoryCode,numberOfPdfs);
 				currentSlipCount = pV.getLeft();
 				numberOfPdfs = pV.getRight();
@@ -80,33 +74,34 @@ public class MergeProcess extends BaseProcess {
 					restUtils.fetchAccessToken(processorData);
 				}
 				logger.debug("School {}/{}",counter,mapDist.size());
+
+				int numberOfCreatedSchoolReports = 0;
+				int numberOfProcessedSchoolReports = 0;
+				if (YEARENDDIST.equalsIgnoreCase(processorData.getActivityCode())) {
+					logger.debug("***** Create and Store Year End school reports *****");
+					numberOfCreatedSchoolReports += createDistrictSchoolYearEndReport(restUtils.getAccessToken(), ADDRESS_LABEL_YE, DISTREP_YE_SD, DISTREP_YE_SC);
+					logger.debug("***** Number of created Year End school reports {} *****", numberOfCreatedSchoolReports);
+					logger.debug("***** Distribute Year End school reports *****");
+					numberOfProcessedSchoolReports += processDistrictSchoolDistribution(processorData, ADDRESS_LABEL_YE, DISTREP_YE_SD, DISTREP_YE_SC);
+					logger.debug("***** Number of distributed Year End school reports {} *****", numberOfProcessedSchoolReports);
+				}
+				if (NONGRADDIST.equalsIgnoreCase(processorData.getActivityCode())) {
+					logger.debug("***** Create and Store Student NonGrad School Report *****");
+					numberOfCreatedSchoolReports += createSchoolLabelsReport(schoolsForLabels, processorData.getAccessToken(), ADDRESS_LABEL_SCHL );
+					logger.debug("***** Number of created Student NonGrad School Reports {} *****", numberOfCreatedSchoolReports);
+					logger.debug("***** Distribute Student NonGrad School Reports *****");
+					numberOfProcessedSchoolReports += processDistrictSchoolDistribution(processorData, ADDRESS_LABEL_SCHL, null, NONGRADDISTREP_SC);
+					logger.debug("***** Number of distributed Student NonGrad School Reports {} *****", numberOfProcessedSchoolReports);
+				}
+				numberOfPdfs += numberOfProcessedSchoolReports;
+				postingProcess(batchId,processorData,numberOfPdfs,mincode);
+				long endTime = System.currentTimeMillis();
+				long diff = (endTime - startTime)/1000;
+				logger.debug("************* TIME Taken  ************ {} secs",diff);
+				response.setMergeProcessResponse("Merge Successful and File Uploaded");
+				processorData.setDistributionResponse(response);
 			}
 		}
-		int numberOfCreatedSchoolReports = 0;
-		int numberOfProcessedSchoolReports = 0;
-		if(MONTHLYDIST.equalsIgnoreCase(processorData.getActivityCode())) {
-			logger.debug("***** Create and Store Monthly school reports *****");
-			numberOfCreatedSchoolReports += createDistrictSchoolMonthReport(restUtils.getAccessToken(), ADDRESS_LABEL_SCHL, null, null);
-			logger.debug("***** Number of created Monthly school reports {} *****", numberOfCreatedSchoolReports);
-			logger.debug("***** Distribute Monthly school reports *****");
-			numberOfProcessedSchoolReports += processDistrictSchoolDistribution(processorData, ADDRESS_LABEL_SCHL, null, null);
-			logger.debug("***** Number of distributed Monthly school reports {} *****", numberOfProcessedSchoolReports);
-		}
-		if (SUPPDIST.equalsIgnoreCase(processorData.getActivityCode())) {
-			logger.debug("***** Create and Store Supplemental school reports *****");
-			numberOfCreatedSchoolReports += createDistrictSchoolSuppReport(restUtils.getAccessToken(), ADDRESS_LABEL_SCHL, null, DISTREP_SC);
-			logger.debug("***** Number of created Supplemental school reports {} *****", numberOfCreatedSchoolReports);
-			logger.debug("***** Distribute Supplemental school reports *****");
-			numberOfProcessedSchoolReports += processDistrictSchoolDistribution(processorData, ADDRESS_LABEL_SCHL, null, DISTREP_SC);
-			logger.debug("***** Number of distributed Supplemental school reports {} *****", numberOfProcessedSchoolReports);
-		}
-		numberOfPdfs += numberOfProcessedSchoolReports;
-		postingProcess(batchId,processorData,numberOfPdfs);
-		long endTime = System.currentTimeMillis();
-		long diff = (endTime - startTime)/1000;
-		logger.debug("************* TIME Taken  ************ {} secs",diff);
-		response.setMergeProcessResponse("Merge Successful and File Uploaded");
-		processorData.setDistributionResponse(response);
 		return processorData;
 	}
 
