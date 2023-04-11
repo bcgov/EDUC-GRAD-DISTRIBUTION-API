@@ -325,6 +325,7 @@ public abstract class BaseProcess implements DistributionProcess{
     }
 
     protected void mergeDocuments(ProcessorData processorData, String mincode, String schoolCategoryCode, String fileName, String paperType, List<InputStream> locations) {
+        logger.debug("*** Start Transcript Documents Merge ***");
         String districtCode = StringUtils.substring(mincode, 0, 3);
         String activityCode = processorData.getActivityCode();
         File bufferDirectory = null;
