@@ -2,8 +2,10 @@ package ca.bc.gov.educ.api.distribution.service;
 
 import ca.bc.gov.educ.api.distribution.model.dto.CommonSchool;
 import ca.bc.gov.educ.api.distribution.model.dto.ExceptionMessage;
+import ca.bc.gov.educ.api.distribution.model.dto.TraxSchool;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import ca.bc.gov.educ.api.distribution.util.RestUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,10 +27,10 @@ public class SchoolService {
 		this.educDistributionApiConstants = educDistributionApiConstants;
 	}
 
-	public CommonSchool getSchoolDetails(String mincode, String accessToken, ExceptionMessage exception) {
+	public CommonSchool getCommonSchoolDetails(String mincode, String accessToken, ExceptionMessage exception) {
 		try
 		{
-			return webClient.get().uri(String.format(educDistributionApiConstants.getSchoolDetails(),mincode)).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).retrieve().bodyToMono(CommonSchool.class).block();
+			return webClient.get().uri(String.format(educDistributionApiConstants.getCommonSchoolByMincode(),mincode)).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).retrieve().bodyToMono(CommonSchool.class).block();
 		} catch (Exception e) {
 			exception.setExceptionName("SCHOOL-API IS DOWN");
 			exception.setExceptionDetails(e.getLocalizedMessage());
@@ -37,7 +39,7 @@ public class SchoolService {
 		}
 	}
 
-	public CommonSchool getDetailsForPackingSlip(String properName) {
+	public CommonSchool getCommonSchoolDetailsForPackingSlip(String properName) {
 		CommonSchool fakeSchoolObj = new CommonSchool();
 		fakeSchoolObj.setSchlNo(String.format("%09d" , 0));
 		fakeSchoolObj.setSchoolName(properName);
@@ -49,5 +51,24 @@ public class SchoolService {
 		fakeSchoolObj.setScPostalCode("V8W9T6");
 		fakeSchoolObj.setScCountryCode("CN");
 		return fakeSchoolObj;
+	}
+
+	public TraxSchool getTraxSchool(String minCode, String accessToken, ExceptionMessage exception) {
+		TraxSchool traxSchool = null;
+		if(!StringUtils.isBlank(minCode)) {
+			try {
+				traxSchool = webClient.get()
+						.uri(String.format(educDistributionApiConstants.getTraxSchoolByMincode(), minCode))
+						.headers(h -> h.setBearerAuth(accessToken))
+						.retrieve()
+						.bodyToMono(TraxSchool.class)
+						.block();
+			} catch (Exception e) {
+				exception.setExceptionName("TRAX-API IS DOWN");
+				exception.setExceptionDetails(e.getLocalizedMessage());
+				logger.error(exception.getExceptionName(), e);
+			}
+		}
+		return traxSchool;
 	}
 }

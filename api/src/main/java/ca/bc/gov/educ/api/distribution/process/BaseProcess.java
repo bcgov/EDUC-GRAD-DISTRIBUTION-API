@@ -71,9 +71,9 @@ public abstract class BaseProcess implements DistributionProcess{
 
     protected CommonSchool getBaseSchoolDetails(DistributionPrintRequest obj, String mincode, ProcessorData processorData, ExceptionMessage exception) {
         if(obj.getProperName() != null)
-            return schoolService.getDetailsForPackingSlip(obj.getProperName());
+            return schoolService.getCommonSchoolDetailsForPackingSlip(obj.getProperName());
         else
-            return schoolService.getSchoolDetails(mincode,restUtils.getAccessToken(),exception);
+            return schoolService.getCommonSchoolDetails(mincode,restUtils.getAccessToken(),exception);
     }
 
     protected void createZipFile(Long batchId) {
@@ -345,19 +345,22 @@ public abstract class BaseProcess implements DistributionProcess{
         schools.add(school);
     }
 
-    protected void processSchoolsForLabels(List<School> schools, CommonSchool commonSchool) {
-        School school = new School();
-        school.setMincode(commonSchool.getDistNo() + commonSchool.getSchlNo());
-        school.setName(commonSchool.getSchoolName());
-        Address address = new Address();
-        address.setStreetLine1(commonSchool.getScAddressLine1());
-        address.setStreetLine2(commonSchool.getScAddressLine2());
-        address.setCity(commonSchool.getScCity());
-        address.setRegion(commonSchool.getScProvinceCode());
-        address.setCountry(commonSchool.getScCountryCode());
-        address.setCode(commonSchool.getScPostalCode());
-        school.setAddress(address);
-        schools.add(school);
+    protected void processSchoolsForLabels(List<School> schools, String mincode, String accessToken, ExceptionMessage exception) {
+        TraxSchool traxSchool = schoolService.getTraxSchool(mincode, accessToken, exception);
+        if(traxSchool != null) {
+            School school = new School();
+            school.setMincode(traxSchool.getMinCode());
+            school.setName(traxSchool.getSchoolName());
+            Address address = new Address();
+            address.setStreetLine1(traxSchool.getAddress1());
+            address.setStreetLine2(traxSchool.getAddress2());
+            address.setCity(traxSchool.getCity());
+            address.setRegion(traxSchool.getProvCode());
+            address.setCountry(traxSchool.getCountryCode());
+            address.setCode(traxSchool.getPostal());
+            school.setAddress(address);
+            schools.add(school);
+        }
     }
 
 }

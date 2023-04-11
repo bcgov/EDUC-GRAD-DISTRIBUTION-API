@@ -1,5 +1,6 @@
 package ca.bc.gov.educ.api.distribution.util;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -120,24 +121,28 @@ public class EducDistributionApiUtils {
 	}
 
 	public static String formatDateForReportJasper(String updatedTimestamp) {
-		SimpleDateFormat fromUser = new SimpleDateFormat(EducDistributionApiConstants.DEFAULT_DATE_FORMAT);
-		SimpleDateFormat myFormat = new SimpleDateFormat(EducDistributionApiConstants.DEFAULT_DATE_FORMAT);
-		try {
-			return myFormat.format(fromUser.parse(updatedTimestamp));
-		} catch (ParseException e) {
-			logger.debug(PARSE_EXP,e.getLocalizedMessage());
+		if(StringUtils.isNotBlank(updatedTimestamp)) {
+			SimpleDateFormat fromUser = new SimpleDateFormat(EducDistributionApiConstants.DEFAULT_DATE_FORMAT);
+			SimpleDateFormat myFormat = new SimpleDateFormat(EducDistributionApiConstants.DEFAULT_DATE_FORMAT);
+			try {
+				return myFormat.format(fromUser.parse(updatedTimestamp));
+			} catch (ParseException e) {
+				logger.debug(PARSE_EXP,e.getLocalizedMessage());
+			}
 		}
 		return updatedTimestamp;
 
 	}
 
 	public static Date formatIssueDateForReportJasper(String updatedTimestamp) {
-		SimpleDateFormat fromUser = new SimpleDateFormat(EducDistributionApiConstants.DEFAULT_DATE_FORMAT);
-		SimpleDateFormat myFormat = new SimpleDateFormat(EducDistributionApiConstants.DEFAULT_DATE_FORMAT);
-		try {
-			return new SimpleDateFormat(EducDistributionApiConstants.DEFAULT_DATE_FORMAT).parse(myFormat.format(fromUser.parse(updatedTimestamp)));
-		} catch (ParseException e) {
-			logger.debug(PARSE_EXP,e.getLocalizedMessage());
+		if(StringUtils.isNotBlank(updatedTimestamp)) {
+			SimpleDateFormat fromUser = new SimpleDateFormat(EducDistributionApiConstants.DEFAULT_DATE_FORMAT);
+			SimpleDateFormat myFormat = new SimpleDateFormat(EducDistributionApiConstants.DEFAULT_DATE_FORMAT);
+			try {
+				return new SimpleDateFormat(EducDistributionApiConstants.DEFAULT_DATE_FORMAT).parse(myFormat.format(fromUser.parse(updatedTimestamp)));
+			} catch (ParseException e) {
+				logger.debug(PARSE_EXP, e.getLocalizedMessage());
+			}
 		}
 		return null;
 
