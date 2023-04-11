@@ -22,11 +22,12 @@ public class EducDistributionApiConstants {
     //Default Date format constants
     public static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd";
     public static final String SECONDARY_DATE_FORMAT = "yyyy/MM/dd";
-    //Grad2-1931
+    //Grad2-1931 - mchintha
     public static final String DATE_FORMAT = "yyyyMMdd";
-    //public static final char EMPTY_CHARACTER = '';
-
     public static final String TMP_DIR = "/tmp/";
+    public static final String MONTHLYDIST = "MONTHLYDIST";
+    public static final String DEL = "/";
+    public static final String FILES_FOLDER_STRUCTURE = "Batch/PSI/";
 
     @Value("${endpoint.grad-graduation-report-api.get-transcript-list.url}")
     private String transcriptDistributionList;

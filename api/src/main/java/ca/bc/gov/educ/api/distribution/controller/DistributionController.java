@@ -61,9 +61,9 @@ public class DistributionController {
     @PreAuthorize(PermissionsConstants.GRADUATE_STUDENT)
     @Operation(summary = "Read Student Reports by Student ID and Report Type", description = "Read Student Reports by Student ID and Report Type", tags = { "Reports" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK")})
-    public ResponseEntity<byte[]> downloadZipFile(@PathVariable(value = "batchId") Long batchId) {
+    public ResponseEntity<byte[]> downloadZipFile(@PathVariable(value = "batchId") Long batchId, @PathVariable(value = "transmissionMode") String transmissionMode) {
         logger.debug("downloadZipFile : ");
-        byte[] resultBinary = gradDistributionService.getDownload(batchId);
+        byte[] resultBinary = gradDistributionService.getDownload(batchId, transmissionMode);
         byte[] encoded = Base64.encodeBase64(resultBinary);
         return handleBinaryResponse(encoded,MediaType.TEXT_PLAIN,batchId);
     }

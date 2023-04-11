@@ -54,7 +54,7 @@ public class MergeProcess extends BaseProcess {
 				List<Student> studListNonGrad = new ArrayList<>();
 				ReportRequest packSlipReq = reportService.preparePackingSlipData(schoolDetails, processorData.getBatchId());
 
-				if(obj.getSchoolDistributionRequest() != null && MONTHLYDIST.equalsIgnoreCase(processorData.getActivityCode())) {
+				if(obj.getSchoolDistributionRequest() != null && educDistributionApiConstants.MONTHLYDIST.equalsIgnoreCase(processorData.getActivityCode())) {
 					ReportRequest schoolDistributionReportRequest = reportService.prepareSchoolDistributionReportData(obj.getSchoolDistributionRequest(), processorData.getBatchId(),schoolDetails);
 					createAndSaveDistributionReport(schoolDistributionReportRequest,mincode,schoolCategoryCode,processorData);
 					numberOfPdfs++;
@@ -83,7 +83,7 @@ public class MergeProcess extends BaseProcess {
 		}
 		int numberOfCreatedSchoolReports = 0;
 		int numberOfProcessedSchoolReports = 0;
-		if(MONTHLYDIST.equalsIgnoreCase(processorData.getActivityCode())) {
+		if(educDistributionApiConstants.MONTHLYDIST.equalsIgnoreCase(processorData.getActivityCode())) {
 			logger.debug("***** Create and Store Monthly school reports *****");
 			numberOfCreatedSchoolReports += createDistrictSchoolMonthReport(restUtils.getAccessToken(), ADDRESS_LABEL_SCHL, null, null);
 			logger.debug("***** Number of created Monthly school reports {} *****", numberOfCreatedSchoolReports);

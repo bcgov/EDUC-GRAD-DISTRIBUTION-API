@@ -52,8 +52,9 @@ public class GradDistributionService {
         return data.getDistributionResponse();
     }
 
-    public byte[] getDownload(Long batchId) {
-        String localFile = "/tmp/EDGRAD.BATCH."+batchId+".zip";
+    //Grad2-1931 Changed the zipped folder path to fetch - mchintha
+    public byte[] getDownload(Long batchId, String transmissionMode) {
+        String localFile = "/tmp/Batch/PSI/" + transmissionMode.toUpperCase() + "/EDGRAD.BATCH."+batchId+".zip";
         Path path = Paths.get(localFile);
         try {
             return Files.readAllBytes(path);

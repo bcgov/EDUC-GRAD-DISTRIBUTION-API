@@ -43,6 +43,7 @@ class DistributionControllerTest {
 		String activityCode = "USERDIST";
 		Long batchId= 9029L;
 		Map<String, DistributionPrintRequest> mapDist= new HashMap<>();
+		String transmissionMode = "paper";
 		String localDownload = null;
 		String accessToken = "123";
 		String mincode = "123123133";
@@ -93,19 +94,20 @@ class DistributionControllerTest {
 		DistributionResponse res = new DistributionResponse();
 		res.setMergeProcessResponse("MERGED");
 
-		Mockito.when(gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,null,"accessToken")).thenReturn(res);
-		distributionController.distributeCredentials(runType,batchId,activityCode,mapDist,null,"accessToken");
-		Mockito.verify(gradDistributionService).distributeCredentials(runType,batchId,mapDist,activityCode,null,"accessToken");
+		Mockito.when(gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode, transmissionMode.toUpperCase(),null,"accessToken")).thenReturn(res);
+		distributionController.distributeCredentials(runType,batchId,activityCode,transmissionMode.toUpperCase(),mapDist,null,"accessToken");
+		Mockito.verify(gradDistributionService).distributeCredentials(runType,batchId,mapDist,activityCode,transmissionMode.toUpperCase(),null,"accessToken");
 	}
 
 
 	@Test
 	void testDownloadZipFile() {
 		Long batchId= 9029L;
+		String transmissionMode = "ftp";
 		byte[] bytesSAR = "Any String you want".getBytes();
-		Mockito.when(gradDistributionService.getDownload(batchId)).thenReturn(bytesSAR);
-		distributionController.downloadZipFile(batchId);
-		Mockito.verify(gradDistributionService).getDownload(batchId);
+		Mockito.when(gradDistributionService.getDownload(batchId, transmissionMode.toUpperCase())).thenReturn(bytesSAR);
+		distributionController.downloadZipFile(batchId, transmissionMode.toUpperCase());
+		Mockito.verify(gradDistributionService).getDownload(batchId, transmissionMode.toUpperCase());
 	}
 	
 }

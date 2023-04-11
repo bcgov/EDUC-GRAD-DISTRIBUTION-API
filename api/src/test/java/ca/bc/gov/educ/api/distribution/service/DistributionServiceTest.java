@@ -192,7 +192,8 @@ public class DistributionServiceTest {
 	@Test
 	public void testGetDownload() {
 		Long batchId= 9029L;
-		byte[] arr = gradDistributionService.getDownload(batchId);
+		String transmissionMode = "ftp";
+		byte[] arr = gradDistributionService.getDownload(batchId, transmissionMode.toUpperCase());
 		assertNotNull(arr);
 	}
 
@@ -211,6 +212,7 @@ public class DistributionServiceTest {
 		Long batchId= 9029L;
 		Map<String, DistributionPrintRequest > mapDist = new HashMap<>();
 		String localDownload = null;
+		String transmissionMode = "ftp";
 		String accessToken = MOCK_TOKEN;
 		String mincode = "123123133";
 
@@ -403,7 +405,7 @@ public class DistributionServiceTest {
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(Psi.class)).thenReturn(Mono.just(psi));
 
-		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,null,accessToken);
+		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,transmissionMode.toUpperCase(),null,accessToken);
 	}
 
 	private ResponseObj getMockResponseObject(){
@@ -417,6 +419,7 @@ public class DistributionServiceTest {
 		Long batchId= 9029L;
 		Map<String, DistributionPrintRequest > mapDist= new HashMap<>();
 		String accessToken = MOCK_TOKEN;
+		String transmissionMode = "ftp";
 		String mincode = "123123133";
 
 		CommonSchool schObj = null;
@@ -487,13 +490,14 @@ public class DistributionServiceTest {
 		when(this.responseMock.bodyToMono(CommonSchool.class)).thenReturn(inputResponseSchool);
 		when(this.inputResponseSchool.block()).thenReturn(schObj);
 
-		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,null,localDownload,accessToken);
+		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,null,transmissionMode,localDownload,accessToken);
 	}
 
 	private DistributionResponse testdistributeCredentials_certificate_blank(String runType,String paperType) {
 		Long batchId= 9029L;
 		Map<String, DistributionPrintRequest > mapDist= new HashMap<>();
 		String localDownload = null;
+		String transmissionMode = "ftp";
 		String accessToken = MOCK_TOKEN;
 		String mincode = "123123133";
 
@@ -560,13 +564,14 @@ public class DistributionServiceTest {
 		when(this.responseMock.bodyToMono(ResponseObj.class)).thenReturn(Mono.just(tokenObject));
 
 		Mockito.when(schoolService.getSchoolDetails(mincode,accessToken,exception)).thenReturn(schObj);
-		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,null,null,accessToken);
+		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,null, transmissionMode,null,accessToken);
 	}
 
 	private DistributionResponse testdistributeCredentials_transcript(String runType, String activityCode,boolean schoolNull,String localDownload) {
 		Long batchId= 9029L;
 		Map<String, DistributionPrintRequest > mapDist= new HashMap<>();
 		String accessToken = MOCK_TOKEN;
+		String transmissionMode = "ftp";
 		String mincode = "123123133";
 
 		CommonSchool schObj = null;
@@ -680,7 +685,7 @@ public class DistributionServiceTest {
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(ResponseObj.class)).thenReturn(Mono.just(tokenObject));
 
-		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,localDownload,accessToken);
+		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,transmissionMode,localDownload,accessToken);
 	}
 
 
@@ -688,6 +693,7 @@ public class DistributionServiceTest {
 		Long batchId= 9029L;
 		Map<String, DistributionPrintRequest > mapDist= new HashMap<>();
 		String localDownload = null;
+		String transmissionMode = "ftp";
 		String accessToken = MOCK_TOKEN;
 		String mincode = "123123133";
 
@@ -821,7 +827,7 @@ public class DistributionServiceTest {
 
 		if(properName == null)
 			Mockito.when(schoolService.getSchoolDetails(mincode,accessToken,exception)).thenReturn(schObj);
-		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,localDownload,accessToken);
+		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,transmissionMode,localDownload,accessToken);
 	}
 
 	private DistributionResponse testdistributeCredentials_certificate_reprint(String runType, String activityCode,String paperType,boolean schoolNull) {
@@ -829,6 +835,7 @@ public class DistributionServiceTest {
 		Map<String, DistributionPrintRequest > mapDist= new HashMap<>();
 		String localDownload = null;
 		String accessToken = MOCK_TOKEN;
+		String transmissionMode = "ftp";
 		String mincode = "123123133";
 
 		CommonSchool schObj =null;
@@ -973,7 +980,7 @@ public class DistributionServiceTest {
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(ResponseObj.class)).thenReturn(Mono.just(tokenObject));
 
-		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,localDownload,accessToken);
+		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,transmissionMode,localDownload,accessToken);
 	}
 
 	@Test
@@ -987,6 +994,7 @@ public class DistributionServiceTest {
 		Long batchId= 9029L;
 		Map<String, DistributionPrintRequest > mapDist= new HashMap<>();
 		String accessToken = MOCK_TOKEN;
+		String transmissionMode = "ftp";
 		String psiCode = "001";
 
 		Psi psiObj = new Psi();
@@ -1066,7 +1074,7 @@ public class DistributionServiceTest {
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(ResponseObj.class)).thenReturn(Mono.just(tokenObject));
 
-		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,localDownload,accessToken);
+		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,transmissionMode,localDownload,accessToken);
 	}
 
 }
