@@ -295,7 +295,7 @@ public abstract class BaseProcess implements DistributionProcess {
             } else {
                 fileNameBuilder.append("/EDGRAD.R.").append("324W.");
             }
-            fileNameBuilder.append(EducDistributionApiUtils.getFileNameSchoolReports(mincode)).append(".pdf");
+            fileNameBuilder.append(EducDistributionApiUtils.getFileNameWithMincodeReports(mincode)).append(".pdf");
             try (OutputStream out = new FileOutputStream(fileNameBuilder.toString())) {
                 out.write(gradReportPdf);
             }
@@ -326,7 +326,7 @@ public abstract class BaseProcess implements DistributionProcess {
             } else {
                 filePathBuilder.append(EducDistributionApiConstants.TMP_DIR).append(processorData.getBatchId()).append(DEL).append(districtCode).append(DEL).append(mincode);
             }
-            filePathBuilder.append(fileName).append(paperType).append(".").append(EducDistributionApiUtils.getFileNameSchoolReports(mincode)).append(".pdf");
+            filePathBuilder.append(fileName).append(paperType).append(".").append(EducDistributionApiUtils.getFileNameWithMincodeReports(mincode)).append(".pdf");
             pdfMergerUtility.setDestinationFileName(filePathBuilder.toString());
             pdfMergerUtility.addSources(locations);
             MemoryUsageSetting memoryUsageSetting = MemoryUsageSetting.setupMixed(50000000)

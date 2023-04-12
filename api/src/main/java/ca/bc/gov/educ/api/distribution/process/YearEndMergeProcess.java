@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 
 @Data
-@Generated
 @Component
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
@@ -35,6 +34,7 @@ public class YearEndMergeProcess extends BaseProcess {
 	private static Logger logger = LoggerFactory.getLogger(YearEndMergeProcess.class);
 
 	@Override
+	@Generated
 	public ProcessorData fire(ProcessorData processorData) {
 		long startTime = System.currentTimeMillis();
 		logger.debug("************* TIME START  ************ {}",startTime);
@@ -106,6 +106,7 @@ public class YearEndMergeProcess extends BaseProcess {
 		return processorData;
 	}
 
+	@Generated
 	private Pair<Integer,Integer> processYedrCertificatePrintRequest(DistributionPrintRequest obj, int currentSlipCount, ReportRequest packSlipReq, List<Student> studListNonGrad, ProcessorData processorData, String mincode, String schoolCategoryCode, int numberOfPdfs) {
 		if (obj.getYedrCertificatePrintRequest() != null) {
 			currentSlipCount++;
@@ -118,6 +119,7 @@ public class YearEndMergeProcess extends BaseProcess {
 		return Pair.of(currentSlipCount,numberOfPdfs);
 	}
 
+	@Generated
 	private Pair<Integer,Integer> processYedbCertificatePrintRequest(DistributionPrintRequest obj, int currentSlipCount, ReportRequest packSlipReq, List<Student> studListNonGrad, ProcessorData processorData, String mincode, String schoolCategoryCode, int numberOfPdfs) {
 		if (obj.getYedbCertificatePrintRequest() != null) {
 			currentSlipCount++;
@@ -130,6 +132,7 @@ public class YearEndMergeProcess extends BaseProcess {
 		return Pair.of(currentSlipCount,numberOfPdfs);
 	}
 
+	@Generated
 	private Pair<Integer,Integer> processYed2CertificatePrintRequest(DistributionPrintRequest obj, int currentSlipCount, ReportRequest packSlipReq, List<Student> studListNonGrad, ProcessorData processorData, String mincode, String schoolCategoryCode, int numberOfPdfs) {
 		if (obj.getYed2CertificatePrintRequest() != null) {
 			currentSlipCount++;
@@ -142,6 +145,7 @@ public class YearEndMergeProcess extends BaseProcess {
 		return Pair.of(currentSlipCount,numberOfPdfs);
 	}
 
+	@Generated
 	private Pair<Integer, Integer> processTranscriptPrintRequest(DistributionPrintRequest obj, int currentSlipCount, ReportRequest packSlipReq, List<Student> studListNonGrad, ProcessorData processorData, String mincode, String schoolCategoryCode, int numberOfPdfs) {
 		if (obj.getTranscriptPrintRequest() != null) {
 			TranscriptPrintRequest transcriptPrintRequest = obj.getTranscriptPrintRequest();
@@ -163,6 +167,7 @@ public class YearEndMergeProcess extends BaseProcess {
 		return Pair.of(currentSlipCount,numberOfPdfs);
 	}
 
+	@Generated
 	private void processStudents(List<StudentCredentialDistribution> scdList, List<Student> studListNonGrad, List<InputStream> locations, ProcessorData processorData) throws IOException {
 		int currentTranscript = 0;
 		int failedToAdd = 0;
@@ -186,6 +191,7 @@ public class YearEndMergeProcess extends BaseProcess {
 		}
 	}
 
+	@Generated
 	private Student prepareStudentObj(StudentCredentialDistribution scd, List<Student> studListNonGrad) {
 		if(scd.getStudentGrade().equalsIgnoreCase("AD") || scd.getStudentGrade().equalsIgnoreCase("12")) {
 			Student std = new Student();
@@ -211,6 +217,7 @@ public class YearEndMergeProcess extends BaseProcess {
 		return null;
 	}
 
+	@Generated
 	private List<NonGradReason> getNonGradReasons(List<GradRequirement> nonGradReasons) {
 		List<NonGradReason> nList = new ArrayList<>();
 		if (nonGradReasons != null) {
@@ -224,6 +231,7 @@ public class YearEndMergeProcess extends BaseProcess {
 		return nList;
 	}
 
+	@Generated
 	private void mergeCertificates(ReportRequest packSlipReq, CertificatePrintRequest certificatePrintRequest, PackingSlipRequest request, ProcessorData processorData, List<Student> studListNonGrad, String schoolCategoryCode) {
 		List<StudentCredentialDistribution> scdList = certificatePrintRequest.getCertificateList();
 		String mincode = request.getMincode();
@@ -256,23 +264,7 @@ public class YearEndMergeProcess extends BaseProcess {
 		}
 	}
 
-	private void createAndSaveDistributionReport(ReportRequest distributionRequest, String mincode, String schoolCategoryCode, ProcessorData processorData) {
-		List<InputStream> locations=new ArrayList<>();
-		try {
-			byte[] bytesSAR = webClient.post().uri(educDistributionApiConstants.getSchoolDistributionReport()).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).body(BodyInserters.fromValue(distributionRequest)).retrieve().bodyToMono(byte[].class).block();
-			if(bytesSAR != null) {
-				locations.add(new ByteArrayInputStream(bytesSAR));
-				byte[] encoded = Base64.encodeBase64(bytesSAR);
-				String encodedPdf = new String(encoded, StandardCharsets.US_ASCII);
-				if(!processorData.getActivityCode().contains("USERDIST"))
-					saveSchoolDistributionReport(encodedPdf,mincode,restUtils.getAccessToken(),"DISTREP_SC");
-			}
-			mergeDocuments(processorData,mincode,schoolCategoryCode,"/EDGRAD.R.","324W",locations);
-		} catch (Exception e) {
-			logger.debug(EXCEPTION,e.getLocalizedMessage());
-		}
-	}
-
+	@Generated
 	private void createAndSaveNonGradReport(CommonSchool schoolDetails, List<Student> studListNonGrad, String mincode, String accessToken) {
 		ReportData nongradProjected = new ReportData();
 		School schObj = new School();
@@ -300,6 +292,7 @@ public class YearEndMergeProcess extends BaseProcess {
 		saveSchoolDistributionReport(encodedPdf,mincode,accessToken, NONGRADDISTREP_SC);
 	}
 
+	@Generated
 	private void saveSchoolDistributionReport(String encodedPdf, String mincode, String accessToken, String reportType) {
 		SchoolReports requestObj = new SchoolReports();
 		requestObj.setReport(encodedPdf);

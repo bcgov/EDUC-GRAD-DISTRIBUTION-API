@@ -104,7 +104,7 @@ public class EducDistributionApiUtils {
 		return month.format(date);
 	}
 
-	public static String getFileNameSchoolReports(String mincode) {
+	public static String getFileNameWithMincodeReports(String mincode) {
 		return getFileName() + "." + mincode;
 	}
 
