@@ -23,7 +23,7 @@ env:
   #GRAD2-1947 Resource Optimization
   MIN_REPLICAS: "3"
   MAX_REPLICAS: "5"
-  STORAGE_LIMIT: 1Gi
+  STORAGE_LIMIT: 4Gi
 
 on:
   # https://docs.github.com/en/actions/reference/events-that-trigger-workflows
