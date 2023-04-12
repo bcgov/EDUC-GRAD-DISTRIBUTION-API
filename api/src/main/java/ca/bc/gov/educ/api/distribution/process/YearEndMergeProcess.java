@@ -2,6 +2,7 @@ package ca.bc.gov.educ.api.distribution.process;
 
 import ca.bc.gov.educ.api.distribution.model.dto.*;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils;
+import ca.bc.gov.educ.api.distribution.util.Generated;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -25,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 @Data
+@Generated
 @Component
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
@@ -87,14 +89,13 @@ public class YearEndMergeProcess extends BaseProcess {
 				}
 				if (NONGRADDIST.equalsIgnoreCase(processorData.getActivityCode())) {
 					logger.debug("***** Create and Store Student NonGrad School Report *****");
-					numberOfCreatedSchoolReports += createSchoolLabelsReport(schoolsForLabels, processorData.getAccessToken(), ADDRESS_LABEL_SCHL );
+					numberOfCreatedSchoolReports += createSchoolLabelsReport(schoolsForLabels, restUtils.getAccessToken(), ADDRESS_LABEL_SCHL );
 					logger.debug("***** Number of created Student NonGrad School Reports {} *****", numberOfCreatedSchoolReports);
 					logger.debug("***** Distribute Student NonGrad School Reports *****");
 					numberOfProcessedSchoolReports += processDistrictSchoolDistribution(processorData, ADDRESS_LABEL_SCHL, null, NONGRADDISTREP_SC);
 					logger.debug("***** Number of distributed Student NonGrad School Reports {} *****", numberOfProcessedSchoolReports);
 				}
 				numberOfPdfs += numberOfProcessedSchoolReports;
-				postingProcess(batchId,processorData,numberOfPdfs,mincode);
 				long endTime = System.currentTimeMillis();
 				long diff = (endTime - startTime)/1000;
 				logger.debug("************* TIME Taken  ************ {} secs",diff);

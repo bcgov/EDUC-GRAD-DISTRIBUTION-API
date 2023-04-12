@@ -25,7 +25,7 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.zip.ZipOutputStream;
 
-public abstract class BaseProcess implements DistributionProcess{
+public abstract class BaseProcess implements DistributionProcess {
 
     private static final Logger logger = LoggerFactory.getLogger(BaseProcess.class);
 
@@ -44,7 +44,7 @@ public abstract class BaseProcess implements DistributionProcess{
     protected static final String DISTREP_SD = "DISTREP_SD";
     protected static final String DISTREP_SC = "DISTREP_SC";
     protected static final String NONGRADDISTREP_SC = "NONGRADDISTREP_SC";
-    
+
     @Autowired
     GradValidation validation;
 
@@ -70,7 +70,7 @@ public abstract class BaseProcess implements DistributionProcess{
     PsiService psiService;
 
     protected CommonSchool getBaseSchoolDetails(DistributionPrintRequest obj, String mincode, ProcessorData processorData, ExceptionMessage exception) {
-        if(obj.getProperName() != null)
+        if (obj.getProperName() != null)
             return schoolService.getCommonSchoolDetailsForPackingSlip(obj.getProperName());
         else
             return schoolService.getCommonSchoolDetails(mincode, exception);
@@ -78,47 +78,23 @@ public abstract class BaseProcess implements DistributionProcess{
 
     protected void createZipFile(Long batchId) {
         StringBuilder sourceFileBuilder = new StringBuilder().append(EducDistributionApiConstants.TMP_DIR).append(batchId);
-        try(FileOutputStream fos = new FileOutputStream(EducDistributionApiConstants.TMP_DIR +"EDGRAD.BATCH." + batchId + ".zip")) {
+        try (FileOutputStream fos = new FileOutputStream(EducDistributionApiConstants.TMP_DIR + "EDGRAD.BATCH." + batchId + ".zip")) {
             ZipOutputStream zipOut = new ZipOutputStream(fos);
             File fileToZip = new File(sourceFileBuilder.toString());
             EducDistributionApiUtils.zipFile(fileToZip, fileToZip.getName(), zipOut);
             zipOut.close();
         } catch (IOException e) {
-            logger.debug(EXCEPTION,e.getLocalizedMessage());
+            logger.debug(EXCEPTION, e.getLocalizedMessage());
         }
     }
 
-    protected void createZipFile(Long batchId, String mincode) {
-        StringBuilder sourceFileBuilder = new StringBuilder().append(EducDistributionApiConstants.TMP_DIR).append(batchId);
-        try(FileOutputStream fos = new FileOutputStream(EducDistributionApiConstants.TMP_DIR +"EDGRAD.BATCH." + batchId + "." + mincode + ".zip")) {
-            ZipOutputStream zipOut = new ZipOutputStream(fos);
-            File fileToZip = new File(sourceFileBuilder.toString());
-            EducDistributionApiUtils.zipFile(fileToZip, fileToZip.getName(), zipOut);
-            zipOut.close();
-        } catch (IOException e) {
-            logger.debug(EXCEPTION,e.getLocalizedMessage());
-        }
-    }
-
-    protected void createControlFile(Long batchId,int numberOfPdfs) {
-        try(FileOutputStream fos = new FileOutputStream("/tmp/EDGRAD.BATCH." + batchId + ".txt")) {
+    protected void createControlFile(Long batchId, int numberOfPdfs) {
+        try (FileOutputStream fos = new FileOutputStream("/tmp/EDGRAD.BATCH." + batchId + ".txt")) {
             byte[] contentInBytes = String.valueOf(numberOfPdfs).getBytes();
             fos.write(contentInBytes);
             fos.flush();
         } catch (IOException e) {
-            logger.debug(EXCEPTION,e.getLocalizedMessage());
-        }
-        logger.debug("Created Control file ");
-
-    }
-
-    protected void createControlFile(Long batchId,int numberOfPdfs, String mincode) {
-        try(FileOutputStream fos = new FileOutputStream("/tmp/EDGRAD.BATCH." + batchId + "." + mincode + ".txt")) {
-            byte[] contentInBytes = String.valueOf(numberOfPdfs).getBytes();
-            fos.write(contentInBytes);
-            fos.flush();
-        } catch (IOException e) {
-            logger.debug(EXCEPTION,e.getLocalizedMessage());
+            logger.debug(EXCEPTION, e.getLocalizedMessage());
         }
         logger.debug("Created Control file ");
 
@@ -142,27 +118,22 @@ public abstract class BaseProcess implements DistributionProcess{
         packSlipReq.getData().getPackingSlip().setOrderNumber(batchId);
     }
 
-    protected void postingProcess(Long batchId,ProcessorData processorData,Integer numberOfPdfs) {
+    protected void postingProcess(Long batchId, ProcessorData processorData, Integer numberOfPdfs) {
         createZipFile(batchId);
-        if(processorData.getLocalDownload() == null || !processorData.getLocalDownload().equalsIgnoreCase("Y")) {
+        if (processorData.getLocalDownload() == null || !processorData.getLocalDownload().equalsIgnoreCase("Y")) {
             createControlFile(batchId, numberOfPdfs);
             sftpUtils.sftpUploadBCMail(batchId);
-        }
-    }
-
-    protected void postingProcess(Long batchId,ProcessorData processorData,Integer numberOfPdfs, String mincode) {
-        createZipFile(batchId, mincode);
-        if(processorData.getLocalDownload() == null || !processorData.getLocalDownload().equalsIgnoreCase("Y")) {
-            createControlFile(batchId, numberOfPdfs, mincode);
-            sftpUtils.sftpUploadBCMail(batchId, mincode);
         }
     }
 
     protected Integer createDistrictSchoolYearEndReport(String accessToken, String schooLabelReportType, String districtReportType, String schoolReportType) {
         Integer reportCount = 0;
         final UUID correlationID = UUID.randomUUID();
-        reportCount += webClient.get().uri(String.format(educDistributionApiConstants.getSchoolDistrictYearEndReport(),schooLabelReportType,districtReportType,schoolReportType))
-                .headers(h -> { h.setBearerAuth(accessToken); h.set(EducDistributionApiConstants.CORRELATION_ID, correlationID.toString()); })
+        reportCount += webClient.get().uri(String.format(educDistributionApiConstants.getSchoolDistrictYearEndReport(), schooLabelReportType, districtReportType, schoolReportType))
+                .headers(h -> {
+                    h.setBearerAuth(accessToken);
+                    h.set(EducDistributionApiConstants.CORRELATION_ID, correlationID.toString());
+                })
                 .retrieve().bodyToMono(Integer.class).block();
         return reportCount;
     }
@@ -170,8 +141,11 @@ public abstract class BaseProcess implements DistributionProcess{
     protected Integer createSchoolLabelsReport(List<School> schools, String accessToken, String schooLabelReportType) {
         Integer reportCount = 0;
         final UUID correlationID = UUID.randomUUID();
-        reportCount += webClient.post().uri(String.format(educDistributionApiConstants.getSchoolLabelsReport(),schooLabelReportType))
-                .headers(h -> { h.setBearerAuth(accessToken); h.set(EducDistributionApiConstants.CORRELATION_ID, correlationID.toString()); })
+        reportCount += webClient.post().uri(String.format(educDistributionApiConstants.getSchoolLabelsReport(), schooLabelReportType))
+                .headers(h -> {
+                    h.setBearerAuth(accessToken);
+                    h.set(EducDistributionApiConstants.CORRELATION_ID, correlationID.toString());
+                })
                 .body(BodyInserters.fromValue(schools)).retrieve().bodyToMono(Integer.class).block();
         return reportCount;
     }
@@ -179,8 +153,11 @@ public abstract class BaseProcess implements DistributionProcess{
     protected Integer createDistrictSchoolMonthReport(String accessToken, String schooLabelReportType, String districtReportType, String schoolReportType) {
         Integer reportCount = 0;
         final UUID correlationID = UUID.randomUUID();
-        reportCount += webClient.get().uri(String.format(educDistributionApiConstants.getSchoolDistrictMonthReport(),schooLabelReportType,districtReportType,schoolReportType))
-                .headers(h -> { h.setBearerAuth(accessToken); h.set(EducDistributionApiConstants.CORRELATION_ID, correlationID.toString()); })
+        reportCount += webClient.get().uri(String.format(educDistributionApiConstants.getSchoolDistrictMonthReport(), schooLabelReportType, districtReportType, schoolReportType))
+                .headers(h -> {
+                    h.setBearerAuth(accessToken);
+                    h.set(EducDistributionApiConstants.CORRELATION_ID, correlationID.toString());
+                })
                 .retrieve().bodyToMono(Integer.class).block();
         return reportCount;
     }
@@ -188,8 +165,11 @@ public abstract class BaseProcess implements DistributionProcess{
     protected Integer createDistrictSchoolSuppReport(String accessToken, String schooLabelReportType, String districtReportType, String schoolReportType) {
         Integer reportCount = 0;
         final UUID correlationID = UUID.randomUUID();
-        reportCount += webClient.get().uri(String.format(educDistributionApiConstants.getSchoolDistrictSupplementalReport(),schooLabelReportType,districtReportType,schoolReportType))
-                .headers(h -> { h.setBearerAuth(accessToken); h.set(EducDistributionApiConstants.CORRELATION_ID, correlationID.toString()); })
+        reportCount += webClient.get().uri(String.format(educDistributionApiConstants.getSchoolDistrictSupplementalReport(), schooLabelReportType, districtReportType, schoolReportType))
+                .headers(h -> {
+                    h.setBearerAuth(accessToken);
+                    h.set(EducDistributionApiConstants.CORRELATION_ID, correlationID.toString());
+                })
                 .retrieve().bodyToMono(Integer.class).block();
         return reportCount;
     }
@@ -197,10 +177,10 @@ public abstract class BaseProcess implements DistributionProcess{
     protected int processDistrictSchoolDistribution(ProcessorData processorData, String schooLabelReportType, String districtReportType, String schoolReportType) {
         int numberOfPdfs = 0;
         List<String> mincodes = new ArrayList<>();
-        if(processorData.getMapDistribution() != null && !processorData.getMapDistribution().isEmpty()) {
+        if (processorData.getMapDistribution() != null && !processorData.getMapDistribution().isEmpty()) {
             mincodes.addAll(processorData.getMapDistribution().keySet());
         }
-        if(StringUtils.isNotBlank(schooLabelReportType)) {
+        if (StringUtils.isNotBlank(schooLabelReportType)) {
             String accessTokenSl = restUtils.getAccessToken();
             List<SchoolReports> yeSchooLabelsReports = webClient.get().uri(String.format(educDistributionApiConstants.getSchoolReportsByReportType(), schooLabelReportType, SCHOOL_LABELS_CODE))
                     .headers(h ->
@@ -210,10 +190,10 @@ public abstract class BaseProcess implements DistributionProcess{
             assert yeSchooLabelsReports != null;
             numberOfPdfs += processDistrictSchoolReports(yeSchooLabelsReports, processorData);
         }
-        if(StringUtils.isNotBlank(districtReportType)) {
+        if (StringUtils.isNotBlank(districtReportType)) {
             String accessTokenSd = restUtils.getAccessToken();
             List<SchoolReports> yeDistrictReports = new ArrayList<>();
-            if(mincodes.isEmpty()) {
+            if (mincodes.isEmpty()) {
                 String districtReportUrl = String.format(educDistributionApiConstants.getSchoolReportsByReportType(), districtReportType);
                 yeDistrictReports.addAll(Objects.requireNonNull(webClient.get().uri(districtReportUrl)
                         .headers(h ->
@@ -221,7 +201,7 @@ public abstract class BaseProcess implements DistributionProcess{
                         ).retrieve().bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
                         }).block()));
             } else {
-                for(String mincode: mincodes) {
+                for (String mincode : mincodes) {
                     String districtReportUrl = String.format(educDistributionApiConstants.getSchoolReportsByReportType(), districtReportType, mincode);
                     yeDistrictReports.addAll(Objects.requireNonNull(webClient.get().uri(districtReportUrl)
                             .headers(h ->
@@ -234,10 +214,10 @@ public abstract class BaseProcess implements DistributionProcess{
             assert yeDistrictReports != null;
             numberOfPdfs += processDistrictSchoolReports(yeDistrictReports, processorData);
         }
-        if(StringUtils.isNotBlank(schoolReportType)) {
+        if (StringUtils.isNotBlank(schoolReportType)) {
             String accessTokenSc = restUtils.getAccessToken();
             List<SchoolReports> yeSchoolReports = new ArrayList<>();
-            if(mincodes.isEmpty()) {
+            if (mincodes.isEmpty()) {
                 String schoolReportUrl = String.format(educDistributionApiConstants.getSchoolReportsByReportType(), schoolReportType);
                 yeSchoolReports.addAll(Objects.requireNonNull(webClient.get().uri(schoolReportUrl)
                         .headers(
@@ -245,14 +225,14 @@ public abstract class BaseProcess implements DistributionProcess{
                         ).retrieve().bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
                         }).block()));
             } else {
-               for(String mincode: mincodes) {
-                   String schoolReportUrl = String.format(educDistributionApiConstants.getSchoolReportsByReportType(), schoolReportType, mincode);
-                   yeSchoolReports.addAll(Objects.requireNonNull(webClient.get().uri(schoolReportUrl)
-                           .headers(
-                                   h -> h.setBearerAuth(accessTokenSc)
-                           ).retrieve().bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
-                           }).block()));
-               }
+                for (String mincode : mincodes) {
+                    String schoolReportUrl = String.format(educDistributionApiConstants.getSchoolReportsByReportType(), schoolReportType, mincode);
+                    yeSchoolReports.addAll(Objects.requireNonNull(webClient.get().uri(schoolReportUrl)
+                            .headers(
+                                    h -> h.setBearerAuth(accessTokenSc)
+                            ).retrieve().bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
+                            }).block()));
+                }
             }
             assert yeSchoolReports != null;
             numberOfPdfs += processDistrictSchoolReports(yeSchoolReports, processorData);
@@ -289,11 +269,11 @@ public abstract class BaseProcess implements DistributionProcess{
         String districtCode = StringUtils.substring(mincode, 0, 3);
         try {
             StringBuilder fileLocBuilder = new StringBuilder();
-            if(SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode)) {
+            if (SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode)) {
                 fileLocBuilder.append(EducDistributionApiConstants.TMP_DIR).append(batchId);
-            } else if(isDistrict) {
+            } else if (isDistrict) {
                 fileLocBuilder.append(EducDistributionApiConstants.TMP_DIR).append(batchId).append(DEL).append(districtCode);
-            } else if("02".equalsIgnoreCase(schoolCategory)) {
+            } else if ("02".equalsIgnoreCase(schoolCategory)) {
                 fileLocBuilder.append(EducDistributionApiConstants.TMP_DIR).append(batchId).append(DEL).append(mincode);
             } else {
                 fileLocBuilder.append(EducDistributionApiConstants.TMP_DIR).append(batchId).append(DEL).append(districtCode).append(DEL).append(mincode);
@@ -301,26 +281,26 @@ public abstract class BaseProcess implements DistributionProcess{
             Path path = Paths.get(fileLocBuilder.toString());
             Files.createDirectories(path);
             StringBuilder fileNameBuilder = new StringBuilder();
-            if(SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode)) {
+            if (SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode)) {
                 fileNameBuilder.append(EducDistributionApiConstants.TMP_DIR).append(batchId);
-            } else if(isDistrict) {
+            } else if (isDistrict) {
                 fileNameBuilder.append(EducDistributionApiConstants.TMP_DIR).append(batchId).append(DEL).append(districtCode);
-            } else if("02".equalsIgnoreCase(schoolCategory)) {
+            } else if ("02".equalsIgnoreCase(schoolCategory)) {
                 fileNameBuilder.append(EducDistributionApiConstants.TMP_DIR).append(batchId).append(DEL).append(mincode);
             } else {
                 fileNameBuilder.append(EducDistributionApiConstants.TMP_DIR).append(batchId).append(DEL).append(districtCode).append(DEL).append(mincode);
             }
-            if(SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode)) {
+            if (SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode)) {
                 fileNameBuilder.append("/EDGRAD.L.").append("3L14.");
             } else {
                 fileNameBuilder.append("/EDGRAD.R.").append("324W.");
             }
             fileNameBuilder.append(EducDistributionApiUtils.getFileNameSchoolReports(mincode)).append(".pdf");
             try (OutputStream out = new FileOutputStream(fileNameBuilder.toString())) {
-                        out.write(gradReportPdf);
+                out.write(gradReportPdf);
             }
         } catch (Exception e) {
-            logger.debug(EXCEPTION,e.getLocalizedMessage());
+            logger.debug(EXCEPTION, e.getLocalizedMessage());
         }
     }
 
@@ -333,7 +313,7 @@ public abstract class BaseProcess implements DistributionProcess{
             bufferDirectory = IOUtils.createTempDirectory(EducDistributionApiConstants.TMP_DIR, "buffer");
             PDFMergerUtility pdfMergerUtility = new PDFMergerUtility();
             StringBuilder directoryPathBuilder = new StringBuilder();
-            if(MONTHLYDIST.equalsIgnoreCase(activityCode) || "02".equalsIgnoreCase(schoolCategoryCode)) {
+            if (MONTHLYDIST.equalsIgnoreCase(activityCode) || "02".equalsIgnoreCase(schoolCategoryCode)) {
                 directoryPathBuilder.append(EducDistributionApiConstants.TMP_DIR).append(processorData.getBatchId()).append(DEL).append(mincode).append(DEL);
             } else {
                 directoryPathBuilder.append(EducDistributionApiConstants.TMP_DIR).append(processorData.getBatchId()).append(DEL).append(districtCode).append(DEL).append(mincode);
@@ -341,7 +321,7 @@ public abstract class BaseProcess implements DistributionProcess{
             Path path = Paths.get(directoryPathBuilder.toString());
             Files.createDirectories(path);
             StringBuilder filePathBuilder = new StringBuilder();
-            if(MONTHLYDIST.equalsIgnoreCase(activityCode) || "02".equalsIgnoreCase(schoolCategoryCode)) {
+            if (MONTHLYDIST.equalsIgnoreCase(activityCode) || "02".equalsIgnoreCase(schoolCategoryCode)) {
                 filePathBuilder.append(EducDistributionApiConstants.TMP_DIR).append(processorData.getBatchId()).append(DEL).append(mincode);
             } else {
                 filePathBuilder.append(EducDistributionApiConstants.TMP_DIR).append(processorData.getBatchId()).append(DEL).append(districtCode).append(DEL).append(mincode);
@@ -350,12 +330,12 @@ public abstract class BaseProcess implements DistributionProcess{
             pdfMergerUtility.setDestinationFileName(filePathBuilder.toString());
             pdfMergerUtility.addSources(locations);
             MemoryUsageSetting memoryUsageSetting = MemoryUsageSetting.setupMixed(50000000)
-                            .setTempDir(bufferDirectory);
+                    .setTempDir(bufferDirectory);
             pdfMergerUtility.mergeDocuments(memoryUsageSetting);
         } catch (Exception e) {
-            logger.error(EXCEPTION,e.getLocalizedMessage());
+            logger.error(EXCEPTION, e.getLocalizedMessage());
         } finally {
-            if(bufferDirectory != null) {
+            if (bufferDirectory != null) {
                 IOUtils.removeFileOrDirectory(bufferDirectory);
             }
         }
@@ -380,7 +360,7 @@ public abstract class BaseProcess implements DistributionProcess{
 
     protected void processSchoolsForLabels(List<School> schools, String mincode, String accessToken, ExceptionMessage exception) {
         TraxSchool traxSchool = schoolService.getTraxSchool(mincode, accessToken, exception);
-        if(traxSchool != null) {
+        if (traxSchool != null) {
             School school = new School();
             school.setMincode(traxSchool.getMinCode());
             school.setName(traxSchool.getSchoolName());
