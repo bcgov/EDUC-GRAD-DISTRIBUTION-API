@@ -62,10 +62,13 @@ public class EducDistributionApiConstants {
     private String tokenUrl;
 
     @Value("${endpoint.educ-school-api.school-by-min-code.url}")
-    private String schoolDetails;
+    private String commonSchoolByMincode;
 
     @Value("${endpoint.grad-trax-api.psi-by-psi-code.url}")
-    private String psiDetails;
+    private String psiByPsiCode;
+
+    @Value("${endpoint.grad-trax-api.school-by-min-code.url}")
+    private String traxSchoolByMincode;
 
     @Value("${endpoint.grad-report-api.get-school-distribution-report.url}")
     private String schoolDistributionReport;
@@ -83,7 +86,7 @@ public class EducDistributionApiConstants {
     private String updateSchoolReport;
 
     @Value("${endpoint.grad-report-api.student_non_grad}")
-    private String nonGrad;
+    private String studentNonGrad;
 
     @Value("${endpoint.grad-graduation-report-api.school-report.url}")
     private String schoolReport;

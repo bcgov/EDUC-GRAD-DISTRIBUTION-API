@@ -81,6 +81,41 @@ public class SFTPUtils {
         }
     }
 
+    public boolean sftpUploadBCMail(Long batchId, String mincode) {
+        String localFile = "/tmp/EDGRAD.BATCH."+batchId+"."+mincode+".zip";
+        String remoteFile = BC_MAIL_LOCATION+"EDGRAD.BATCH."+batchId+"."+mincode+".zip";
+        String localControlFile = "/tmp/EDGRAD.BATCH."+batchId+"."+mincode+".txt";
+        String remoteControlFile = BC_MAIL_LOCATION+"EDGRAD.BATCH."+batchId+"."+mincode+".txt";
+        Session jschSession = null;
+
+        setupBCMailSFTP();
+
+        try {
+            JSch jsch = new JSch();
+            jsch.setKnownHosts(KNOWN_HOST);
+            jschSession = jsch.getSession(BCMAIL_SFTP_USERNAME, BCMAIL_REMOTE_HOST, REMOTE_PORT);
+            jsch.addIdentity(RSA_PRV);
+            jschSession.connect(SESSION_TIMEOUT);
+
+            Channel sftp = jschSession.openChannel("sftp");
+            sftp.connect(CHANNEL_TIMEOUT);
+            ChannelSftp channelSftp = (ChannelSftp) sftp;
+
+            // transfer file from local to remote server
+            channelSftp.put(localFile, remoteFile);
+            channelSftp.put(localControlFile, remoteControlFile);
+            channelSftp.exit();
+            return true;
+        } catch (JSchException | SftpException e) {
+            logger.debug("Error {} ",e.getLocalizedMessage());
+            return false;
+        } finally {
+            if (jschSession != null) {
+                jschSession.disconnect();
+            }
+        }
+    }
+
     private boolean setupBCMailSFTP() {
         writeFile(RSA_PRV, BCMAIL_PRIVATE_KEY);
         writeFile(RSA_PUB, BCMAIL_PUBLIC_KEY);

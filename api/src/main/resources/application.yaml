@@ -95,7 +95,7 @@ endpoint:
     school-report:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/schoolreport?mincode=%s&reportType=%s
     school-report-by-report-type:
-      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/schoolreport/type/%s
+      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/schoolreport/type/%s?mincode=%s
     get-achievement-report:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/studentreport?studentID=%s&reportType=%s&documentStatusCode=%s
     get-transcript-psi-by-student-id:
@@ -134,6 +134,8 @@ endpoint:
   grad-trax-api:
     psi-by-psi-code:
       url: ${GRAD_TRAX_API}api/v1/trax/psi/%s
+    school-by-min-code:
+      url: ${GRAD_TRAX_API}api/v1/trax/school/%s
 
 #Splunk LogHelper
 splunk:
