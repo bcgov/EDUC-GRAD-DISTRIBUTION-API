@@ -14,6 +14,9 @@ public class DistributionProcessFactory {
     MergeProcess mergeProcess;
 
     @Autowired
+    YearEndMergeProcess yearEndMergeProcess;
+
+    @Autowired
     PostingSchoolReportProcess postingSchoolReportProcess;
 
     @Autowired
@@ -42,7 +45,7 @@ public class DistributionProcessFactory {
                 break;
             case "MERYER":
                 logger.debug("\n************* MERGE PROCESS (MERYER) START  ************");
-                pcs = mergeProcess;
+                pcs = yearEndMergeProcess;
                 break;
             case "MERSUPP":
                 logger.debug("\n************* MERGE PROCESS (MERSUPP) START  ************");

@@ -45,9 +45,9 @@ public class PostingSchoolReportProcess extends BaseProcess {
 			DistributionPrintRequest obj = entry.getValue();
 			if (obj.getSchoolReportPostRequest() != null) {
 				SchoolReportPostRequest schoolRepPostReq = obj.getSchoolReportPostRequest();
-				numberOfPdfs = processFile(schoolRepPostReq.getGradReport(),mincode,year,month,"DISTREP_SC",numberOfPdfs,processorData);
-				numberOfPdfs = processFile(schoolRepPostReq.getNongradReport(),mincode,year,month,"NONGRADDISTREP_SC",numberOfPdfs,processorData);
-				numberOfPdfs = processFile(schoolRepPostReq.getNongradprjreport(),mincode,year,"00","NONGRADPRJ",numberOfPdfs,processorData);
+				numberOfPdfs = processFile(schoolRepPostReq.getGradReport(),mincode,numberOfPdfs,processorData);
+				numberOfPdfs = processFile(schoolRepPostReq.getNongradReport(),mincode,numberOfPdfs,processorData);
+				numberOfPdfs = processFile(schoolRepPostReq.getNongradprjreport(),mincode,numberOfPdfs,processorData);
 			}
 			if (counter % 50 == 0) {
 				restUtils.fetchAccessToken(processorData);
@@ -63,7 +63,7 @@ public class PostingSchoolReportProcess extends BaseProcess {
 		return processorData;
 	}
 
-	private int processFile(SchoolReportDistribution scdReport, String mincode, int year, String month, String type, int numberOfPdfs, ProcessorData processorData) {
+	private int processFile(SchoolReportDistribution scdReport, String mincode, int numberOfPdfs, ProcessorData processorData) {
 		if(scdReport != null) {
 			List<InputStream> locations = new ArrayList<>();
 			try {
@@ -71,7 +71,7 @@ public class PostingSchoolReportProcess extends BaseProcess {
 				if (gradReportPdf != null) {
 					locations.add(gradReportPdf.getInputStream());
 					logger.debug("*** Added PDFs Current Report Type {}", scdReport.getReportTypeCode());
-					mergeDocuments(processorData, mincode, EducDistributionApiUtils.getFileNameSchoolReports(mincode, year, month, type), locations);
+					mergeDocuments(processorData, mincode, EducDistributionApiUtils.getFileNameWithMincodeReports(mincode), locations);
 					numberOfPdfs++;
 				} else {
 					logger.debug("*** Failed to Add PDFs Current Report Type {}", scdReport.getReportTypeCode());

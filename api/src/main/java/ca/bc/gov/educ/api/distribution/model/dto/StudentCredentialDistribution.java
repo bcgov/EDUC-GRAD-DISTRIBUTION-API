@@ -1,7 +1,9 @@
 package ca.bc.gov.educ.api.distribution.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,6 +23,8 @@ public class StudentCredentialDistribution {
 	private String legalLastName;
 	private String studentCitizenship;
 	private String programCompletionDate;
+	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+	private Date lastUpdateDate;
 	private String honoursStanding;
 	private String program;
 	private String studentGrade;

@@ -18,6 +18,7 @@ public class Student implements Serializable {
     private String gender;
     private String citizenship;
     private Date birthdate;
+    private Date lastUpdateDate;
     private Address address;
     private String grade;
     private String gradProgram;
@@ -95,6 +96,15 @@ public class Student implements Serializable {
 
     public void setBirthdate(Date value) {
         this.birthdate = value;
+    }
+
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    public Date getLastUpdateDate() {
+        return lastUpdateDate;
+    }
+
+    public void setLastUpdateDate(Date lastUpdateDate) {
+        this.lastUpdateDate = lastUpdateDate;
     }
 
     @JsonDeserialize(as = Address.class)

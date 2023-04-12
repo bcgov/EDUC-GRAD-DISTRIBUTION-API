@@ -98,7 +98,7 @@ endpoint:
     school-report:
       url: https://educ-grad-graduation-report-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/schoolreport?mincode=%s&reportType=%s
     school-report-by-report-type:
-      url: https://educ-grad-graduation-report-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/schoolreport/type/%s
+      url: https://educ-grad-graduation-report-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/schoolreport/type/%s?mincode=%s
     get-achievement-report:
       url: https://educ-grad-graduation-report-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/studentreport?studentID=%s&reportType=%s&documentStatusCode=%s
     get-transcript-psi-by-student-id:
@@ -137,6 +137,8 @@ endpoint:
   grad-trax-api:
     psi-by-psi-code:
       url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/trax/psi/%s
+    school-by-min-code:
+      url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/trax/school/%s
 
 #Splunk LogHelper
 splunk:

@@ -22,6 +22,6 @@ public class PsiService {
 	}
 
 	public Psi getPsiDetails(String psiCode, String accessToken) {
-		return webClient.get().uri(String.format(educDistributionApiConstants.getPsiDetails(),psiCode)).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).retrieve().bodyToMono(Psi.class).block();
+		return webClient.get().uri(String.format(educDistributionApiConstants.getPsiByPsiCode(),psiCode)).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).retrieve().bodyToMono(Psi.class).block();
 	}
 }

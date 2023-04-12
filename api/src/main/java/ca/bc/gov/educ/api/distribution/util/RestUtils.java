@@ -1,13 +1,5 @@
 package ca.bc.gov.educ.api.distribution.util;
 
-import java.lang.reflect.Type;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Stream;
-
 import ca.bc.gov.educ.api.distribution.model.dto.BaseModel;
 import ca.bc.gov.educ.api.distribution.model.dto.ProcessorData;
 import ca.bc.gov.educ.api.distribution.model.dto.ResponseObj;
@@ -28,6 +20,10 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+
+import java.lang.reflect.Type;
+import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * Utility class used to construct {@link ResponseEntity} for various HTTP methods.
@@ -56,6 +52,7 @@ public class RestUtils {
 		}
 		return responseObjCache.getResponseObj();
 	}
+
 	public String fetchAccessToken() {
 		return this.getTokenResponseObject().getAccess_token();
 	}
