@@ -41,7 +41,6 @@ public class YearEndMergeProcess extends BaseProcess {
 		DistributionResponse response = new DistributionResponse();
 		ExceptionMessage exception = new ExceptionMessage();
 		Map<String,DistributionPrintRequest> mapDist = processorData.getMapDistribution();
-		Long batchId = processorData.getBatchId();
 		int numberOfPdfs = 0;
 		int counter=0;
 		List<School> schoolsForLabels = new ArrayList<>();
@@ -68,7 +67,7 @@ public class YearEndMergeProcess extends BaseProcess {
 				pV = processYedrCertificatePrintRequest(distributionPrintRequest,currentSlipCount,packSlipReq,studListNonGrad,processorData,mincode,schoolCategoryCode,numberOfPdfs);
 				numberOfPdfs = pV.getRight();
 				if(!studListNonGrad.isEmpty()) {
-					createAndSaveNonGradReport(schoolDetails,studListNonGrad,mincode,restUtils.getAccessToken());
+					createAndSaveNonGradReport(schoolDetails,studListNonGrad,mincode);
 				}
 				logger.debug("PDFs Merged {}", schoolDetails.getSchoolName());
 				processSchoolsForLabels(schoolsForLabels, mincode, restUtils.getAccessToken(), exception);
@@ -156,7 +155,7 @@ public class YearEndMergeProcess extends BaseProcess {
 			try {
 				locations.add(reportService.getPackingSlip(packSlipReq, restUtils.getAccessToken()).getInputStream());
 				logger.debug("*** Packing Slip Added");
-				processStudents(scdList,studListNonGrad,locations,processorData);
+				processStudents(scdList,studListNonGrad,locations);
 				mergeDocuments(processorData,mincode,schoolCategoryCode,"/EDGRAD.T.","YED4",locations);
 				numberOfPdfs++;
 				logger.debug("*** Transcript Documents Merged ***");
@@ -168,7 +167,7 @@ public class YearEndMergeProcess extends BaseProcess {
 	}
 
 	@Generated
-	private void processStudents(List<StudentCredentialDistribution> scdList, List<Student> studListNonGrad, List<InputStream> locations, ProcessorData processorData) throws IOException {
+	private void processStudents(List<StudentCredentialDistribution> scdList, List<Student> studListNonGrad, List<InputStream> locations) {
 		int currentTranscript = 0;
 		int failedToAdd = 0;
 		for (StudentCredentialDistribution scd : scdList) {
@@ -265,7 +264,7 @@ public class YearEndMergeProcess extends BaseProcess {
 	}
 
 	@Generated
-	private void createAndSaveNonGradReport(CommonSchool schoolDetails, List<Student> studListNonGrad, String mincode, String accessToken) {
+	private void createAndSaveNonGradReport(CommonSchool schoolDetails, List<Student> studListNonGrad, String mincode) {
 		ReportData nongradProjected = new ReportData();
 		School schObj = new School();
 		schObj.setMincode(schoolDetails.getDistNo()+schoolDetails.getSchlNo());
@@ -289,11 +288,11 @@ public class YearEndMergeProcess extends BaseProcess {
 		byte[] encoded = Base64.encodeBase64(bytesSAR);
 		assert encoded != null;
 		String encodedPdf = new String(encoded, StandardCharsets.US_ASCII);
-		saveSchoolDistributionReport(encodedPdf,mincode,accessToken, NONGRADDISTREP_SC);
+		saveSchoolDistributionReport(encodedPdf,mincode,NONGRADDISTREP_SC);
 	}
 
 	@Generated
-	private void saveSchoolDistributionReport(String encodedPdf, String mincode, String accessToken, String reportType) {
+	private void saveSchoolDistributionReport(String encodedPdf, String mincode, String reportType) {
 		SchoolReports requestObj = new SchoolReports();
 		requestObj.setReport(encodedPdf);
 		requestObj.setSchoolOfRecord(mincode);
