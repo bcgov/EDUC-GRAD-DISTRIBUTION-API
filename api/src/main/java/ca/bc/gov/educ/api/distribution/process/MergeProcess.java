@@ -2,6 +2,7 @@ package ca.bc.gov.educ.api.distribution.process;
 
 import ca.bc.gov.educ.api.distribution.model.dto.*;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils;
+import ca.bc.gov.educ.api.distribution.util.Generated;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -33,6 +34,7 @@ public class MergeProcess extends BaseProcess {
 	private static Logger logger = LoggerFactory.getLogger(MergeProcess.class);
 
 	@Override
+	@Generated
 	public ProcessorData fire(ProcessorData processorData) {
 		long startTime = System.currentTimeMillis();
 		logger.debug("************* TIME START  ************ {}",startTime);
