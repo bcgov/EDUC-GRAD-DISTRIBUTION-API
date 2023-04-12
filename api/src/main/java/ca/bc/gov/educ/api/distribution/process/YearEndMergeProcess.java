@@ -12,7 +12,6 @@ import org.modelmapper.internal.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
 
@@ -56,15 +55,6 @@ public class YearEndMergeProcess extends BaseProcess {
 				List<Student> studListNonGrad = new ArrayList<>();
 				ReportRequest packSlipReq = reportService.preparePackingSlipData(schoolDetails, processorData.getBatchId());
 				Pair<Integer,Integer> pV = processTranscriptPrintRequest(distributionPrintRequest,currentSlipCount,packSlipReq,studListNonGrad,processorData,mincode,schoolCategoryCode,numberOfPdfs);
-				currentSlipCount = pV.getLeft();
-				numberOfPdfs = pV.getRight();
-				pV = processYed2CertificatePrintRequest(distributionPrintRequest,currentSlipCount,packSlipReq,studListNonGrad,processorData,mincode,schoolCategoryCode,numberOfPdfs);
-				currentSlipCount = pV.getLeft();
-				numberOfPdfs = pV.getRight();
-				pV = processYedbCertificatePrintRequest(distributionPrintRequest,currentSlipCount,packSlipReq,studListNonGrad,processorData,mincode,schoolCategoryCode,numberOfPdfs);
-				currentSlipCount = pV.getLeft();
-				numberOfPdfs = pV.getRight();
-				pV = processYedrCertificatePrintRequest(distributionPrintRequest,currentSlipCount,packSlipReq,studListNonGrad,processorData,mincode,schoolCategoryCode,numberOfPdfs);
 				numberOfPdfs = pV.getRight();
 				if(!studListNonGrad.isEmpty()) {
 					createAndSaveNonGradReport(schoolDetails,studListNonGrad,mincode);
@@ -103,45 +93,6 @@ public class YearEndMergeProcess extends BaseProcess {
 			}
 		}
 		return processorData;
-	}
-
-	@Generated
-	private Pair<Integer,Integer> processYedrCertificatePrintRequest(DistributionPrintRequest obj, int currentSlipCount, ReportRequest packSlipReq, List<Student> studListNonGrad, ProcessorData processorData, String mincode, String schoolCategoryCode, int numberOfPdfs) {
-		if (obj.getYedrCertificatePrintRequest() != null) {
-			currentSlipCount++;
-			CertificatePrintRequest certificatePrintRequest = obj.getYedrCertificatePrintRequest();
-			PackingSlipRequest request = PackingSlipRequest.builder().mincode(mincode).currentSlip(currentSlipCount).total(obj.getTotal()).paperType("YEDR").build();
-			mergeCertificates(packSlipReq, certificatePrintRequest, request,processorData,studListNonGrad,schoolCategoryCode);
-			numberOfPdfs++;
-			logger.debug("*** YEDR Documents Merged ***");
-		}
-		return Pair.of(currentSlipCount,numberOfPdfs);
-	}
-
-	@Generated
-	private Pair<Integer,Integer> processYedbCertificatePrintRequest(DistributionPrintRequest obj, int currentSlipCount, ReportRequest packSlipReq, List<Student> studListNonGrad, ProcessorData processorData, String mincode, String schoolCategoryCode, int numberOfPdfs) {
-		if (obj.getYedbCertificatePrintRequest() != null) {
-			currentSlipCount++;
-			CertificatePrintRequest certificatePrintRequest = obj.getYedbCertificatePrintRequest();
-			PackingSlipRequest request = PackingSlipRequest.builder().mincode(mincode).currentSlip(currentSlipCount).total(obj.getTotal()).paperType("YEDB").build();
-			mergeCertificates(packSlipReq, certificatePrintRequest, request,processorData,studListNonGrad, schoolCategoryCode);
-			numberOfPdfs++;
-			logger.debug("*** YEDB Documents Merged ***");
-		}
-		return Pair.of(currentSlipCount,numberOfPdfs);
-	}
-
-	@Generated
-	private Pair<Integer,Integer> processYed2CertificatePrintRequest(DistributionPrintRequest obj, int currentSlipCount, ReportRequest packSlipReq, List<Student> studListNonGrad, ProcessorData processorData, String mincode, String schoolCategoryCode, int numberOfPdfs) {
-		if (obj.getYed2CertificatePrintRequest() != null) {
-			currentSlipCount++;
-			CertificatePrintRequest certificatePrintRequest = obj.getYed2CertificatePrintRequest();
-			PackingSlipRequest request = PackingSlipRequest.builder().mincode(mincode).currentSlip(currentSlipCount).total(obj.getTotal()).paperType("YED2").build();
-			mergeCertificates(packSlipReq, certificatePrintRequest, request,processorData,studListNonGrad, schoolCategoryCode);
-			numberOfPdfs++;
-			logger.debug("*** YED2 Documents Merged ***");
-		}
-		return Pair.of(currentSlipCount,numberOfPdfs);
 	}
 
 	@Generated
@@ -228,39 +179,6 @@ public class YearEndMergeProcess extends BaseProcess {
 			}
 		}
 		return nList;
-	}
-
-	@Generated
-	private void mergeCertificates(ReportRequest packSlipReq, CertificatePrintRequest certificatePrintRequest, PackingSlipRequest request, ProcessorData processorData, List<Student> studListNonGrad, String schoolCategoryCode) {
-		List<StudentCredentialDistribution> scdList = certificatePrintRequest.getCertificateList();
-		String mincode = request.getMincode();
-		String paperType = request.getPaperType();
-		List<InputStream> locations=new ArrayList<>();
-		setExtraDataForPackingSlip(packSlipReq,paperType,request.getTotal(),scdList.size(),request.getCurrentSlip(),"Certificate", certificatePrintRequest.getBatchId());
-		try {
-			locations.add(reportService.getPackingSlip(packSlipReq,restUtils.getAccessToken()).getInputStream());
-			int currentCertificate = 0;
-			int failedToAdd = 0;
-			for (StudentCredentialDistribution scd : scdList) {
-				if(scd.getNonGradReasons() != null && !scd.getNonGradReasons().isEmpty()) {
-					Student objStd = prepareStudentObj(scd,studListNonGrad);
-					if(objStd != null)
-						studListNonGrad.add(objStd);
-				}
-				InputStreamResource certificatePdf = webClient.get().uri(String.format(educDistributionApiConstants.getCertificate(),scd.getStudentID(),scd.getCredentialTypeCode(),scd.getDocumentStatusCode())).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).retrieve().bodyToMono(InputStreamResource.class).block();
-				if(certificatePdf != null) {
-					locations.add(certificatePdf.getInputStream());
-					currentCertificate++;
-					logger.debug("*** Added PDFs {}/{} Current student {}",currentCertificate,scdList.size(),scd.getStudentID());
-				}else {
-					failedToAdd++;
-					logger.debug("*** Failed to Add PDFs {} Current student {} papertype : {}",failedToAdd,scd.getStudentID(),paperType);
-				}
-			}
-			mergeDocuments(processorData,mincode,schoolCategoryCode,"/EDGRAD.C.",paperType,locations);
-		} catch (IOException e) {
-			logger.debug(EXCEPTION,e.getLocalizedMessage());
-		}
 	}
 
 	@Generated
