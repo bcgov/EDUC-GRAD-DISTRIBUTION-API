@@ -61,9 +61,6 @@ public class YearEndMergeProcess extends BaseProcess {
 				}
 				logger.debug("PDFs Merged {}", schoolDetails.getSchoolName());
 				processSchoolsForLabels(schoolsForLabels, mincode, restUtils.getAccessToken(), exception);
-				if (counter % 50 == 0) {
-					restUtils.fetchAccessToken(processorData);
-				}
 				logger.debug("School {}/{}",counter,mapDist.size());
 
 				int numberOfCreatedSchoolReports = 0;
