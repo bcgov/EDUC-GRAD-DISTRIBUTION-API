@@ -2,7 +2,9 @@ package ca.bc.gov.educ.api.distribution.controller;
 
 import ca.bc.gov.educ.api.distribution.model.dto.DistributionPrintRequest;
 import ca.bc.gov.educ.api.distribution.model.dto.DistributionResponse;
+import ca.bc.gov.educ.api.distribution.model.dto.School;
 import ca.bc.gov.educ.api.distribution.service.GradDistributionService;
+import ca.bc.gov.educ.api.distribution.service.PostingDistributionService;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import ca.bc.gov.educ.api.distribution.util.GradValidation;
 import ca.bc.gov.educ.api.distribution.util.PermissionsConstants;
@@ -24,6 +26,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @CrossOrigin
@@ -39,6 +42,9 @@ public class DistributionController {
 
     @Autowired
     GradDistributionService gradDistributionService;
+
+    @Autowired
+    PostingDistributionService postingDistributionService;
 
     @Autowired
     GradValidation validation;
@@ -65,6 +71,15 @@ public class DistributionController {
         byte[] resultBinary = gradDistributionService.getDownload(batchId);
         byte[] encoded = Base64.encodeBase64(resultBinary);
         return handleBinaryResponse(encoded,MediaType.TEXT_PLAIN,batchId);
+    }
+
+    @PostMapping(EducDistributionApiConstants.POST_DISTRIBUTION)
+    @PreAuthorize(PermissionsConstants.GRADUATE_STUDENT)
+    @Operation(summary = "Read Student Reports by Student ID and Report Type", description = "Read Student Reports by Student ID and Report Type", tags = { "Reports" })
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK")})
+    public ResponseEntity<Boolean> postingDistribution(@PathVariable(value = "batchId") Long batchId, @RequestParam(required = false) String localDownload, @RequestBody List<School> schools) {
+        logger.debug("zipBatchDirectory : ");
+        return response.GET(postingDistributionService.postingProcess(batchId, localDownload, schools));
     }
 
     private ResponseEntity<byte[]> handleBinaryResponse(byte[] resultBinary, MediaType contentType,Long batchId) {

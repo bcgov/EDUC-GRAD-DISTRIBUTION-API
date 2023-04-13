@@ -37,8 +37,6 @@ public class PostingSchoolReportProcess extends BaseProcess {
 		int numberOfPdfs = 0;
 		int counter=0;
 		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("PST"), Locale.CANADA);
-		int year = cal.get(Calendar.YEAR);
-		String month = String.format("%02d", cal.get(Calendar.MONTH) + 1);
 		for (Map.Entry<String, DistributionPrintRequest> entry : mapDist.entrySet()) {
 			counter++;
 			String mincode = entry.getKey();
