@@ -26,6 +26,8 @@ public class Student implements Serializable {
     private String mincodeGrad;
     private String englishCert;
     private String frenchCert;
+    //Grad2-1931
+    private String consumerEducReqt;
 
     private String localId;
     private String hasOtherProgram;
@@ -164,6 +166,17 @@ public class Student implements Serializable {
 
     public String getLocalId() {
         return localId;
+    }
+
+    //Grad2-1931
+
+
+    public String getConsumerEducReqt() {
+        return consumerEducReqt;
+    }
+
+    public void setConsumerEducReqt(String consumerEducReqt) {
+        this.consumerEducReqt = consumerEducReqt;
     }
 
     public void setLocalId(String localId) {

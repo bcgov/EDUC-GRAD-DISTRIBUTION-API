@@ -74,19 +74,35 @@ public abstract class BaseProcess implements DistributionProcess {
 
     //Grad2-1931 Changed the folder structure of created files to be placed - mchintha
     protected void createZipFile(Long batchId, String transmissionMode) {
-        StringBuilder sourceFileBuilder = new StringBuilder().append(EducDistributionApiConstants.TMP_DIR).append(educDistributionApiConstants.FILES_FOLDER_STRUCTURE).append(transmissionMode.toUpperCase()).append(educDistributionApiConstants.DEL).append(batchId);
-        try (FileOutputStream fos = new FileOutputStream(EducDistributionApiConstants.TMP_DIR + educDistributionApiConstants.FILES_FOLDER_STRUCTURE + transmissionMode.toUpperCase() + "/EDGRAD.BATCH." + batchId + ".zip")) {
+        StringBuilder sourceFileBuilder = null;
+        File file ;
+        if(!transmissionMode.isBlank() && (transmissionMode.equalsIgnoreCase("FTP") || (transmissionMode.equalsIgnoreCase("PAPER")))) {
+            sourceFileBuilder = new StringBuilder().append(EducDistributionApiConstants.TMP_DIR).append(educDistributionApiConstants.FILES_FOLDER_STRUCTURE).append(transmissionMode.toUpperCase()).append(educDistributionApiConstants.DEL).append(batchId);
+            file = new File(EducDistributionApiConstants.TMP_DIR + educDistributionApiConstants.FILES_FOLDER_STRUCTURE + transmissionMode.toUpperCase() + "/EDGRAD.BATCH." + batchId + ".zip");
+        }
+        else {
+            sourceFileBuilder = new StringBuilder().append(EducDistributionApiConstants.TMP_DIR).append(batchId);
+            file = new File(EducDistributionApiConstants.TMP_DIR + "EDGRAD.BATCH." + batchId + ".zip");
+        }
+        try (FileOutputStream fos = new FileOutputStream(file)) {
             ZipOutputStream zipOut = new ZipOutputStream(fos);
             File fileToZip = new File(sourceFileBuilder.toString());
             EducDistributionApiUtils.zipFile(fileToZip, fileToZip.getName(), zipOut);
-        } catch (IOException e) {
-            logger.debug(EXCEPTION, e.getLocalizedMessage());
-        }
+            } catch (IOException e) {
+                logger.debug(EXCEPTION, e.getLocalizedMessage());
+            }
     }
 
-    //Grad2-1931 Changed the folder structure of created files to be placed - mchintha
+    //Grad2-1931 Changed the folder structure of PSIRUN files to be placed - mchintha
     protected void createControlFile(Long batchId, String transmissionMode, int numberOfPdfs) {
-        try (FileOutputStream fos = new FileOutputStream("/tmp/Batch/PSI/" + transmissionMode.toUpperCase() + "/EDGRAD.BATCH." + batchId + ".txt")) {
+        File file;
+        if(transmissionMode.equalsIgnoreCase("FTP") || transmissionMode.equalsIgnoreCase("PAPER")) {
+            file = new File("/tmp/Batch/PSI/" + transmissionMode.toUpperCase() + "/EDGRAD.BATCH." + batchId + ".txt");
+        }
+        else {
+            file = new File("/tmp/EDGRAD.BATCH." + batchId + ".txt");
+        }
+        try (FileOutputStream fos = new FileOutputStream(file)) {
             byte[] contentInBytes = String.valueOf(numberOfPdfs).getBytes();
             fos.write(contentInBytes);
             fos.flush();
@@ -235,37 +251,76 @@ public abstract class BaseProcess implements DistributionProcess {
         boolean isDistrict = StringUtils.isNotBlank(mincode) && StringUtils.length(mincode) == 3;
         String districtCode = StringUtils.substring(mincode, 0, 3);
         try {
-            StringBuilder fileLocBuilder = new StringBuilder();
-            if (SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode)) {
-                fileLocBuilder.append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.FILES_FOLDER_STRUCTURE).append(transmissionMode.toUpperCase()).append(EducDistributionApiConstants.DEL).append(batchId);
-            } else if (isDistrict) {
-                fileLocBuilder.append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.FILES_FOLDER_STRUCTURE).append(transmissionMode.toUpperCase()).append(EducDistributionApiConstants.DEL).append(batchId).append(EducDistributionApiConstants.DEL).append(districtCode);
-            } else if ("02".equalsIgnoreCase(schoolCategory)) {
-                fileLocBuilder.append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.FILES_FOLDER_STRUCTURE).append(transmissionMode.toUpperCase()).append(EducDistributionApiConstants.DEL).append(batchId).append(EducDistributionApiConstants.DEL).append(mincode);
-            } else {
-                fileLocBuilder.append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.FILES_FOLDER_STRUCTURE).append(transmissionMode.toUpperCase()).append(EducDistributionApiConstants.DEL).append(batchId).append(EducDistributionApiConstants.DEL).append(districtCode).append(educDistributionApiConstants.DEL).append(mincode);
+            if(!transmissionMode.isBlank() && (transmissionMode.equalsIgnoreCase("FTP") || transmissionMode.equalsIgnoreCase("PAPER"))) {
+                StringBuilder fileLocBuilder = new StringBuilder();
+                if (SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode)) {
+                    fileLocBuilder.append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.FILES_FOLDER_STRUCTURE).append(transmissionMode.toUpperCase()).append(EducDistributionApiConstants.DEL).append(batchId);
+                } else if (isDistrict) {
+                    fileLocBuilder.append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.FILES_FOLDER_STRUCTURE).append(transmissionMode.toUpperCase()).append(EducDistributionApiConstants.DEL).append(batchId).append(EducDistributionApiConstants.DEL).append(districtCode);
+                } else if ("02".equalsIgnoreCase(schoolCategory)) {
+                    fileLocBuilder.append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.FILES_FOLDER_STRUCTURE).append(transmissionMode.toUpperCase()).append(EducDistributionApiConstants.DEL).append(batchId).append(EducDistributionApiConstants.DEL).append(mincode);
+                } else {
+                    fileLocBuilder.append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.FILES_FOLDER_STRUCTURE).append(transmissionMode.toUpperCase()).append(EducDistributionApiConstants.DEL).append(batchId).append(EducDistributionApiConstants.DEL).append(districtCode).append(educDistributionApiConstants.DEL).append(mincode);
+                }
+                Path path = Paths.get(fileLocBuilder.toString());
+                Files.createDirectories(path);
+                StringBuilder fileNameBuilder = new StringBuilder();
+                if (SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode)) {
+                    fileNameBuilder.append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.FILES_FOLDER_STRUCTURE).append(transmissionMode.toUpperCase()).append(EducDistributionApiConstants.DEL).append(batchId);
+                } else if (isDistrict) {
+                    fileNameBuilder.append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.FILES_FOLDER_STRUCTURE).append(transmissionMode.toUpperCase()).append(EducDistributionApiConstants.DEL).append(batchId).append(EducDistributionApiConstants.DEL).append(districtCode);
+                } else if ("02".equalsIgnoreCase(schoolCategory)) {
+                    fileNameBuilder.append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.FILES_FOLDER_STRUCTURE).append(transmissionMode.toUpperCase()).append(EducDistributionApiConstants.DEL).append(batchId).append(EducDistributionApiConstants.DEL).append(mincode);
+                } else {
+                    fileNameBuilder.append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.FILES_FOLDER_STRUCTURE).append(transmissionMode.toUpperCase()).append(EducDistributionApiConstants.DEL).append(batchId).append(EducDistributionApiConstants.DEL).append(districtCode).append(educDistributionApiConstants.DEL).append(mincode);
+                }
+                if (SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode)) {
+                    fileNameBuilder.append("/EDGRAD.L.").append("3L14.");
+                } else {
+                    fileNameBuilder.append("/EDGRAD.R.").append("324W.");
+                }
+                fileNameBuilder.append(EducDistributionApiUtils.getFileName()).append(".pdf");
+                if (transmissionMode.equalsIgnoreCase("PAPER")) {
+                    try (OutputStream out = new FileOutputStream(fileNameBuilder.toString())) {
+                        out.write(gradReportPdf);
+                    }
+                }
             }
-            Path path = Paths.get(fileLocBuilder.toString());
-            Files.createDirectories(path);
-            StringBuilder fileNameBuilder = new StringBuilder();
-            if (SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode)) {
-                fileNameBuilder.append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.FILES_FOLDER_STRUCTURE).append(transmissionMode.toUpperCase()).append(EducDistributionApiConstants.DEL).append(batchId);
-            } else if (isDistrict) {
-                fileNameBuilder.append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.FILES_FOLDER_STRUCTURE).append(transmissionMode.toUpperCase()).append(EducDistributionApiConstants.DEL).append(batchId).append(EducDistributionApiConstants.DEL).append(districtCode);
-            } else if ("02".equalsIgnoreCase(schoolCategory)) {
-                fileNameBuilder.append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.FILES_FOLDER_STRUCTURE).append(transmissionMode.toUpperCase()).append(EducDistributionApiConstants.DEL).append(batchId).append(EducDistributionApiConstants.DEL).append(mincode);
-            } else {
-                fileNameBuilder.append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.FILES_FOLDER_STRUCTURE).append(transmissionMode.toUpperCase()).append(EducDistributionApiConstants.DEL).append(batchId).append(EducDistributionApiConstants.DEL).append(districtCode).append(educDistributionApiConstants.DEL).append(mincode);
+            else {
+                StringBuilder fileLocBuilder = new StringBuilder();
+                if (SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode)) {
+                    fileLocBuilder.append(EducDistributionApiConstants.TMP_DIR).append(batchId);
+                } else if (isDistrict) {
+                    fileLocBuilder.append(EducDistributionApiConstants.TMP_DIR).append(batchId).append(EducDistributionApiConstants.DEL).append(districtCode);
+                } else if ("02".equalsIgnoreCase(schoolCategory)) {
+                    fileLocBuilder.append(EducDistributionApiConstants.TMP_DIR).append(batchId).append(EducDistributionApiConstants.DEL).append(mincode);
+                } else {
+                    fileLocBuilder.append(EducDistributionApiConstants.TMP_DIR).append(batchId).append(EducDistributionApiConstants.DEL).append(districtCode).append(EducDistributionApiConstants.DEL).append(mincode);
+                }
+                Path path = Paths.get(fileLocBuilder.toString());
+                Files.createDirectories(path);
+                StringBuilder fileNameBuilder = new StringBuilder();
+                if (SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode)) {
+                    fileNameBuilder.append(EducDistributionApiConstants.TMP_DIR).append(batchId);
+                } else if (isDistrict) {
+                    fileNameBuilder.append(EducDistributionApiConstants.TMP_DIR).append(batchId).append(EducDistributionApiConstants.DEL).append(districtCode);
+                } else if ("02".equalsIgnoreCase(schoolCategory)) {
+                    fileNameBuilder.append(EducDistributionApiConstants.TMP_DIR).append(batchId).append(EducDistributionApiConstants.DEL).append(mincode);
+                } else {
+                    fileNameBuilder.append(EducDistributionApiConstants.TMP_DIR).append(batchId).append(EducDistributionApiConstants.DEL).append(districtCode).append(EducDistributionApiConstants.DEL).append(mincode);
+                }
+                if (SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode)) {
+                    fileNameBuilder.append("/EDGRAD.L.").append("3L14.");
+                } else {
+                    fileNameBuilder.append("/EDGRAD.R.").append("324W.");
+                }
+                fileNameBuilder.append(EducDistributionApiUtils.getFileName()).append(".pdf");
+                try (OutputStream out = new FileOutputStream(fileNameBuilder.toString())) {
+                    out.write(gradReportPdf);
+                }
+
             }
-            if (SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode)) {
-                fileNameBuilder.append("/EDGRAD.L.").append("3L14.");
-            } else {
-                fileNameBuilder.append("/EDGRAD.R.").append("324W.");
-            }
-            fileNameBuilder.append(EducDistributionApiUtils.getFileName()).append(".pdf");
-            try (OutputStream out = new FileOutputStream(fileNameBuilder.toString())) {
-                out.write(gradReportPdf);
-            }
+
         } catch (Exception e) {
             logger.debug(EXCEPTION, e.getLocalizedMessage());
         }

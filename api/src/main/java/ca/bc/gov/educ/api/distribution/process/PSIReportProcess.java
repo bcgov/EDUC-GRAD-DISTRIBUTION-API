@@ -12,6 +12,7 @@ import com.opencsv.ICSVWriter;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.internal.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -162,7 +163,7 @@ public class PSIReportProcess extends BaseProcess {
                 path = Paths.get(filePathBuilder.toString());
                 newFile = new File(Files.createFile(path).toUri());
             } else {
-                throw new IOException("Path is not available to create DAT file and to write the student data on it");
+                throw new IOException("Path is not available to create DAT file to write the student data");
             }
             for (PsiCredentialDistribution scd : scdList) {
 
@@ -173,61 +174,133 @@ public class PSIReportProcess extends BaseProcess {
                     School schoolDetails = transcriptCsv.getSchool();
                     List<TranscriptResult> courseDetails = (transcriptCsv.getTranscript() != null ? transcriptCsv.getTranscript().getResults() : null);
 
+
                     //Writes the A's row's data on CSV
                     if (studentDetails != null) {
                         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(educDistributionApiConstants.DATE_FORMAT);
+                        String studentBirthDate = simpleDateFormat.format(studentDetails.getBirthdate());
                         studentInfo = new String[]{
-                                scd.getPen(), "A", studentDetails.getLastName(), studentDetails.getFirstName(), studentDetails.getMiddleName(),
-                                simpleDateFormat.format(studentDetails.getBirthdate()), studentDetails.getGender(), studentDetails.getCitizenship(),
-                                studentDetails.getGrade(), studentDetails.getGraduationStatus().getSchoolOfRecord(), studentDetails.getLocalId(), studentDetails.getHasOtherProgram(), "", "", "", "", "", "", "", studentDetails.getGradProgram()};
+                                scd.getPen(),
+                                "A",
+                                studentDetails.getLastName(),
+                                studentDetails.getFirstName(),
+                                studentDetails.getMiddleName(),
+                                studentDetails.getBirthdate() == null ? "" : (StringUtils.isNotBlank(studentBirthDate) ? studentBirthDate : ""),
+                                studentDetails.getGender(), studentDetails.getCitizenship(),
+                                studentDetails.getGrade(), studentDetails.getGraduationStatus().getSchoolOfRecord(), studentDetails.getLocalId(),
+                                "", //Optional program
+                                studentDetails.getConsumerEducReqt(),
+                                "0000",
+                                StringUtils.isNotBlank(studentDetails.getGraduationStatus().getProgramCompletionDate()) ? studentDetails.getGraduationStatus().getProgramCompletionDate() : "000000",
+                                String.valueOf(studentDetails.getGraduationData().getDogwoodFlag()).equals("false") ? "N" : "Y",
+                                String.valueOf(studentDetails.getGraduationData().getHonorsFlag()).equals("false") ? "N" : "Y",
+                                "", //Non grad reasons
+                                "", //18 Blanks
+                                studentDetails.getGradProgram() == null ? "" : studentDetails.getGradProgram().substring(0,3)};
 
                         setColumnsWidths(
                                 studentInfo,
                                 IntStream.of(10, 1, 25, 25, 25, 8, 1, 1, 2, 8, 12, 2, 1, 4, 6, 1, 1, 15, 18, 4).toArray(),
                                 studentTranscriptdata);
                     }
+
                     //Writes the B's row's data on CSV
                     if (schoolDetails != null) {
                         schoolInfo = new String[]{
-                                scd.getPen(), "B", schoolDetails.getAddress().getStreetLine1(), schoolDetails.getAddress().getStreetLine2(), schoolDetails.getAddress().getCity(),
-                                schoolDetails.getAddress().getCode(), schoolDetails.getAddress().getCountry(), ""};
+                                scd.getPen(), "B",
+                                "", //Address blank
+                                "", //Address blank
+                                "", //City blank
+                                "", //Prov code blank
+                                "", //country code blank
+                                "" //postal blank
+                        };
 
                         setColumnsWidths(schoolInfo,
                                 IntStream.of(10, 1, 40, 40, 30, 2, 2, 7).toArray(),
                                 studentTranscriptdata);
                     }
+
                     //Writes the C's data on CSV
                     if (courseDetails != null) {
                         for (TranscriptResult course : courseDetails) {
+                            String creditsString = course.getUsedForGrad();
+                            int credits = creditsString.chars()
+                                    .filter(Character::isDigit)
+                                    .reduce(0, (a, b) -> a * 10 + Character.getNumericValue(b));
                             //C rows writes Examinable Courses and Assessments
                             if (course.getCourse().getType().equals("1") || course.getCourse().getType().equals("3")) {
-                                examinableCoursesAndAssessmentsInfo = new String[]{
-                                        scd.getPen(), "C", course.getCourse().getCode(), course.getCourse().getLevel(), course.getCourse().getSessionDate(),
-                                        course.getMark().getInterimLetterGrade(), "", course.getMark().getSchoolPercent(), "", course.getMark().getExamPercent(),
-                                        course.getMark().getFinalPercent(), course.getMark().getFinalLetterGrade(), course.getMark().getInterimPercent(), "", "", ""};
+                                try {
+                                    examinableCoursesAndAssessmentsInfo = new String[]{
+                                            scd.getPen(), "C", course.getCourse().getCode(),
+                                            course.getCourse().getLevel(),
+                                            course.getCourse().getSessionDate(),
+                                            course.getMark().getInterimLetterGrade(),
+                                            "", //IB flag
+                                            StringUtils.isBlank(course.getMark().getSchoolPercent()) ? "000" : String.format("%03d", Integer.parseInt(course.getMark().getSchoolPercent())) ,
+                                            "", //Special case
+                                            StringUtils.isBlank(course.getMark().getExamPercent()) ? "000" : String.format("%03d", Integer.parseInt(course.getMark().getExamPercent())),
+                                            StringUtils.isBlank(course.getMark().getFinalPercent()) ? "000" : String.format("%03d", Integer.parseInt(course.getMark().getFinalPercent())),
+                                            course.getMark().getFinalLetterGrade() ,
+                                            StringUtils.isBlank(course.getMark().getInterimPercent()) ? "000" : String.format("%03d", Integer.parseInt(course.getMark().getInterimPercent())),
+                                            StringUtils.isBlank(course.getCourse().getCredits()) ? "00" : String.format("%02d", Integer.parseInt(course.getCourse().getCredits())),
+                                            "", //Course case
+                                            credits > 0 ? "Y" : ""
+                                    };
 
-                                setColumnsWidths(examinableCoursesAndAssessmentsInfo,
-                                        IntStream.of(10, 1, 5, 3, 6, 2, 1, 3, 1, 3, 3, 2, 3, 2, 1, 1).toArray(),
-                                        studentTranscriptdata);
+                                    setColumnsWidths(examinableCoursesAndAssessmentsInfo,
+                                            IntStream.of(10, 1, 5, 3, 6, 2, 1, 3, 1, 3, 3, 2, 3, 2, 1, 1).toArray(),
+                                            studentTranscriptdata);
+                                }
+                                catch (Exception e) {
+                                    logger.error(EXCEPTION, e.getLocalizedMessage());
+                                }
                             }
                         }
                     }
+
                     //Writes D's rows data on CSV
                     if (courseDetails != null) {
                         for (TranscriptResult course : courseDetails) {
                             //D rows writes only Non-Examinable Courses
                             if (course.getCourse().getType().equals("2")) {
+                                String creditsString = course.getUsedForGrad();
+                                int credits = creditsString.chars()
+                                        .filter(Character::isDigit)
+                                        .reduce(0, (a, b) -> a * 10 + Character.getNumericValue(b));
+
+                                try {
                                 nonExaminableCoursesInfo = new String[]{
-                                        scd.getPen(), "D", course.getCourse().getCode(), course.getCourse().getLevel(), course.getCourse().getSessionDate(),
-                                        course.getMark().getInterimLetterGrade(), "", course.getMark().getSchoolPercent(), "", course.getMark().getExamPercent(),
-                                        course.getMark().getFinalPercent(), course.getMark().getFinalLetterGrade(), course.getMark().getInterimPercent(), "", "", "", ""};
+                                        scd.getPen(),
+                                        "D",
+                                        course.getCourse().getCode(),
+                                        course.getCourse().getLevel(),
+                                        StringUtils.isNotBlank(course.getCourse().getSessionDate()) ? course.getCourse().getSessionDate() : "",
+                                        course.getMark().getInterimLetterGrade(),
+                                        course.getMark().getFinalLetterGrade(),
+                                        StringUtils.isBlank(course.getMark().getInterimPercent()) ? "000" : String.format("%03d", Integer.parseInt(course.getMark().getInterimPercent())),
+                                        StringUtils.isBlank(course.getMark().getFinalPercent()) ? "000" : String.format("%03d", Integer.parseInt(course.getMark().getFinalPercent())),
+                                        StringUtils.isBlank(course.getCourse().getCredits()) ? "00" : String.format("%02d", Integer.parseInt(course.getCourse().getCredits())),
+                                        course.getCourse().getRelatedCourse(),
+                                        course.getCourse().getRelatedLevel(),
+                                        course.getCourse().getName(),
+                                        course.getEquivalency(),
+                                        course.getRequirement(),
+                                        "",// partial flag
+                                        credits > 0 ? "Y" : ""
+                                };
 
                                 setColumnsWidths(nonExaminableCoursesInfo,
                                         IntStream.of(10, 1, 5, 3, 6, 2, 2, 3, 3, 2, 5, 3, 40, 1, 1, 1, 1).toArray(),
                                         studentTranscriptdata);
                             }
+                                catch (Exception e) {
+                                    logger.error(EXCEPTION, e.getLocalizedMessage());
+                            }
+                            }
                         }
                     }
+
                     currentTranscript++;
                     logger.debug("*** Added csv {}/{} Current student {}", currentTranscript, scdList.size(), scd.getPen());
                 } else {
