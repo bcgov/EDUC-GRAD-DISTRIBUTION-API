@@ -28,6 +28,23 @@ public class EducDistributionApiConstants {
     public static final String MONTHLYDIST = "MONTHLYDIST";
     public static final String DEL = "/";
     public static final String FILES_FOLDER_STRUCTURE = "Batch/PSI/";
+    public static final String TRANSMISSION_MODE_FTP = "FTP";
+    public static final String TRANSMISSION_MODE_PAPER = "PAPER";
+    public static final String FTP_FILENAME_PREFIX = "/GRAD_INT";
+    public static final String FTP_FILENAME_SUFFIX = "_RESULTS";
+    public static final String EXCEPTION_MSG_FILE_NOT_CREATED_AT_PATH = "Path is not available to create DAT file to write the student data";
+    public static final String FOUR_ZEROES = "0000";
+    public static final String THREE_ZEROES = "000";
+    public static final String SIX_ZEROES = "000000";
+    public static final String TWO_ZEROES = "00";
+    public static final String LETTER_A = "A";
+    public static final String LETTER_B = "B";
+    public static final String LETTER_C = "C";
+    public static final String LETTER_D = "D";
+    public static final String LETTER_Y = "Y";
+    public static final String LETTER_N = "N";
+
+
 
     @Value("${endpoint.grad-graduation-report-api.get-transcript-list.url}")
     private String transcriptDistributionList;

@@ -76,9 +76,9 @@ public abstract class BaseProcess implements DistributionProcess {
     protected void createZipFile(Long batchId, String transmissionMode) {
         StringBuilder sourceFileBuilder = null;
         File file ;
-        if(!transmissionMode.isBlank() && (transmissionMode.equalsIgnoreCase("FTP") || (transmissionMode.equalsIgnoreCase("PAPER")))) {
-            sourceFileBuilder = new StringBuilder().append(EducDistributionApiConstants.TMP_DIR).append(educDistributionApiConstants.FILES_FOLDER_STRUCTURE).append(transmissionMode.toUpperCase()).append(educDistributionApiConstants.DEL).append(batchId);
-            file = new File(EducDistributionApiConstants.TMP_DIR + educDistributionApiConstants.FILES_FOLDER_STRUCTURE + transmissionMode.toUpperCase() + "/EDGRAD.BATCH." + batchId + ".zip");
+        if(!transmissionMode.isBlank() && (transmissionMode.equalsIgnoreCase(EducDistributionApiConstants.TRANSMISSION_MODE_FTP) || (transmissionMode.equalsIgnoreCase(EducDistributionApiConstants.TRANSMISSION_MODE_PAPER)))) {
+            sourceFileBuilder = new StringBuilder().append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.FILES_FOLDER_STRUCTURE).append(transmissionMode.toUpperCase()).append(educDistributionApiConstants.DEL).append(batchId);
+            file = new File(EducDistributionApiConstants.TMP_DIR + EducDistributionApiConstants.FILES_FOLDER_STRUCTURE + transmissionMode.toUpperCase() + "/EDGRAD.BATCH." + batchId + ".zip");
         }
         else {
             sourceFileBuilder = new StringBuilder().append(EducDistributionApiConstants.TMP_DIR).append(batchId);
@@ -96,7 +96,7 @@ public abstract class BaseProcess implements DistributionProcess {
     //Grad2-1931 Changed the folder structure of PSIRUN files to be placed - mchintha
     protected void createControlFile(Long batchId, String transmissionMode, int numberOfPdfs) {
         File file;
-        if(transmissionMode.equalsIgnoreCase("FTP") || transmissionMode.equalsIgnoreCase("PAPER")) {
+        if(transmissionMode.equalsIgnoreCase(EducDistributionApiConstants.TRANSMISSION_MODE_FTP) || transmissionMode.equalsIgnoreCase(EducDistributionApiConstants.TRANSMISSION_MODE_PAPER)) {
             file = new File("/tmp/Batch/PSI/" + transmissionMode.toUpperCase() + "/EDGRAD.BATCH." + batchId + ".txt");
         }
         else {
@@ -251,7 +251,7 @@ public abstract class BaseProcess implements DistributionProcess {
         boolean isDistrict = StringUtils.isNotBlank(mincode) && StringUtils.length(mincode) == 3;
         String districtCode = StringUtils.substring(mincode, 0, 3);
         try {
-            if(!transmissionMode.isBlank() && (transmissionMode.equalsIgnoreCase("FTP") || transmissionMode.equalsIgnoreCase("PAPER"))) {
+            if(!transmissionMode.isBlank() && (transmissionMode.equalsIgnoreCase(EducDistributionApiConstants.TRANSMISSION_MODE_FTP) || transmissionMode.equalsIgnoreCase(EducDistributionApiConstants.TRANSMISSION_MODE_PAPER))) {
                 StringBuilder fileLocBuilder = new StringBuilder();
                 if (SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode)) {
                     fileLocBuilder.append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.FILES_FOLDER_STRUCTURE).append(transmissionMode.toUpperCase()).append(EducDistributionApiConstants.DEL).append(batchId);
@@ -280,7 +280,7 @@ public abstract class BaseProcess implements DistributionProcess {
                     fileNameBuilder.append("/EDGRAD.R.").append("324W.");
                 }
                 fileNameBuilder.append(EducDistributionApiUtils.getFileName()).append(".pdf");
-                if (transmissionMode.equalsIgnoreCase("PAPER")) {
+                if (transmissionMode.equalsIgnoreCase(EducDistributionApiConstants.TRANSMISSION_MODE_PAPER)) {
                     try (OutputStream out = new FileOutputStream(fileNameBuilder.toString())) {
                         out.write(gradReportPdf);
                     }

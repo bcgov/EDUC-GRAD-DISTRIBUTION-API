@@ -107,7 +107,7 @@ public class PSIReportProcess extends BaseProcess {
                 locations.add(reportService.getPackingSlip(packSlipReq, restUtils.getAccessToken()).getInputStream());
                 logger.debug("*** Packing Slip Added");
                 //Grad2-1931 : processing students transcripts, merging them and placing in tmp location for transmission mode FTP to generate CSV files- mchintha
-                if (processorData.getTransmissionMode().equalsIgnoreCase("FTP")) {
+                if (processorData.getTransmissionMode().equalsIgnoreCase(EducDistributionApiConstants.TRANSMISSION_MODE_FTP)) {
                     processStudentsForCSVs(scdList, psiCode, processorData);
                 } else {
                     processStudentsForPDFs(scdList, locations, processorData);
@@ -157,13 +157,13 @@ public class PSIReportProcess extends BaseProcess {
         try {
             StringBuilder filePathBuilder = IOUtils.createFolderStructureInTempDirectory(processorData, psiCode, "02");
 
-            filePathBuilder = filePathBuilder.append("/GRAD_INT").append(psiCode).append("_RESULTS").append(".").append(EducDistributionApiUtils.getFileName()).append(".DAT");
+            filePathBuilder.append(EducDistributionApiConstants.FTP_FILENAME_PREFIX).append(psiCode).append(EducDistributionApiConstants.FTP_FILENAME_SUFFIX).append(".").append(EducDistributionApiUtils.getFileName()).append(".DAT");
 
             if (filePathBuilder != null) {
                 path = Paths.get(filePathBuilder.toString());
                 newFile = new File(Files.createFile(path).toUri());
             } else {
-                throw new IOException("Path is not available to create DAT file to write the student data");
+                throw new IOException(EducDistributionApiConstants.EXCEPTION_MSG_FILE_NOT_CREATED_AT_PATH);
             }
             for (PsiCredentialDistribution scd : scdList) {
 
@@ -173,41 +173,44 @@ public class PSIReportProcess extends BaseProcess {
                     Student studentDetails = transcriptCsv.getStudent();
                     School schoolDetails = transcriptCsv.getSchool();
                     List<TranscriptResult> courseDetails = (transcriptCsv.getTranscript() != null ? transcriptCsv.getTranscript().getResults() : null);
-
-
                     //Writes the A's row's data on CSV
                     if (studentDetails != null) {
-                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(educDistributionApiConstants.DATE_FORMAT);
-                        String studentBirthDate = simpleDateFormat.format(studentDetails.getBirthdate());
-                        studentInfo = new String[]{
-                                scd.getPen(),
-                                "A",
-                                studentDetails.getLastName(),
-                                studentDetails.getFirstName(),
-                                studentDetails.getMiddleName(),
-                                studentDetails.getBirthdate() == null ? "" : (StringUtils.isNotBlank(studentBirthDate) ? studentBirthDate : ""),
-                                studentDetails.getGender(), studentDetails.getCitizenship(),
-                                studentDetails.getGrade(), studentDetails.getGraduationStatus().getSchoolOfRecord(), studentDetails.getLocalId(),
-                                "", //Optional program
-                                studentDetails.getConsumerEducReqt(),
-                                "0000",
-                                StringUtils.isNotBlank(studentDetails.getGraduationStatus().getProgramCompletionDate()) ? studentDetails.getGraduationStatus().getProgramCompletionDate() : "000000",
-                                String.valueOf(studentDetails.getGraduationData().getDogwoodFlag()).equals("false") ? "N" : "Y",
-                                String.valueOf(studentDetails.getGraduationData().getHonorsFlag()).equals("false") ? "N" : "Y",
-                                "", //Non grad reasons
-                                "", //18 Blanks
-                                studentDetails.getGradProgram() == null ? "" : studentDetails.getGradProgram().substring(0,3)};
 
-                        setColumnsWidths(
-                                studentInfo,
-                                IntStream.of(10, 1, 25, 25, 25, 8, 1, 1, 2, 8, 12, 2, 1, 4, 6, 1, 1, 15, 18, 4).toArray(),
-                                studentTranscriptdata);
+                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(EducDistributionApiConstants.DATE_FORMAT);
+                            String studentBirthDate = simpleDateFormat.format(studentDetails.getBirthdate());
+                            studentInfo = new String[]{
+                                    scd.getPen(),
+                                    EducDistributionApiConstants.LETTER_A,
+                                    studentDetails.getLastName(),
+                                    studentDetails.getFirstName(),
+                                    studentDetails.getMiddleName(),
+                                    (studentDetails.getBirthdate() == null || StringUtils.isBlank(studentBirthDate)) ? "" : studentBirthDate,
+                                    studentDetails.getGender(),
+                                    studentDetails.getCitizenship(),
+                                    studentDetails.getGrade(),
+                                    studentDetails.getGraduationStatus().getSchoolOfRecord(), studentDetails.getLocalId(),
+                                    "", //Optional program blank
+                                    studentDetails.getConsumerEducReqt(),
+                                    EducDistributionApiConstants.FOUR_ZEROES,
+                                    StringUtils.isNotBlank(studentDetails.getGraduationStatus().getProgramCompletionDate()) ? studentDetails.getGraduationStatus().getProgramCompletionDate() : EducDistributionApiConstants.SIX_ZEROES,
+                                    String.valueOf(studentDetails.getGraduationData().getDogwoodFlag()).equals("false") ? EducDistributionApiConstants.LETTER_N : EducDistributionApiConstants.LETTER_Y,
+                                    String.valueOf(studentDetails.getGraduationData().getHonorsFlag()).equals("false") ? EducDistributionApiConstants.LETTER_N : EducDistributionApiConstants.LETTER_Y,
+                                    studentDetails.getNonGradReasons().stream()
+                                            .map(NonGradReason::getCode)
+                                            .collect(Collectors.joining(",")),//Non grad reasons
+                                    "", //18 Blanks
+                                    StringUtils.isBlank(studentDetails.getGradProgram()) ? "" : studentDetails.getGradProgram().substring(1, 4)};
+
+                            setColumnsWidths(
+                                    studentInfo,
+                                    IntStream.of(10, 1, 25, 25, 25, 8, 1, 1, 2, 8, 12, 2, 1, 4, 6, 1, 1, 15, 18, 4).toArray(),
+                                    studentTranscriptdata);
                     }
-
                     //Writes the B's row's data on CSV
                     if (schoolDetails != null) {
                         schoolInfo = new String[]{
-                                scd.getPen(), "B",
+                                scd.getPen(),
+                                EducDistributionApiConstants.LETTER_B,
                                 "", //Address blank
                                 "", //Address blank
                                 "", //City blank
@@ -220,87 +223,73 @@ public class PSIReportProcess extends BaseProcess {
                                 IntStream.of(10, 1, 40, 40, 30, 2, 2, 7).toArray(),
                                 studentTranscriptdata);
                     }
-
                     //Writes the C's data on CSV
                     if (courseDetails != null) {
                         for (TranscriptResult course : courseDetails) {
-                            String creditsString = course.getUsedForGrad();
-                            int credits = creditsString.chars()
-                                    .filter(Character::isDigit)
-                                    .reduce(0, (a, b) -> a * 10 + Character.getNumericValue(b));
+                            String credits = (course.getUsedForGrad() == null || course.getUsedForGrad().isBlank()) ? "" : course.getUsedForGrad();
+
                             //C rows writes Examinable Courses and Assessments
                             if (course.getCourse().getType().equals("1") || course.getCourse().getType().equals("3")) {
-                                try {
+
                                     examinableCoursesAndAssessmentsInfo = new String[]{
-                                            scd.getPen(), "C", course.getCourse().getCode(),
+                                            scd.getPen(),
+                                            EducDistributionApiConstants.LETTER_C,
+                                            course.getCourse().getCode(),
                                             course.getCourse().getLevel(),
                                             course.getCourse().getSessionDate(),
                                             course.getMark().getInterimLetterGrade(),
                                             "", //IB flag
-                                            StringUtils.isBlank(course.getMark().getSchoolPercent()) ? "000" : String.format("%03d", Integer.parseInt(course.getMark().getSchoolPercent())) ,
-                                            "", //Special case
-                                            StringUtils.isBlank(course.getMark().getExamPercent()) ? "000" : String.format("%03d", Integer.parseInt(course.getMark().getExamPercent())),
-                                            StringUtils.isBlank(course.getMark().getFinalPercent()) ? "000" : String.format("%03d", Integer.parseInt(course.getMark().getFinalPercent())),
-                                            course.getMark().getFinalLetterGrade() ,
-                                            StringUtils.isBlank(course.getMark().getInterimPercent()) ? "000" : String.format("%03d", Integer.parseInt(course.getMark().getInterimPercent())),
-                                            StringUtils.isBlank(course.getCourse().getCredits()) ? "00" : String.format("%02d", Integer.parseInt(course.getCourse().getCredits())),
+                                            StringUtils.isBlank(course.getMark().getSchoolPercent()) ? EducDistributionApiConstants.THREE_ZEROES : String.format("%03d", extractNumericValue(course.getMark().getSchoolPercent())),
+                                            course.getCourse().getSpecialCase(),
+                                            StringUtils.isBlank(course.getMark().getExamPercent()) ? EducDistributionApiConstants.THREE_ZEROES : String.format("%03d", extractNumericValue(course.getMark().getExamPercent())),
+                                            StringUtils.isBlank(course.getMark().getFinalPercent()) ? EducDistributionApiConstants.THREE_ZEROES : String.format("%03d", extractNumericValue(course.getMark().getFinalPercent())),
+                                            course.getMark().getFinalLetterGrade(),
+                                            StringUtils.isBlank(course.getMark().getInterimPercent()) ? EducDistributionApiConstants.THREE_ZEROES : String.format("%03d", extractNumericValue(course.getMark().getInterimPercent())),
+                                            StringUtils.isBlank(course.getCourse().getCredits()) ? EducDistributionApiConstants.TWO_ZEROES : String.format("%02d", extractNumericValue(course.getCourse().getCredits())),
                                             "", //Course case
-                                            credits > 0 ? "Y" : ""
+                                            extractNumericValue(credits) > 0 ? EducDistributionApiConstants.LETTER_Y : ""
                                     };
 
                                     setColumnsWidths(examinableCoursesAndAssessmentsInfo,
                                             IntStream.of(10, 1, 5, 3, 6, 2, 1, 3, 1, 3, 3, 2, 3, 2, 1, 1).toArray(),
                                             studentTranscriptdata);
                                 }
-                                catch (Exception e) {
-                                    logger.error(EXCEPTION, e.getLocalizedMessage());
-                                }
-                            }
                         }
                     }
-
                     //Writes D's rows data on CSV
                     if (courseDetails != null) {
                         for (TranscriptResult course : courseDetails) {
                             //D rows writes only Non-Examinable Courses
                             if (course.getCourse().getType().equals("2")) {
-                                String creditsString = course.getUsedForGrad();
-                                int credits = creditsString.chars()
-                                        .filter(Character::isDigit)
-                                        .reduce(0, (a, b) -> a * 10 + Character.getNumericValue(b));
+                                String credits = (course.getUsedForGrad() == null || course.getUsedForGrad().isBlank()) ? "" : course.getUsedForGrad();
 
-                                try {
-                                nonExaminableCoursesInfo = new String[]{
-                                        scd.getPen(),
-                                        "D",
-                                        course.getCourse().getCode(),
-                                        course.getCourse().getLevel(),
-                                        StringUtils.isNotBlank(course.getCourse().getSessionDate()) ? course.getCourse().getSessionDate() : "",
-                                        course.getMark().getInterimLetterGrade(),
-                                        course.getMark().getFinalLetterGrade(),
-                                        StringUtils.isBlank(course.getMark().getInterimPercent()) ? "000" : String.format("%03d", Integer.parseInt(course.getMark().getInterimPercent())),
-                                        StringUtils.isBlank(course.getMark().getFinalPercent()) ? "000" : String.format("%03d", Integer.parseInt(course.getMark().getFinalPercent())),
-                                        StringUtils.isBlank(course.getCourse().getCredits()) ? "00" : String.format("%02d", Integer.parseInt(course.getCourse().getCredits())),
-                                        course.getCourse().getRelatedCourse(),
-                                        course.getCourse().getRelatedLevel(),
-                                        course.getCourse().getName(),
-                                        course.getEquivalency(),
-                                        course.getRequirement(),
-                                        "",// partial flag
-                                        credits > 0 ? "Y" : ""
-                                };
+                                    nonExaminableCoursesInfo = new String[]{
+                                            scd.getPen(),
+                                            EducDistributionApiConstants.LETTER_D,
+                                            course.getCourse().getCode(),
+                                            course.getCourse().getLevel(),
+                                            StringUtils.isNotBlank(course.getCourse().getSessionDate()) ? course.getCourse().getSessionDate() : "",
+                                            course.getMark().getInterimLetterGrade(),
+                                            course.getMark().getFinalLetterGrade(),
+                                            StringUtils.isBlank(course.getMark().getInterimPercent()) ? EducDistributionApiConstants.THREE_ZEROES : String.format("%03d", extractNumericValue(course.getMark().getInterimPercent())),
+                                            StringUtils.isBlank(course.getMark().getFinalPercent()) ? EducDistributionApiConstants.THREE_ZEROES : String.format("%03d", extractNumericValue(course.getMark().getFinalPercent())),
+                                            StringUtils.isBlank(course.getCourse().getCredits()) ? EducDistributionApiConstants.TWO_ZEROES : String.format("%02d", extractNumericValue(course.getCourse().getCredits())),
+                                            course.getCourse().getRelatedCourse(),
+                                            course.getCourse().getRelatedLevel(),
+                                            course.getCourse().getName(),
+                                            course.getEquivalency(),
+                                            course.getCourse().getType(),
+                                            "",// partial flag
+                                            extractNumericValue(credits) > 0 ? EducDistributionApiConstants.LETTER_Y : ""
+                                    };
 
-                                setColumnsWidths(nonExaminableCoursesInfo,
-                                        IntStream.of(10, 1, 5, 3, 6, 2, 2, 3, 3, 2, 5, 3, 40, 1, 1, 1, 1).toArray(),
-                                        studentTranscriptdata);
-                            }
-                                catch (Exception e) {
-                                    logger.error(EXCEPTION, e.getLocalizedMessage());
-                            }
+                                    setColumnsWidths(nonExaminableCoursesInfo,
+                                            IntStream.of(10, 1, 5, 3, 6, 2, 2, 3, 3, 2, 5, 3, 40, 1, 1, 1, 1).toArray(),
+                                            studentTranscriptdata);
+
                             }
                         }
                     }
-
                     currentTranscript++;
                     logger.debug("*** Added csv {}/{} Current student {}", currentTranscript, scdList.size(), scd.getPen());
                 } else {
@@ -309,9 +298,10 @@ public class PSIReportProcess extends BaseProcess {
                 }
 
             }
+            // Converts list of string array to list of string which removes double quotes surrounded by each string and commas in between.
             for (String[] studentData : studentTranscriptdata) {
-                String listAsString = String.join("", studentData);
-                updatedStudentTranscriptdataList.add(listAsString);
+                String stringArrayAsString = String.join("", studentData);
+                updatedStudentTranscriptdataList.add(stringArrayAsString);
             }
 
             csv = csvMapper.writeValueAsString(updatedStudentTranscriptdataList);
@@ -328,6 +318,7 @@ public class PSIReportProcess extends BaseProcess {
 
     }
 
+    //Grad2-1931 sets columns widths of each row on csv - mchintha
     private void setColumnsWidths(String[] allCSVRowsInfo, int[] eachRowsColumnsWidths, List<String[]> studentTranscriptdata) {
         for (int i = 0; i < allCSVRowsInfo.length; i++) {
             String formattedString = String.format("%-" + eachRowsColumnsWidths[i] + "s", (allCSVRowsInfo[i] != null ? allCSVRowsInfo[i] : ""));
@@ -336,4 +327,11 @@ public class PSIReportProcess extends BaseProcess {
         studentTranscriptdata.add(allCSVRowsInfo);
     }
 
+    //Grad2-1931 considers only numeric values - mchintha
+    private int extractNumericValue(String val) {
+        return val.chars()
+                .filter(Character::isDigit)
+                .reduce(0, (a, b) -> a * 10 + Character.getNumericValue(b));
+
+        }
 }
