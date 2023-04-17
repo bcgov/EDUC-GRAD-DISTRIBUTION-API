@@ -23,6 +23,20 @@ public class EducDistributionApiUtils {
 	private static final String ERROR = "ERROR: {}";
 	private static final String PARSE_EXP = "Parse Exception {}";
 
+	public static final String SCHOOL_LABELS_CODE = "000000000";
+	public static final String YEARENDDIST = "YEARENDDIST";
+	public static final String MONTHLYDIST = "MONTHLYDIST";
+	public static final String NONGRADDIST = "NONGRADDIST";
+	public static final String SUPPDIST = "SUPPDIST";
+	public static final String DISTREP_YE_SD = "DISTREP_YE_SD";
+	public static final String DISTREP_YE_SC = "DISTREP_YE_SC";
+	public static final String ADDRESS_LABEL_SCHL = "ADDRESS_LABEL_SCHL";
+	public static final String ADDRESS_LABEL_DISTRICT = "ADDRESS_LABEL_DIST";
+	public static final String ADDRESS_LABEL_YE = "ADDRESS_LABEL_YE";
+	public static final String DISTREP_SD = "DISTREP_SD";
+	public static final String DISTREP_SC = "DISTREP_SC";
+	public static final String NONGRADDISTREP_SC = "NONGRADDISTREP_SC";
+
 	private EducDistributionApiUtils() {}
 
 	public static String formatDate(Date date) {
@@ -146,6 +160,10 @@ public class EducDistributionApiUtils {
 		}
 		return null;
 
+	}
+
+	public static String getDistrictCodeFromMincode(String mincode) {
+		return StringUtils.substring(mincode, 0, 3);
 	}
 
 	public static String parsingDateForCertificate(String sessionDate) {

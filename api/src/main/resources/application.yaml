@@ -136,6 +136,8 @@ endpoint:
       url: ${GRAD_TRAX_API}api/v1/trax/psi/%s
     school-by-min-code:
       url: ${GRAD_TRAX_API}api/v1/trax/school/%s
+    district-by-dist-code:
+      url: ${GRAD_TRAX_API}api/v1/trax/district/%s
 
 #Splunk LogHelper
 splunk:

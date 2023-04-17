@@ -3,6 +3,7 @@ package ca.bc.gov.educ.api.distribution.service;
 import ca.bc.gov.educ.api.distribution.model.dto.ProcessorData;
 import ca.bc.gov.educ.api.distribution.model.dto.School;
 import ca.bc.gov.educ.api.distribution.model.dto.SchoolReports;
+import ca.bc.gov.educ.api.distribution.model.dto.TraxDistrict;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils;
 import ca.bc.gov.educ.api.distribution.util.RestUtils;
@@ -29,14 +30,14 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.zip.ZipOutputStream;
 
+import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils.*;
+
 @Service
 public class PostingDistributionService {
 
     private static final Logger logger = LoggerFactory.getLogger(PostingDistributionService.class);
 
     public static final String DEL = "/";
-    public static final String SCHOOL_LABELS_CODE = "000000000";
-    public static final String ADDRESS_LABEL_SCHL = "ADDRESS_LABEL_SCHL";
 
     final SFTPUtils sftpUtils;
 
@@ -128,6 +129,18 @@ public class PostingDistributionService {
         return reportCount;
     }
 
+    public Integer createDistrictLabelsReport(List<TraxDistrict> schools, String districtLabelReportType) {
+        Integer reportCount = 0;
+        final UUID correlationID = UUID.randomUUID();
+        reportCount += webClient.post().uri(String.format(educDistributionApiConstants.getSchoolLabelsReport(), districtLabelReportType))
+                .headers(h -> {
+                    h.setBearerAuth(restUtils.getAccessToken());
+                    h.set(EducDistributionApiConstants.CORRELATION_ID, correlationID.toString());
+                })
+                .body(BodyInserters.fromValue(schools)).retrieve().bodyToMono(Integer.class).block();
+        return reportCount;
+    }
+
     public Integer createDistrictSchoolYearEndReport(String schooLabelReportType, String districtReportType, String schoolReportType) {
         Integer reportCount = 0;
         final UUID correlationID = UUID.randomUUID();
@@ -148,7 +161,7 @@ public class PostingDistributionService {
                 ).retrieve().bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
                 }).block();
         assert yeSchooLabelsReports != null;
-        return processDistrictSchoolReports(yeSchooLabelsReports, batchId);
+        return processDistrictSchoolReports(yeSchooLabelsReports, schooLabelReportType, batchId);
     }
 
     public int processDistrictSchoolDistribution(ProcessorData processorData, String schooLabelReportType, String districtReportType, String schoolReportType) {
@@ -182,7 +195,7 @@ public class PostingDistributionService {
             }
 
             assert yeDistrictReports != null;
-            numberOfPdfs += processDistrictSchoolReports(yeDistrictReports, processorData.getBatchId());
+            numberOfPdfs += processDistrictSchoolReports(yeDistrictReports, schooLabelReportType, processorData.getBatchId());
         }
         if (StringUtils.isNotBlank(schoolReportType)) {
             String accessTokenSc = restUtils.getAccessToken();
@@ -205,12 +218,12 @@ public class PostingDistributionService {
                 }
             }
             assert yeSchoolReports != null;
-            numberOfPdfs += processDistrictSchoolReports(yeSchoolReports, processorData.getBatchId());
+            numberOfPdfs += processDistrictSchoolReports(yeSchoolReports, schooLabelReportType, processorData.getBatchId());
         }
         return numberOfPdfs;
     }
 
-    protected int processDistrictSchoolReports(List<SchoolReports> schoolReports, Long batchId) {
+    protected int processDistrictSchoolReports(List<SchoolReports> schoolReports, String schooLabelReportType, Long batchId) {
         int numberOfPdfs = 0;
         String accessToken = restUtils.getAccessToken();
         for (SchoolReports report : schoolReports) {
@@ -220,6 +233,7 @@ public class PostingDistributionService {
                     logger.debug("*** Added PDFs Current Report Type {} for school {} category {}", report.getReportTypeCode(), report.getSchoolOfRecord(), report.getSchoolCategory());
                     uploadSchoolReportDocuments(
                             batchId,
+                            schooLabelReportType,
                             report.getSchoolOfRecord(),
                             report.getSchoolCategory(),
                             gradReportPdf);
@@ -234,9 +248,9 @@ public class PostingDistributionService {
         return numberOfPdfs;
     }
 
-    protected void uploadSchoolReportDocuments(Long batchId, String mincode, String schoolCategory, byte[] gradReportPdf) {
-        boolean isDistrict = StringUtils.isNotBlank(mincode) && StringUtils.length(mincode) == 3;
-        String districtCode = StringUtils.substring(mincode, 0, 3);
+    protected void uploadSchoolReportDocuments(Long batchId, String schooLabelReportType, String mincode, String schoolCategory, byte[] gradReportPdf) {
+        boolean isDistrict = (StringUtils.isNotBlank(mincode) && StringUtils.length(mincode) == 3);
+        String districtCode = getDistrictCodeFromMincode(mincode);
         try {
             StringBuilder fileLocBuilder = new StringBuilder();
             if (SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode)) {
@@ -251,7 +265,7 @@ public class PostingDistributionService {
             Path path = Paths.get(fileLocBuilder.toString());
             Files.createDirectories(path);
             StringBuilder fileNameBuilder = new StringBuilder();
-            if (SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode)) {
+            if (!isDistrict && SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode)) {
                 fileNameBuilder.append(EducDistributionApiConstants.TMP_DIR).append(batchId);
             } else if (isDistrict) {
                 fileNameBuilder.append(EducDistributionApiConstants.TMP_DIR).append(batchId).append(DEL).append(districtCode);

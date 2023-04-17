@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils.*;
+
 @Data
 @Component
 @NoArgsConstructor
@@ -32,7 +34,13 @@ public class YearEndMergeProcess extends MergeProcess {
         int numberOfPdfs = 0;
         int schoolCounter = 0;
         List<School> schoolsForLabels = new ArrayList<>();
+        List<School> districtsForLabels = new ArrayList<>();
         for (String mincode : mapDist.keySet()) {
+
+            if(districtsForLabels.isEmpty()) {
+                String distcode = getDistrictCodeFromMincode(mincode);
+                processDistrictsForLabels(districtsForLabels, distcode, restUtils.getAccessToken(), exception);
+            }
 
             //TODO: TEST CODE - REMOVE
             /*********** TEST CODE - REMOVE **********/
@@ -45,7 +53,9 @@ public class YearEndMergeProcess extends MergeProcess {
                 schoolCounter++;
                 String schoolCategoryCode = commonSchool.getSchoolCategoryCode();
                 logger.debug("*** School Details Acquired {} category {}", mincode, schoolCategoryCode);
-                processSchoolsForLabels(schoolsForLabels, mincode, restUtils.getAccessToken(), exception);
+                if("02".equals(schoolCategoryCode)) {
+                    processSchoolsForLabels(schoolsForLabels, mincode, restUtils.getAccessToken(), exception);
+                }
                 logger.debug("School {}/{}", schoolCounter, mapDist.size());
                 List<Student> studListNonGrad = new ArrayList<>();
 
@@ -71,6 +81,7 @@ public class YearEndMergeProcess extends MergeProcess {
         response.setTranscriptResponse(numberOfPdfs + " transcripts have been processed in batch " + processorData.getBatchId());
         int numberOfCreatedSchoolReports = 0;
         int numberOfProcessedSchoolReports = 0;
+        int numberOfCreatedSchoolLabelReports = 0;
         if (YEARENDDIST.equalsIgnoreCase(processorData.getActivityCode())) {
             logger.debug("***** Create and Store Year End school reports *****");
             numberOfCreatedSchoolReports += createDistrictSchoolYearEndReport(ADDRESS_LABEL_YE, DISTREP_YE_SD, DISTREP_YE_SC);
@@ -80,9 +91,18 @@ public class YearEndMergeProcess extends MergeProcess {
             logger.debug("***** Number of distributed Year End school reports {} *****", numberOfProcessedSchoolReports);
         }
         if (NONGRADDIST.equalsIgnoreCase(processorData.getActivityCode())) {
+//            logger.debug("***** Create and Store school labels reports *****");
+//            numberOfCreatedSchoolLabelReports += createSchoolLabelsReport(schoolsForLabels, ADDRESS_LABEL_SCHL);
+//            logger.debug("***** Number of created school labels reports {} *****", numberOfCreatedSchoolLabelReports);
+            logger.debug("***** Create and Store district labels reports *****");
+             numberOfCreatedSchoolLabelReports += createSchoolLabelsReport(districtsForLabels, ADDRESS_LABEL_YE);
+            logger.debug("***** Number of created district labels reports {} *****", numberOfCreatedSchoolLabelReports);
             logger.debug("***** Distribute Student NonGrad School Reports *****");
             numberOfProcessedSchoolReports += processDistrictSchoolDistribution(processorData, null, null, NONGRADDISTREP_SC);
             logger.debug("***** Number of distributed Student NonGrad School Reports {} *****", numberOfProcessedSchoolReports);
+            logger.debug("***** Distribute District Labels Reports *****");
+            numberOfProcessedSchoolReports += processDistrictSchoolDistribution(processorData, ADDRESS_LABEL_YE, null, null);
+            logger.debug("***** Number of distributed District Labels Reports {} *****", numberOfProcessedSchoolReports);
         }
         numberOfPdfs += numberOfProcessedSchoolReports;
         long endTime = System.currentTimeMillis();

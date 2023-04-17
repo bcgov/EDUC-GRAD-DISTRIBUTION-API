@@ -6,7 +6,6 @@ import ca.bc.gov.educ.api.distribution.service.PsiService;
 import ca.bc.gov.educ.api.distribution.service.ReportService;
 import ca.bc.gov.educ.api.distribution.service.SchoolService;
 import ca.bc.gov.educ.api.distribution.util.*;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.pdfbox.io.MemoryUsageSetting;
 import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import org.slf4j.Logger;
@@ -21,25 +20,15 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
+import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils.MONTHLYDIST;
+import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils.getDistrictCodeFromMincode;
+
 public abstract class BaseProcess implements DistributionProcess {
 
     private static final Logger logger = LoggerFactory.getLogger(BaseProcess.class);
 
     protected static final String DEL = "/";
     protected static final String EXCEPTION = "Error {} ";
-    protected static final String SCHOOL_LABELS_CODE = "000000000";
-
-    protected static final String YEARENDDIST = "YEARENDDIST";
-    protected static final String MONTHLYDIST = "MONTHLYDIST";
-    protected static final String NONGRADDIST = "NONGRADDIST";
-    protected static final String SUPPDIST = "SUPPDIST";
-    protected static final String DISTREP_YE_SD = "DISTREP_YE_SD";
-    protected static final String DISTREP_YE_SC = "DISTREP_YE_SC";
-    protected static final String ADDRESS_LABEL_SCHL = "ADDRESS_LABEL_SCHL";
-    protected static final String ADDRESS_LABEL_YE = "ADDRESS_LABEL_YE";
-    protected static final String DISTREP_SD = "DISTREP_SD";
-    protected static final String DISTREP_SC = "DISTREP_SC";
-    protected static final String NONGRADDISTREP_SC = "NONGRADDISTREP_SC";
 
     @Autowired
     GradValidation validation;
@@ -73,6 +62,10 @@ public abstract class BaseProcess implements DistributionProcess {
             return schoolService.getCommonSchoolDetailsForPackingSlip(obj.getProperName());
         else
             return schoolService.getCommonSchoolDetails(mincode, exception);
+    }
+
+    protected TraxDistrict getTraxDistrictDetails(String distCode, ExceptionMessage exception) {
+        return schoolService.getTraxDistrict(distCode, restUtils.getAccessToken(), exception);
     }
 
     protected void setExtraDataForPackingSlip(ReportRequest packSlipReq, String paperType, int total, int quantity, int currentSlip, Long batchId) {
@@ -109,6 +102,10 @@ public abstract class BaseProcess implements DistributionProcess {
         return postingDistributionService.createSchoolLabelsReport(schools, schooLabelReportType);
     }
 
+    protected Integer createDistrictLabelsReport(List<TraxDistrict> traxDistricts, String districtLabelReportType) {
+        return postingDistributionService.createDistrictLabelsReport(traxDistricts, districtLabelReportType);
+    }
+
     protected Integer createDistrictSchoolMonthReport(String schooLabelReportType, String districtReportType, String schoolReportType) {
         return postingDistributionService.createDistrictSchoolMonthReport(schooLabelReportType, districtReportType, schoolReportType);
     }
@@ -123,7 +120,7 @@ public abstract class BaseProcess implements DistributionProcess {
 
     protected void mergeDocuments(ProcessorData processorData, String mincode, String schoolCategoryCode, String fileName, String paperType, List<InputStream> locations) {
         logger.debug("*** Start Transcript Documents Merge ***");
-        String districtCode = StringUtils.substring(mincode, 0, 3);
+        String districtCode = getDistrictCodeFromMincode(mincode);
         String activityCode = processorData.getActivityCode();
         File bufferDirectory = null;
         try {
@@ -193,4 +190,21 @@ public abstract class BaseProcess implements DistributionProcess {
         }
     }
 
+    protected void processDistrictsForLabels(List<School> schools, String distcode, String accessToken, ExceptionMessage exception) {
+        TraxDistrict traxDistrict = schoolService.getTraxDistrict(distcode, accessToken, exception);
+        if (traxDistrict != null) {
+            School school = new School();
+            school.setMincode(traxDistrict.getDistrictNumber());
+            school.setName(traxDistrict.getSuperIntendent());
+            Address address = new Address();
+            address.setStreetLine1(traxDistrict.getAddress1());
+            address.setStreetLine2(traxDistrict.getAddress2());
+            address.setCity(traxDistrict.getCity());
+            address.setRegion(traxDistrict.getProvCode());
+            address.setCountry(traxDistrict.getCountryCode());
+            address.setCode(traxDistrict.getPostal());
+            school.setAddress(address);
+            schools.add(school);
+        }
+    }
 }

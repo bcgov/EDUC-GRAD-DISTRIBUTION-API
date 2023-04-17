@@ -2,6 +2,7 @@ package ca.bc.gov.educ.api.distribution.service;
 
 import ca.bc.gov.educ.api.distribution.model.dto.CommonSchool;
 import ca.bc.gov.educ.api.distribution.model.dto.ExceptionMessage;
+import ca.bc.gov.educ.api.distribution.model.dto.TraxDistrict;
 import ca.bc.gov.educ.api.distribution.model.dto.TraxSchool;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import ca.bc.gov.educ.api.distribution.util.RestUtils;
@@ -70,5 +71,24 @@ public class SchoolService {
 			}
 		}
 		return traxSchool;
+	}
+
+	public TraxDistrict getTraxDistrict(String distCode, String accessToken, ExceptionMessage exception) {
+		TraxDistrict traxDistrict = null;
+		if(!StringUtils.isBlank(distCode)) {
+			try {
+				traxDistrict = webClient.get()
+						.uri(String.format(educDistributionApiConstants.getTraxDistrictByDistcode(), distCode))
+						.headers(h -> h.setBearerAuth(accessToken))
+						.retrieve()
+						.bodyToMono(TraxDistrict.class)
+						.block();
+			} catch (Exception e) {
+				exception.setExceptionName("TRAX-API IS DOWN");
+				exception.setExceptionDetails(e.getLocalizedMessage());
+				logger.error(exception.getExceptionName(), e);
+			}
+		}
+		return traxDistrict;
 	}
 }
