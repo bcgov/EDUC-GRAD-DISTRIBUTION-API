@@ -6,6 +6,7 @@ import ca.bc.gov.educ.api.distribution.model.dto.ProcessorData;
 import ca.bc.gov.educ.api.distribution.process.DistributionProcess;
 import ca.bc.gov.educ.api.distribution.process.DistributionProcessFactory;
 import ca.bc.gov.educ.api.distribution.process.DistributionProcessType;
+import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import ca.bc.gov.educ.api.distribution.util.RestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,7 +56,7 @@ public class GradDistributionService {
     //Grad2-1931 Changed the zipped folder path to fetch - mchintha
     public byte[] getDownload(Long batchId, String transmissionMode) {
         String localFile = null;
-        if(!transmissionMode.isBlank() && (transmissionMode.equalsIgnoreCase("FTP") || transmissionMode.equalsIgnoreCase("PAPER"))) {
+        if((!transmissionMode.isBlank() || transmissionMode != null) && (transmissionMode.equalsIgnoreCase(EducDistributionApiConstants.TRANSMISSION_MODE_FTP) || transmissionMode.equalsIgnoreCase(EducDistributionApiConstants.TRANSMISSION_MODE_PAPER))) {
             localFile = "/tmp/Batch/PSI/" + transmissionMode.toUpperCase() + "/EDGRAD.BATCH." + batchId + ".zip";
         }
         else {
