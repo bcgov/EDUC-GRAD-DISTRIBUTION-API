@@ -1,12 +1,9 @@
 package ca.bc.gov.educ.api.distribution.util;
 
-import ca.bc.gov.educ.api.distribution.model.dto.ProcessorData;
-import ca.bc.gov.educ.api.distribution.process.BaseProcess;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.FileSystemUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,10 +18,8 @@ import java.util.Set;
 public class IOUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(IOUtils.class);
-    private static final String EXCEPTION = "Error {}";
 
-    private IOUtils() {
-    }
+    private IOUtils(){}
 
     /**
      * Creates a secured temp dir for processing files, it is up to
@@ -53,18 +48,18 @@ public class IOUtils {
 
     /**
      * Removes a directory or file recursively
-     *
      * @param file
      */
     public static void removeFileOrDirectory(File file) {
         try {
-            if (file.isDirectory()) {
-                FileUtils.deleteDirectory(file);
+            if(file.isDirectory() && file.exists()){
+                FileSystemUtils.deleteRecursively(file);
             } else {
                 Files.deleteIfExists(Path.of(file.getAbsolutePath()));
             }
         } catch (IOException e) {
+            logger.error("Unable to delete file or folder {}", file.getAbsolutePath());
         }
     }
 
- }
+}

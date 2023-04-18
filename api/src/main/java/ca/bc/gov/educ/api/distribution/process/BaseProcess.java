@@ -20,7 +20,9 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.zip.ZipOutputStream;
 
@@ -32,6 +34,8 @@ public abstract class BaseProcess implements DistributionProcess {
     protected static final String SCHOOL_LABELS_CODE = "000000000";
 
     protected static final String YEARENDDIST = "YEARENDDIST";
+    protected static final String MONTHLYDIST = "MONTHLYDIST";
+    protected static final String NONGRADDIST = "NONGRADDIST";
     protected static final String SUPPDIST = "SUPPDIST";
     protected static final String DISTREP_YE_SD = "DISTREP_YE_SD";
     protected static final String DISTREP_YE_SC = "DISTREP_YE_SC";
@@ -40,6 +44,8 @@ public abstract class BaseProcess implements DistributionProcess {
     protected static final String DISTREP_SD = "DISTREP_SD";
     protected static final String DISTREP_SC = "DISTREP_SC";
 
+
+    protected static final String NONGRADDISTREP_SC = "NONGRADDISTREP_SC";
 
     @Autowired
     GradValidation validation;
@@ -67,9 +73,9 @@ public abstract class BaseProcess implements DistributionProcess {
 
     protected CommonSchool getBaseSchoolDetails(DistributionPrintRequest obj, String mincode, ProcessorData processorData, ExceptionMessage exception) {
         if (obj.getProperName() != null)
-            return schoolService.getDetailsForPackingSlip(obj.getProperName());
+            return schoolService.getCommonSchoolDetailsForPackingSlip(obj.getProperName());
         else
-            return schoolService.getSchoolDetails(mincode, restUtils.getAccessToken(), exception);
+            return schoolService.getCommonSchoolDetails(mincode, exception);
     }
 
     //Grad2-1931 Changed the folder structure of created files to be placed - mchintha
@@ -88,9 +94,9 @@ public abstract class BaseProcess implements DistributionProcess {
             ZipOutputStream zipOut = new ZipOutputStream(fos);
             File fileToZip = new File(sourceFileBuilder.toString());
             EducDistributionApiUtils.zipFile(fileToZip, fileToZip.getName(), zipOut);
-            } catch (IOException e) {
-                logger.debug(EXCEPTION, e.getLocalizedMessage());
-            }
+        } catch (IOException e) {
+            logger.debug(EXCEPTION, e.getLocalizedMessage());
+        }
     }
 
     //Grad2-1931 Changed the folder structure of PSIRUN files to be placed - mchintha
@@ -189,9 +195,13 @@ public abstract class BaseProcess implements DistributionProcess {
 
     protected int processDistrictSchoolDistribution(ProcessorData processorData, String schooLabelReportType, String districtReportType, String schoolReportType) {
         int numberOfPdfs = 0;
+        List<String> mincodes = new ArrayList<>();
+        if (processorData.getMapDistribution() != null && !processorData.getMapDistribution().isEmpty()) {
+            mincodes.addAll(processorData.getMapDistribution().keySet());
+        }
         if (StringUtils.isNotBlank(schooLabelReportType)) {
             String accessTokenSl = restUtils.getAccessToken();
-            List<SchoolReports> yeSchooLabelsReports = webClient.get().uri(String.format(educDistributionApiConstants.getSchoolReportsByReportType(), schooLabelReportType))
+            List<SchoolReports> yeSchooLabelsReports = webClient.get().uri(String.format(educDistributionApiConstants.getSchoolReportsByReportType(), schooLabelReportType, SCHOOL_LABELS_CODE))
                     .headers(h ->
                             h.setBearerAuth(accessTokenSl)
                     ).retrieve().bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
@@ -201,21 +211,48 @@ public abstract class BaseProcess implements DistributionProcess {
         }
         if (StringUtils.isNotBlank(districtReportType)) {
             String accessTokenSd = restUtils.getAccessToken();
-            List<SchoolReports> yeDistrictReports = webClient.get().uri(String.format(educDistributionApiConstants.getSchoolReportsByReportType(), districtReportType))
-                    .headers(h ->
-                            h.setBearerAuth(accessTokenSd)
-                    ).retrieve().bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
-                    }).block();
+            List<SchoolReports> yeDistrictReports = new ArrayList<>();
+            if (mincodes.isEmpty()) {
+                String districtReportUrl = String.format(educDistributionApiConstants.getSchoolReportsByReportType(), districtReportType);
+                yeDistrictReports.addAll(Objects.requireNonNull(webClient.get().uri(districtReportUrl)
+                        .headers(h ->
+                                h.setBearerAuth(accessTokenSd)
+                        ).retrieve().bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
+                        }).block()));
+            } else {
+                for (String mincode : mincodes) {
+                    String districtReportUrl = String.format(educDistributionApiConstants.getSchoolReportsByReportType(), districtReportType, mincode);
+                    yeDistrictReports.addAll(Objects.requireNonNull(webClient.get().uri(districtReportUrl)
+                            .headers(h ->
+                                    h.setBearerAuth(accessTokenSd)
+                            ).retrieve().bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
+                            }).block()));
+                }
+            }
+
             assert yeDistrictReports != null;
             numberOfPdfs += processDistrictSchoolReports(yeDistrictReports, processorData);
         }
         if (StringUtils.isNotBlank(schoolReportType)) {
             String accessTokenSc = restUtils.getAccessToken();
-            List<SchoolReports> yeSchoolReports = webClient.get().uri(String.format(educDistributionApiConstants.getSchoolReportsByReportType(), schoolReportType))
-                    .headers(
-                            h -> h.setBearerAuth(accessTokenSc)
-                    ).retrieve().bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
-                    }).block();
+            List<SchoolReports> yeSchoolReports = new ArrayList<>();
+            if (mincodes.isEmpty()) {
+                String schoolReportUrl = String.format(educDistributionApiConstants.getSchoolReportsByReportType(), schoolReportType);
+                yeSchoolReports.addAll(Objects.requireNonNull(webClient.get().uri(schoolReportUrl)
+                        .headers(
+                                h -> h.setBearerAuth(accessTokenSc)
+                        ).retrieve().bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
+                        }).block()));
+            } else {
+                for (String mincode : mincodes) {
+                    String schoolReportUrl = String.format(educDistributionApiConstants.getSchoolReportsByReportType(), schoolReportType, mincode);
+                    yeSchoolReports.addAll(Objects.requireNonNull(webClient.get().uri(schoolReportUrl)
+                            .headers(
+                                    h -> h.setBearerAuth(accessTokenSc)
+                            ).retrieve().bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
+                            }).block()));
+                }
+            }
             assert yeSchoolReports != null;
             numberOfPdfs += processDistrictSchoolReports(yeSchoolReports, processorData);
         }
@@ -329,19 +366,22 @@ public abstract class BaseProcess implements DistributionProcess {
         schools.add(school);
     }
 
-    protected void processSchoolsForLabels(List<School> schools, CommonSchool commonSchool) {
-        School school = new School();
-        school.setMincode(commonSchool.getDistNo() + commonSchool.getSchlNo());
-        school.setName(commonSchool.getSchoolName());
-        Address address = new Address();
-        address.setStreetLine1(commonSchool.getScAddressLine1());
-        address.setStreetLine2(commonSchool.getScAddressLine2());
-        address.setCity(commonSchool.getScCity());
-        address.setRegion(commonSchool.getScProvinceCode());
-        address.setCountry(commonSchool.getScCountryCode());
-        address.setCode(commonSchool.getScPostalCode());
-        school.setAddress(address);
-        schools.add(school);
+    protected void processSchoolsForLabels(List<School> schools, String mincode, String accessToken, ExceptionMessage exception) {
+        TraxSchool traxSchool = schoolService.getTraxSchool(mincode, accessToken, exception);
+        if (traxSchool != null) {
+            School school = new School();
+            school.setMincode(traxSchool.getMinCode());
+            school.setName(traxSchool.getSchoolName());
+            Address address = new Address();
+            address.setStreetLine1(traxSchool.getAddress1());
+            address.setStreetLine2(traxSchool.getAddress2());
+            address.setCity(traxSchool.getCity());
+            address.setRegion(traxSchool.getProvCode());
+            address.setCountry(traxSchool.getCountryCode());
+            address.setCode(traxSchool.getPostal());
+            school.setAddress(address);
+            schools.add(school);
+        }
     }
 
     //Grad2-1931 : Creates folder structure in temp directory for all the batch runs - mchintha/

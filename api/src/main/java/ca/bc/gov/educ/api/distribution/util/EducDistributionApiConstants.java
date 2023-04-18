@@ -55,6 +55,9 @@ public class EducDistributionApiConstants {
     @Value("${endpoint.grad-graduation-report-api.get-transcript.url}")
     private String transcript;
 
+    @Value("${endpoint.grad-graduation-report-api.get-transcript-psi-by-student-id.url}")
+    private String transcriptPsiUsingStudentID;
+
     @Value("${endpoint.grad-graduation-report-api.get-transcript-by-student-id.url}")
     private String transcriptUsingStudentID;
 
@@ -80,10 +83,13 @@ public class EducDistributionApiConstants {
     private String tokenUrl;
 
     @Value("${endpoint.educ-school-api.school-by-min-code.url}")
-    private String schoolDetails;
+    private String commonSchoolByMincode;
 
     @Value("${endpoint.grad-trax-api.psi-by-psi-code.url}")
-    private String psiDetails;
+    private String psiByPsiCode;
+
+    @Value("${endpoint.grad-trax-api.school-by-min-code.url}")
+    private String traxSchoolByMincode;
 
     @Value("${endpoint.grad-report-api.get-school-distribution-report.url}")
     private String schoolDistributionReport;
@@ -104,7 +110,7 @@ public class EducDistributionApiConstants {
     private String updateSchoolReport;
 
     @Value("${endpoint.grad-report-api.student_non_grad}")
-    private String nonGrad;
+    private String studentNonGrad;
 
     @Value("${endpoint.grad-graduation-report-api.school-report.url}")
     private String schoolReport;
@@ -120,6 +126,9 @@ public class EducDistributionApiConstants {
 
     @Value("${endpoint.grad-graduation-api.school_district_supplemental_report.url}")
     private String schoolDistrictSupplementalReport;
+
+    @Value("${endpoint.grad-graduation-api.school_district_student_nongrad_report.url}")
+    private String schoolDistrictStudentNonGradReport;
 
     @Value("${endpoint.grad-graduation-api.school_labels_report.url}")
     private String schoolLabelsReport;
