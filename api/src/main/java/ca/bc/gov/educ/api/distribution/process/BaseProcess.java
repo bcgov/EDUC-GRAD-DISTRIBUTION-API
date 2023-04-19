@@ -168,7 +168,7 @@ public abstract class BaseProcess implements DistributionProcess {
         return reportCount;
     }
 
-    protected Integer createDistrictSchoolMonthReport(String accessToken, String schooLabelReportType, String districtReportType, String schoolReportType) {
+    /*protected Integer createDistrictSchoolMonthReport(String accessToken, String schooLabelReportType, String districtReportType, String schoolReportType) {
         Integer reportCount = 0;
         final UUID correlationID = UUID.randomUUID();
         reportCount += webClient.get().uri(String.format(educDistributionApiConstants.getSchoolDistrictMonthReport(), schooLabelReportType, districtReportType, schoolReportType))
@@ -178,9 +178,11 @@ public abstract class BaseProcess implements DistributionProcess {
                 })
                 .retrieve().bodyToMono(Integer.class).block();
         return reportCount;
-    }
+    }*/
 
-    protected Integer createDistrictSchoolSuppReport(String accessToken, String schooLabelReportType, String districtReportType, String schoolReportType) {
+    protected Integer createDistrictSchoolSuppReport(String accessToken, String schoolReportType) {
+        String schooLabelReportType = null;
+        String districtReportType = null;
         Integer reportCount = 0;
         final UUID correlationID = UUID.randomUUID();
         reportCount += webClient.get().uri(String.format(educDistributionApiConstants.getSchoolDistrictSupplementalReport(), schooLabelReportType, districtReportType, schoolReportType))

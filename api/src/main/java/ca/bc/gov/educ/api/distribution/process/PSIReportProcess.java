@@ -136,7 +136,7 @@ public class PSIReportProcess extends BaseProcess {
     }
 
     //Grad2-1931 : Writes students transcripts data on CSV and formatting them - mchintha
-    private void processStudentsForCSVs(List<PsiCredentialDistribution> scdList, String psiCode, ProcessorData processorData) throws IOException {
+   /* private void processStudentsForCSVs(List<PsiCredentialDistribution> scdList, String psiCode, ProcessorData processorData) throws IOException {
         int currentTranscript = 0;
         int failedToAdd = 0;
         String[] studentInfo = null;
@@ -307,6 +307,199 @@ public class PSIReportProcess extends BaseProcess {
             logger.error(EXCEPTION, e.getLocalizedMessage());
         }
 
+    }*/
+    private void processStudentsForCSVs(List<PsiCredentialDistribution> scdList, String psiCode, ProcessorData processorData) throws IOException {
+        int currentTranscript = 0;
+        int failedToAdd = 0;
+        String[] schoolInfo = null;
+        String csv;
+        Path path;
+        File newFile = null;
+        List<String[]> studentTranscriptdata = new ArrayList<>();
+        List<String> updatedStudentTranscriptdataList = new ArrayList<>();
+        CsvMapper csvMapper = new CsvMapper();
+
+        try {
+            StringBuilder filePathBuilder = createFolderStructureInTempDirectory(processorData, psiCode, "02");
+
+            filePathBuilder.append(EducDistributionApiConstants.FTP_FILENAME_PREFIX).append(psiCode).append(EducDistributionApiConstants.FTP_FILENAME_SUFFIX).append(".").append(EducDistributionApiUtils.getFileNameSchoolReports(psiCode)).append(".DAT");
+
+            if (filePathBuilder != null) {
+                path = Paths.get(filePathBuilder.toString());
+                newFile = new File(Files.createFile(path).toUri());
+            } else {
+                throw new IOException(EducDistributionApiConstants.EXCEPTION_MSG_FILE_NOT_CREATED_AT_PATH);
+            }
+            for (PsiCredentialDistribution scd : scdList) {
+
+                ReportData transcriptCsv = graduationService.getReportData(scd.getPen());
+
+                if (transcriptCsv != null) {
+                    Student studentDetails = transcriptCsv.getStudent();
+                    School schoolDetails = transcriptCsv.getSchool();
+                    List<TranscriptResult> courseDetails = (transcriptCsv.getTranscript() != null ? transcriptCsv.getTranscript().getResults() : null);
+
+                    //Writes the A's row's data on CSV
+                    writesCsvFileRowA(studentTranscriptdata, scd.getPen(), studentDetails);
+
+                    //Writes the B's row's data on CSV
+                    if (schoolDetails != null) {
+                        schoolInfo = new String[]{
+                                scd.getPen(),
+                                EducDistributionApiConstants.LETTER_B,
+                                "", //Address blank
+                                "", //Address blank
+                                "", //City blank
+                                "", //Prov code blank
+                                "", //country code blank
+                                "" //postal blank
+                        };
+
+                        setColumnsWidths(schoolInfo,
+                                IntStream.of(10, 1, 40, 40, 30, 2, 2, 7).toArray(),
+                                studentTranscriptdata);
+                    }
+                    //Writes the C's data on CSV
+                    writesCsvFileRowC(studentTranscriptdata, scd.getPen(), courseDetails);
+
+                    //Writes D's rows data on CSV
+                    writesCsvFileRowD(studentTranscriptdata, scd.getPen(), courseDetails);
+                    currentTranscript++;
+                    logger.debug("*** Added csv {}/{} Current student {}", currentTranscript, scdList.size(), scd.getPen());
+                } else {
+                    failedToAdd++;
+                    logger.debug("*** Failed to Add {} Current student {}", failedToAdd, scd.getPen());
+                }
+
+            }
+            // Converts list of string array to list of string which removes double quotes surrounded by each string and commas in between.
+            for (String[] studentData : studentTranscriptdata) {
+                String stringArrayAsString = String.join("", studentData);
+                updatedStudentTranscriptdataList.add(stringArrayAsString);
+            }
+
+            csv = csvMapper.writeValueAsString(updatedStudentTranscriptdataList);
+            csv = csv.replace("\"", "").replace(",", "\r\n");
+            try(FileWriter fWriter = new FileWriter(newFile)) {
+                fWriter.write(csv);
+            }
+            catch (IOException e){
+                logger.error(EXCEPTION, e.getLocalizedMessage());
+            }
+        } catch (Exception e) {
+            logger.error(EXCEPTION, e.getLocalizedMessage());
+        }
+
+    }
+
+    private void writesCsvFileRowD(List<String[]> studentTranscriptdata, String pen, List<TranscriptResult> courseDetails) {
+        String[] nonExaminableCoursesInfo = null;
+        if (courseDetails != null) {
+            for (TranscriptResult course : courseDetails) {
+                //D rows writes only Non-Examinable Courses
+                if (course.getCourse().getType().equals("2")) {
+                    String credits = (course.getUsedForGrad() == null || course.getUsedForGrad().isBlank()) ? "" : course.getUsedForGrad();
+
+                    nonExaminableCoursesInfo = new String[]{
+                            pen,
+                            EducDistributionApiConstants.LETTER_D,
+                            course.getCourse().getCode(),
+                            course.getCourse().getLevel(),
+                            StringUtils.isNotBlank(course.getCourse().getSessionDate()) ? course.getCourse().getSessionDate() : "",
+                            course.getMark().getInterimLetterGrade(),
+                            course.getMark().getFinalLetterGrade(),
+                            StringUtils.isBlank(course.getMark().getInterimPercent()) ? EducDistributionApiConstants.THREE_ZEROES : String.format("%03d", extractNumericValue(course.getMark().getInterimPercent())),
+                            StringUtils.isBlank(course.getMark().getFinalPercent()) ? EducDistributionApiConstants.THREE_ZEROES : String.format("%03d", extractNumericValue(course.getMark().getFinalPercent())),
+                            StringUtils.isBlank(course.getCourse().getCredits()) ? EducDistributionApiConstants.TWO_ZEROES : String.format("%02d", extractNumericValue(course.getCourse().getCredits())),
+                            course.getCourse().getRelatedCourse(),
+                            course.getCourse().getRelatedLevel(),
+                            course.getCourse().getName(),
+                            course.getEquivalency(),
+                            course.getCourse().getType(),
+                            "",// partial flag
+                            extractNumericValue(credits) > 0 ? EducDistributionApiConstants.LETTER_Y : ""
+                    };
+
+                    setColumnsWidths(nonExaminableCoursesInfo,
+                            IntStream.of(10, 1, 5, 3, 6, 2, 2, 3, 3, 2, 5, 3, 40, 1, 1, 1, 1).toArray(),
+                            studentTranscriptdata);
+
+                }
+            }
+        }
+    }
+
+    private void writesCsvFileRowC(List<String[]> studentTranscriptdata, String pen, List<TranscriptResult> courseDetails) {
+        String[] examinableCoursesAndAssessmentsInfo = null;
+        if (courseDetails != null) {
+            for (TranscriptResult course : courseDetails) {
+                String credits = (course.getUsedForGrad() == null || course.getUsedForGrad().isBlank()) ? "" : course.getUsedForGrad();
+
+                //C rows writes Examinable Courses and Assessments
+                if (course.getCourse().getType().equals("1") || course.getCourse().getType().equals("3")) {
+
+                    examinableCoursesAndAssessmentsInfo = new String[]{
+                            pen,
+                            EducDistributionApiConstants.LETTER_C,
+                            course.getCourse().getCode(),
+                            course.getCourse().getLevel(),
+                            course.getCourse().getSessionDate(),
+                            course.getMark().getInterimLetterGrade(),
+                            "", //IB flag
+                            StringUtils.isBlank(course.getMark().getSchoolPercent()) ? EducDistributionApiConstants.THREE_ZEROES : String.format("%03d", extractNumericValue(course.getMark().getSchoolPercent())),
+                            course.getCourse().getSpecialCase(),
+                            StringUtils.isBlank(course.getMark().getExamPercent()) ? EducDistributionApiConstants.THREE_ZEROES : String.format("%03d", extractNumericValue(course.getMark().getExamPercent())),
+                            StringUtils.isBlank(course.getMark().getFinalPercent()) ? EducDistributionApiConstants.THREE_ZEROES : String.format("%03d", extractNumericValue(course.getMark().getFinalPercent())),
+                            course.getMark().getFinalLetterGrade(),
+                            StringUtils.isBlank(course.getMark().getInterimPercent()) ? EducDistributionApiConstants.THREE_ZEROES : String.format("%03d", extractNumericValue(course.getMark().getInterimPercent())),
+                            StringUtils.isBlank(course.getCourse().getCredits()) ? EducDistributionApiConstants.TWO_ZEROES : String.format("%02d", extractNumericValue(course.getCourse().getCredits())),
+                            "", //Course case
+                            extractNumericValue(credits) > 0 ? EducDistributionApiConstants.LETTER_Y : ""
+                    };
+
+                    setColumnsWidths(examinableCoursesAndAssessmentsInfo,
+                            IntStream.of(10, 1, 5, 3, 6, 2, 1, 3, 1, 3, 3, 2, 3, 2, 1, 1).toArray(),
+                            studentTranscriptdata);
+                }
+            }
+        }
+    }
+
+    private void writesCsvFileRowA(List<String[]> studentTranscriptdata, String pen, Student studentDetails) {
+        String[] studentInfo;
+        //Writes the A's row's data on CSV
+        if (studentDetails != null) {
+
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(EducDistributionApiConstants.DATE_FORMAT);
+            String studentBirthDate = simpleDateFormat.format(studentDetails.getBirthdate());
+            studentInfo = new String[]{
+                    pen,
+                    EducDistributionApiConstants.LETTER_A,
+                    studentDetails.getLastName(),
+                    studentDetails.getFirstName(),
+                    studentDetails.getMiddleName(),
+                    (studentDetails.getBirthdate() == null || StringUtils.isBlank(studentBirthDate)) ? "" : studentBirthDate,
+                    studentDetails.getGender(),
+                    studentDetails.getCitizenship(),
+                    studentDetails.getGrade(),
+                    studentDetails.getGraduationStatus().getSchoolOfRecord(), studentDetails.getLocalId(),
+                    "", //Optional program blank
+                    studentDetails.getConsumerEducReqt(),
+                    EducDistributionApiConstants.FOUR_ZEROES,
+                    StringUtils.isNotBlank(studentDetails.getGraduationStatus().getProgramCompletionDate()) ? studentDetails.getGraduationStatus().getProgramCompletionDate() : EducDistributionApiConstants.SIX_ZEROES,
+                    String.valueOf(studentDetails.getGraduationData().getDogwoodFlag()).equals("false") ? EducDistributionApiConstants.LETTER_N : EducDistributionApiConstants.LETTER_Y,
+                    String.valueOf(studentDetails.getGraduationData().getHonorsFlag()).equals("false") ? EducDistributionApiConstants.LETTER_N : EducDistributionApiConstants.LETTER_Y,
+                    studentDetails.getNonGradReasons().stream()
+                            .map(NonGradReason::getCode)
+                            .collect(Collectors.joining(",")),//Non grad reasons
+                    "", //18 Blanks
+                    StringUtils.isBlank(studentDetails.getGradProgram()) ? "" : studentDetails.getGradProgram().substring(1, 4)};
+
+            setColumnsWidths(
+                    studentInfo,
+                    IntStream.of(10, 1, 25, 25, 25, 8, 1, 1, 2, 8, 12, 2, 1, 4, 6, 1, 1, 15, 18, 4).toArray(),
+                    studentTranscriptdata);
+        }
     }
 
     //Grad2-1931 sets columns widths of each row on csv - mchintha
