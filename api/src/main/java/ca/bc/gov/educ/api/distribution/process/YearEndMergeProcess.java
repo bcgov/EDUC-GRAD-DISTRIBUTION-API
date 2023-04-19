@@ -104,7 +104,7 @@ public class YearEndMergeProcess extends BaseProcess {
 				locations.add(reportService.getPackingSlip(packSlipReq, restUtils.getAccessToken()).getInputStream());
 				logger.debug("*** Packing Slip Added");
 				processStudents(scdList,studListNonGrad,locations);
-				mergeDocuments(processorData,mincode,schoolCategoryCode,"/EDGRAD.T.","YED4",locations);
+				mergeDocumentsPDFs(processorData,mincode,schoolCategoryCode,"/EDGRAD.T.","YED4",locations);
 				numberOfPdfs++;
 				logger.debug("*** Transcript Documents Merged ***");
 			} catch (IOException e) {

@@ -626,7 +626,7 @@ public class DistributionServiceTest {
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(ResponseObj.class)).thenReturn(Mono.just(tokenObject));
 
-		Mockito.when(schoolService.getSchoolDetails(mincode,accessToken,exception)).thenReturn(schObj);
+		Mockito.when(schoolService.getCommonSchoolDetails(mincode,exception)).thenReturn(schObj);
 		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,null, transmissionMode,null,accessToken);
 	}
 
@@ -897,7 +897,7 @@ public class DistributionServiceTest {
 		when(this.responseMock.bodyToMono(ResponseObj.class)).thenReturn(Mono.just(tokenObject));
 
 		if(properName == null)
-			Mockito.when(schoolService.getSchoolDetails(mincode,accessToken,exception)).thenReturn(schObj);
+			Mockito.when(schoolService.getCommonSchoolDetails(mincode,exception)).thenReturn(schObj);
 		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,transmissionMode,localDownload,accessToken);
 	}
 

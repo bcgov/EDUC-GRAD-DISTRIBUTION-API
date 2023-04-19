@@ -71,7 +71,7 @@ public class PostingSchoolReportProcess extends BaseProcess {
 				if (gradReportPdf != null) {
 					locations.add(gradReportPdf.getInputStream());
 					logger.debug("*** Added PDFs Current Report Type {}", scdReport.getReportTypeCode());
-					mergeDocuments(processorData, mincode, EducDistributionApiUtils.getFileNameWithMincodeReports(mincode), locations);
+					mergeDocuments(processorData, mincode, EducDistributionApiUtils.getFileNameSchoolReports(mincode), locations);
 					numberOfPdfs++;
 				} else {
 					logger.debug("*** Failed to Add PDFs Current Report Type {}", scdReport.getReportTypeCode());

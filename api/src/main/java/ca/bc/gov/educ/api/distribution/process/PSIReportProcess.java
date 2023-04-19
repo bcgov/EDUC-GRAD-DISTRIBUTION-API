@@ -157,7 +157,7 @@ public class PSIReportProcess extends BaseProcess {
         try {
             StringBuilder filePathBuilder = createFolderStructureInTempDirectory(processorData, psiCode, "02");
 
-            filePathBuilder.append(EducDistributionApiConstants.FTP_FILENAME_PREFIX).append(psiCode).append(EducDistributionApiConstants.FTP_FILENAME_SUFFIX).append(".").append(EducDistributionApiUtils.getFileName()).append(".DAT");
+            filePathBuilder.append(EducDistributionApiConstants.FTP_FILENAME_PREFIX).append(psiCode).append(EducDistributionApiConstants.FTP_FILENAME_SUFFIX).append(".").append(EducDistributionApiUtils.getFileNameSchoolReports(psiCode)).append(".DAT");
 
             if (filePathBuilder != null) {
                 path = Paths.get(filePathBuilder.toString());
@@ -367,7 +367,7 @@ public class PSIReportProcess extends BaseProcess {
             } else {
                 fileNameBuilder.append("/EDGRAD.R.").append("324W.");
             }
-            fileNameBuilder.append(EducDistributionApiUtils.getFileName()).append(".pdf");
+            fileNameBuilder.append(EducDistributionApiUtils.getFileNameSchoolReports(mincode)).append(".pdf");
             if (transmissionMode.equalsIgnoreCase(EducDistributionApiConstants.TRANSMISSION_MODE_PAPER)) {
                 try (OutputStream out = new FileOutputStream(fileNameBuilder.toString())) {
                     out.write(gradReportPdf);
