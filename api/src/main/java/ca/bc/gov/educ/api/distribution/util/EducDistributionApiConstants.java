@@ -22,8 +22,29 @@ public class EducDistributionApiConstants {
     //Default Date format constants
     public static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd";
     public static final String SECONDARY_DATE_FORMAT = "yyyy/MM/dd";
-
+    //Grad2-1931 - mchintha
+    public static final String DATE_FORMAT = "yyyyMMdd";
     public static final String TMP_DIR = "/tmp/";
+    public static final String MONTHLYDIST = "MONTHLYDIST";
+    public static final String DEL = "/";
+    public static final String FILES_FOLDER_STRUCTURE = "Batch/PSI/";
+    public static final String TRANSMISSION_MODE_FTP = "FTP";
+    public static final String TRANSMISSION_MODE_PAPER = "PAPER";
+    public static final String FTP_FILENAME_PREFIX = "/GRAD_INT";
+    public static final String FTP_FILENAME_SUFFIX = "_RESULTS";
+    public static final String EXCEPTION_MSG_FILE_NOT_CREATED_AT_PATH = "Path is not available to create DAT file to write the student data";
+    public static final String FOUR_ZEROES = "0000";
+    public static final String THREE_ZEROES = "000";
+    public static final String SIX_ZEROES = "000000";
+    public static final String TWO_ZEROES = "00";
+    public static final String LETTER_A = "A";
+    public static final String LETTER_B = "B";
+    public static final String LETTER_C = "C";
+    public static final String LETTER_D = "D";
+    public static final String LETTER_Y = "Y";
+    public static final String LETTER_N = "N";
+
+
 
     @Value("${endpoint.grad-graduation-report-api.get-transcript-list.url}")
     private String transcriptDistributionList;
@@ -75,6 +96,9 @@ public class EducDistributionApiConstants {
 
     @Value("${endpoint.grad-graduation-api.report-by-pen.url}")
     private String certDataReprint;
+
+    @Value("${endpoint.grad-graduation-api.student-report-by-pen.url}")
+    private String transcriptCSVData;
 
     @Value("${endpoint.grad-report-api.certificate_report.url}")
     private String certificateReport;

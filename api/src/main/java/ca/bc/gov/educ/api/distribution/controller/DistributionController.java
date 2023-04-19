@@ -52,17 +52,18 @@ public class DistributionController {
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK")})
     public ResponseEntity<DistributionResponse> distributeCredentials(
             @PathVariable String runType, @RequestParam(required = false) Long batchId ,@RequestParam(required = false) String activityCode,
-            @RequestBody Map<String, DistributionPrintRequest> mapDist,@RequestParam(required = false) String localDownload, @RequestHeader(name="Authorization") String accessToken) {
-        return response.GET(gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,localDownload,accessToken));
+            @RequestParam(required = false) String transmissionType, @RequestBody Map<String, DistributionPrintRequest> mapDist,
+            @RequestParam(required = false) String localDownload, @RequestHeader(name="Authorization") String accessToken) {
+        return response.GET(gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,transmissionType,localDownload,accessToken));
     }
 
     @GetMapping(EducDistributionApiConstants.LOCAL_DOWNLOAD)
     @PreAuthorize(PermissionsConstants.GRADUATE_STUDENT)
     @Operation(summary = "Read Student Reports by Student ID and Report Type", description = "Read Student Reports by Student ID and Report Type", tags = { "Reports" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK")})
-    public ResponseEntity<byte[]> downloadZipFile(@PathVariable(value = "batchId") Long batchId) {
+    public ResponseEntity<byte[]> downloadZipFile(@PathVariable(value = "batchId") Long batchId, @RequestParam(required = false) String transmissionMode) {
         logger.debug("downloadZipFile : ");
-        byte[] resultBinary = gradDistributionService.getDownload(batchId);
+        byte[] resultBinary = gradDistributionService.getDownload(batchId, transmissionMode);
         byte[] encoded = Base64.encodeBase64(resultBinary);
         return handleBinaryResponse(encoded,MediaType.TEXT_PLAIN,batchId);
     }
