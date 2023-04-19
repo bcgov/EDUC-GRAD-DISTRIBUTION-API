@@ -74,7 +74,7 @@ public class MergeProcess extends BaseProcess {
 				pV = processYedrCertificatePrintRequest(distributionPrintRequest,currentSlipCount,packSlipReq,studListNonGrad,processorData,mincode,schoolCategoryCode,numberOfPdfs);
 				numberOfPdfs = pV.getRight();
 				if(!studListNonGrad.isEmpty()) {
-					createAndSaveNonGradReport(schoolDetails,studListNonGrad,mincode,restUtils.getAccessToken());
+					createAndSaveNonGradReport(schoolDetails,studListNonGrad,mincode);
 				}
 				logger.debug("PDFs Merged {}", schoolDetails.getSchoolName());
 				processSchoolsForLabels(schoolsForLabels, mincode, restUtils.getAccessToken(), exception);
@@ -149,7 +149,7 @@ public class MergeProcess extends BaseProcess {
 		return Pair.of(currentSlipCount,numberOfPdfs);
 	}
 
-	private Pair<Integer, Integer> processTranscriptPrintRequest(DistributionPrintRequest obj, int currentSlipCount, ReportRequest packSlipReq, List<Student> studListNonGrad, ProcessorData processorData, String mincode, String schoolCategoryCode, int numberOfPdfs) {
+	protected Pair<Integer, Integer> processTranscriptPrintRequest(DistributionPrintRequest obj, int currentSlipCount, ReportRequest packSlipReq, List<Student> studListNonGrad, ProcessorData processorData, String mincode, String schoolCategoryCode, int numberOfPdfs) {
 		if (obj.getTranscriptPrintRequest() != null) {
 			TranscriptPrintRequest transcriptPrintRequest = obj.getTranscriptPrintRequest();
 			List<StudentCredentialDistribution> scdList = transcriptPrintRequest.getTranscriptList();
@@ -193,7 +193,7 @@ public class MergeProcess extends BaseProcess {
 		}
 	}
 
-	private Student prepareStudentObj(StudentCredentialDistribution scd, List<Student> studListNonGrad) {
+	protected Student prepareStudentObj(StudentCredentialDistribution scd, List<Student> studListNonGrad) {
 		if(scd.getStudentGrade().equalsIgnoreCase("AD") || scd.getStudentGrade().equalsIgnoreCase("12")) {
 			Student std = new Student();
 			std.setFirstName(scd.getLegalFirstName());
@@ -272,7 +272,7 @@ public class MergeProcess extends BaseProcess {
 				byte[] encoded = Base64.encodeBase64(bytesSAR);
 				String encodedPdf = new String(encoded, StandardCharsets.US_ASCII);
 				if(!processorData.getActivityCode().contains("USERDIST"))
-					saveSchoolDistributionReport(encodedPdf,mincode,restUtils.getAccessToken(),"DISTREP_SC");
+					saveSchoolDistributionReport(encodedPdf,mincode,"DISTREP_SC");
 			}
 			mergeDocumentsPDFs(processorData,mincode,schoolCategoryCode,"/EDGRAD.R.","324W",locations);
 		} catch (Exception e) {
@@ -280,7 +280,7 @@ public class MergeProcess extends BaseProcess {
 		}
 	}
 
-	private void createAndSaveNonGradReport(CommonSchool schoolDetails, List<Student> studListNonGrad, String mincode, String accessToken) {
+	protected void createAndSaveNonGradReport(CommonSchool schoolDetails, List<Student> studListNonGrad, String mincode) {
 		ReportData nongradProjected = new ReportData();
 		School schObj = new School();
 		schObj.setMincode(schoolDetails.getDistNo()+schoolDetails.getSchlNo());
@@ -304,10 +304,10 @@ public class MergeProcess extends BaseProcess {
 		byte[] encoded = Base64.encodeBase64(bytesSAR);
 		assert encoded != null;
 		String encodedPdf = new String(encoded, StandardCharsets.US_ASCII);
-		saveSchoolDistributionReport(encodedPdf,mincode,accessToken, NONGRADDISTREP_SC);
+		saveSchoolDistributionReport(encodedPdf,mincode,NONGRADDISTREP_SC);
 	}
 
-	private void saveSchoolDistributionReport(String encodedPdf, String mincode, String accessToken, String reportType) {
+	private void saveSchoolDistributionReport(String encodedPdf, String mincode, String reportType) {
 		SchoolReports requestObj = new SchoolReports();
 		requestObj.setReport(encodedPdf);
 		requestObj.setSchoolOfRecord(mincode);
