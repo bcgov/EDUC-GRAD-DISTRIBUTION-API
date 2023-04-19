@@ -50,7 +50,7 @@ public class MergeProcess extends BaseProcess {
 			int currentSlipCount = 0;
 			String mincode = entry.getKey();
 			DistributionPrintRequest distributionPrintRequest = entry.getValue();
-			CommonSchool schoolDetails = getBaseSchoolDetails(distributionPrintRequest,mincode,processorData,exception);
+			CommonSchool schoolDetails = getBaseSchoolDetails(distributionPrintRequest,mincode,exception);
 			if(schoolDetails != null) {
 				String schoolCategoryCode = schoolDetails.getSchoolCategoryCode();
 				logger.debug("*** School Details Acquired {} category {}", mincode, schoolCategoryCode);

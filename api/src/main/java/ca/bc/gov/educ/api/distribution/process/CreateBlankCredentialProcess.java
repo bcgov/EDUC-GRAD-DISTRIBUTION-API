@@ -42,7 +42,7 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 			int currentSlipCount = 0;
 			String mincode = entry.getKey();
 			DistributionPrintRequest obj = entry.getValue();
-			CommonSchool schoolDetails = getBaseSchoolDetails(obj,mincode,processorData,exception);
+			CommonSchool schoolDetails = getBaseSchoolDetails(obj,mincode,exception);
 			if(schoolDetails != null) {
 				logger.debug("*** School Details Acquired {}", schoolDetails.getSchoolName());
 

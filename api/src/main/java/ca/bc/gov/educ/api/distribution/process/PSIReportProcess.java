@@ -4,11 +4,7 @@ import ca.bc.gov.educ.api.distribution.model.dto.*;
 import ca.bc.gov.educ.api.distribution.service.GraduationService;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils;
-import ca.bc.gov.educ.api.distribution.util.IOUtils;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
-import com.opencsv.CSVWriter;
-import com.opencsv.ICSVWriter;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -27,7 +23,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -110,7 +105,7 @@ public class PSIReportProcess extends BaseProcess {
                 if (processorData.getTransmissionMode().equalsIgnoreCase(EducDistributionApiConstants.TRANSMISSION_MODE_FTP)) {
                     processStudentsForCSVs(scdList, psiCode, processorData);
                 } else {
-                    processStudentsForPDFs(scdList, locations, processorData);
+                    processStudentsForPDFs(scdList, locations);
                     mergeDocumentsPDFs(processorData, psiCode, "02", "/EDGRAD.T.", "YED4", locations);
                 }
                 numOfPdfs++;
@@ -123,7 +118,7 @@ public class PSIReportProcess extends BaseProcess {
     }
 
 
-    private void processStudentsForPDFs(List<PsiCredentialDistribution> scdList, List<InputStream> locations, ProcessorData processorData) throws IOException {
+    private void processStudentsForPDFs(List<PsiCredentialDistribution> scdList, List<InputStream> locations) throws IOException {
         int currentTranscript = 0;
         int failedToAdd = 0;
 
@@ -154,7 +149,8 @@ public class PSIReportProcess extends BaseProcess {
         List<String[]> studentTranscriptdata = new ArrayList<>();
         List<String> updatedStudentTranscriptdataList = new ArrayList<>();
         CsvMapper csvMapper = new CsvMapper();
-        try {
+
+        try (FileWriter fWriter = new FileWriter(newFile)) {
             StringBuilder filePathBuilder = createFolderStructureInTempDirectory(processorData, psiCode, "02");
 
             filePathBuilder.append(EducDistributionApiConstants.FTP_FILENAME_PREFIX).append(psiCode).append(EducDistributionApiConstants.FTP_FILENAME_SUFFIX).append(".").append(EducDistributionApiUtils.getFileNameSchoolReports(psiCode)).append(".DAT");
@@ -305,13 +301,8 @@ public class PSIReportProcess extends BaseProcess {
             }
 
             csv = csvMapper.writeValueAsString(updatedStudentTranscriptdataList);
-            csv = csv.replaceAll("\"", "").replaceAll(",", "\r\n");
-            try (FileWriter fWriter = new FileWriter(newFile)) {
-                fWriter.write(csv);
-            } catch (IOException e) {
-                logger.error(EXCEPTION, e.getLocalizedMessage());
-            }
-
+            csv = csv.replace("\"", "").replace(",", "\r\n");
+            fWriter.write(csv);
         } catch (Exception e) {
             logger.error(EXCEPTION, e.getLocalizedMessage());
         }
@@ -321,7 +312,9 @@ public class PSIReportProcess extends BaseProcess {
     //Grad2-1931 sets columns widths of each row on csv - mchintha
     private void setColumnsWidths(String[] allCSVRowsInfo, int[] eachRowsColumnsWidths, List<String[]> studentTranscriptdata) {
         for (int i = 0; i < allCSVRowsInfo.length; i++) {
-            String formattedString = String.format("%-" + eachRowsColumnsWidths[i] + "s", (allCSVRowsInfo[i] != null ? allCSVRowsInfo[i] : ""));
+            String columnWidth = allCSVRowsInfo[i] != null ? allCSVRowsInfo[i] : "";
+            String value = "%-" + eachRowsColumnsWidths[i] + "s";
+            String formattedString = String.format(value, columnWidth);
             allCSVRowsInfo[i] = formattedString;
         }
         studentTranscriptdata.add(allCSVRowsInfo);
@@ -336,6 +329,7 @@ public class PSIReportProcess extends BaseProcess {
         }
 
     //Grad2-1931 : Uploads school reports for only PSIRUNs- mchintha
+    @Override
     protected void uploadSchoolReportDocuments(Long batchId, String mincode, String schoolCategory, String transmissionMode, byte[] gradReportPdf) {
         boolean isDistrict = StringUtils.isNotBlank(mincode) && StringUtils.length(mincode) == 3;
         String districtCode = StringUtils.substring(mincode, 0, 3);
@@ -348,7 +342,7 @@ public class PSIReportProcess extends BaseProcess {
             } else if ("02".equalsIgnoreCase(schoolCategory)) {
                 fileLocBuilder.append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.FILES_FOLDER_STRUCTURE).append(transmissionMode.toUpperCase()).append(EducDistributionApiConstants.DEL).append(batchId).append(EducDistributionApiConstants.DEL).append(mincode);
             } else {
-                fileLocBuilder.append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.FILES_FOLDER_STRUCTURE).append(transmissionMode.toUpperCase()).append(EducDistributionApiConstants.DEL).append(batchId).append(EducDistributionApiConstants.DEL).append(districtCode).append(educDistributionApiConstants.DEL).append(mincode);
+                fileLocBuilder.append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.FILES_FOLDER_STRUCTURE).append(transmissionMode.toUpperCase()).append(EducDistributionApiConstants.DEL).append(batchId).append(EducDistributionApiConstants.DEL).append(districtCode).append(EducDistributionApiConstants.DEL).append(mincode);
             }
             Path path = Paths.get(fileLocBuilder.toString());
             Files.createDirectories(path);
@@ -360,7 +354,7 @@ public class PSIReportProcess extends BaseProcess {
             } else if ("02".equalsIgnoreCase(schoolCategory)) {
                 fileNameBuilder.append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.FILES_FOLDER_STRUCTURE).append(transmissionMode.toUpperCase()).append(EducDistributionApiConstants.DEL).append(batchId).append(EducDistributionApiConstants.DEL).append(mincode);
             } else {
-                fileNameBuilder.append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.FILES_FOLDER_STRUCTURE).append(transmissionMode.toUpperCase()).append(EducDistributionApiConstants.DEL).append(batchId).append(EducDistributionApiConstants.DEL).append(districtCode).append(educDistributionApiConstants.DEL).append(mincode);
+                fileNameBuilder.append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.FILES_FOLDER_STRUCTURE).append(transmissionMode.toUpperCase()).append(EducDistributionApiConstants.DEL).append(batchId).append(EducDistributionApiConstants.DEL).append(districtCode).append(EducDistributionApiConstants.DEL).append(mincode);
             }
             if (SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode)) {
                 fileNameBuilder.append("/EDGRAD.L.").append("3L14.");
