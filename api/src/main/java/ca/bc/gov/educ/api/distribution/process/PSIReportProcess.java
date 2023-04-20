@@ -36,7 +36,7 @@ import java.util.stream.IntStream;
 public class PSIReportProcess extends BaseProcess {
 
     private static Logger logger = LoggerFactory.getLogger(PSIReportProcess.class);
-    private static final String ADDRESS_LABEL_PSI = "ADDRESS_LABEL_PSI";
+    private static final String TRANSMISSION_MODE_ERROR = "Transmission mode can't be blank for PSI distribution";
 
     GraduationService graduationService;
 
@@ -361,7 +361,7 @@ public class PSIReportProcess extends BaseProcess {
         String districtCode = StringUtils.substring(mincode, 0, 3);
         String transmissionMode = processorData.getTransmissionMode();
         if(StringUtils.isBlank(transmissionMode)) {
-            throw new GradBusinessRuleException("Transmission mode can't be blank for PSI distribution");
+            throw new GradBusinessRuleException(TRANSMISSION_MODE_ERROR);
         }
         try {
             StringBuilder fileLocBuilder = buildFileLocationPath(batchId, mincode, schoolCategory, isDistrict, districtCode, transmissionMode);
@@ -399,6 +399,7 @@ public class PSIReportProcess extends BaseProcess {
         return fileLocBuilder;
     }
 
+    @Override
     //Grad2-1931 : Creates folder structure in temp directory only for PSIRUNs - mchintha
     public StringBuilder createFolderStructureInTempDirectory(ProcessorData processorData, String minCode, String schoolCategoryCode) {
         String districtCode = StringUtils.substring(minCode, 0, 3);
@@ -437,7 +438,7 @@ public class PSIReportProcess extends BaseProcess {
         logger.debug("Create zip file for {}", processorData.getActivityCode());
         String transmissionMode = processorData.getTransmissionMode();
         if(StringUtils.isBlank(transmissionMode)) {
-            throw new GradBusinessRuleException("Transmission mode can't be blank for PSI distribution");
+            throw new GradBusinessRuleException(TRANSMISSION_MODE_ERROR);
         }
         StringBuilder sourceFileBuilder = new StringBuilder().append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.FILES_FOLDER_STRUCTURE).append(transmissionMode.toUpperCase()).append(EducDistributionApiConstants.DEL).append(batchId);
         File file = new File(EducDistributionApiConstants.TMP_DIR + EducDistributionApiConstants.FILES_FOLDER_STRUCTURE + transmissionMode.toUpperCase() + "/EDGRAD.BATCH." + batchId + ".zip");
@@ -449,7 +450,7 @@ public class PSIReportProcess extends BaseProcess {
     protected void createControlFile(Long batchId, ProcessorData processorData, int numberOfPdfs) {
         String transmissionMode = processorData.getTransmissionMode();
         if(StringUtils.isBlank(transmissionMode)) {
-            throw new GradBusinessRuleException("Transmission mode can't be blank for PSI distribution");
+            throw new GradBusinessRuleException(TRANSMISSION_MODE_ERROR);
         }
         File file = new File(EducDistributionApiConstants.TMP_DIR + EducDistributionApiConstants.FILES_FOLDER_STRUCTURE + transmissionMode.toUpperCase() + "/EDGRAD.BATCH." + batchId + ".txt");
         writeControlFile(numberOfPdfs, file);

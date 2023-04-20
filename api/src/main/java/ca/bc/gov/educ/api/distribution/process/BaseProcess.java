@@ -40,6 +40,7 @@ public abstract class BaseProcess implements DistributionProcess {
     protected static final String DISTREP_YE_SC = "DISTREP_YE_SC";
     protected static final String ADDRESS_LABEL_SCHL = "ADDRESS_LABEL_SCHL";
     protected static final String ADDRESS_LABEL_YE = "ADDRESS_LABEL_YE";
+    protected static final String ADDRESS_LABEL_PSI = "ADDRESS_LABEL_PSI";
     protected static final String DISTREP_SD = "DISTREP_SD";
     protected static final String DISTREP_SC = "DISTREP_SC";
 
