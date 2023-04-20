@@ -478,7 +478,7 @@ public class DistributionServiceTest {
 		Long batchId= 9029L;
 		Map<String, DistributionPrintRequest > mapDist= new HashMap<>();
 		String accessToken = MOCK_TOKEN;
-		String transmissionMode = "ftp";
+		String transmissionMode = "paper";
 		String mincode = "123123133";
 
 		CommonSchool schObj = null;

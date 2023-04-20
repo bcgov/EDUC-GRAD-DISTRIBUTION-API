@@ -86,7 +86,7 @@ public class MergeProcess extends BaseProcess {
 		}
 		int numberOfCreatedSchoolReports = 0;
 		int numberOfProcessedSchoolReports = 0;
-		if(educDistributionApiConstants.MONTHLYDIST.equalsIgnoreCase(processorData.getActivityCode())) {
+		if(EducDistributionApiConstants.MONTHLYDIST.equalsIgnoreCase(processorData.getActivityCode())) {
 			logger.debug("***** Create and Store Monthly school reports *****");
 			numberOfCreatedSchoolReports += createSchoolLabelsReport(schoolsForLabels, processorData.getAccessToken(), ADDRESS_LABEL_SCHL);
 			logger.debug("***** Number of created Monthly school reports {} *****", numberOfCreatedSchoolReports);
@@ -159,7 +159,7 @@ public class MergeProcess extends BaseProcess {
 			try {
 				locations.add(reportService.getPackingSlip(packSlipReq, restUtils.getAccessToken()).getInputStream());
 				logger.debug("*** Packing Slip Added");
-				processStudents(scdList,studListNonGrad,locations,processorData);
+				processStudents(scdList,studListNonGrad,locations);
 				mergeDocumentsPDFs(processorData,mincode,schoolCategoryCode,"/EDGRAD.T.","YED4",locations);
 				numberOfPdfs++;
 				logger.debug("*** Transcript Documents Merged ***");
@@ -170,7 +170,7 @@ public class MergeProcess extends BaseProcess {
 		return Pair.of(currentSlipCount,numberOfPdfs);
 	}
 
-	private void processStudents(List<StudentCredentialDistribution> scdList, List<Student> studListNonGrad, List<InputStream> locations, ProcessorData processorData) throws IOException {
+	private void processStudents(List<StudentCredentialDistribution> scdList, List<Student> studListNonGrad, List<InputStream> locations) {
 		int currentTranscript = 0;
 		int failedToAdd = 0;
 		for (StudentCredentialDistribution scd : scdList) {
@@ -193,7 +193,7 @@ public class MergeProcess extends BaseProcess {
 		}
 	}
 
-	protected Student prepareStudentObj(StudentCredentialDistribution scd, List<Student> studListNonGrad) {
+	private Student prepareStudentObj(StudentCredentialDistribution scd, List<Student> studListNonGrad) {
 		if(scd.getStudentGrade().equalsIgnoreCase("AD") || scd.getStudentGrade().equalsIgnoreCase("12")) {
 			Student std = new Student();
 			std.setFirstName(scd.getLegalFirstName());
