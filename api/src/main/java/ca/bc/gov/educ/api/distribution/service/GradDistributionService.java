@@ -56,10 +56,10 @@ public class GradDistributionService {
     public byte[] getDownload(Long batchId, String transmissionMode) {
         String localFile = null;
         if((transmissionMode != null) && (transmissionMode.equalsIgnoreCase(EducDistributionApiConstants.TRANSMISSION_MODE_FTP) || transmissionMode.equalsIgnoreCase(EducDistributionApiConstants.TRANSMISSION_MODE_PAPER))) {
-            localFile = "/tmp/Batch/PSI/" + transmissionMode.toUpperCase() + "/EDGRAD.BATCH." + batchId + ".zip";
+            localFile = EducDistributionApiConstants.TMP_DIR + EducDistributionApiConstants.FILES_FOLDER_STRUCTURE + transmissionMode.toUpperCase() + "/EDGRAD.BATCH." + batchId + ".zip";
         }
         else {
-            localFile = "/tmp/EDGRAD.BATCH." + batchId + ".zip";
+            localFile = EducDistributionApiConstants.TMP_DIR + "/EDGRAD.BATCH." + batchId + ".zip";
         }
         Path path = Paths.get(localFile);
         try {

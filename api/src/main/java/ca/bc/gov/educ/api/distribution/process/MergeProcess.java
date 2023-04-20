@@ -86,7 +86,7 @@ public class MergeProcess extends BaseProcess {
 		}
 		int numberOfCreatedSchoolReports = 0;
 		int numberOfProcessedSchoolReports = 0;
-		if(EducDistributionApiConstants.MONTHLYDIST.equalsIgnoreCase(processorData.getActivityCode())) {
+		if(MONTHLYDIST.equalsIgnoreCase(processorData.getActivityCode())) {
 			logger.debug("***** Create and Store Monthly school reports *****");
 			numberOfCreatedSchoolReports += createSchoolLabelsReport(schoolsForLabels, processorData.getAccessToken(), ADDRESS_LABEL_SCHL);
 			logger.debug("***** Number of created Monthly school reports {} *****", numberOfCreatedSchoolReports);

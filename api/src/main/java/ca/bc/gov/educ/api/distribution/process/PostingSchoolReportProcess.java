@@ -88,11 +88,11 @@ public class PostingSchoolReportProcess extends BaseProcess {
 		try {
 			PDFMergerUtility objs = new PDFMergerUtility();
 			StringBuilder pBuilder = new StringBuilder();
-			pBuilder.append(EducDistributionApiConstants.TMP_DIR).append(processorData.getBatchId()).append(EducDistributionApiConstants.DEL).append(mincode).append(EducDistributionApiConstants.DEL);
+			pBuilder.append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.DEL).append(processorData.getBatchId()).append(EducDistributionApiConstants.DEL).append(mincode).append(EducDistributionApiConstants.DEL);
 			Path path = Paths.get(pBuilder.toString());
 			Files.createDirectories(path);
 			pBuilder = new StringBuilder();
-			pBuilder.append(EducDistributionApiConstants.TMP_DIR).append(processorData.getBatchId()).append(EducDistributionApiConstants.DEL).append(mincode).append(EducDistributionApiConstants.DEL).append(fileName).append(".pdf");
+			pBuilder.append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.DEL).append(processorData.getBatchId()).append(EducDistributionApiConstants.DEL).append(mincode).append(EducDistributionApiConstants.DEL).append(fileName).append(".pdf");
 			objs.setDestinationFileName(pBuilder.toString());
 			objs.addSources(locations);
 			objs.mergeDocuments(MemoryUsageSetting.setupMainMemoryOnly());
