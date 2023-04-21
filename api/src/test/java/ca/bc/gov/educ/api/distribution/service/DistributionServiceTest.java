@@ -213,7 +213,6 @@ public class DistributionServiceTest {
 	private DistributionResponse testdistributeSchoolReport(String runType, String reportType, String activityCode) {
 		Long batchId= 9029L;
 		Map<String, DistributionPrintRequest > mapDist = new HashMap<>();
-		String localDownload = null;
 		String accessToken = MOCK_TOKEN;
 		String mincode = "123123133";
 
@@ -256,8 +255,7 @@ public class DistributionServiceTest {
 		mapDist.put(mincode,printRequest);
 
 		mockTraxSchool(mincode);
-
-		byte[] bytesSAR = "Any String you want".getBytes();
+		mockTraxDistrict("123");
 
 		byte[] greBPack = "Any String you want".getBytes();
 		InputStreamResource inSRPack = new InputStreamResource(new ByteArrayInputStream(greBPack));
@@ -667,6 +665,7 @@ public class DistributionServiceTest {
 		mapDist.put(mincode,printRequest);
 
 		mockTraxSchool(mincode);
+		mockTraxDistrict("123");
 
 		byte[] bytesSAR = "Any String you want".getBytes();
 		when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
@@ -739,7 +738,6 @@ public class DistributionServiceTest {
 
 		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,localDownload,accessToken);
 	}
-
 
 	private DistributionResponse testdistributeCredentials_certificate(String runType, String activityCode,String paperType,String properName,boolean noSchoolDis) {
 		Long batchId= 9029L;
@@ -1056,6 +1054,7 @@ public class DistributionServiceTest {
 		psiObj.setAddress1("sadaasdadad");
 		psiObj.setCity("adad");
 
+		mockTraxDistrict("123");
 
 		List<PsiCredentialDistribution> scdList = new ArrayList<>();
 		PsiCredentialDistribution scd = new PsiCredentialDistribution();
@@ -1138,5 +1137,15 @@ public class DistributionServiceTest {
 		when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(TraxSchool.class)).thenReturn(Mono.just(traxSchool));
+	}
+
+	protected void mockTraxDistrict(String mincode) {
+		TraxDistrict traxSchool = new TraxDistrict();
+		traxSchool.setDistrictNumber(mincode);
+		when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+		when(this.requestHeadersUriMock.uri(String.format(constants.getTraxDistrictByDistcode(),traxSchool.getDistrictNumber()))).thenReturn(this.requestHeadersMock);
+		when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.bodyToMono(TraxDistrict.class)).thenReturn(Mono.just(traxSchool));
 	}
 }
