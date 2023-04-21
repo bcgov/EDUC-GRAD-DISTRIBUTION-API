@@ -33,6 +33,9 @@ public class YearEndMergeProcess extends MergeProcess {
         Map<String, DistributionPrintRequest> mapDist = processorData.getMapDistribution();
         int numberOfPdfs = 0;
         int schoolCounter = 0;
+        int numberOfCreatedSchoolReports = 0;
+        int numberOfProcessedSchoolReports = 0;
+        int numberOfCreatedSchoolLabelReports = 0;
         List<School> schoolsForLabels = new ArrayList<>();
         List<School> districtsForLabels = new ArrayList<>();
         for (String mincode : mapDist.keySet()) {
@@ -72,32 +75,22 @@ public class YearEndMergeProcess extends MergeProcess {
                 Pair<Integer, Integer> pV = processTranscriptPrintRequest(distributionPrintRequest, currentSlipCount, packSlipReq, studListNonGrad, processorData, mincode, schoolCategoryCode, numberOfPdfs);
                 numberOfPdfs += pV.getRight();
 
-                if (!studListNonGrad.isEmpty()) {
+                if (!studListNonGrad.isEmpty() && NONGRADDIST.equalsIgnoreCase(processorData.getActivityCode())) {
+                    logger.debug("***** Create Student NonGrad School Reports *****");
                     createAndSaveNonGradReport(commonSchool, studListNonGrad, mincode);
+                    logger.debug("***** Student NonGrad School Reports Created *****");
+                    logger.debug("***** Distribute Student NonGrad School Reports *****");
+                    numberOfProcessedSchoolReports += processDistrictSchoolDistribution(processorData, null, null, NONGRADDISTREP_SC);
+                    logger.debug("***** Number of distributed Student NonGrad School Reports {} *****", numberOfProcessedSchoolReports);
                 }
                 logger.debug("PDFs Merged {}", commonSchool.getSchoolName());
             }
         }
         response.setTranscriptResponse(numberOfPdfs + " transcripts have been processed in batch " + processorData.getBatchId());
-        int numberOfCreatedSchoolReports = 0;
-        int numberOfProcessedSchoolReports = 0;
-        int numberOfCreatedSchoolLabelReports = 0;
-        if (YEARENDDIST.equalsIgnoreCase(processorData.getActivityCode())) {
-            logger.debug("***** Create and Store Year End school reports *****");
-            numberOfCreatedSchoolReports += createDistrictSchoolYearEndReport(ADDRESS_LABEL_YE, DISTREP_YE_SD, DISTREP_YE_SC);
-            logger.debug("***** Number of created Year End school reports {} *****", numberOfCreatedSchoolReports);
-            logger.debug("***** Distribute Year End school reports *****");
-            numberOfProcessedSchoolReports += processDistrictSchoolDistribution(processorData, ADDRESS_LABEL_YE, DISTREP_YE_SD, DISTREP_YE_SC);
-            logger.debug("***** Number of distributed Year End school reports {} *****", numberOfProcessedSchoolReports);
-        }
-        if (NONGRADDIST.equalsIgnoreCase(processorData.getActivityCode())) {
-            logger.debug("***** Create and Store district labels reports *****");
-             numberOfCreatedSchoolLabelReports += createSchoolLabelsReport(districtsForLabels, ADDRESS_LABEL_YE);
-            logger.debug("***** Number of created district labels reports {} *****", numberOfCreatedSchoolLabelReports);
-            logger.debug("***** Distribute Student NonGrad School Reports *****");
-            numberOfProcessedSchoolReports += processDistrictSchoolDistribution(processorData, null, null, NONGRADDISTREP_SC);
-            logger.debug("***** Number of distributed Student NonGrad School Reports {} *****", numberOfProcessedSchoolReports);
-        }
+        logger.debug("***** Create and Store district labels reports *****");
+        numberOfCreatedSchoolLabelReports += createSchoolLabelsReport(districtsForLabels, ADDRESS_LABEL_YE);
+        logger.debug("***** Number of created district labels reports {} *****", numberOfCreatedSchoolLabelReports);
+
         numberOfPdfs += numberOfProcessedSchoolReports;
         long endTime = System.currentTimeMillis();
         long diff = (endTime - startTime) / 1000;

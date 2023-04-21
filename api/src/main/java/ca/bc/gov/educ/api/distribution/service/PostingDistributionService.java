@@ -55,10 +55,14 @@ public class PostingDistributionService {
         this.educDistributionApiConstants = educDistributionApiConstants;
     }
 
-    public boolean postingProcess(Long batchId, String download, List<School> schools) {
+    public boolean postingProcess(Long batchId, String download, List<School> schools, String activityCode) {
         Integer numberOfPdfs = createSchoolLabelsReport(schools, ADDRESS_LABEL_SCHL);
         processSchoolLabelsDistribution(batchId, ADDRESS_LABEL_SCHL);
         processSchoolLabelsDistribution(batchId, ADDRESS_LABEL_YE);
+        if(YEARENDDIST.equalsIgnoreCase(activityCode)) {
+            createDistrictSchoolYearEndReport(null, DISTREP_YE_SD, DISTREP_YE_SC);
+            processDistrictSchoolDistribution(batchId, null, DISTREP_YE_SD, DISTREP_YE_SC);
+        }
         return zipBatchDirectory(batchId, download, numberOfPdfs);
     }
 
@@ -238,6 +242,37 @@ public class PostingDistributionService {
             }
             assert yeSchoolReports != null;
             numberOfPdfs += processDistrictSchoolReports(yeSchoolReports, processorData.getBatchId(), schooLabelReportType);
+        }
+        return numberOfPdfs;
+    }
+
+    public int processDistrictSchoolDistribution(Long batchId, String schooLabelReportType, String districtReportType, String schoolReportType) {
+        int numberOfPdfs = 0;
+        if (StringUtils.isNotBlank(schooLabelReportType)) {
+            numberOfPdfs += processSchoolLabelsDistribution(batchId, schooLabelReportType);
+        }
+        if (StringUtils.isNotBlank(districtReportType)) {
+            String accessTokenSd = restUtils.getAccessToken();
+            String districtReportUrl = String.format(educDistributionApiConstants.getSchoolReportsByReportType(), districtReportType);
+            List<SchoolReports> yeDistrictReports = webClient.get().uri(districtReportUrl)
+                    .headers(h ->
+                            h.setBearerAuth(accessTokenSd)
+                    ).retrieve().bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
+                    }).block();
+
+            assert yeDistrictReports != null;
+            numberOfPdfs += processDistrictSchoolReports(yeDistrictReports, batchId, schooLabelReportType);
+        }
+        if (StringUtils.isNotBlank(schoolReportType)) {
+            String accessTokenSc = restUtils.getAccessToken();
+            String schoolReportUrl = String.format(educDistributionApiConstants.getSchoolReportsByReportType(), schoolReportType);
+            List<SchoolReports> yeSchoolReports = webClient.get().uri(schoolReportUrl)
+                    .headers(
+                            h -> h.setBearerAuth(accessTokenSc)
+                    ).retrieve().bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
+                    }).block();
+            assert yeSchoolReports != null;
+            numberOfPdfs += processDistrictSchoolReports(yeSchoolReports, batchId, schooLabelReportType);
         }
         return numberOfPdfs;
     }

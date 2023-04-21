@@ -77,9 +77,9 @@ public class DistributionController {
     @PreAuthorize(PermissionsConstants.GRADUATE_STUDENT)
     @Operation(summary = "Read Student Reports by Student ID and Report Type", description = "Read Student Reports by Student ID and Report Type", tags = { "Reports" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK")})
-    public ResponseEntity<Boolean> postingDistribution(@PathVariable(value = "batchId") Long batchId, @RequestParam(required = false) String localDownload, @RequestBody List<School> schools) {
+    public ResponseEntity<Boolean> postingDistribution(@PathVariable(value = "batchId") Long batchId, @RequestParam(required = true) String activityCode, @RequestParam(required = false) String localDownload, @RequestBody List<School> schools) {
         logger.debug("zipBatchDirectory : ");
-        return response.GET(postingDistributionService.postingProcess(batchId, localDownload, schools));
+        return response.GET(postingDistributionService.postingProcess(batchId, localDownload, schools, activityCode));
     }
 
     private ResponseEntity<byte[]> handleBinaryResponse(byte[] resultBinary, MediaType contentType,Long batchId) {
