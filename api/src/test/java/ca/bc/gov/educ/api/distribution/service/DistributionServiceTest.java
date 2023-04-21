@@ -754,7 +754,7 @@ public class DistributionServiceTest {
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(ResponseObj.class)).thenReturn(Mono.just(tokenObject));
 
-		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,transmissionMode,localDownload,accessToken);
+		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,transmissionMode.toUpperCase(),localDownload,accessToken);
 	}
 
 
@@ -1095,6 +1095,29 @@ public class DistributionServiceTest {
 		printRequest.setPsiCredentialPrintRequest(cReq);
 		mapDist.put(psiCode,printRequest);
 
+		ReportData data = new ReportData();
+		Student student = new Student();
+		GraduationData gradData = new GraduationData();
+		GraduationStatus gradStatus = new GraduationStatus();
+		student.setGraduationData(gradData);
+		student.setGraduationStatus(gradStatus);
+		data.setStudent(student);
+		data.setSchool(new School());
+		Transcript transcript = new Transcript();
+		TranscriptResult result = new TranscriptResult();
+		TranscriptResult result2 = new TranscriptResult();
+		TranscriptResult result3 = new TranscriptResult();
+		List<TranscriptResult> listOfResults = new ArrayList<TranscriptResult>();
+		listOfResults.add(result);
+		listOfResults.add(result2);
+		listOfResults.add(result3);
+		transcript.setResults(listOfResults);
+		TranscriptCourse course = new TranscriptCourse();
+		course.setType("1");
+		result.setCourse(course);
+		result.setMark(new Mark());
+		data.setTranscript(transcript);
+
 		byte[] bytesSAR = "Any String you want".getBytes();
 		InputStreamResource inSRCert = new InputStreamResource(new ByteArrayInputStream(bytesSAR));
 		when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
@@ -1112,6 +1135,10 @@ public class DistributionServiceTest {
 		when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(byte[].class)).thenReturn(Mono.just(greBPack));
+
+		GradStudentTranscripts studentTranscripts = new GradStudentTranscripts();
+		studentTranscripts.setStudentID(scd.getStudentID());
+		studentTranscripts.setTranscript(Base64.encodeBase64String(greBPack));
 
 		when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
 		when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolReportsByReportType(), "ADDRESS_LABEL_PSI", "000000000"))).thenReturn(this.requestHeadersMock);
@@ -1139,6 +1166,14 @@ public class DistributionServiceTest {
 		tokenObject.setAccess_token(MOCK_TOKEN);
 		tokenObject.setRefresh_token("456");
 
+		//Grad2-1931 checking for CSV transcripts - mchintha
+		when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+		when(this.requestHeadersUriMock.uri(String.format(constants.getTranscriptCSVData(), scd.getPen()))).thenReturn(this.requestHeadersMock);
+		when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.bodyToMono(ReportData.class)).thenReturn(inputResponseReport);
+		when(this.inputResponseReport.block()).thenReturn(data);
+
 		when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
 		when(this.requestBodyUriMock.uri(constants.getTokenUrl())).thenReturn(this.requestBodyUriMock);
 		when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
@@ -1147,7 +1182,7 @@ public class DistributionServiceTest {
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(ResponseObj.class)).thenReturn(Mono.just(tokenObject));
 
-		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,transmissionMode,localDownload,accessToken);
+		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,transmissionMode.toUpperCase(),localDownload,accessToken);
 	}
 
 	protected void mockTraxSchool(String mincode) {

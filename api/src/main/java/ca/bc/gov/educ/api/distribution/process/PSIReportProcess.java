@@ -1,7 +1,6 @@
 package ca.bc.gov.educ.api.distribution.process;
 
 import ca.bc.gov.educ.api.distribution.model.dto.*;
-import ca.bc.gov.educ.api.distribution.service.GraduationService;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils;
 import ca.bc.gov.educ.api.distribution.util.GradBusinessRuleException;
@@ -13,7 +12,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.internal.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Component;
 
@@ -37,13 +35,6 @@ public class PSIReportProcess extends BaseProcess {
 
     private static Logger logger = LoggerFactory.getLogger(PSIReportProcess.class);
     private static final String TRANSMISSION_MODE_ERROR = "Transmission mode can't be blank for PSI distribution";
-
-    GraduationService graduationService;
-
-    @Autowired
-    public PSIReportProcess(GraduationService graduationService) {
-        this.graduationService = graduationService;
-    }
 
     @Override
     public ProcessorData fire(ProcessorData processorData) {
@@ -159,7 +150,7 @@ public class PSIReportProcess extends BaseProcess {
             }
             for (PsiCredentialDistribution scd : scdList) {
 
-                ReportData transcriptCsv = graduationService.getReportData(scd.getPen());
+                ReportData transcriptCsv = psiService.getReportData(scd.getPen());
 
                 if (transcriptCsv != null) {
                     Student studentDetails = transcriptCsv.getStudent();
@@ -213,7 +204,7 @@ public class PSIReportProcess extends BaseProcess {
         }
 
     }
-
+    //Grad2-1931 : Writes all rows data together on CSV - mchintha
     private static void writesFormattedAllRowsDataOnCSV(String csv, File newFile) {
         try (FileWriter fWriter = new FileWriter(newFile)) {
             fWriter.write(csv);
@@ -227,26 +218,27 @@ public class PSIReportProcess extends BaseProcess {
         String[] nonExaminableCoursesInfo = null;
         if (courseDetails != null) {
             for (TranscriptResult course : courseDetails) {
+                String credits = (course.getUsedForGrad() == null || course.getUsedForGrad().isBlank()) ? "" : course.getUsedForGrad();
+                String courseType = (course.getCourse().getType() == null || course.getCourse().getType().isBlank()) ? "" : course.getCourse().getType();
                 //D rows writes only Non-Examinable Courses
-                if (course.getCourse().getType().equals("2")) {
-                    String credits = (course.getUsedForGrad() == null || course.getUsedForGrad().isBlank()) ? "" : course.getUsedForGrad();
+                if (courseType.equals("2")) {
 
                     nonExaminableCoursesInfo = new String[]{
                             pen,
                             EducDistributionApiConstants.LETTER_D,
-                            course.getCourse().getCode(),
-                            course.getCourse().getLevel(),
-                            StringUtils.isNotBlank(course.getCourse().getSessionDate()) ? course.getCourse().getSessionDate() : "",
-                            course.getMark().getInterimLetterGrade(),
-                            course.getMark().getFinalLetterGrade(),
-                            StringUtils.isBlank(course.getMark().getInterimPercent()) ? EducDistributionApiConstants.THREE_ZEROES : String.format("%03d", extractNumericValue(course.getMark().getInterimPercent())),
-                            StringUtils.isBlank(course.getMark().getFinalPercent()) ? EducDistributionApiConstants.THREE_ZEROES : String.format("%03d", extractNumericValue(course.getMark().getFinalPercent())),
-                            StringUtils.isBlank(course.getCourse().getCredits()) ? EducDistributionApiConstants.TWO_ZEROES : String.format("%02d", extractNumericValue(course.getCourse().getCredits())),
-                            course.getCourse().getRelatedCourse(),
-                            course.getCourse().getRelatedLevel(),
-                            course.getCourse().getName(),
-                            course.getEquivalency(),
-                            course.getCourse().getType(),
+                            (course.getCourse().getCode() == null || course.getCourse().getCode().isBlank()) ? "" : course.getCourse().getCode(),
+                            (course.getCourse().getLevel() == null || course.getCourse().getLevel().isBlank()) ? "" : course.getCourse().getLevel(),
+                            (course.getCourse().getSessionDate() != null || StringUtils.isNotBlank(course.getCourse().getSessionDate())) ? course.getCourse().getSessionDate() : "",
+                            (course.getMark().getInterimLetterGrade() == null || course.getMark().getInterimLetterGrade().isBlank()) ? "" : course.getMark().getInterimLetterGrade(),
+                            (course.getMark().getFinalLetterGrade() == null || course.getMark().getFinalLetterGrade().isBlank()) ? "" : course.getMark().getFinalLetterGrade(),
+                            (course.getMark().getInterimPercent() == null || StringUtils.isBlank(course.getMark().getInterimPercent())) ? EducDistributionApiConstants.THREE_ZEROES : String.format("%03d", extractNumericValue(course.getMark().getInterimPercent())),
+                            (course.getMark().getFinalPercent() == null || StringUtils.isBlank(course.getMark().getFinalPercent())) ? EducDistributionApiConstants.THREE_ZEROES : String.format("%03d", extractNumericValue(course.getMark().getFinalPercent())),
+                            (course.getCourse().getCredits() == null || StringUtils.isBlank(course.getCourse().getCredits())) ? EducDistributionApiConstants.TWO_ZEROES : String.format("%02d", extractNumericValue(course.getCourse().getCredits())),
+                            (course.getCourse().getRelatedCourse() == null || course.getCourse().getRelatedCourse().isBlank()) ? "" : course.getCourse().getRelatedCourse(),
+                            (course.getCourse().getRelatedLevel() == null || course.getCourse().getRelatedLevel().isBlank()) ? "" : course.getCourse().getRelatedLevel(),
+                            (course.getCourse().getName() == null || course.getCourse().getName().isBlank()) ? "" : course.getCourse().getName(),
+                            (course.getEquivalency() == null || course.getEquivalency().isBlank()) ? "" : course.getEquivalency(),
+                            courseType,
                             "",// partial flag
                             extractNumericValue(credits) > 0 ? EducDistributionApiConstants.LETTER_Y : ""
                     };
@@ -266,25 +258,26 @@ public class PSIReportProcess extends BaseProcess {
         if (courseDetails != null) {
             for (TranscriptResult course : courseDetails) {
                 String credits = (course.getUsedForGrad() == null || course.getUsedForGrad().isBlank()) ? "" : course.getUsedForGrad();
+                String courseType = (course.getCourse().getType() == null || course.getCourse().getType().isBlank()) ? "" : course.getCourse().getType();
 
                 //C rows writes Examinable Courses and Assessments
-                if (course.getCourse().getType().equals("1") || course.getCourse().getType().equals("3")) {
+                if (courseType.equals("1") || courseType.equals("3")) {
 
                     examinableCoursesAndAssessmentsInfo = new String[]{
                             pen,
                             EducDistributionApiConstants.LETTER_C,
-                            course.getCourse().getCode(),
-                            course.getCourse().getLevel(),
-                            course.getCourse().getSessionDate(),
-                            course.getMark().getInterimLetterGrade(),
+                            (course.getCourse().getCode() == null || course.getCourse().getCode().isBlank()) ? "" : course.getCourse().getCode(),
+                            (course.getCourse().getLevel() == null || course.getCourse().getLevel().isBlank()) ? "" : course.getCourse().getLevel(),
+                            (course.getCourse().getSessionDate() == null || StringUtils.isBlank(course.getCourse().getSessionDate())) ? "" : course.getCourse().getSessionDate(),
+                            (course.getMark().getInterimLetterGrade() == null || course.getMark().getInterimLetterGrade().isBlank()) ? "" : course.getMark().getInterimLetterGrade(),
                             "", //IB flag
-                            StringUtils.isBlank(course.getMark().getSchoolPercent()) ? EducDistributionApiConstants.THREE_ZEROES : String.format("%03d", extractNumericValue(course.getMark().getSchoolPercent())),
-                            course.getCourse().getSpecialCase(),
-                            StringUtils.isBlank(course.getMark().getExamPercent()) ? EducDistributionApiConstants.THREE_ZEROES : String.format("%03d", extractNumericValue(course.getMark().getExamPercent())),
-                            StringUtils.isBlank(course.getMark().getFinalPercent()) ? EducDistributionApiConstants.THREE_ZEROES : String.format("%03d", extractNumericValue(course.getMark().getFinalPercent())),
-                            course.getMark().getFinalLetterGrade(),
-                            StringUtils.isBlank(course.getMark().getInterimPercent()) ? EducDistributionApiConstants.THREE_ZEROES : String.format("%03d", extractNumericValue(course.getMark().getInterimPercent())),
-                            StringUtils.isBlank(course.getCourse().getCredits()) ? EducDistributionApiConstants.TWO_ZEROES : String.format("%02d", extractNumericValue(course.getCourse().getCredits())),
+                            (course.getMark().getSchoolPercent() == null || StringUtils.isBlank(course.getMark().getSchoolPercent())) ? EducDistributionApiConstants.THREE_ZEROES : String.format("%03d", extractNumericValue(course.getMark().getSchoolPercent())),
+                            (course.getCourse().getSpecialCase() == null || course.getCourse().getSpecialCase().isBlank()) ? "" : course.getCourse().getSpecialCase(),
+                            (course.getMark().getExamPercent() == null || StringUtils.isBlank(course.getMark().getExamPercent())) ? EducDistributionApiConstants.THREE_ZEROES : String.format("%03d", extractNumericValue(course.getMark().getExamPercent())),
+                            (course.getMark().getFinalPercent() == null || StringUtils.isBlank(course.getMark().getFinalPercent())) ? EducDistributionApiConstants.THREE_ZEROES : String.format("%03d", extractNumericValue(course.getMark().getFinalPercent())),
+                            (course.getMark().getFinalLetterGrade() == null || course.getMark().getFinalLetterGrade().isBlank()) ? "" : course.getMark().getFinalLetterGrade(),
+                            (course.getMark().getInterimPercent() == null || StringUtils.isBlank(course.getMark().getInterimPercent())) ? EducDistributionApiConstants.THREE_ZEROES : String.format("%03d", extractNumericValue(course.getMark().getInterimPercent())),
+                            (course.getCourse().getCredits() == null || StringUtils.isBlank(course.getCourse().getCredits())) ? EducDistributionApiConstants.TWO_ZEROES : String.format("%02d", extractNumericValue(course.getCourse().getCredits())),
                             "", //Course case
                             extractNumericValue(credits) > 0 ? EducDistributionApiConstants.LETTER_Y : ""
                     };
@@ -300,33 +293,44 @@ public class PSIReportProcess extends BaseProcess {
     //Grad2-1931 : Writes Row A's data on CSV - mchintha
     private void writesCsvFileRowA(List<String[]> studentTranscriptdata, String pen, Student studentDetails) {
         String[] studentInfo;
+        String birthDate = null;
         //Writes the A's row's data on CSV
         if (studentDetails != null) {
 
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat(EducDistributionApiConstants.DATE_FORMAT);
-            String studentBirthDate = simpleDateFormat.format(studentDetails.getBirthdate());
+
+            if(studentDetails.getBirthdate() == null || StringUtils.isBlank(studentDetails.getBirthdate().toString())) {
+                birthDate = "";
+            }
+            else {
+                birthDate = simpleDateFormat.format(studentDetails.getBirthdate());
+                }
+            String dogWoodFlag = String.valueOf(studentDetails.getGraduationData().getDogwoodFlag()).isBlank() ? "" : String.valueOf(studentDetails.getGraduationData().getDogwoodFlag());
+            String honorsFlag = String.valueOf(studentDetails.getGraduationData().getHonorsFlag()).isBlank() ? "" : String.valueOf(studentDetails.getGraduationData().getHonorsFlag());
+
             studentInfo = new String[]{
                     pen,
                     EducDistributionApiConstants.LETTER_A,
-                    studentDetails.getLastName(),
-                    studentDetails.getFirstName(),
-                    studentDetails.getMiddleName(),
-                    (studentDetails.getBirthdate() == null || StringUtils.isBlank(studentBirthDate)) ? "" : studentBirthDate,
-                    studentDetails.getGender(),
-                    studentDetails.getCitizenship(),
-                    studentDetails.getGrade(),
-                    studentDetails.getGraduationStatus().getSchoolOfRecord(), studentDetails.getLocalId(),
+                    (studentDetails.getLastName() == null || StringUtils.isBlank(studentDetails.getLastName())) ? "" : studentDetails.getLastName(),
+                    (studentDetails.getFirstName() == null || StringUtils.isBlank(studentDetails.getFirstName())) ? "" : studentDetails.getFirstName(),
+                    (studentDetails.getMiddleName() == null || StringUtils.isBlank(studentDetails.getMiddleName())) ? "" : studentDetails.getMiddleName(),
+                    birthDate,
+                    (studentDetails.getGender() == null || StringUtils.isBlank(studentDetails.getGender())) ? "" : studentDetails.getGender(),
+                    (studentDetails.getCitizenship() == null || StringUtils.isBlank(studentDetails.getCitizenship())) ? "" : studentDetails.getCitizenship(),
+                    (studentDetails.getGrade() == null || StringUtils.isBlank(studentDetails.getGrade())) ? "" : studentDetails.getGrade(),
+                    (studentDetails.getGraduationStatus().getSchoolOfRecord() == null || StringUtils.isBlank(studentDetails.getGraduationStatus().getSchoolOfRecord())) ? "" : studentDetails.getGraduationStatus().getSchoolOfRecord(),
+                    (studentDetails.getLocalId() == null || StringUtils.isBlank(studentDetails.getLocalId())) ? "" : studentDetails.getLocalId(),
                     "", //Optional program blank
-                    studentDetails.getConsumerEducReqt(),
+                    (studentDetails.getConsumerEducReqt() == null || StringUtils.isBlank(studentDetails.getConsumerEducReqt())) ? "" : studentDetails.getConsumerEducReqt(),
                     EducDistributionApiConstants.FOUR_ZEROES,
                     StringUtils.isNotBlank(studentDetails.getGraduationStatus().getProgramCompletionDate()) ? studentDetails.getGraduationStatus().getProgramCompletionDate() : EducDistributionApiConstants.SIX_ZEROES,
-                    String.valueOf(studentDetails.getGraduationData().getDogwoodFlag()).equals("false") ? EducDistributionApiConstants.LETTER_N : EducDistributionApiConstants.LETTER_Y,
-                    String.valueOf(studentDetails.getGraduationData().getHonorsFlag()).equals("false") ? EducDistributionApiConstants.LETTER_N : EducDistributionApiConstants.LETTER_Y,
+                    dogWoodFlag.equals("false") ? EducDistributionApiConstants.LETTER_N : EducDistributionApiConstants.LETTER_Y,
+                    honorsFlag.equals("false") ? EducDistributionApiConstants.LETTER_N : EducDistributionApiConstants.LETTER_Y,
                     studentDetails.getNonGradReasons().stream()
                             .map(NonGradReason::getCode)
                             .collect(Collectors.joining(",")),//Non grad reasons
                     "", //18 Blanks
-                    StringUtils.isBlank(studentDetails.getGradProgram()) ? "" : studentDetails.getGradProgram().substring(1, 4)};
+                    (studentDetails.getGradProgram() == null || StringUtils.isBlank(studentDetails.getGradProgram())) ? "" : studentDetails.getGradProgram().substring(1, 4)};
 
             setColumnsWidths(
                     studentInfo,
@@ -442,6 +446,9 @@ public class PSIReportProcess extends BaseProcess {
         }
         StringBuilder sourceFileBuilder = new StringBuilder().append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.FILES_FOLDER_STRUCTURE).append(transmissionMode.toUpperCase()).append(EducDistributionApiConstants.DEL).append(batchId);
         File file = new File(EducDistributionApiConstants.TMP_DIR + EducDistributionApiConstants.FILES_FOLDER_STRUCTURE + transmissionMode.toUpperCase() + "/EDGRAD.BATCH." + batchId + ".zip");
+        System.out.println("Source file builder" + sourceFileBuilder.toString());
+        if(file.exists())
+            System.out.println("Yes file path exists in the system");
         writeZipFile(sourceFileBuilder, file);
     }
 
