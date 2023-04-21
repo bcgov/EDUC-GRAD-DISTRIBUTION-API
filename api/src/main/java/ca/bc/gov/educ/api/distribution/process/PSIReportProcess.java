@@ -446,9 +446,6 @@ public class PSIReportProcess extends BaseProcess {
         }
         StringBuilder sourceFileBuilder = new StringBuilder().append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.FILES_FOLDER_STRUCTURE).append(transmissionMode.toUpperCase()).append(EducDistributionApiConstants.DEL).append(batchId);
         File file = new File(EducDistributionApiConstants.TMP_DIR + EducDistributionApiConstants.FILES_FOLDER_STRUCTURE + transmissionMode.toUpperCase() + "/EDGRAD.BATCH." + batchId + ".zip");
-        System.out.println("Source file builder" + sourceFileBuilder.toString());
-        if(file.exists())
-            System.out.println("Yes file path exists in the system");
         writeZipFile(sourceFileBuilder, file);
     }
 
