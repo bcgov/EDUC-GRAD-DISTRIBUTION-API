@@ -1058,16 +1058,17 @@ public class DistributionServiceTest {
 
 	@Test
 	public void testdistributeCredentialsPSI() {
-		DistributionResponse res = testpsidistributeCredential("PSPR",null);
+		DistributionResponse res = testpsidistributeCredential("PSPR","Y", "ftp");
+		assertNotNull(res);
+		res = testpsidistributeCredential("PSPR","Y", "paper");
 		assertNotNull(res);
 	}
 
-	private DistributionResponse testpsidistributeCredential(String runType, String localDownload) {
+	private DistributionResponse testpsidistributeCredential(String runType, String localDownload, String transmissionMode) {
 		String activityCode = null;
 		Long batchId= 9029L;
 		Map<String, DistributionPrintRequest > mapDist= new HashMap<>();
 		String accessToken = MOCK_TOKEN;
-		String transmissionMode = "ftp";
 		String psiCode = "001";
 
 		Psi psiObj = new Psi();
@@ -1139,6 +1140,13 @@ public class DistributionServiceTest {
 		GradStudentTranscripts studentTranscripts = new GradStudentTranscripts();
 		studentTranscripts.setStudentID(scd.getStudentID());
 		studentTranscripts.setTranscript(Base64.encodeBase64String(greBPack));
+
+		when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+		when(this.requestHeadersUriMock.uri(String.format(constants.getTranscriptUsingStudentID(), scd.getStudentID()))).thenReturn(this.requestHeadersMock);
+		when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<GradStudentTranscripts>>() {
+		})).thenReturn(Mono.just(List.of(studentTranscripts)));
 
 		when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
 		when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolReportsByReportType(), "ADDRESS_LABEL_PSI", "000000000"))).thenReturn(this.requestHeadersMock);
