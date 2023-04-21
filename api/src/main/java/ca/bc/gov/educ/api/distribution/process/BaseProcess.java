@@ -115,7 +115,7 @@ public abstract class BaseProcess implements DistributionProcess {
     }
 
     protected int processDistrictSchoolDistribution(ProcessorData processorData, String schooLabelReportType, String districtReportType, String schoolReportType) {
-        return postingDistributionService.processDistrictSchoolDistribution(processorData,schooLabelReportType, districtReportType, schoolReportType);
+        return postingDistributionService.processDistrictSchoolDistribution(processorData, schooLabelReportType, districtReportType, schoolReportType);
     }
 
     protected void mergeDocuments(ProcessorData processorData, String mincode, String schoolCategoryCode, String fileName, String paperType, List<InputStream> locations) {

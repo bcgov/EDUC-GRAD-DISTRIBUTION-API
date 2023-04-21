@@ -56,7 +56,7 @@ public class PSIReportProcess extends BaseProcess{
 		}
 		restUtils.fetchAccessToken(processorData);
 		logger.debug("***** Create and Store school labels reports *****");
-		int numberOfCreatedSchoolLabelReports = createSchoolLabelsReport(schoolsForLabels, ADDRESS_LABEL_PSI );
+		int numberOfCreatedSchoolLabelReports = createSchoolLabelsReport(schoolsForLabels, ADDRESS_LABEL_PSI);
 		logger.debug("***** Number of created school labels reports {} *****", numberOfCreatedSchoolLabelReports);
 		logger.debug("***** Distribute school labels reports *****");
 		int numberOfProcessedSchoolLabelsReports = processDistrictSchoolDistribution(processorData, ADDRESS_LABEL_PSI, null, null);
