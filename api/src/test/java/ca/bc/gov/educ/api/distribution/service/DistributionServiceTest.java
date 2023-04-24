@@ -1060,10 +1060,10 @@ public class DistributionServiceTest {
 	public void testdistributeCredentialsPSI() {
 		DistributionResponse res = testpsidistributeCredential("PSPR","Y", "ftp");
 		assertNotNull(res);
-		res = testpsidistributeCredential("PSPR","Y", "paper");
+		res = testpsidistributeCredential("PSPR","N", "paper");
 		assertNotNull(res);
 	}
-
+    // testcase for PSIRUNs for both ftp and paper.
 	private DistributionResponse testpsidistributeCredential(String runType, String localDownload, String transmissionMode) {
 		String activityCode = null;
 		Long batchId= 9029L;
@@ -1096,28 +1096,52 @@ public class DistributionServiceTest {
 		printRequest.setPsiCredentialPrintRequest(cReq);
 		mapDist.put(psiCode,printRequest);
 
+		//Grad2-1931 Setting properties for report data to test PSI FTP transmission mode.
 		ReportData data = new ReportData();
 		Student student = new Student();
+		student.setFirstName("aaa");
+		student.setLastName("bbbb");
+		student.setBirthdate(new Date(270597));
 		GraduationData gradData = new GraduationData();
+		gradData.setDogwoodFlag(true);
+		gradData.setHonorsFlag(false);
+		gradData.setTotalCreditsUsedForGrad("");
 		GraduationStatus gradStatus = new GraduationStatus();
+		gradStatus.setSchoolOfRecord("cccc");
+		gradStatus.setGraduationMessage("xxxx");
 		student.setGraduationData(gradData);
 		student.setGraduationStatus(gradStatus);
 		data.setStudent(student);
 		data.setSchool(new School());
 		Transcript transcript = new Transcript();
-		TranscriptResult result = new TranscriptResult();
+		data.setTranscript(transcript);
+		TranscriptResult result1 = new TranscriptResult();
 		TranscriptResult result2 = new TranscriptResult();
 		TranscriptResult result3 = new TranscriptResult();
 		List<TranscriptResult> listOfResults = new ArrayList<TranscriptResult>();
-		listOfResults.add(result);
+		listOfResults.add(result1);
 		listOfResults.add(result2);
 		listOfResults.add(result3);
 		transcript.setResults(listOfResults);
-		TranscriptCourse course = new TranscriptCourse();
-		course.setType("1");
-		result.setCourse(course);
-		result.setMark(new Mark());
-		data.setTranscript(transcript);
+		TranscriptCourse course1 = new TranscriptCourse();
+		TranscriptCourse course2 = new TranscriptCourse();
+		TranscriptCourse course3 = new TranscriptCourse();
+		result1.setEquivalency("Result1Course1Type1");
+		result2.setEquivalency("Result2Course2Type2");
+		result3.setEquivalency("Result3Course3type3");
+		result1.setCourse(course1);
+		result2.setCourse(course2);
+		result3.setCourse(course3);
+		course1.setType("1");
+		course2.setType("2");
+		course3.setType("3");
+		Mark mark = new Mark();
+		mark.setInterimLetterGrade("A");
+		result1.setMark(mark);
+		result2.setMark(mark);
+		result3.setMark(mark);
+		result1.setUsedForGrad("04");
+
 
 		byte[] bytesSAR = "Any String you want".getBytes();
 		InputStreamResource inSRCert = new InputStreamResource(new ByteArrayInputStream(bytesSAR));
@@ -1190,7 +1214,7 @@ public class DistributionServiceTest {
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(ResponseObj.class)).thenReturn(Mono.just(tokenObject));
 
-		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,transmissionMode.toUpperCase(),localDownload,accessToken);
+        return gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,transmissionMode.toUpperCase(),localDownload,accessToken);
 	}
 
 	protected void mockTraxSchool(String mincode) {
