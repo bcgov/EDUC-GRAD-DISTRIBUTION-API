@@ -47,9 +47,9 @@ public class SFTPUtils {
     private static Logger logger = LoggerFactory.getLogger(SFTPUtils.class);
 
     public boolean sftpUploadBCMail(Long batchId) {
-        String localFile = "/tmp/EDGRAD.BATCH."+batchId+".zip";
+        String localFile = EducDistributionApiConstants.TMP_DIR + "/EDGRAD.BATCH."+batchId+".zip";
         String remoteFile = BC_MAIL_LOCATION+"EDGRAD.BATCH."+batchId+".zip";
-        String localControlFile = "/tmp/EDGRAD.BATCH."+batchId+".txt";
+        String localControlFile = EducDistributionApiConstants.TMP_DIR + "/EDGRAD.BATCH."+batchId+".txt";
         String remoteControlFile = BC_MAIL_LOCATION+"EDGRAD.BATCH."+batchId+".txt";
         Session jschSession = null;
 
@@ -82,9 +82,9 @@ public class SFTPUtils {
     }
 
     public boolean sftpUploadBCMail(Long batchId, String mincode) {
-        String localFile = "/tmp/EDGRAD.BATCH."+batchId+"."+mincode+".zip";
+        String localFile = EducDistributionApiConstants.TMP_DIR + "/EDGRAD.BATCH."+batchId+"."+mincode+".zip";
         String remoteFile = BC_MAIL_LOCATION+"EDGRAD.BATCH."+batchId+"."+mincode+".zip";
-        String localControlFile = "/tmp/EDGRAD.BATCH."+batchId+"."+mincode+".txt";
+        String localControlFile = EducDistributionApiConstants.TMP_DIR + "/EDGRAD.BATCH."+batchId+"."+mincode+".txt";
         String remoteControlFile = BC_MAIL_LOCATION+"EDGRAD.BATCH."+batchId+"."+mincode+".txt";
         Session jschSession = null;
 
@@ -124,7 +124,7 @@ public class SFTPUtils {
     }
 
     public boolean sftpUploadTSW(Long batchId,String mincode,String fileName) {
-        String localFile = "/tmp/"+batchId+"/"+mincode+"/"+fileName+".pdf";
+        String localFile = EducDistributionApiConstants.TMP_DIR + EducDistributionApiConstants.DEL + batchId + EducDistributionApiConstants.DEL + mincode + EducDistributionApiConstants.DEL + fileName+".pdf";
         String remoteFile = "/$1$dga5037/EDUC/XTD";
         String location1 = remoteFile+"/WEB/"+fileName+".pdf";
         String location2 = remoteFile+"/TSWSFTP/"+fileName+".pdf";

@@ -104,10 +104,9 @@ public class EducDistributionApiUtils {
 		return month.format(date);
 	}
 
-	public static String getFileNameWithMincodeReports(String mincode) {
+	public static String getFileNameSchoolReports(String mincode) {
 		return getFileName() + "." + mincode;
 	}
-
 	public static String formatDateForReport(String updatedTimestamp) {
 		SimpleDateFormat fromUser = new SimpleDateFormat("yyyy-MM-dd");
 		SimpleDateFormat myFormat = new SimpleDateFormat("yyyyMMdd");

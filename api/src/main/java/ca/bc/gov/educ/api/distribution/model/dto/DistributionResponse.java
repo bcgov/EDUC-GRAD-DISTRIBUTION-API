@@ -9,4 +9,7 @@ public class DistributionResponse {
     private String yedrResponse;
     private String yedbResponse;
     private String mergeProcessResponse;
+    //Grad2-1931
+    private String batchId;
+    private String localDownload;
 }
