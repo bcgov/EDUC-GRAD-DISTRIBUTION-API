@@ -1,6 +1,8 @@
 package ca.bc.gov.educ.api.distribution.config;
 
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import org.modelmapper.ModelMapper;
+import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,6 +12,9 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
 
 import java.io.FileFilter;
+import java.time.format.DateTimeFormatter;
+
+import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants.DATETIME_FORMAT;
 
 @Configuration
 public class EducDistributionApiConfig {
@@ -46,5 +51,11 @@ public class EducDistributionApiConfig {
         };
     }
 
-    
+    @Bean
+    public Jackson2ObjectMapperBuilderCustomizer jacksonObjectMapperCustomization() {
+        LocalDateTimeSerializer localDateTimeSerializer = new LocalDateTimeSerializer(DateTimeFormatter.ofPattern(DATETIME_FORMAT));
+        return jacksonObjectMapperBuilder ->
+                jacksonObjectMapperBuilder
+                        .serializers(localDateTimeSerializer);
+    }
 }

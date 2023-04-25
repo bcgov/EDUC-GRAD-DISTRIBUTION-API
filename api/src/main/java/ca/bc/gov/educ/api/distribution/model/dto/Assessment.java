@@ -1,5 +1,6 @@
 package ca.bc.gov.educ.api.distribution.model.dto;
 
+import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
@@ -16,7 +17,7 @@ public class Assessment implements Serializable {
     private Date issueDate;
     private List<AssessmentResult> results;
 
-    @JsonFormat(pattern="yyyy-MM-dd")
+    @JsonFormat(pattern= EducDistributionApiConstants.DEFAULT_DATE_FORMAT)
     public Date getIssueDate() {
         return issueDate;
     }

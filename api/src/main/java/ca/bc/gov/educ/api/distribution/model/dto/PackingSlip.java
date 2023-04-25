@@ -1,5 +1,6 @@
 package ca.bc.gov.educ.api.distribution.model.dto;
 
+import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
@@ -43,7 +44,7 @@ public class PackingSlip implements Serializable {
         this.orderType = orderType;
     }
 
-    @JsonFormat(pattern="yyyy-MM-dd")
+    @JsonFormat(pattern= EducDistributionApiConstants.DEFAULT_DATE_FORMAT)
     public Date getOrderDate() {
         return orderDate;
     }

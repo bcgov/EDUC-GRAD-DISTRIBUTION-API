@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.distribution.model.dto;
 
 
+import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -38,7 +39,7 @@ public class Transcript implements Serializable {
         this.transcriptTypeCode = code;
     }
 
-    @JsonFormat(pattern="yyyy-MM-dd")
+    @JsonFormat(pattern= EducDistributionApiConstants.DEFAULT_DATE_FORMAT)
     public Date getIssueDate() {
         return issueDate;
     }

@@ -1,5 +1,6 @@
 package ca.bc.gov.educ.api.distribution.model.dto;
 
+import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
@@ -91,7 +92,7 @@ public class Student implements Serializable {
         this.citizenship = citizenship;
     }
 
-    @JsonFormat(pattern="yyyy-MM-dd")
+    @JsonFormat(pattern=EducDistributionApiConstants.DEFAULT_DATE_FORMAT)
     public Date getBirthdate() {
         return birthdate;
     }
@@ -100,7 +101,7 @@ public class Student implements Serializable {
         this.birthdate = value;
     }
 
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern= EducDistributionApiConstants.DATETIME_FORMAT)
     public Date getLastUpdateDate() {
         return lastUpdateDate;
     }

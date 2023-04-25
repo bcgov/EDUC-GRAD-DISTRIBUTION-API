@@ -1,17 +1,18 @@
 package ca.bc.gov.educ.api.distribution.model.dto;
 
+import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlSeeAlso;
+import jakarta.xml.bind.annotation.XmlType;
 import lombok.Data;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 import org.springframework.stereotype.Component;
 
-import jakarta.xml.bind.annotation.XmlRootElement;
-import jakarta.xml.bind.annotation.XmlSeeAlso;
-import jakarta.xml.bind.annotation.XmlType;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
@@ -66,7 +67,7 @@ public class ReportData implements Serializable {
 	@JsonDeserialize(as = GraduationData.class)
 	private GraduationData graduationData;
 	private String gradMessage;
-	@JsonFormat(pattern="yyyy-MM-dd")
+	@JsonFormat(pattern= EducDistributionApiConstants.DEFAULT_DATE_FORMAT)
 	private String updateDate;
 	@JsonDeserialize(as = PackingSlip.class)
 	private PackingSlip packingSlip;
@@ -78,7 +79,7 @@ public class ReportData implements Serializable {
 	private String orgCode;
 
 	private String reportNumber;
-	@JsonFormat(pattern="yyyy-MM-dd")
+	@JsonFormat(pattern=EducDistributionApiConstants.DEFAULT_DATE_FORMAT)
 	private Date issueDate;
 
 	private String reportTitle;
