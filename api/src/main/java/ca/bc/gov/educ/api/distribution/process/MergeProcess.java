@@ -50,7 +50,7 @@ public class MergeProcess extends BaseProcess {
 			int currentSlipCount = 0;
 			String mincode = entry.getKey();
 			DistributionPrintRequest distributionPrintRequest = entry.getValue();
-			CommonSchool schoolDetails = getBaseSchoolDetails(distributionPrintRequest,mincode,processorData,exception);
+			CommonSchool schoolDetails = getBaseSchoolDetails(distributionPrintRequest,mincode,exception);
 			if(schoolDetails != null) {
 				String schoolCategoryCode = schoolDetails.getSchoolCategoryCode();
 				logger.debug("*** School Details Acquired {} category {}", mincode, schoolCategoryCode);
@@ -74,7 +74,7 @@ public class MergeProcess extends BaseProcess {
 				pV = processYedrCertificatePrintRequest(distributionPrintRequest,currentSlipCount,packSlipReq,studListNonGrad,processorData,mincode,schoolCategoryCode,numberOfPdfs);
 				numberOfPdfs = pV.getRight();
 				if(!studListNonGrad.isEmpty()) {
-					createAndSaveNonGradReport(schoolDetails,studListNonGrad,mincode,restUtils.getAccessToken());
+					createAndSaveNonGradReport(schoolDetails,studListNonGrad,mincode);
 				}
 				logger.debug("PDFs Merged {}", schoolDetails.getSchoolName());
 				processSchoolsForLabels(schoolsForLabels, mincode, restUtils.getAccessToken(), exception);
@@ -97,7 +97,7 @@ public class MergeProcess extends BaseProcess {
 		if (SUPPDIST.equalsIgnoreCase(processorData.getActivityCode())) {
 			logger.debug("***** Create and Store Supplemental school reports *****");
 			numberOfCreatedSchoolReports += createSchoolLabelsReport(schoolsForLabels, processorData.getAccessToken(), ADDRESS_LABEL_SCHL);
-			numberOfCreatedSchoolReports += createDistrictSchoolSuppReport(restUtils.getAccessToken(), null, null, DISTREP_SC);
+			numberOfCreatedSchoolReports += createDistrictSchoolSuppReport( null, null, DISTREP_SC);
 			logger.debug("***** Number of created Supplemental school reports {} *****", numberOfCreatedSchoolReports);
 			logger.debug("***** Distribute Supplemental school reports *****");
 			numberOfProcessedSchoolReports += processDistrictSchoolDistribution(processorData, ADDRESS_LABEL_SCHL, null, DISTREP_SC);
@@ -149,7 +149,7 @@ public class MergeProcess extends BaseProcess {
 		return Pair.of(currentSlipCount,numberOfPdfs);
 	}
 
-	private Pair<Integer, Integer> processTranscriptPrintRequest(DistributionPrintRequest obj, int currentSlipCount, ReportRequest packSlipReq, List<Student> studListNonGrad, ProcessorData processorData, String mincode, String schoolCategoryCode, int numberOfPdfs) {
+	protected Pair<Integer, Integer> processTranscriptPrintRequest(DistributionPrintRequest obj, int currentSlipCount, ReportRequest packSlipReq, List<Student> studListNonGrad, ProcessorData processorData, String mincode, String schoolCategoryCode, int numberOfPdfs) {
 		if (obj.getTranscriptPrintRequest() != null) {
 			TranscriptPrintRequest transcriptPrintRequest = obj.getTranscriptPrintRequest();
 			List<StudentCredentialDistribution> scdList = transcriptPrintRequest.getTranscriptList();
@@ -159,8 +159,8 @@ public class MergeProcess extends BaseProcess {
 			try {
 				locations.add(reportService.getPackingSlip(packSlipReq, restUtils.getAccessToken()).getInputStream());
 				logger.debug("*** Packing Slip Added");
-				processStudents(scdList,studListNonGrad,locations,processorData);
-				mergeDocuments(processorData,mincode,schoolCategoryCode,"/EDGRAD.T.","YED4",locations);
+				processStudents(scdList,studListNonGrad,locations);
+				mergeDocumentsPDFs(processorData,mincode,schoolCategoryCode,"/EDGRAD.T.","YED4",locations);
 				numberOfPdfs++;
 				logger.debug("*** Transcript Documents Merged ***");
 			} catch (IOException e) {
@@ -170,7 +170,7 @@ public class MergeProcess extends BaseProcess {
 		return Pair.of(currentSlipCount,numberOfPdfs);
 	}
 
-	private void processStudents(List<StudentCredentialDistribution> scdList, List<Student> studListNonGrad, List<InputStream> locations, ProcessorData processorData) throws IOException {
+	private void processStudents(List<StudentCredentialDistribution> scdList, List<Student> studListNonGrad, List<InputStream> locations) {
 		int currentTranscript = 0;
 		int failedToAdd = 0;
 		for (StudentCredentialDistribution scd : scdList) {
@@ -257,7 +257,7 @@ public class MergeProcess extends BaseProcess {
 					logger.debug("*** Failed to Add PDFs {} Current student {} papertype : {}",failedToAdd,scd.getStudentID(),paperType);
 				}
 			}
-			mergeDocuments(processorData,mincode,schoolCategoryCode,"/EDGRAD.C.",paperType,locations);
+			mergeDocumentsPDFs(processorData,mincode,schoolCategoryCode,"/EDGRAD.C.",paperType,locations);
 		} catch (IOException e) {
 			logger.debug(EXCEPTION,e.getLocalizedMessage());
 		}
@@ -272,15 +272,15 @@ public class MergeProcess extends BaseProcess {
 				byte[] encoded = Base64.encodeBase64(bytesSAR);
 				String encodedPdf = new String(encoded, StandardCharsets.US_ASCII);
 				if(!processorData.getActivityCode().contains("USERDIST"))
-					saveSchoolDistributionReport(encodedPdf,mincode,restUtils.getAccessToken(),"DISTREP_SC");
+					saveSchoolDistributionReport(encodedPdf,mincode,"DISTREP_SC");
 			}
-			mergeDocuments(processorData,mincode,schoolCategoryCode,"/EDGRAD.R.","324W",locations);
+			mergeDocumentsPDFs(processorData,mincode,schoolCategoryCode,"/EDGRAD.R.","324W",locations);
 		} catch (Exception e) {
 			logger.debug(EXCEPTION,e.getLocalizedMessage());
 		}
 	}
 
-	private void createAndSaveNonGradReport(CommonSchool schoolDetails, List<Student> studListNonGrad, String mincode, String accessToken) {
+	protected void createAndSaveNonGradReport(CommonSchool schoolDetails, List<Student> studListNonGrad, String mincode) {
 		ReportData nongradProjected = new ReportData();
 		School schObj = new School();
 		schObj.setMincode(schoolDetails.getDistNo()+schoolDetails.getSchlNo());
@@ -304,10 +304,10 @@ public class MergeProcess extends BaseProcess {
 		byte[] encoded = Base64.encodeBase64(bytesSAR);
 		assert encoded != null;
 		String encodedPdf = new String(encoded, StandardCharsets.US_ASCII);
-		saveSchoolDistributionReport(encodedPdf,mincode,accessToken, NONGRADDISTREP_SC);
+		saveSchoolDistributionReport(encodedPdf,mincode,NONGRADDISTREP_SC);
 	}
 
-	private void saveSchoolDistributionReport(String encodedPdf, String mincode, String accessToken, String reportType) {
+	private void saveSchoolDistributionReport(String encodedPdf, String mincode, String reportType) {
 		SchoolReports requestObj = new SchoolReports();
 		requestObj.setReport(encodedPdf);
 		requestObj.setSchoolOfRecord(mincode);

@@ -20,6 +20,8 @@ public class ProcessorData {
 	private Long batchId;
 	private String certificateProcessType;
 	private String activityCode;
+	//Grad2-1931
+	private String transmissionMode;
 	private String localDownload;
 	private List<StudentCredentialDistribution> transcriptList;
 	private List<StudentCredentialDistribution> yed2List;

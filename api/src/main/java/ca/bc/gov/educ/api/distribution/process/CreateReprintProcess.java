@@ -40,7 +40,7 @@ public class CreateReprintProcess extends BaseProcess {
 			int currentSlipCount = 0;
 			String mincode = entry.getKey();
 			DistributionPrintRequest obj = entry.getValue();
-			CommonSchool schoolDetails = getBaseSchoolDetails(obj,mincode,processorData,exception);
+			CommonSchool schoolDetails = getBaseSchoolDetails(obj,mincode,exception);
 			if(schoolDetails != null) {
 				logger.debug("*** School Details Acquired {}", schoolDetails.getSchoolName());
 
@@ -139,7 +139,7 @@ public class CreateReprintProcess extends BaseProcess {
 					logger.debug("*** Failed to Add PDFs {} Current student {}", failedToAdd, scd.getStudentID());
 				}
 			}
-			mergeDocuments(processorData,mincode,"02","/EDGRAD.C.",paperType,locations);
+			mergeDocumentsPDFs(processorData,mincode,"02","/EDGRAD.C.",paperType,locations);
 		} catch (IOException e) {
 			logger.debug(EXCEPTION,e.getMessage());
 		}
@@ -152,7 +152,7 @@ public class CreateReprintProcess extends BaseProcess {
 			if(bytesSAR != null) {
 				locations.add(new ByteArrayInputStream(bytesSAR));
 			}
-			mergeDocuments(processorData,mincode,"02","/EDGRAD.R.","324W",locations);
+			mergeDocumentsPDFs(processorData,mincode,"02","/EDGRAD.R.","324W",locations);
 		} catch (Exception e) {
 			logger.debug(EXCEPTION,e.getMessage());
 		}

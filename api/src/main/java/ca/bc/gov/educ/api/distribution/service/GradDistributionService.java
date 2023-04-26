@@ -6,6 +6,7 @@ import ca.bc.gov.educ.api.distribution.model.dto.ProcessorData;
 import ca.bc.gov.educ.api.distribution.process.DistributionProcess;
 import ca.bc.gov.educ.api.distribution.process.DistributionProcessFactory;
 import ca.bc.gov.educ.api.distribution.process.DistributionProcessType;
+import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import ca.bc.gov.educ.api.distribution.util.RestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,10 +34,13 @@ public class GradDistributionService {
         this.restUtils = restUtils;
     }
 
-    public DistributionResponse distributeCredentials(String runType, Long batchId, Map<String, DistributionPrintRequest> mapDist, String activityCode, String localDownload, String accessToken) {
-        ProcessorData data = ProcessorData.builder().batchId(batchId).accessToken(accessToken).distributionResponse(null).mapDistribution(mapDist).activityCode(activityCode).localDownload(localDownload).build();
+    public DistributionResponse distributeCredentials(String runType, Long batchId, Map<String, DistributionPrintRequest> mapDist, String activityCode, String transmissionMode,String localDownload, String accessToken) {
+        ProcessorData data = ProcessorData.builder().batchId(batchId).accessToken(accessToken).distributionResponse(null).mapDistribution(mapDist).activityCode(activityCode).transmissionMode(transmissionMode).localDownload(localDownload).build();
         DistributionResponse disRes = new DistributionResponse();
         disRes.setMergeProcessResponse(processDistribution(runType,data).getMergeProcessResponse());
+        //Grad2-1931 setting the batchId and enabling local download for Users - mchintha
+        disRes.setBatchId(data.getBatchId().toString());
+        disRes.setLocalDownload(data.getLocalDownload());
         return disRes;
     }
 
@@ -48,8 +52,15 @@ public class GradDistributionService {
         return data.getDistributionResponse();
     }
 
-    public byte[] getDownload(Long batchId) {
-        String localFile = "/tmp/EDGRAD.BATCH."+batchId+".zip";
+    //Grad2-1931 Changed the zipped folder path to fetch - mchintha
+    public byte[] getDownload(Long batchId, String transmissionMode) {
+        String localFile = null;
+        if((transmissionMode != null) && (transmissionMode.equalsIgnoreCase(EducDistributionApiConstants.TRANSMISSION_MODE_FTP) || transmissionMode.equalsIgnoreCase(EducDistributionApiConstants.TRANSMISSION_MODE_PAPER))) {
+            localFile = EducDistributionApiConstants.TMP_DIR + EducDistributionApiConstants.FILES_FOLDER_STRUCTURE + transmissionMode.toUpperCase() + "/EDGRAD.BATCH." + batchId + ".zip";
+        }
+        else {
+            localFile = EducDistributionApiConstants.TMP_DIR + "/EDGRAD.BATCH." + batchId + ".zip";
+        }
         Path path = Paths.get(localFile);
         try {
             return Files.readAllBytes(path);

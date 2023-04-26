@@ -42,7 +42,7 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 			int currentSlipCount = 0;
 			String mincode = entry.getKey();
 			DistributionPrintRequest obj = entry.getValue();
-			CommonSchool schoolDetails = getBaseSchoolDetails(obj,mincode,processorData,exception);
+			CommonSchool schoolDetails = getBaseSchoolDetails(obj,mincode,exception);
 			if(schoolDetails != null) {
 				logger.debug("*** School Details Acquired {}", schoolDetails.getSchoolName());
 
@@ -101,7 +101,7 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 						logger.debug("*** Failed to Add PDFs {} Current Credential {}", failedToAdd, bcd.getCredentialTypeCode());
 					}
 				}
-				mergeDocuments(processorData,mincode,"02","/EDGRAD.T.","YED4",locations);
+				mergeDocumentsPDFs(processorData,mincode,"02","/EDGRAD.T.","YED4",locations);
 				numberOfPdfs++;
 				logger.debug("*** Transcript Documents Merged");
 			} catch (IOException e) {
@@ -176,7 +176,7 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 					logger.debug("*** Failed to Add PDFs {} Current Credential {}", failedToAdd, bcd.getCredentialTypeCode());
 				}
 			}
-			mergeDocuments(processorData,mincode,"02","/EDGRAD.C.",paperType,locations);
+			mergeDocumentsPDFs(processorData,mincode,"02","/EDGRAD.C.",paperType,locations);
 		} catch (IOException e) {
 			logger.debug(EXCEPTION,e.getMessage());
 		}
