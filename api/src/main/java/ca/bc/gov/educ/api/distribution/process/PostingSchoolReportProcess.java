@@ -69,7 +69,7 @@ public class PostingSchoolReportProcess extends BaseProcess {
 				if (gradReportPdf != null) {
 					locations.add(gradReportPdf.getInputStream());
 					logger.debug("*** Added PDFs Current Report Type {}", scdReport.getReportTypeCode());
-					mergeDocuments(processorData, mincode, EducDistributionApiUtils.getFileNameWithMincodeReports(mincode), locations);
+					mergeDocuments(processorData, mincode, EducDistributionApiUtils.getFileNameSchoolReports(mincode), locations);
 					numberOfPdfs++;
 				} else {
 					logger.debug("*** Failed to Add PDFs Current Report Type {}", scdReport.getReportTypeCode());
@@ -86,11 +86,11 @@ public class PostingSchoolReportProcess extends BaseProcess {
 		try {
 			PDFMergerUtility objs = new PDFMergerUtility();
 			StringBuilder pBuilder = new StringBuilder();
-			pBuilder.append(EducDistributionApiConstants.TMP_DIR).append(processorData.getBatchId()).append(DEL).append(mincode).append(DEL);
+			pBuilder.append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.DEL).append(processorData.getBatchId()).append(EducDistributionApiConstants.DEL).append(mincode).append(EducDistributionApiConstants.DEL);
 			Path path = Paths.get(pBuilder.toString());
 			Files.createDirectories(path);
 			pBuilder = new StringBuilder();
-			pBuilder.append(EducDistributionApiConstants.TMP_DIR).append(processorData.getBatchId()).append(DEL).append(mincode).append(DEL).append(fileName).append(".pdf");
+			pBuilder.append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.DEL).append(processorData.getBatchId()).append(EducDistributionApiConstants.DEL).append(mincode).append(EducDistributionApiConstants.DEL).append(fileName).append(".pdf");
 			objs.setDestinationFileName(pBuilder.toString());
 			objs.addSources(locations);
 			objs.mergeDocuments(MemoryUsageSetting.setupMainMemoryOnly());

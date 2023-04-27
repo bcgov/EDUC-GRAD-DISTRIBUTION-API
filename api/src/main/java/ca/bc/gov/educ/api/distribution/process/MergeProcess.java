@@ -2,6 +2,7 @@ package ca.bc.gov.educ.api.distribution.process;
 
 import ca.bc.gov.educ.api.distribution.model.dto.*;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils;
+import ca.bc.gov.educ.api.distribution.util.Generated;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -35,6 +36,7 @@ public class MergeProcess extends BaseProcess {
 	private static Logger logger = LoggerFactory.getLogger(MergeProcess.class);
 
 	@Override
+	@Generated
 	public ProcessorData fire(ProcessorData processorData) {
 		long startTime = System.currentTimeMillis();
 		logger.debug("************* TIME START  ************ {}",startTime);
@@ -88,7 +90,7 @@ public class MergeProcess extends BaseProcess {
 		int numberOfProcessedSchoolReports = 0;
 		if(MONTHLYDIST.equalsIgnoreCase(processorData.getActivityCode())) {
 			logger.debug("***** Create and Store Monthly school reports *****");
-			numberOfCreatedSchoolReports += createDistrictSchoolMonthReport(ADDRESS_LABEL_SCHL, null, null);
+			numberOfCreatedSchoolReports += createSchoolLabelsReport(schoolsForLabels, ADDRESS_LABEL_SCHL);
 			logger.debug("***** Number of created Monthly school reports {} *****", numberOfCreatedSchoolReports);
 			logger.debug("***** Distribute Monthly school reports *****");
 			numberOfProcessedSchoolReports += processDistrictSchoolDistribution(processorData, ADDRESS_LABEL_SCHL, null, null);
@@ -96,7 +98,8 @@ public class MergeProcess extends BaseProcess {
 		}
 		if (SUPPDIST.equalsIgnoreCase(processorData.getActivityCode())) {
 			logger.debug("***** Create and Store Supplemental school reports *****");
-			numberOfCreatedSchoolReports += createDistrictSchoolSuppReport(ADDRESS_LABEL_SCHL, null, DISTREP_SC);
+			numberOfCreatedSchoolReports += createSchoolLabelsReport(schoolsForLabels, ADDRESS_LABEL_SCHL);
+			numberOfCreatedSchoolReports += createDistrictSchoolSuppReport( null, null, DISTREP_SC);
 			logger.debug("***** Number of created Supplemental school reports {} *****", numberOfCreatedSchoolReports);
 			logger.debug("***** Distribute Supplemental school reports *****");
 			numberOfProcessedSchoolReports += processDistrictSchoolDistribution(processorData, ADDRESS_LABEL_SCHL, null, DISTREP_SC);
@@ -159,7 +162,7 @@ public class MergeProcess extends BaseProcess {
 				locations.add(reportService.getPackingSlip(packSlipReq, restUtils.getAccessToken()).getInputStream());
 				logger.debug("*** Packing Slip Added");
 				processStudents(scdList,studListNonGrad,locations);
-				mergeDocuments(processorData,mincode,schoolCategoryCode,"/EDGRAD.T.","YED4",locations);
+				mergeDocumentsPDFs(processorData,mincode,schoolCategoryCode,"/EDGRAD.T.","YED4",locations);
 				numberOfPdfs++;
 				logger.debug("*** Transcript Documents Merged ***");
 			} catch (IOException e) {
@@ -169,7 +172,7 @@ public class MergeProcess extends BaseProcess {
 		return Pair.of(currentSlipCount,numberOfPdfs);
 	}
 
-	protected void processStudents(List<StudentCredentialDistribution> scdList, List<Student> studListNonGrad, List<InputStream> locations) throws IOException {
+	private void processStudents(List<StudentCredentialDistribution> scdList, List<Student> studListNonGrad, List<InputStream> locations) {
 		int currentTranscript = 0;
 		int failedToAdd = 0;
 		for (StudentCredentialDistribution scd : scdList) {
@@ -273,7 +276,7 @@ public class MergeProcess extends BaseProcess {
 				if(!processorData.getActivityCode().contains("USERDIST"))
 					saveSchoolDistributionReport(encodedPdf,mincode,"DISTREP_SC");
 			}
-			mergeDocuments(processorData,mincode,schoolCategoryCode,"/EDGRAD.R.","324W",locations);
+			mergeDocumentsPDFs(processorData,mincode,schoolCategoryCode,"/EDGRAD.R.","324W",locations);
 		} catch (Exception e) {
 			logger.debug(EXCEPTION,e.getLocalizedMessage());
 		}
@@ -306,7 +309,7 @@ public class MergeProcess extends BaseProcess {
 		saveSchoolDistributionReport(encodedPdf,mincode,NONGRADDISTREP_SC);
 	}
 
-	protected void saveSchoolDistributionReport(String encodedPdf, String mincode, String reportType) {
+	private void saveSchoolDistributionReport(String encodedPdf, String mincode, String reportType) {
 		SchoolReports requestObj = new SchoolReports();
 		requestObj.setReport(encodedPdf);
 		requestObj.setSchoolOfRecord(mincode);

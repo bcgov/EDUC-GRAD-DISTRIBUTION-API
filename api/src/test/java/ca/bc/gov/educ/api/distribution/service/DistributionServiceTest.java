@@ -195,7 +195,8 @@ public class DistributionServiceTest {
 	@Test
 	public void testGetDownload() {
 		Long batchId= 9029L;
-		byte[] arr = gradDistributionService.getDownload(batchId);
+		String transmissionMode = "ftp";
+		byte[] arr = gradDistributionService.getDownload(batchId, transmissionMode.toUpperCase());
 		assertNotNull(arr);
 	}
 
@@ -213,6 +214,8 @@ public class DistributionServiceTest {
 	private DistributionResponse testdistributeSchoolReport(String runType, String reportType, String activityCode) {
 		Long batchId= 9029L;
 		Map<String, DistributionPrintRequest > mapDist = new HashMap<>();
+		String localDownload = null;
+		String transmissionMode = "ftp";
 		String accessToken = MOCK_TOKEN;
 		String mincode = "123123133";
 
@@ -256,6 +259,8 @@ public class DistributionServiceTest {
 
 		mockTraxSchool(mincode);
 		mockTraxDistrict("123");
+
+		byte[] bytesSAR = "Any String you want".getBytes();
 
 		byte[] greBPack = "Any String you want".getBytes();
 		InputStreamResource inSRPack = new InputStreamResource(new ByteArrayInputStream(greBPack));
@@ -427,6 +432,18 @@ public class DistributionServiceTest {
 		when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(2));
 
 		when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+		when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolDistrictSupplementalReport(), "ADDRESS_LABEL_SCHL", null, null))).thenReturn(this.requestHeadersMock);
+		when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(2));
+
+		when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+		when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolDistrictSupplementalReport(), null, null, "DISTREP_SC"))).thenReturn(this.requestHeadersMock);
+		when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(2));
+
+		when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
 		when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolDistrictStudentNonGradReport(), "ADDRESS_LABEL_YE", null, null))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
@@ -448,7 +465,7 @@ public class DistributionServiceTest {
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(Psi.class)).thenReturn(Mono.just(psi));
 
-		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,null,accessToken);
+		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,transmissionMode.toUpperCase(),null,accessToken);
 	}
 
 	private ResponseObj getMockResponseObject(){
@@ -534,7 +551,7 @@ public class DistributionServiceTest {
 		when(this.responseMock.bodyToMono(CommonSchool.class)).thenReturn(inputResponseSchool);
 		when(this.inputResponseSchool.block()).thenReturn(schObj);
 
-		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,null,localDownload,accessToken);
+		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,null,transmissionMode,localDownload,accessToken);
 	}
 
 	private DistributionResponse testdistributeCredentials_certificate_blank(String runType,String paperType) {
@@ -609,7 +626,7 @@ public class DistributionServiceTest {
 		when(this.responseMock.bodyToMono(ResponseObj.class)).thenReturn(Mono.just(tokenObject));
 
 		Mockito.when(schoolService.getCommonSchoolDetails(mincode,exception)).thenReturn(schObj);
-		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,null,null,accessToken);
+		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,null, transmissionMode,null,accessToken);
 	}
 
 	private DistributionResponse testdistributeCredentials_transcript(String runType, String activityCode,boolean schoolNull,String localDownload) {
@@ -736,7 +753,7 @@ public class DistributionServiceTest {
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(ResponseObj.class)).thenReturn(Mono.just(tokenObject));
 
-		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,localDownload,accessToken);
+		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,transmissionMode.toUpperCase(),localDownload,accessToken);
 	}
 
 	private DistributionResponse testdistributeCredentials_certificate(String runType, String activityCode,String paperType,String properName,boolean noSchoolDis) {
@@ -878,7 +895,7 @@ public class DistributionServiceTest {
 
 		if(properName == null)
 			Mockito.when(schoolService.getCommonSchoolDetails(mincode,exception)).thenReturn(schObj);
-		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,localDownload,accessToken);
+		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,transmissionMode,localDownload,accessToken);
 	}
 
 	private DistributionResponse testdistributeCredentials_certificate_reprint(String runType, String activityCode,String paperType,boolean schoolNull) {
@@ -886,6 +903,7 @@ public class DistributionServiceTest {
 		Map<String, DistributionPrintRequest > mapDist= new HashMap<>();
 		String localDownload = null;
 		String accessToken = MOCK_TOKEN;
+		String transmissionMode = "ftp";
 		String mincode = "123123133";
 
 		CommonSchool schObj =null;
@@ -1032,16 +1050,18 @@ public class DistributionServiceTest {
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(ResponseObj.class)).thenReturn(Mono.just(tokenObject));
 
-		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,localDownload,accessToken);
+		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,transmissionMode,localDownload,accessToken);
 	}
 
 	@Test
 	public void testdistributeCredentialsPSI() {
-		DistributionResponse res = testpsidistributeCredential("PSPR",null);
+		DistributionResponse res = testpsidistributeCredential("PSPR","Y", "ftp");
+		assertNotNull(res);
+		res = testpsidistributeCredential("PSPR","Y", "paper");
 		assertNotNull(res);
 	}
-
-	private DistributionResponse testpsidistributeCredential(String runType, String localDownload) {
+    // testcase for PSIRUNs for both ftp and paper.
+	private DistributionResponse testpsidistributeCredential(String runType, String localDownload, String transmissionMode) {
 		String activityCode = null;
 		Long batchId= 9029L;
 		Map<String, DistributionPrintRequest > mapDist= new HashMap<>();
@@ -1074,6 +1094,53 @@ public class DistributionServiceTest {
 		printRequest.setPsiCredentialPrintRequest(cReq);
 		mapDist.put(psiCode,printRequest);
 
+		//Grad2-1931 Setting properties for report data to test PSI FTP transmission mode.
+		ReportData data = new ReportData();
+		Student student = new Student();
+		student.setFirstName("aaa");
+		student.setLastName("bbbb");
+		student.setBirthdate(new Date(270597));
+		GraduationData gradData = new GraduationData();
+		gradData.setDogwoodFlag(true);
+		gradData.setHonorsFlag(false);
+		gradData.setTotalCreditsUsedForGrad("");
+		GraduationStatus gradStatus = new GraduationStatus();
+		gradStatus.setSchoolOfRecord("cccc");
+		gradStatus.setGraduationMessage("xxxx");
+		student.setGraduationData(gradData);
+		student.setGraduationStatus(gradStatus);
+		data.setStudent(student);
+		data.setSchool(new School());
+		Transcript transcript = new Transcript();
+		data.setTranscript(transcript);
+		TranscriptResult result1 = new TranscriptResult();
+		TranscriptResult result2 = new TranscriptResult();
+		TranscriptResult result3 = new TranscriptResult();
+		List<TranscriptResult> listOfResults = new ArrayList<TranscriptResult>();
+		listOfResults.add(result1);
+		listOfResults.add(result2);
+		listOfResults.add(result3);
+		transcript.setResults(listOfResults);
+		TranscriptCourse course1 = new TranscriptCourse();
+		TranscriptCourse course2 = new TranscriptCourse();
+		TranscriptCourse course3 = new TranscriptCourse();
+		result1.setEquivalency("Result1Course1Type1");
+		result2.setEquivalency("Result2Course2Type2");
+		result3.setEquivalency("Result3Course3type3");
+		result1.setCourse(course1);
+		result2.setCourse(course2);
+		result3.setCourse(course3);
+		course1.setType("1");
+		course2.setType("2");
+		course3.setType("3");
+		Mark mark = new Mark();
+		mark.setInterimLetterGrade("A");
+		result1.setMark(mark);
+		result2.setMark(mark);
+		result3.setMark(mark);
+		result1.setUsedForGrad("04");
+
+
 		byte[] bytesSAR = "Any String you want".getBytes();
 		InputStreamResource inSRCert = new InputStreamResource(new ByteArrayInputStream(bytesSAR));
 		when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
@@ -1091,6 +1158,17 @@ public class DistributionServiceTest {
 		when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(byte[].class)).thenReturn(Mono.just(greBPack));
+
+		GradStudentTranscripts studentTranscripts = new GradStudentTranscripts();
+		studentTranscripts.setStudentID(scd.getStudentID());
+		studentTranscripts.setTranscript(Base64.encodeBase64String(greBPack));
+
+		when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+		when(this.requestHeadersUriMock.uri(String.format(constants.getTranscriptUsingStudentID(), scd.getStudentID()))).thenReturn(this.requestHeadersMock);
+		when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<GradStudentTranscripts>>() {
+		})).thenReturn(Mono.just(List.of(studentTranscripts)));
 
 		when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
 		when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolReportsByReportType(), "ADDRESS_LABEL_PSI", "000000000"))).thenReturn(this.requestHeadersMock);
@@ -1118,6 +1196,14 @@ public class DistributionServiceTest {
 		tokenObject.setAccess_token(MOCK_TOKEN);
 		tokenObject.setRefresh_token("456");
 
+		//Grad2-1931 checking for CSV transcripts - mchintha
+		when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+		when(this.requestHeadersUriMock.uri(String.format(constants.getTranscriptCSVData(), scd.getPen()))).thenReturn(this.requestHeadersMock);
+		when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.bodyToMono(ReportData.class)).thenReturn(inputResponseReport);
+		when(this.inputResponseReport.block()).thenReturn(data);
+
 		when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
 		when(this.requestBodyUriMock.uri(constants.getTokenUrl())).thenReturn(this.requestBodyUriMock);
 		when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
@@ -1126,7 +1212,7 @@ public class DistributionServiceTest {
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(ResponseObj.class)).thenReturn(Mono.just(tokenObject));
 
-		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,localDownload,accessToken);
+        return gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,transmissionMode.toUpperCase(),localDownload,accessToken);
 	}
 
 	protected void mockTraxSchool(String mincode) {

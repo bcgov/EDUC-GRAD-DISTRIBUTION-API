@@ -13,5 +13,8 @@ public class DistributionResponse {
     private String yedbResponse;
     private String mergeProcessResponse;
     private int numberOfPdfs;
+    //Grad2-1931
+    private String batchId;
+    private String localDownload;
     private List<School> schools = new ArrayList<>();
 }

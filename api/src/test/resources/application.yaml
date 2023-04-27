@@ -119,6 +119,8 @@ endpoint:
       url: https://educ-grad-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/reports/transcriptreport
     student_non_grad: https://educ-grad-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/reports/studentnongrad
   grad-graduation-api:
+    student-report-by-pen:
+      url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduate/report/data/%s
     report-by-pen:
       url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduate/report/data/%s?type=CERT
     school_district_year_end_report:
