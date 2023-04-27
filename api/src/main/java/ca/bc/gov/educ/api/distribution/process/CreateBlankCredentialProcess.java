@@ -10,7 +10,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.BodyInserters;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -77,7 +76,7 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 			int totalQuantity = transcriptPrintRequest.getBlankTranscriptList().get(0).getQuantity() * bcdList.size();
 			setExtraDataForPackingSlip(packSlipReq, "YED4", obj.getTotal(), totalQuantity, currentSlipCount, transcriptPrintRequest.getBatchId());
 			try {
-				locations.add(reportService.getPackingSlip(packSlipReq, restUtils.getAccessToken()).getInputStream());
+				locations.add(reportService.getPackingSlip(packSlipReq).getInputStream());
 				logger.debug("*** Packing Slip Added");
 				int currentTranscript = 0;
 				int failedToAdd = 0;
@@ -89,7 +88,7 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 					ReportRequest reportParams = new ReportRequest();
 					reportParams.setOptions(options);
 					reportParams.setData(data);
-					byte[] bytesSAR = webClient.post().uri(educDistributionApiConstants.getTranscriptReport()).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).body(BodyInserters.fromValue(reportParams)).retrieve().bodyToMono(byte[].class).block();
+					byte[] bytesSAR = restService.executePost(educDistributionApiConstants.getTranscriptReport(), byte[].class, reportParams);
 					if (bytesSAR != null) {
 						for(int i=1;i<=bcd.getQuantity();i++) {
 							locations.add(new ByteArrayInputStream(bytesSAR));
@@ -153,7 +152,7 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 		int totalQuantity = certificatePrintRequest.getBlankCertificateList().get(0).getQuantity() * bcdList.size();
 		setExtraDataForPackingSlip(packSlipReq,paperType,request.getTotal(),totalQuantity,request.getCurrentSlip(),certificatePrintRequest.getBatchId());
 		try {
-			locations.add(reportService.getPackingSlip(packSlipReq,restUtils.getAccessToken()).getInputStream());
+			locations.add(reportService.getPackingSlip(packSlipReq).getInputStream());
 			int currentCertificate = 0;
 			int failedToAdd = 0;
 			for (BlankCredentialDistribution bcd : bcdList) {
@@ -164,7 +163,7 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 				ReportRequest reportParams = new ReportRequest();
 				reportParams.setOptions(options);
 				reportParams.setData(data);
-				byte[] bytesSAR = webClient.post().uri(educDistributionApiConstants.getCertificateReport()).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).body(BodyInserters.fromValue(reportParams)).retrieve().bodyToMono(byte[].class).block();
+				byte[] bytesSAR = restService.executePost(educDistributionApiConstants.getCertificateReport(), byte[].class, reportParams);
 				if (bytesSAR != null) {
 					for(int i=1;i<=bcd.getQuantity();i++) {
 						locations.add(new ByteArrayInputStream(bytesSAR));

@@ -67,7 +67,7 @@ public class PSIReportProcess extends BaseProcess {
         }
         restUtils.fetchAccessToken(processorData);
         logger.debug("***** Create and Store school labels reports *****");
-        int numberOfCreatedSchoolLabelReports = createSchoolLabelsReport(schoolsForLabels, processorData.getAccessToken(), ADDRESS_LABEL_PSI);
+        int numberOfCreatedSchoolLabelReports = createSchoolLabelsReport(schoolsForLabels, ADDRESS_LABEL_PSI);
         logger.debug("***** Number of created school labels reports {} *****", numberOfCreatedSchoolLabelReports);
         logger.debug("***** Distribute school labels reports *****");
         int numberOfProcessedSchoolLabelsReports = processDistrictSchoolDistribution(processorData, ADDRESS_LABEL_PSI, null, null);
@@ -82,7 +82,7 @@ public class PSIReportProcess extends BaseProcess {
         return processorData;
     }
 
-    private Pair<Integer, Integer> processTranscriptPrintRequest(DistributionPrintRequest obj, int currentSlipCount, ReportRequest packSlipReq, ProcessorData processorData, String psiCode, int numOfPdfs) {
+    protected Pair<Integer, Integer> processTranscriptPrintRequest(DistributionPrintRequest obj, int currentSlipCount, ReportRequest packSlipReq, ProcessorData processorData, String psiCode, int numOfPdfs) {
         if (obj.getPsiCredentialPrintRequest() != null) {
             PsiCredentialPrintRequest psiCredentialPrintRequest = obj.getPsiCredentialPrintRequest();
             List<PsiCredentialDistribution> scdList = psiCredentialPrintRequest.getPsiList();
@@ -90,7 +90,7 @@ public class PSIReportProcess extends BaseProcess {
             currentSlipCount++;
             setExtraDataForPackingSlip(packSlipReq, "YED4", obj.getTotal(), scdList.size(), 1, "Transcript", psiCredentialPrintRequest.getBatchId());
             try {
-                locations.add(reportService.getPackingSlip(packSlipReq, restUtils.getAccessToken()).getInputStream());
+                locations.add(reportService.getPackingSlip(packSlipReq).getInputStream());
                 logger.debug("*** Packing Slip Added");
                 //Grad2-1931 : processing students transcripts, merging them and placing in tmp location for transmission mode FTP to generate CSV files- mchintha
                 if (EducDistributionApiConstants.TRANSMISSION_MODE_FTP.equalsIgnoreCase(processorData.getTransmissionMode())) {
@@ -113,7 +113,11 @@ public class PSIReportProcess extends BaseProcess {
         int failedToAdd = 0;
 
         for (PsiCredentialDistribution scd : scdList) {
-            InputStreamResource transcriptPdf = webClient.get().uri(String.format(educDistributionApiConstants.getTranscriptUsingStudentID(), scd.getStudentID())).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).retrieve().bodyToMono(InputStreamResource.class).block();
+            InputStreamResource transcriptPdf = restService.executeGet(
+                    educDistributionApiConstants.getTranscriptUsingStudentID(),
+                    InputStreamResource.class,
+                    scd.getStudentID().toString()
+            );
             if (transcriptPdf != null) {
                 locations.add(transcriptPdf.getInputStream());
                 currentTranscript++;

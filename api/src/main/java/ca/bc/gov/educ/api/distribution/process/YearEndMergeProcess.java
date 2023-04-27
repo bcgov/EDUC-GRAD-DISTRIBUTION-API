@@ -1,31 +1,20 @@
 package ca.bc.gov.educ.api.distribution.process;
 
 import ca.bc.gov.educ.api.distribution.model.dto.*;
-import ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils;
-import ca.bc.gov.educ.api.distribution.util.Generated;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.internal.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.BodyInserters;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils.*;
+import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils.getDistrictCodeFromMincode;
 
 @Data
 @Component
@@ -53,7 +42,7 @@ public class YearEndMergeProcess extends MergeProcess {
 
             if(districtsForLabels.isEmpty()) {
                 String distcode = getDistrictCodeFromMincode(mincode);
-                processDistrictsForLabels(districtsForLabels, distcode, restUtils.getAccessToken(), exception);
+                processDistrictsForLabels(districtsForLabels, distcode, exception);
             }
 
             //TODO: TEST CODE - REMOVE

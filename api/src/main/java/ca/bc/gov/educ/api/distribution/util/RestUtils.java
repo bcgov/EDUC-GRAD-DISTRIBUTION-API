@@ -200,8 +200,6 @@ public class RestUtils {
 		return new ResponseEntity<>(ApiResponseModel.SUCCESS(null), HttpStatus.OK);
 	}
 
-
-
 	//************   DELETE methods
 	public <T> ResponseEntity<Void> DELETE(int deleteCount) {
 		if (deleteCount == 0) {

@@ -11,27 +11,30 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
 public class SchoolService {
 
 	private static Logger logger = LoggerFactory.getLogger(SchoolService.class);
 	RestUtils restUtils;
-    WebClient webClient;
+    RestService restService;
 	EducDistributionApiConstants educDistributionApiConstants;
 
 	@Autowired
-	public SchoolService(RestUtils restUtils, WebClient webClient, EducDistributionApiConstants educDistributionApiConstants) {
+	public SchoolService(RestUtils restUtils, RestService restService, EducDistributionApiConstants educDistributionApiConstants) {
 		this.restUtils = restUtils;
-		this.webClient = webClient;
+		this.restService = restService;
 		this.educDistributionApiConstants = educDistributionApiConstants;
 	}
 
 	public CommonSchool getCommonSchoolDetails(String mincode, ExceptionMessage exception) {
 		try
 		{
-			return webClient.get().uri(String.format(educDistributionApiConstants.getCommonSchoolByMincode(),mincode)).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).retrieve().bodyToMono(CommonSchool.class).block();
+			return restService.executeGet(
+					educDistributionApiConstants.getCommonSchoolByMincode(),
+					CommonSchool.class,
+					mincode
+			);
 		} catch (Exception e) {
 			exception.setExceptionName("SCHOOL-API IS DOWN");
 			exception.setExceptionDetails(e.getLocalizedMessage());
@@ -58,12 +61,11 @@ public class SchoolService {
 		TraxSchool traxSchool = null;
 		if(!StringUtils.isBlank(minCode)) {
 			try {
-				traxSchool = webClient.get()
-						.uri(String.format(educDistributionApiConstants.getTraxSchoolByMincode(), minCode))
-						.headers(h -> h.setBearerAuth(accessToken))
-						.retrieve()
-						.bodyToMono(TraxSchool.class)
-						.block();
+				traxSchool = restService.executeGet(
+								educDistributionApiConstants.getTraxSchoolByMincode(),
+								TraxSchool.class,
+								minCode
+						);
 			} catch (Exception e) {
 				exception.setExceptionName("TRAX-API IS DOWN");
 				exception.setExceptionDetails(e.getLocalizedMessage());
@@ -73,16 +75,15 @@ public class SchoolService {
 		return traxSchool;
 	}
 
-	public TraxDistrict getTraxDistrict(String distCode, String accessToken, ExceptionMessage exception) {
+	public TraxDistrict getTraxDistrict(String distCode, ExceptionMessage exception) {
 		TraxDistrict traxDistrict = null;
 		if(!StringUtils.isBlank(distCode)) {
 			try {
-				traxDistrict = webClient.get()
-						.uri(String.format(educDistributionApiConstants.getTraxDistrictByDistcode(), distCode))
-						.headers(h -> h.setBearerAuth(accessToken))
-						.retrieve()
-						.bodyToMono(TraxDistrict.class)
-						.block();
+				traxDistrict = restService.executeGet(
+								educDistributionApiConstants.getTraxDistrictByDistcode(),
+								TraxDistrict.class,
+								distCode
+						);
 			} catch (Exception e) {
 				exception.setExceptionName("TRAX-API IS DOWN");
 				exception.setExceptionDetails(e.getLocalizedMessage());

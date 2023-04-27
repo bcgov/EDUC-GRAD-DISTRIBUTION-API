@@ -1,10 +1,7 @@
 package ca.bc.gov.educ.api.distribution.process;
 
 import ca.bc.gov.educ.api.distribution.model.dto.*;
-import ca.bc.gov.educ.api.distribution.service.PostingDistributionService;
-import ca.bc.gov.educ.api.distribution.service.PsiService;
-import ca.bc.gov.educ.api.distribution.service.ReportService;
-import ca.bc.gov.educ.api.distribution.service.SchoolService;
+import ca.bc.gov.educ.api.distribution.service.*;
 import ca.bc.gov.educ.api.distribution.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pdfbox.io.MemoryUsageSetting;
@@ -12,20 +9,13 @@ import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.web.reactive.function.BodyInserters;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.*;
-import java.util.zip.ZipOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
-
-import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils.MONTHLYDIST;
-import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils.getDistrictCodeFromMincode;
+import java.util.zip.ZipOutputStream;
 
 public abstract class BaseProcess implements DistributionProcess {
 
@@ -52,7 +42,7 @@ public abstract class BaseProcess implements DistributionProcess {
     GradValidation validation;
 
     @Autowired
-    WebClient webClient;
+    RestService restService;
 
     @Autowired
     EducDistributionApiConstants educDistributionApiConstants;
@@ -84,7 +74,7 @@ public abstract class BaseProcess implements DistributionProcess {
 
     protected void createZipFile(Long batchId) {
         StringBuilder sourceFileBuilder = new StringBuilder().append(EducDistributionApiConstants.TMP_DIR).append(batchId);
-        try (FileOutputStream fos = new FileOutputStream(EducDistributionApiConstants.TMP_DIR + "EDGRAD.BATCH." + batchId + ".zip")) {
+        try (FileOutputStream fos = new FileOutputStream(EducDistributionApiConstants.TMP_DIR + "/EDGRAD.BATCH." + batchId + ".zip")) {
             ZipOutputStream zipOut = new ZipOutputStream(fos);
             File fileToZip = new File(sourceFileBuilder.toString());
             EducDistributionApiUtils.zipFile(fileToZip, fileToZip.getName(), zipOut);
@@ -95,7 +85,7 @@ public abstract class BaseProcess implements DistributionProcess {
     }
 
     protected void createControlFile(Long batchId, int numberOfPdfs) {
-        try (FileOutputStream fos = new FileOutputStream("/tmp/EDGRAD.BATCH." + batchId + ".txt")) {
+        try (FileOutputStream fos = new FileOutputStream(EducDistributionApiConstants.TMP_DIR + "/EDGRAD.BATCH." + batchId + ".txt")) {
             byte[] contentInBytes = String.valueOf(numberOfPdfs).getBytes();
             fos.write(contentInBytes);
             fos.flush();
@@ -242,10 +232,7 @@ public abstract class BaseProcess implements DistributionProcess {
         return fileLocBuilder;
     }
 
-    protected void mergeDocuments(ProcessorData processorData, String mincode, String schoolCategoryCode, String fileName, String paperType, List<InputStream> locations) {
-        logger.debug("*** Start Transcript Documents Merge ***");
-        String districtCode = StringUtils.substring(mincode, 0, 3);
-        String activityCode = processorData.getActivityCode();
+    protected void mergeDocumentsPDFs(ProcessorData processorData, String mincode, String schoolCategoryCode, String fileName, String paperType, List<InputStream> locations) {
         File bufferDirectory = null;
         try {
             StringBuilder filePathBuilder = createFolderStructureInTempDirectory(processorData, mincode, schoolCategoryCode);
@@ -302,8 +289,8 @@ public abstract class BaseProcess implements DistributionProcess {
         }
     }
 
-    protected void processDistrictsForLabels(List<School> schools, String distcode, String accessToken, ExceptionMessage exception) {
-        TraxDistrict traxDistrict = schoolService.getTraxDistrict(distcode, accessToken, exception);
+    protected void processDistrictsForLabels(List<School> schools, String distcode, ExceptionMessage exception) {
+        TraxDistrict traxDistrict = schoolService.getTraxDistrict(distcode, exception);
         if (traxDistrict != null) {
             School school = new School();
             school.setMincode(traxDistrict.getDistrictNumber());
@@ -349,4 +336,5 @@ public abstract class BaseProcess implements DistributionProcess {
 
         return filePathBuilder;
     }
+
 }

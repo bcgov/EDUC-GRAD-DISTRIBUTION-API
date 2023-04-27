@@ -8,7 +8,6 @@ import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.BodyInserters;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -113,11 +112,11 @@ public class CreateReprintProcess extends BaseProcess {
 		List<InputStream> locations=new ArrayList<>();
 		setExtraDataForPackingSlip(packSlipReq,paperType,request.getTotal(),scdList.size(),request.getCurrentSlip(), certificatePrintRequest.getBatchId());
 		try {
-			locations.add(reportService.getPackingSlip(packSlipReq,restUtils.getAccessToken()).getInputStream());
+			locations.add(reportService.getPackingSlip(packSlipReq).getInputStream());
 			int currentCertificate = 0;
 			int failedToAdd = 0;
 			for (StudentCredentialDistribution scd : scdList) {
-				ReportData data = webClient.get().uri(String.format(educDistributionApiConstants.getCertDataReprint(), scd.getPen())).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).retrieve().bodyToMono(ReportData.class).block();
+				ReportData data = restService.executeGet(educDistributionApiConstants.getCertDataReprint(), ReportData.class, scd.getPen());
 				if(data != null) {
 					data.getCertificate().setCertStyle("Reprint");
 					data.getCertificate().getOrderType().getCertificateType().setReportName(scd.getCredentialTypeCode());
@@ -129,7 +128,7 @@ public class CreateReprintProcess extends BaseProcess {
 				ReportRequest reportParams = new ReportRequest();
 				reportParams.setOptions(options);
 				reportParams.setData(data);
-				byte[] bytesSAR = webClient.post().uri(educDistributionApiConstants.getCertificateReport()).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).body(BodyInserters.fromValue(reportParams)).retrieve().bodyToMono(byte[].class).block();
+				byte[] bytesSAR = restService.executePost(educDistributionApiConstants.getCertificateReport(), byte[].class, reportParams);
 				if (bytesSAR != null) {
 					locations.add(new ByteArrayInputStream(bytesSAR));
 					currentCertificate++;
@@ -148,7 +147,7 @@ public class CreateReprintProcess extends BaseProcess {
 	private void createAndSaveDistributionReport(ReportRequest distributionRequest,String mincode,ProcessorData processorData) {
 		List<InputStream> locations=new ArrayList<>();
 		try {
-			byte[] bytesSAR = webClient.post().uri(educDistributionApiConstants.getSchoolDistributionReport()).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).body(BodyInserters.fromValue(distributionRequest)).retrieve().bodyToMono(byte[].class).block();
+			byte[] bytesSAR = restService.executePost(educDistributionApiConstants.getSchoolDistributionReport(), byte[].class, distributionRequest);
 			if(bytesSAR != null) {
 				locations.add(new ByteArrayInputStream(bytesSAR));
 			}

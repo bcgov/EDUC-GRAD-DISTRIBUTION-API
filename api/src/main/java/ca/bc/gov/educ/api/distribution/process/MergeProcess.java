@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.BodyInserters;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -24,8 +23,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils.*;
 
 @Data
 @Component
@@ -159,7 +156,7 @@ public class MergeProcess extends BaseProcess {
 			currentSlipCount++;
 			setExtraDataForPackingSlip(packSlipReq, "YED4", obj.getTotal(), scdList.size(), 1, "Transcript", transcriptPrintRequest.getBatchId());
 			try {
-				locations.add(reportService.getPackingSlip(packSlipReq, restUtils.getAccessToken()).getInputStream());
+				locations.add(reportService.getPackingSlip(packSlipReq).getInputStream());
 				logger.debug("*** Packing Slip Added");
 				processStudents(scdList,studListNonGrad,locations);
 				mergeDocumentsPDFs(processorData,mincode,schoolCategoryCode,"/EDGRAD.T.","YED4",locations);
@@ -181,7 +178,11 @@ public class MergeProcess extends BaseProcess {
 				if(objStd != null)
 					studListNonGrad.add(objStd);
 			}
-			List<GradStudentTranscripts> studentTranscripts = webClient.get().uri(String.format(educDistributionApiConstants.getTranscriptUsingStudentID(), scd.getStudentID())).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).retrieve().bodyToMono(new ParameterizedTypeReference<List<GradStudentTranscripts>>() {}).block();
+			List<GradStudentTranscripts> studentTranscripts = restService.executeGet(
+					educDistributionApiConstants.getTranscriptUsingStudentID(),
+					new ParameterizedTypeReference<List<GradStudentTranscripts>>(){},
+					scd.getStudentID().toString()
+			);
 			if(studentTranscripts != null && !studentTranscripts.isEmpty() ) {
 				GradStudentTranscripts studentTranscript = studentTranscripts.get(0);
 				byte[] transcriptPdf = Base64.decodeBase64(studentTranscript.getTranscript());
@@ -240,7 +241,7 @@ public class MergeProcess extends BaseProcess {
 		List<InputStream> locations=new ArrayList<>();
 		setExtraDataForPackingSlip(packSlipReq,paperType,request.getTotal(),scdList.size(),request.getCurrentSlip(),"Certificate", certificatePrintRequest.getBatchId());
 		try {
-			locations.add(reportService.getPackingSlip(packSlipReq,restUtils.getAccessToken()).getInputStream());
+			locations.add(reportService.getPackingSlip(packSlipReq).getInputStream());
 			int currentCertificate = 0;
 			int failedToAdd = 0;
 			for (StudentCredentialDistribution scd : scdList) {
@@ -249,7 +250,13 @@ public class MergeProcess extends BaseProcess {
 					if(objStd != null)
 						studListNonGrad.add(objStd);
 				}
-				InputStreamResource certificatePdf = webClient.get().uri(String.format(educDistributionApiConstants.getCertificate(),scd.getStudentID(),scd.getCredentialTypeCode(),scd.getDocumentStatusCode())).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).retrieve().bodyToMono(InputStreamResource.class).block();
+				InputStreamResource certificatePdf = restService.executeGet(
+						educDistributionApiConstants.getCertificate(),
+						InputStreamResource.class,
+						scd.getStudentID().toString(),
+						scd.getCredentialTypeCode(),
+						scd.getDocumentStatusCode()
+				);
 				if(certificatePdf != null) {
 					locations.add(certificatePdf.getInputStream());
 					currentCertificate++;
@@ -259,7 +266,7 @@ public class MergeProcess extends BaseProcess {
 					logger.debug("*** Failed to Add PDFs {} Current student {} papertype : {}",failedToAdd,scd.getStudentID(),paperType);
 				}
 			}
-			mergeDocuments(processorData,mincode,schoolCategoryCode,"/EDGRAD.C.",paperType,locations);
+			mergeDocumentsPDFs(processorData,mincode,schoolCategoryCode,"/EDGRAD.C.",paperType,locations);
 		} catch (IOException e) {
 			logger.debug(EXCEPTION,e.getLocalizedMessage());
 		}
@@ -268,7 +275,11 @@ public class MergeProcess extends BaseProcess {
 	protected void createAndSaveDistributionReport(ReportRequest distributionRequest, String mincode, String schoolCategoryCode, ProcessorData processorData) {
 		List<InputStream> locations=new ArrayList<>();
 		try {
-			byte[] bytesSAR = webClient.post().uri(educDistributionApiConstants.getSchoolDistributionReport()).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).body(BodyInserters.fromValue(distributionRequest)).retrieve().bodyToMono(byte[].class).block();
+			byte[] bytesSAR = restService.executePost(
+					educDistributionApiConstants.getSchoolDistributionReport(),
+					byte[].class,
+					distributionRequest
+			);
 			if(bytesSAR != null) {
 				locations.add(new ByteArrayInputStream(bytesSAR));
 				byte[] encoded = Base64.encodeBase64(bytesSAR);
@@ -301,8 +312,11 @@ public class MergeProcess extends BaseProcess {
 		reportParams.setOptions(options);
 		reportParams.setData(nongradProjected);
 
-		byte[] bytesSAR = webClient.post().uri(educDistributionApiConstants.getStudentNonGrad())
-				.headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).body(BodyInserters.fromValue(reportParams)).retrieve().bodyToMono(byte[].class).block();
+		byte[] bytesSAR = restService.executePost(
+						educDistributionApiConstants.getStudentNonGrad(),
+						byte[].class,
+						reportParams
+				);
 		byte[] encoded = Base64.encodeBase64(bytesSAR);
 		assert encoded != null;
 		String encodedPdf = new String(encoded, StandardCharsets.US_ASCII);
@@ -314,6 +328,6 @@ public class MergeProcess extends BaseProcess {
 		requestObj.setReport(encodedPdf);
 		requestObj.setSchoolOfRecord(mincode);
 		requestObj.setReportTypeCode(reportType);
-		webClient.post().uri(educDistributionApiConstants.getUpdateSchoolReport()).headers(h ->h.setBearerAuth(restUtils.fetchAccessToken())).body(BodyInserters.fromValue(requestObj)).retrieve().bodyToMono(SchoolReports.class).block();
+		restService.executePost(educDistributionApiConstants.getUpdateSchoolReport(), SchoolReports.class, requestObj);
 	}
 }

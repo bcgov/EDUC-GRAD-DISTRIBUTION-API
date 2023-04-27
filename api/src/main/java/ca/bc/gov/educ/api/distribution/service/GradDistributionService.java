@@ -34,14 +34,13 @@ public class GradDistributionService {
         this.restUtils = restUtils;
     }
 
-    public DistributionResponse distributeCredentials(String runType, Long batchId, Map<String, DistributionPrintRequest> mapDist, String activityCode, String localDownload, String accessToken) {
-        ProcessorData data = ProcessorData.builder().batchId(batchId).accessToken(accessToken).distributionResponse(null).mapDistribution(mapDist).activityCode(activityCode).localDownload(localDownload).build();
+    public DistributionResponse distributeCredentials(String runType, Long batchId, Map<String, DistributionPrintRequest> mapDist, String activityCode, String transmissionMode,String localDownload, String accessToken) {
+        ProcessorData data = ProcessorData.builder().batchId(batchId).accessToken(accessToken).distributionResponse(null).mapDistribution(mapDist).activityCode(activityCode).transmissionMode(transmissionMode).localDownload(localDownload).build();
         DistributionResponse disRes = new DistributionResponse();
         disRes.setMergeProcessResponse(processDistribution(runType,data).getMergeProcessResponse());
         //Grad2-1931 setting the batchId and enabling local download for Users - mchintha
         disRes.setBatchId(data.getBatchId().toString());
         disRes.setLocalDownload(data.getLocalDownload());
-
         return disRes;
     }
 

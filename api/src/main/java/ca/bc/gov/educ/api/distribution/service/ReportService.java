@@ -5,10 +5,11 @@ import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils;
 import ca.bc.gov.educ.api.distribution.util.RestUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.ByteArrayInputStream;
@@ -20,28 +21,28 @@ import java.util.List;
 @Service
 public class ReportService {
 
+	private static Logger logger = LoggerFactory.getLogger(ReportService.class);
+
     WebClient webClient;
 
 	RestUtils restUtils;
 
 	EducDistributionApiConstants educDistributionApiConstants;
 
+	final RestService restService;
+
 	@Autowired
-	public ReportService(WebClient webClient, RestUtils restUtils, EducDistributionApiConstants educDistributionApiConstants) {
+	public ReportService(WebClient webClient, RestUtils restUtils, EducDistributionApiConstants educDistributionApiConstants, RestService restService) {
 		this.webClient = webClient;
 		this.restUtils = restUtils;
 		this.educDistributionApiConstants = educDistributionApiConstants;
+		this.restService = restService;
 	}
 
-	public InputStreamResource getPackingSlip(ReportRequest packingSlipReq, String accessToken) {
-		try
-		{
-			byte[] packingSlip = webClient.post().uri(educDistributionApiConstants.getPackingSlip()).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).body(BodyInserters.fromValue(packingSlipReq)).retrieve().bodyToMono(byte[].class).block();
-			ByteArrayInputStream bis = new ByteArrayInputStream(packingSlip);
-			return new InputStreamResource(bis);
-		} catch (Exception e) {
-			return null;
-		}
+	public InputStreamResource getPackingSlip(ReportRequest packingSlipReq) {
+		byte[] packingSlip = restService.executePost(educDistributionApiConstants.getPackingSlip(), byte[].class, packingSlipReq, "");
+		ByteArrayInputStream bis = new ByteArrayInputStream(packingSlip);
+		return new InputStreamResource(bis);
 	}
 
 	public ReportRequest preparePackingSlipData(CommonSchool schoolDetails,Long batchId) {
