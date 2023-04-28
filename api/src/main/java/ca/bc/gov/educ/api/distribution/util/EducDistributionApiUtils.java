@@ -14,8 +14,9 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
+import java.util.zip.*;
+
+import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants.DEL;
 
 public class EducDistributionApiUtils {
 
@@ -189,22 +190,22 @@ public class EducDistributionApiUtils {
 		return formatter.format(date);
 	}
 
-	public static void zipFile(File fileToZip, String fileName, ZipOutputStream zipOut) throws IOException {
+	public static synchronized void zipFile(File fileToZip, String fileName, ZipOutputStream zipOut) throws IOException {
 		if (fileToZip.isHidden()) {
 			return;
 		}
 		if (fileToZip.isDirectory()) {
-			if (fileName.endsWith("/")) {
+			if (fileName.endsWith(DEL)) {
 				zipOut.putNextEntry(new ZipEntry(fileName));
 				zipOut.closeEntry();
 			} else {
-				zipOut.putNextEntry(new ZipEntry(fileName + "/"));
+				zipOut.putNextEntry(new ZipEntry(fileName + DEL));
 				zipOut.closeEntry();
 			}
 			File[] children = fileToZip.listFiles();
 			assert children != null;
 			for (File childFile : children) {
-				zipFile(childFile, fileName + "/" + childFile.getName(), zipOut);
+				zipFile(childFile, fileName + DEL + childFile.getName(), zipOut);
 			}
 			return;
 		}
@@ -216,8 +217,57 @@ public class EducDistributionApiUtils {
 			while ((length = fis.read(bytes)) >= 0) {
 				zipOut.write(bytes, 0, length);
 			}
-		}catch (Exception e) {
+			zipOut.closeEntry();
+		} catch (Exception e) {
 			logger.debug("Write Exception {}",e.getLocalizedMessage());
+		}
+	}
+
+	public static boolean isValid(File file) {
+		ZipFile zipfile = null;
+		ZipInputStream zis = null;
+		ZipEntry ze = null;
+		try {
+			zipfile = new ZipFile(file);
+			zis = new ZipInputStream(new FileInputStream(file));
+			ze = zis.getNextEntry();
+			if(ze == null) {
+				return false;
+			}
+			while(ze != null) {
+				// if it throws an exception fetching any of the following then we know the file is corrupted.
+				zipfile.getInputStream(ze);
+				if(!ze.isDirectory()) {
+					String entryName = ze.getName();
+					ze.getCrc();
+					ze.getCompressedSize();
+					ze.getSize();
+					logger.debug("Validated {}", entryName);
+				}
+				ze = zis.getNextEntry();
+			}
+			return true;
+		} catch (ZipException e) {
+			logger.debug("Zip file {} is not valid: {}", file.getName(), e.getLocalizedMessage());
+			return false;
+		} catch (IOException e) {
+			return false;
+		} finally {
+			try {
+				if (zipfile != null) {
+					zipfile.close();
+					zipfile = null;
+				}
+			} catch (IOException e) {
+				return false;
+			} try {
+				if (zis != null) {
+					zis.close();
+					zis = null;
+				}
+			} catch (IOException e) {
+				return false;
+			}
 		}
 	}
 

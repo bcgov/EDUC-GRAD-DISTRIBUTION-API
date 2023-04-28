@@ -82,16 +82,20 @@ public abstract class BaseProcess implements DistributionProcess {
         logger.debug("Create zip file for {}", processorData.getActivityCode());
         StringBuilder sourceFileBuilder = new StringBuilder().append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.DEL).append(batchId);
         File file = new File(EducDistributionApiConstants.TMP_DIR + "/EDGRAD.BATCH." + batchId + ".zip");
-        writeZipFile(sourceFileBuilder, file);
+        writeZipFile(sourceFileBuilder.toString(), file);
     }
 
-    protected void writeZipFile(StringBuilder sourceFileBuilder, File file) {
-        try (FileOutputStream fos = new FileOutputStream(file)) {
+    protected void writeZipFile(String rootPath, File file) {
+        try (FileOutputStream fos = new FileOutputStream(file.getAbsolutePath())) {
             ZipOutputStream zipOut = new ZipOutputStream(fos);
-            File fileToZip = new File(sourceFileBuilder.toString());
+            File fileToZip = new File(rootPath);
             EducDistributionApiUtils.zipFile(fileToZip, fileToZip.getName(), zipOut);
+            zipOut.close();
         } catch (IOException e) {
             logger.debug(EXCEPTION, e.getLocalizedMessage());
+        }
+        if(!EducDistributionApiUtils.isValid(file)) {
+            throw new GradBusinessRuleException("Zip file " + file.getAbsolutePath() + " is not valid");
         }
     }
 
