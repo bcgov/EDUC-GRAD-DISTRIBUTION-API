@@ -220,7 +220,7 @@ public class EducDistributionApiUtils {
 			}
 			zipOut.closeEntry();
 		} catch (Exception e) {
-			logger.debug("Write Exception {}",e.getLocalizedMessage());
+			logger.error("Write Exception {}",e.getLocalizedMessage());
 		}
 	}
 
