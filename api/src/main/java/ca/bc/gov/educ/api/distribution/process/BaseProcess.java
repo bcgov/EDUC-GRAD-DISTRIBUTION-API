@@ -94,9 +94,10 @@ public abstract class BaseProcess implements DistributionProcess {
         } catch (IOException e) {
             logger.debug(EXCEPTION, e.getLocalizedMessage());
         }
+        /**
         if(!EducDistributionApiUtils.isValid(file)) {
             throw new GradBusinessRuleException("Zip file " + file.getAbsolutePath() + " is not valid");
-        }
+        }**/
     }
 
     protected void createControlFile(Long batchId, ProcessorData processorData, int numberOfPdfs) {

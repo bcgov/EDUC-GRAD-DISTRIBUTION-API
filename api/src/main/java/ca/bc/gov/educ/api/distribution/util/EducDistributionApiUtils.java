@@ -14,7 +14,8 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
-import java.util.zip.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants.DEL;
 
@@ -223,6 +224,7 @@ public class EducDistributionApiUtils {
 		}
 	}
 
+	/**
 	public static boolean isValid(File file) {
 		ZipFile zipfile = null;
 		ZipInputStream zis = null;
@@ -270,5 +272,6 @@ public class EducDistributionApiUtils {
 			}
 		}
 	}
+	 **/
 
 }
