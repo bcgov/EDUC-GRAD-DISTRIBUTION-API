@@ -86,13 +86,21 @@ public abstract class BaseProcess implements DistributionProcess {
     }
 
     protected void writeZipFile(String rootPath, File file) {
+        ZipOutputStream zipOut = null;
         try (FileOutputStream fos = new FileOutputStream(file.getAbsolutePath())) {
-            ZipOutputStream zipOut = new ZipOutputStream(fos);
+            zipOut = new ZipOutputStream(fos);
             File fileToZip = new File(rootPath);
             EducDistributionApiUtils.zipFile(fileToZip, fileToZip.getName(), zipOut);
-            zipOut.close();
         } catch (IOException e) {
             logger.debug(EXCEPTION, e.getLocalizedMessage());
+        } finally {
+            if(zipOut != null) {
+                try {
+                    zipOut.close();
+                } catch (IOException e) {
+                    logger.warn("Is the stream already closed? {}", e.getLocalizedMessage());
+                }
+            }
         }
         /**
         if(!EducDistributionApiUtils.isValid(file)) {
