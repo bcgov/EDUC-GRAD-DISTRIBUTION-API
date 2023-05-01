@@ -87,7 +87,7 @@ public class DistributionServiceTest {
 
 	@Mock
 	Path path;
-	
+
 	@Test
 	public void testdistributeCredentialsMonthly() {
 		DistributionResponse res = testdistributeCredentials_transcript("MER","USERDIST",false,null);
