@@ -1060,7 +1060,7 @@ public class DistributionServiceTest {
 	public void testdistributeCredentialsPSI() {
 		DistributionResponse res = testpsidistributeCredential("PSPR","Y", "ftp");
 		assertNotNull(res);
-		res = testpsidistributeCredential("PSPR","Y", "paper");
+		res = testpsidistributeCredential("PSPR","N", "paper");
 		assertNotNull(res);
 	}
     // testcase for PSIRUNs for both ftp and paper.

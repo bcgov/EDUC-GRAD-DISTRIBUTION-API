@@ -135,8 +135,12 @@ public abstract class BaseProcess implements DistributionProcess {
         createZipFile(batchId, processorData);
         if (processorData.getLocalDownload() == null || !processorData.getLocalDownload().equalsIgnoreCase("Y")) {
             createControlFile(batchId, processorData, numberOfPdfs);
-            sftpUtils.sftpUploadBCMail(batchId);
+            sftpUtils.sftpUploadBCMail(batchId, getZipFolderFromRootLocation());
         }
+    }
+    //Grad2-1931 - setting SFTP root folder location where it has to pick zip folders from, to send to BC mail - mchintha
+    protected String getZipFolderFromRootLocation() {
+        return EducDistributionApiConstants.TMP_DIR;
     }
 
     protected Integer createDistrictSchoolYearEndReport(String accessToken, String schooLabelReportType, String districtReportType, String schoolReportType) {

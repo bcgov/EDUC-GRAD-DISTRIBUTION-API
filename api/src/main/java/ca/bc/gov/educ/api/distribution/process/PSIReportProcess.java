@@ -448,6 +448,11 @@ public class PSIReportProcess extends BaseProcess {
         File file = new File(EducDistributionApiConstants.TMP_DIR + EducDistributionApiConstants.FILES_FOLDER_STRUCTURE + transmissionMode.toUpperCase() + "/EDGRAD.BATCH." + batchId + ".zip");
         writeZipFile(sourceFileBuilder, file);
     }
+    //Grad2-1931 - setting SFTP root folder location for PSIRUN paper where it has to pick zip folders from, to send to BC mail - mchintha
+    @Override
+    protected String getZipFolderFromRootLocation() {
+        return EducDistributionApiConstants.TMP_DIR + EducDistributionApiConstants.FILES_FOLDER_STRUCTURE + EducDistributionApiConstants.TRANSMISSION_MODE_PAPER;
+    }
 
     @Override
     //Grad2-1931 Changed the folder structure of created files to be placed - mchintha
