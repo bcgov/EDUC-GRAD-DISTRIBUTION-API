@@ -293,7 +293,7 @@ public class MergeProcess extends BaseProcess {
 		}
 	}
 
-	protected void createAndSaveNonGradReport(CommonSchool schoolDetails, List<Student> studListNonGrad, String mincode) {
+	protected Integer createAndSaveNonGradReport(CommonSchool schoolDetails, List<Student> studListNonGrad, String mincode) {
 		ReportData nongradProjected = new ReportData();
 		School schObj = new School();
 		schObj.setMincode(schoolDetails.getDistNo()+schoolDetails.getSchlNo());
@@ -321,6 +321,7 @@ public class MergeProcess extends BaseProcess {
 		assert encoded != null;
 		String encodedPdf = new String(encoded, StandardCharsets.US_ASCII);
 		saveSchoolDistributionReport(encodedPdf,mincode,NONGRADDISTREP_SC);
+		return 1;
 	}
 
 	private void saveSchoolDistributionReport(String encodedPdf, String mincode, String reportType) {

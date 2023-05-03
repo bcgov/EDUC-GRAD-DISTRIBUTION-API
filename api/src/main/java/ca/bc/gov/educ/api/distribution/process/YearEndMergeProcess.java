@@ -77,8 +77,8 @@ public class YearEndMergeProcess extends MergeProcess {
 
                 if (!studListNonGrad.isEmpty() && NONGRADDIST.equalsIgnoreCase(processorData.getActivityCode())) {
                     logger.debug("***** Create Student NonGrad School Reports *****");
-                    createAndSaveNonGradReport(commonSchool, studListNonGrad, mincode);
-                    logger.debug("***** Student NonGrad School Reports Created *****");
+                    numberOfCreatedSchoolReports += createAndSaveNonGradReport(commonSchool, studListNonGrad, mincode);
+                    logger.debug("***** Number of Student NonGrad School Reports Created {} *****", numberOfCreatedSchoolReports);
                     logger.debug("***** Distribute Student NonGrad School Reports *****");
                     numberOfProcessedSchoolReports += processDistrictSchoolDistribution(processorData, null, null, NONGRADDISTREP_SC);
                     logger.debug("***** Number of distributed Student NonGrad School Reports {} *****", numberOfProcessedSchoolReports);
