@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils.getDistrictCodeFromMincode;
 
@@ -40,15 +39,8 @@ public class YearEndMergeProcess extends MergeProcess {
         List<School> districtsForLabels = new ArrayList<>();
         for (String mincode : mapDist.keySet()) {
 
-            if(districtsForLabels.isEmpty()) {
-                String distcode = getDistrictCodeFromMincode(mincode);
-                processDistrictsForLabels(districtsForLabels, distcode, exception);
-            }
-
-            //TODO: TEST CODE - REMOVE
-            /*********** TEST CODE - REMOVE **********/
-            if(schoolCounter > 12) break;
-            /*********** TEST CODE - REMOVE **********/
+            String distcode = getDistrictCodeFromMincode(mincode);
+            processDistrictsForLabels(districtsForLabels, distcode, exception);
 
             CommonSchool commonSchool = getBaseSchoolDetails(null, mincode, exception);
             if (commonSchool != null) {
@@ -63,13 +55,6 @@ public class YearEndMergeProcess extends MergeProcess {
                 List<Student> studListNonGrad = new ArrayList<>();
 
                 DistributionPrintRequest distributionPrintRequest = mapDist.get(mincode);
-
-                //TODO: TEST CODE - REMOVE
-                /*********** TEST CODE - REMOVE **********/
-                List<StudentCredentialDistribution> studentList = distributionPrintRequest.getTranscriptPrintRequest().getTranscriptList();
-                distributionPrintRequest.getTranscriptPrintRequest().setTranscriptList(studentList.subList(0,
-                        new Random().ints(0, Math.min(12, studentList.size())).findFirst().getAsInt()));
-                /*********** TEST CODE - REMOVE **********/
 
                 ReportRequest packSlipReq = reportService.preparePackingSlipData(getBaseSchoolDetails(distributionPrintRequest, mincode, exception), processorData.getBatchId());
                 Pair<Integer, Integer> pV = processTranscriptPrintRequest(distributionPrintRequest, currentSlipCount, packSlipReq, studListNonGrad, processorData, mincode, schoolCategoryCode, numberOfPdfs);
@@ -92,6 +77,9 @@ public class YearEndMergeProcess extends MergeProcess {
         logger.debug("***** Number of created district labels reports {} *****", numberOfCreatedSchoolLabelReports);
 
         numberOfPdfs += numberOfProcessedSchoolReports;
+        if(YEARENDDIST.equalsIgnoreCase(processorData.getActivityCode())) {
+            postingDistributionService.postingProcess(processorData.getBatchId(), processorData.getLocalDownload(), schoolsForLabels, YEARENDDIST);
+        }
         long endTime = System.currentTimeMillis();
         long diff = (endTime - startTime) / 1000;
         logger.debug("************* TIME Taken  ************ {} secs", diff);

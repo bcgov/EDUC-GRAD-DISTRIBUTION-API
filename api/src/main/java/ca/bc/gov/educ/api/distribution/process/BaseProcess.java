@@ -73,7 +73,7 @@ public abstract class BaseProcess implements DistributionProcess {
     }
 
     protected void createZipFile(Long batchId) {
-        StringBuilder sourceFileBuilder = new StringBuilder().append(EducDistributionApiConstants.TMP_DIR).append(batchId);
+        StringBuilder sourceFileBuilder = new StringBuilder().append(EducDistributionApiConstants.TMP_DIR).append(DEL).append(batchId);
         try (FileOutputStream fos = new FileOutputStream(EducDistributionApiConstants.TMP_DIR + "/EDGRAD.BATCH." + batchId + ".zip")) {
             ZipOutputStream zipOut = new ZipOutputStream(fos);
             File fileToZip = new File(sourceFileBuilder.toString());
@@ -303,7 +303,9 @@ public abstract class BaseProcess implements DistributionProcess {
             address.setCountry(traxDistrict.getCountryCode());
             address.setCode(traxDistrict.getPostal());
             school.setAddress(address);
-            schools.add(school);
+            if(!schools.contains(school)) {
+                schools.add(school);
+            }
         }
     }
 

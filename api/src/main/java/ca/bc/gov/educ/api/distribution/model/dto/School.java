@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 
 public class School implements Serializable {
 
@@ -118,5 +119,18 @@ public class School implements Serializable {
 
     public void setStudents(List<Student> students) {
         this.students = students;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        School school = (School) o;
+        return mincode.equals(school.mincode);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mincode);
     }
 }
