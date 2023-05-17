@@ -71,7 +71,7 @@ public class RestUtils {
 	}
 
 	@Retry(name = "rt-getToken", fallbackMethod = "rtGetTokenFallback")
-	private ResponseObj getResponseObj() {
+	public ResponseObj getResponseObj() {
 		LOGGER.debug("Fetch token");
 		HttpHeaders httpHeadersKC = EducDistributionApiUtils.getHeaders(
 				constants.getUserName(), constants.getPassword());
@@ -88,6 +88,15 @@ public class RestUtils {
 	public ResponseObj rtGetTokenFallBack(HttpServerErrorException exception){
 		LOGGER.error("{} NOT REACHABLE after many attempts.", constants.getTokenUrl(), exception);
 		return null;
+	}
+
+	public void notifyDistributionJobIsCompleted(Long batchId, String status, String accessToken) {
+		final UUID correlationID = UUID.randomUUID();
+		webClient.get().uri(String.format(constants.getDistributionJobCompleteNotification(), batchId, status))
+				.headers(h -> {
+					h.setBearerAuth(accessToken);
+					h.set(EducDistributionApiConstants.CORRELATION_ID, correlationID.toString());
+				}).retrieve().bodyToMono(Void.class).block();
 	}
 
 	public ResponseEntity<Void> FORBIDDEN() {
