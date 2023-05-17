@@ -76,8 +76,8 @@ public class GradDistributionService {
             logger.error("Distribution Process - unexpected exception occurred: {}", ex.getLocalizedMessage());
             status = "error";
         }
-        String accessToken = restUtils.getAccessToken();
-        restUtils.notifyDistributionJobIsCompleted(data.getBatchId(), status, accessToken);
+        restUtils.fetchAccessToken(data);
+        restUtils.notifyDistributionJobIsCompleted(data.getBatchId(), status, data.getAccessToken());
     }
 
     //Grad2-1931 Changed the zipped folder path to fetch - mchintha
