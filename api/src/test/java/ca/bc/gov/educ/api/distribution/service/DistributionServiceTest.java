@@ -746,6 +746,7 @@ public class DistributionServiceTest {
 		tokenObject.setAccess_token(MOCK_TOKEN);
 		tokenObject.setRefresh_token("456");
 
+//		when(this.restUtilsMock.getTokenResponseObject()).thenReturn(getMockResponseObject());
 		when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
 		when(this.requestBodyUriMock.uri(constants.getTokenUrl())).thenReturn(this.requestBodyUriMock);
 		when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
@@ -755,6 +756,18 @@ public class DistributionServiceTest {
 		when(this.responseMock.bodyToMono(ResponseObj.class)).thenReturn(Mono.just(tokenObject));
 
 		if (isAsyncProcess) {
+			when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+			when(this.requestHeadersUriMock.uri(String.format(constants.getDistributionJobCompleteNotification(), batchId, "success"))).thenReturn(this.requestHeadersMock);
+			when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+			when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+			when(this.responseMock.bodyToMono(Void.class)).thenReturn(Mono.empty());
+
+			when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+			when(this.requestHeadersUriMock.uri(String.format(constants.getDistributionJobCompleteNotification(), batchId, "error"))).thenReturn(this.requestHeadersMock);
+			when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+			when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+			when(this.responseMock.bodyToMono(Void.class)).thenReturn(Mono.empty());
+
 			gradDistributionService.asyncDistributeCredentials(runType, batchId, mapDist, activityCode, transmissionMode, localDownload, accessToken);
 			DistributionResponse disRes = new DistributionResponse();
 			disRes.setBatchId(batchId.toString());
@@ -897,6 +910,7 @@ public class DistributionServiceTest {
 		tokenObject.setAccess_token(MOCK_TOKEN);
 		tokenObject.setRefresh_token("456");
 
+//		when(this.restUtilsMock.getTokenResponseObject()).thenReturn(getMockResponseObject());
 		when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
 		when(this.requestBodyUriMock.uri(constants.getTokenUrl())).thenReturn(this.requestBodyUriMock);
 		when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
@@ -909,6 +923,18 @@ public class DistributionServiceTest {
 			Mockito.when(schoolService.getCommonSchoolDetails(mincode,exception)).thenReturn(schObj);
 
 		if (isAsyncProcess) {
+			when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+			when(this.requestHeadersUriMock.uri(String.format(constants.getDistributionJobCompleteNotification(), batchId, "success"))).thenReturn(this.requestHeadersMock);
+			when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+			when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+			when(this.responseMock.bodyToMono(Void.class)).thenReturn(Mono.empty());
+
+			when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+			when(this.requestHeadersUriMock.uri(String.format(constants.getDistributionJobCompleteNotification(), batchId, "error"))).thenReturn(this.requestHeadersMock);
+			when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+			when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+			when(this.responseMock.bodyToMono(Void.class)).thenReturn(Mono.empty());
+
 			gradDistributionService.asyncDistributeCredentials(runType, batchId, mapDist, activityCode, transmissionMode, localDownload, accessToken);
 			DistributionResponse disRes = new DistributionResponse();
 			disRes.setBatchId(batchId.toString());
