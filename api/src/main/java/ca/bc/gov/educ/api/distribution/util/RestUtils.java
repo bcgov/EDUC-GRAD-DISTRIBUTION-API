@@ -71,7 +71,7 @@ public class RestUtils {
 	}
 
 	@Retry(name = "rt-getToken", fallbackMethod = "rtGetTokenFallback")
-	private ResponseObj getResponseObj() {
+	public ResponseObj getResponseObj() {
 		LOGGER.debug("Fetch token");
 		HttpHeaders httpHeadersKC = EducDistributionApiUtils.getHeaders(
 				constants.getUserName(), constants.getPassword());

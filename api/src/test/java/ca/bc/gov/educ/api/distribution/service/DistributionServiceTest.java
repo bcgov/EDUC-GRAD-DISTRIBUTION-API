@@ -42,7 +42,7 @@ public class DistributionServiceTest {
 	@Autowired
 	private ExceptionMessage exception;
 	
-	@Autowired
+	@MockBean
 	private SchoolService schoolService;
 
 	@Autowired
@@ -80,8 +80,8 @@ public class DistributionServiceTest {
 	@Autowired
 	private EducDistributionApiConstants constants;
 
-	@Mock
-	private RestUtils restUtilsMock;
+	@MockBean
+	private RestUtils restUtils;
 	
 	private static final String MOCK_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NzcxMDM0NzYsImlhdCI6MTY3NzEwMzE3NiwiYXV0aF90aW1lIjoxNjc3MTAyMjk0LCJqdGkiOiJkNWE5MTQ1Ny1mYzVjLTQ4YmItODNiZC1hYjMyYmEwMzQ1MzIiLCJpc3MiOiJodHRwczovL3NvYW0tZGV2LmFwcHMuc2lsdmVyLmRldm9wcy5nb3YuYmMuY2EvYXV0aC9yZWFsbXMvbWFzdGVyIiwiYXVkIjoiYWNjb3VudCIsInN1YiI6IjIzZGYxMzJlLTE3NTQtNDYzYi05MGI1LWIyN2E4ODIxMjM0NSIsInR5cCI6IkJlYXJlciIsImF6cCI6ImZha2VfY2xpZW50Iiwic2Vzc2lvbl9zdGF0ZSI6IjUzY2UxNDBiLTMzMTctNDA3NC04YmEzLWIwYWE3MTIzMjQ1NCIsImFjciI6IjAiLCJhbGxvd2VkLW9yaWdpbnMiOlsiaHR0cHM6Ly9kZXYuZ3JhZC5nb3YuYmMuY2EiLCJodHRwczovL2dyYWQuZ292LmJjLmNhIl0sInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJyb2xlXzEiLCJyb2xlXzIiXX0sInJlc291cmNlX2FjY2VzcyI6eyJhY2NvdW50Ijp7InJvbGVzIjpbInJvbGVfMSJdfX0sInNjb3BlIjoiTVlfU0NPUEUifQ.D57DWJJuLPFIj84A14EmRlKSKcLVOG9HLvc-OCWTTeM";
 
@@ -97,6 +97,18 @@ public class DistributionServiceTest {
 		res = testdistributeCredentials_certificate("MER","MONTHLYDIST","YEDB",null,false, true);
 		assertNotNull(res);
 		res = testdistributeCredentials_certificate("MER","MONTHLYDIST","YEDR",null,false, true);
+		assertNotNull(res);
+	}
+
+	@Test
+	public void testdistributeCredentialsUserRequest() {
+		DistributionResponse res = testdistributeCredentials_transcript("MER","USERDIST",false,null, false);
+		assertNotNull(res);
+		res = testdistributeCredentials_certificate("MER","USERDIST","YED2",null,true, false);
+		assertNotNull(res);
+		res = testdistributeCredentials_certificate("MER","USERDIST","YEDB",null,false, false);
+		assertNotNull(res);
+		res = testdistributeCredentials_certificate("MER","USERDIST","YEDR",null,false, false);
 		assertNotNull(res);
 	}
 
@@ -230,18 +242,7 @@ public class DistributionServiceTest {
 		obj.setReportTypeCode(reportType);
 		obj.setSchoolOfRecord(mincode);
 
-		final ResponseObj tokenObject = new ResponseObj();
-		tokenObject.setAccess_token(MOCK_TOKEN);
-		tokenObject.setRefresh_token("456");
-
-		when(this.restUtilsMock.getTokenResponseObject()).thenReturn(getMockResponseObject());
-		when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
-		when(this.requestBodyUriMock.uri(constants.getTokenUrl())).thenReturn(this.requestBodyUriMock);
-		when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
-		when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
-		when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
-		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-		when(this.responseMock.bodyToMono(ResponseObj.class)).thenReturn(Mono.just(tokenObject));
+		Mockito.doReturn(getMockResponseObject()).when(this.restUtils).getTokenResponseObject();
 
 		SchoolReportPostRequest tPReq = new SchoolReportPostRequest();
 		tPReq.setBatchId(batchId);
@@ -464,13 +465,15 @@ public class DistributionServiceTest {
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(Psi.class)).thenReturn(Mono.just(psi));
 
+		Mockito.when(schoolService.getCommonSchoolDetails(mincode,exception)).thenReturn(schObj);
+
 		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,transmissionMode.toUpperCase(),null,accessToken);
 	}
 
 	private ResponseObj getMockResponseObject(){
 		ResponseObj obj = new ResponseObj();
 		obj.setAccess_token(MOCK_TOKEN);
-		obj.setRefresh_token(MOCK_TOKEN);
+		obj.setRefresh_token("456");
 		return obj;
 	}
 
@@ -532,17 +535,7 @@ public class DistributionServiceTest {
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(byte[].class)).thenReturn(Mono.just(bytesSAR));
 
-		final ResponseObj tokenObject = new ResponseObj();
-		tokenObject.setAccess_token(MOCK_TOKEN);
-		tokenObject.setRefresh_token("456");
-
-		when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
-		when(this.requestBodyUriMock.uri(constants.getTokenUrl())).thenReturn(this.requestBodyUriMock);
-		when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
-		when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
-		when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
-		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-		when(this.responseMock.bodyToMono(ResponseObj.class)).thenReturn(Mono.just(tokenObject));
+		Mockito.doReturn(getMockResponseObject()).when(this.restUtils).getTokenResponseObject();
 
 		when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
 		when(this.requestHeadersUriMock.uri(String.format(constants.getCommonSchoolByMincode(), mincode))).thenReturn(this.requestHeadersMock);
@@ -614,17 +607,7 @@ public class DistributionServiceTest {
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(byte[].class)).thenReturn(Mono.just(bytesSAR));
 
-		final ResponseObj tokenObject = new ResponseObj();
-		tokenObject.setAccess_token(MOCK_TOKEN);
-		tokenObject.setRefresh_token("456");
-
-		when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
-		when(this.requestBodyUriMock.uri(constants.getTokenUrl())).thenReturn(this.requestBodyUriMock);
-		when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
-		when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
-		when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
-		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-		when(this.responseMock.bodyToMono(ResponseObj.class)).thenReturn(Mono.just(tokenObject));
+		Mockito.doReturn(getMockResponseObject()).when(this.restUtils).getTokenResponseObject();
 
 		Mockito.when(schoolService.getCommonSchoolDetails(mincode,exception)).thenReturn(schObj);
 		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,null, transmissionMode,null,accessToken);
@@ -742,31 +725,12 @@ public class DistributionServiceTest {
 		when(this.responseMock.bodyToMono(CommonSchool.class)).thenReturn(inputResponseSchool);
 		when(this.inputResponseSchool.block()).thenReturn(schObj);
 
-		final ResponseObj tokenObject = new ResponseObj();
-		tokenObject.setAccess_token(MOCK_TOKEN);
-		tokenObject.setRefresh_token("456");
-
-//		when(this.restUtilsMock.getTokenResponseObject()).thenReturn(getMockResponseObject());
-		when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
-		when(this.requestBodyUriMock.uri(constants.getTokenUrl())).thenReturn(this.requestBodyUriMock);
-		when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
-		when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
-		when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
-		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-		when(this.responseMock.bodyToMono(ResponseObj.class)).thenReturn(Mono.just(tokenObject));
+		Mockito.doReturn(getMockResponseObject()).when(this.restUtils).getTokenResponseObject();
+//		Mockito.doReturn(schObj).when(schoolService).getCommonSchoolDetails(mincode,exception);
 
 		if (isAsyncProcess) {
-			when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-			when(this.requestHeadersUriMock.uri(String.format(constants.getDistributionJobCompleteNotification(), batchId, "success"))).thenReturn(this.requestHeadersMock);
-			when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
-			when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-			when(this.responseMock.bodyToMono(Void.class)).thenReturn(Mono.empty());
-
-			when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-			when(this.requestHeadersUriMock.uri(String.format(constants.getDistributionJobCompleteNotification(), batchId, "error"))).thenReturn(this.requestHeadersMock);
-			when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
-			when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-			when(this.responseMock.bodyToMono(Void.class)).thenReturn(Mono.empty());
+			Mockito.doNothing().when(this.restUtils).notifyDistributionJobIsCompleted(batchId, "success", MOCK_TOKEN);
+			Mockito.doNothing().when(this.restUtils).notifyDistributionJobIsCompleted(batchId, "error", MOCK_TOKEN);
 
 			gradDistributionService.asyncDistributeCredentials(runType, batchId, mapDist, activityCode, transmissionMode, localDownload, accessToken);
 			DistributionResponse disRes = new DistributionResponse();
@@ -906,34 +870,16 @@ public class DistributionServiceTest {
 		when(this.responseMock.bodyToMono(InputStreamResource.class)).thenReturn(inputResponse);
 		when(this.inputResponse.block()).thenReturn(inSRCert);
 
-		final ResponseObj tokenObject = new ResponseObj();
-		tokenObject.setAccess_token(MOCK_TOKEN);
-		tokenObject.setRefresh_token("456");
-
-//		when(this.restUtilsMock.getTokenResponseObject()).thenReturn(getMockResponseObject());
-		when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
-		when(this.requestBodyUriMock.uri(constants.getTokenUrl())).thenReturn(this.requestBodyUriMock);
-		when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
-		when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
-		when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
-		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-		when(this.responseMock.bodyToMono(ResponseObj.class)).thenReturn(Mono.just(tokenObject));
+		Mockito.doReturn(getMockResponseObject()).when(this.restUtils).getTokenResponseObject();
 
 		if(properName == null)
-			Mockito.when(schoolService.getCommonSchoolDetails(mincode,exception)).thenReturn(schObj);
+			Mockito.doReturn(schObj).when(schoolService).getCommonSchoolDetails(mincode,exception);
+		else
+			Mockito.doReturn(schObj).when(schoolService).getCommonSchoolDetailsForPackingSlip(properName);
 
 		if (isAsyncProcess) {
-			when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-			when(this.requestHeadersUriMock.uri(String.format(constants.getDistributionJobCompleteNotification(), batchId, "success"))).thenReturn(this.requestHeadersMock);
-			when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
-			when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-			when(this.responseMock.bodyToMono(Void.class)).thenReturn(Mono.empty());
-
-			when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-			when(this.requestHeadersUriMock.uri(String.format(constants.getDistributionJobCompleteNotification(), batchId, "error"))).thenReturn(this.requestHeadersMock);
-			when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
-			when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-			when(this.responseMock.bodyToMono(Void.class)).thenReturn(Mono.empty());
+			Mockito.doNothing().when(this.restUtils).notifyDistributionJobIsCompleted(batchId, "success", MOCK_TOKEN);
+			Mockito.doNothing().when(this.restUtils).notifyDistributionJobIsCompleted(batchId, "error", MOCK_TOKEN);
 
 			gradDistributionService.asyncDistributeCredentials(runType, batchId, mapDist, activityCode, transmissionMode, localDownload, accessToken);
 			DistributionResponse disRes = new DistributionResponse();
@@ -1086,17 +1032,7 @@ public class DistributionServiceTest {
 		when(this.responseMock.bodyToMono(CommonSchool.class)).thenReturn(inputResponseSchool);
 		when(this.inputResponseSchool.block()).thenReturn(schObj);
 
-		final ResponseObj tokenObject = new ResponseObj();
-		tokenObject.setAccess_token(MOCK_TOKEN);
-		tokenObject.setRefresh_token("456");
-
-		when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
-		when(this.requestBodyUriMock.uri(constants.getTokenUrl())).thenReturn(this.requestBodyUriMock);
-		when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
-		when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
-		when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
-		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-		when(this.responseMock.bodyToMono(ResponseObj.class)).thenReturn(Mono.just(tokenObject));
+		Mockito.doReturn(getMockResponseObject()).when(this.restUtils).getTokenResponseObject();
 
 		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,transmissionMode,localDownload,accessToken);
 	}
@@ -1239,10 +1175,6 @@ public class DistributionServiceTest {
 		when(this.responseMock.bodyToMono(Psi.class)).thenReturn(inputResponsePsi);
 		when(this.inputResponsePsi.block()).thenReturn(psiObj);
 
-		final ResponseObj tokenObject = new ResponseObj();
-		tokenObject.setAccess_token(MOCK_TOKEN);
-		tokenObject.setRefresh_token("456");
-
 		//Grad2-1931 checking for CSV transcripts - mchintha
 		when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
 		when(this.requestHeadersUriMock.uri(String.format(constants.getTranscriptCSVData(), scd.getPen()))).thenReturn(this.requestHeadersMock);
@@ -1251,13 +1183,7 @@ public class DistributionServiceTest {
 		when(this.responseMock.bodyToMono(ReportData.class)).thenReturn(inputResponseReport);
 		when(this.inputResponseReport.block()).thenReturn(data);
 
-		when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
-		when(this.requestBodyUriMock.uri(constants.getTokenUrl())).thenReturn(this.requestBodyUriMock);
-		when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
-		when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
-		when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
-		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-		when(this.responseMock.bodyToMono(ResponseObj.class)).thenReturn(Mono.just(tokenObject));
+		Mockito.doReturn(getMockResponseObject()).when(this.restUtils).getTokenResponseObject();
 
         return gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,transmissionMode.toUpperCase(),localDownload,accessToken);
 	}
