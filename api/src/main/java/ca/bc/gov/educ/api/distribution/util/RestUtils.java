@@ -90,6 +90,15 @@ public class RestUtils {
 		return null;
 	}
 
+	public void notifyDistributionJobIsCompleted(Long batchId, String status, String accessToken) {
+		final UUID correlationID = UUID.randomUUID();
+		webClient.get().uri(String.format(constants.getDistributionJobCompleteNotification(), batchId, status))
+				.headers(h -> {
+					h.setBearerAuth(accessToken);
+					h.set(EducDistributionApiConstants.CORRELATION_ID, correlationID.toString());
+				}).retrieve().bodyToMono(Void.class).block();
+	}
+
 	public ResponseEntity<Void> FORBIDDEN() {
 		return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 	}

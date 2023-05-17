@@ -90,59 +90,59 @@ public class DistributionServiceTest {
 
 	@Test
 	public void testdistributeCredentialsMonthly() {
-		DistributionResponse res = testdistributeCredentials_transcript("MER","USERDIST",false,null);
+		DistributionResponse res = testdistributeCredentials_transcript("MER","MONTHLYDIST",false,null, true);
 		assertNotNull(res);
-		res = testdistributeCredentials_certificate("MER","USERDIST","YED2",null,true);
+		res = testdistributeCredentials_certificate("MER","MONTHLYDIST","YED2",null,true, true);
 		assertNotNull(res);
-		res = testdistributeCredentials_certificate("MER","USERDIST","YEDB",null,false);
+		res = testdistributeCredentials_certificate("MER","MONTHLYDIST","YEDB",null,false, true);
 		assertNotNull(res);
-		res = testdistributeCredentials_certificate("MER","USERDIST","YEDR",null,false);
+		res = testdistributeCredentials_certificate("MER","MONTHLYDIST","YEDR",null,false, true);
 		assertNotNull(res);
 	}
 
 	@Test
 	public void testdistributeCredentialsMonthlyLocalDownload() {
-		DistributionResponse res = testdistributeCredentials_transcript("MER","USERDIST",false,"Y");
+		DistributionResponse res = testdistributeCredentials_transcript("MER","USERDIST",false,"Y", false);
 		assertNotNull(res);
-		res = testdistributeCredentials_certificate("MER","USERDIST","YED2",null,false);
+		res = testdistributeCredentials_certificate("MER","USERDIST","YED2",null,false, false);
 		assertNotNull(res);
-		res = testdistributeCredentials_certificate("MER","USERDIST","YEDB",null,false);
+		res = testdistributeCredentials_certificate("MER","USERDIST","YEDB",null,false, false);
 		assertNotNull(res);
-		res = testdistributeCredentials_certificate("MER","USERDIST","YEDR",null,false);
+		res = testdistributeCredentials_certificate("MER","USERDIST","YEDR",null,false, false);
 		assertNotNull(res);
 	}
 
 	@Test
 	public void testdistributeCredentialsMonthly_schoolNull() {
-		DistributionResponse res = testdistributeCredentials_transcript("MER","USERDIST",true,null);
+		DistributionResponse res = testdistributeCredentials_transcript("MER","USERDIST",true,null, false);
 		assertNotNull(res);
-		res = testdistributeCredentials_certificate("MER","USERDIST","YED2",null,false);
+		res = testdistributeCredentials_certificate("MER","USERDIST","YED2",null,false, false);
 		assertNotNull(res);
-		res = testdistributeCredentials_certificate("MER","USERDIST","YEDB",null,false);
+		res = testdistributeCredentials_certificate("MER","USERDIST","YEDB",null,false, false);
 		assertNotNull(res);
-		res = testdistributeCredentials_certificate("MER","USERDIST","YEDR",null,false);
+		res = testdistributeCredentials_certificate("MER","USERDIST","YEDR",null,false, false);
 		assertNotNull(res);
 	}
 
 	@Test
 	public void testdistributeCredentialsUserReq() {
-		DistributionResponse res = testdistributeCredentials_certificate("MER","USERDISTRC","YED2","John Doe",false);
+		DistributionResponse res = testdistributeCredentials_certificate("MER","USERDISTRC","YED2","John Doe",false, false);
 		assertNotNull(res);
-		res = testdistributeCredentials_certificate("MER","USERDISTRC","YEDB","John Doe",false);
+		res = testdistributeCredentials_certificate("MER","USERDISTRC","YEDB","John Doe",false, false);
 		assertNotNull(res);
-		res = testdistributeCredentials_certificate("MER","USERDISTRC","YEDR","John Doe",false);
+		res = testdistributeCredentials_certificate("MER","USERDISTRC","YEDR","John Doe",false, false);
 		assertNotNull(res);
 	}
 
 	@Test
 	public void testdistributeCredentialsYearly() {
-		DistributionResponse res = testdistributeCredentials_transcript("MERYER","USERDIST",false,null);
+		DistributionResponse res = testdistributeCredentials_transcript("MERYER","DISTRUN_YE",false,null, true);
 		assertNotNull(res);
-		res = testdistributeCredentials_certificate("MERYER","USERDIST","YED2",null,false);
+		res = testdistributeCredentials_certificate("MERYER","DISTRUN_YE","YED2",null,false, true);
 		assertNotNull(res);
-		res = testdistributeCredentials_certificate("MERYER","USERDIST","YEDB",null,false);
+		res = testdistributeCredentials_certificate("MERYER","DISTRUN_YE","YEDB",null,false, true);
 		assertNotNull(res);
-		res = testdistributeCredentials_certificate("MERYER","USERDIST","YEDR",null,false);
+		res = testdistributeCredentials_certificate("MERYER","DISTRUN_YE","YEDR",null,false, true);
 		assertNotNull(res);
 	}
 
@@ -630,7 +630,7 @@ public class DistributionServiceTest {
 		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,null, transmissionMode,null,accessToken);
 	}
 
-	private DistributionResponse testdistributeCredentials_transcript(String runType, String activityCode,boolean schoolNull,String localDownload) {
+	private DistributionResponse testdistributeCredentials_transcript(String runType, String activityCode,boolean schoolNull,String localDownload, boolean isAsyncProcess) {
 		Long batchId= 9029L;
 		Map<String, DistributionPrintRequest > mapDist= new HashMap<>();
 		String accessToken = MOCK_TOKEN;
@@ -754,11 +754,20 @@ public class DistributionServiceTest {
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(ResponseObj.class)).thenReturn(Mono.just(tokenObject));
 
-		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,transmissionMode.toUpperCase(),localDownload,accessToken);
+		if (isAsyncProcess) {
+			gradDistributionService.asyncDistributeCredentials(runType, batchId, mapDist, activityCode, transmissionMode, localDownload, accessToken);
+			DistributionResponse disRes = new DistributionResponse();
+			disRes.setBatchId(batchId.toString());
+			disRes.setLocalDownload(localDownload);
+			disRes.setMergeProcessResponse("Merge Successful and File Uploaded");
+			return disRes;
+		} else {
+			return gradDistributionService.distributeCredentials(runType, batchId, mapDist, activityCode, transmissionMode, localDownload, accessToken);
+		}
 	}
 
 
-	private DistributionResponse testdistributeCredentials_certificate(String runType, String activityCode,String paperType,String properName,boolean noSchoolDis) {
+	private DistributionResponse testdistributeCredentials_certificate(String runType, String activityCode,String paperType,String properName,boolean noSchoolDis, boolean isAsyncProcess) {
 		Long batchId= 9029L;
 		Map<String, DistributionPrintRequest > mapDist= new HashMap<>();
 		String localDownload = null;
@@ -898,7 +907,17 @@ public class DistributionServiceTest {
 
 		if(properName == null)
 			Mockito.when(schoolService.getCommonSchoolDetails(mincode,exception)).thenReturn(schObj);
-		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,transmissionMode,localDownload,accessToken);
+
+		if (isAsyncProcess) {
+			gradDistributionService.asyncDistributeCredentials(runType, batchId, mapDist, activityCode, transmissionMode, localDownload, accessToken);
+			DistributionResponse disRes = new DistributionResponse();
+			disRes.setBatchId(batchId.toString());
+			disRes.setLocalDownload(localDownload);
+			disRes.setMergeProcessResponse("Merge Successful and File Uploaded");
+			return disRes;
+		} else {
+			return gradDistributionService.distributeCredentials(runType, batchId, mapDist, activityCode, transmissionMode, localDownload, accessToken);
+		}
 	}
 
 	private DistributionResponse testdistributeCredentials_certificate_reprint(String runType, String activityCode,String paperType,boolean schoolNull) {

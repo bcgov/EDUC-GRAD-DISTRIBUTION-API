@@ -138,6 +138,10 @@ endpoint:
       url: ${GRAD_TRAX_API}api/v1/trax/psi/%s
     school-by-min-code:
       url: ${GRAD_TRAX_API}api/v1/trax/school/%s
+  grad-batch-graduation-api:
+    distribution:
+      notify-completion:
+        url: ${GRAD_BATCH_API}api/v1/batch/notifyDistributionJobCompleted?batchId=%s&status=%s
 
 #Splunk LogHelper
 splunk:
@@ -146,3 +150,4 @@ splunk:
 
 scheduler:
   clean-tmp-cache-cron: ${CLEAN_TMP_CACHE_CRON}
+

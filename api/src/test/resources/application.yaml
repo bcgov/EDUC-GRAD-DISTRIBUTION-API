@@ -141,6 +141,10 @@ endpoint:
       url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/trax/psi/%s
     school-by-min-code:
       url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/trax/school/%s
+  grad-batch-graduation-api:
+    distribution:
+      notify-completion:
+        url: https://educ-grad-batch-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/batch/notifyDistributionJobCompleted?batchId=%s&status=%s
 
 #Splunk LogHelper
 splunk:
