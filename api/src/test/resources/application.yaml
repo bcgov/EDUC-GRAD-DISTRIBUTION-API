@@ -60,6 +60,17 @@ springdoc:
     path: /api/v1/api-docs-ui.html
     operationsSorter: alpha
 
+#Resilience
+resilience4j.retry:
+  instances:
+    rt-getToken:
+      maxAttempts: 35
+      waitDuration: 5s
+      retryExceptions:
+        - org.springframework.web.client.HttpServerErrorException
+      ignoreExceptions:
+        - java.lang.NullPointerException
+
 authorization:
   user: batch-api
   password: dsfs3434fddf
@@ -141,6 +152,10 @@ endpoint:
       url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/trax/psi/%s
     school-by-min-code:
       url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/trax/school/%s
+  grad-batch-graduation-api:
+    distribution:
+      notify-completion:
+        url: https://educ-grad-batch-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/batch/notifyDistributionJobCompleted?batchId=%s&status=%s
 
 #Splunk LogHelper
 splunk:

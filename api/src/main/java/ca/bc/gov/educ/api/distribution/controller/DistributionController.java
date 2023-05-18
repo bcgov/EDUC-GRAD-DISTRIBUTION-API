@@ -54,7 +54,21 @@ public class DistributionController {
             @PathVariable String runType, @RequestParam(required = false) Long batchId ,@RequestParam(required = false) String activityCode,
             @RequestParam(required = false) String transmissionType, @RequestBody Map<String, DistributionPrintRequest> mapDist,
             @RequestParam(required = false) String localDownload, @RequestHeader(name="Authorization") String accessToken) {
-        return response.GET(gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,transmissionType,localDownload,accessToken));
+        if (("MER".equals(runType) && "MONTHLYDIST".equals(activityCode))
+            || "MERYER".equals(runType) || "MERSUPP".equals(runType)) {
+            // non-blocking IO - launching async process to distribute credentials
+            gradDistributionService.asyncDistributeCredentials(runType,batchId,mapDist,activityCode,transmissionType,localDownload,accessToken);
+
+            // return as successful immediately
+            DistributionResponse disRes = new DistributionResponse();
+            disRes.setBatchId(batchId.toString());
+            disRes.setLocalDownload(localDownload);
+            disRes.setMergeProcessResponse("Merge Successful and File Uploaded");
+            return response.GET(disRes);
+        } else {
+            // blocking IO - launching sync process to distribute credentials
+            return response.GET(gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,transmissionType,localDownload,accessToken));
+        }
     }
 
     @GetMapping(EducDistributionApiConstants.LOCAL_DOWNLOAD)

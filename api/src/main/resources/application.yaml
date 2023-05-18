@@ -58,6 +58,17 @@ springdoc:
     path: /api/v1/api-docs-ui.html
     operationsSorter: alpha
 
+#Resilience
+resilience4j.retry:
+  instances:
+    rt-getToken:
+      maxAttempts: 35
+      waitDuration: 5s
+      retryExceptions:
+        - org.springframework.web.client.HttpServerErrorException
+      ignoreExceptions:
+        - java.lang.NullPointerException
+
 authorization:
   user: ${GRAD_CLIENT_NAME}
   password: ${GRAD_CLIENT_SECRET}
@@ -138,6 +149,10 @@ endpoint:
       url: ${GRAD_TRAX_API}api/v1/trax/psi/%s
     school-by-min-code:
       url: ${GRAD_TRAX_API}api/v1/trax/school/%s
+  grad-batch-graduation-api:
+    distribution:
+      notify-completion:
+        url: ${GRAD_BATCH_API}api/v1/batch/notifyDistributionJobCompleted?batchId=%s&status=%s
 
 #Splunk LogHelper
 splunk:
@@ -146,3 +161,4 @@ splunk:
 
 scheduler:
   clean-tmp-cache-cron: ${CLEAN_TMP_CACHE_CRON}
+
