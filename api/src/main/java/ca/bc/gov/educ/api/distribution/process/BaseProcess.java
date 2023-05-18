@@ -138,7 +138,7 @@ public abstract class BaseProcess implements DistributionProcess {
             sftpUtils.sftpUploadBCMail(batchId, getZipFolderFromRootLocation());
         }
     }
-    //Grad2-1931 - setting SFTP root folder location where it has to pick zip folders from, to send to BC mail - mchintha
+    //Grad2-2052 - setting SFTP root folder location where it has to pick zip folders from, to send them to BC mail - mchintha
     protected String getZipFolderFromRootLocation() {
         return EducDistributionApiConstants.TMP_DIR;
     }
