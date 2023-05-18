@@ -54,8 +54,7 @@ public class DistributionController {
             @PathVariable String runType, @RequestParam(required = false) Long batchId ,@RequestParam(required = false) String activityCode,
             @RequestParam(required = false) String transmissionType, @RequestBody Map<String, DistributionPrintRequest> mapDist,
             @RequestParam(required = false) String localDownload, @RequestHeader(name="Authorization") String accessToken) {
-        if (("MER".equals(runType) && "MONTHLYDIST".equals(activityCode))
-            || "MERYER".equals(runType) || "MERSUPP".equals(runType)) {
+        if (isAsyncDistribution(runType, activityCode)) {
             // non-blocking IO - launching async process to distribute credentials
             gradDistributionService.asyncDistributeCredentials(runType,batchId,mapDist,activityCode,transmissionType,localDownload,accessToken);
 
@@ -97,5 +96,9 @@ public class DistributionController {
             responseEntity = ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         }
         return responseEntity;
+    }
+
+    private boolean isAsyncDistribution(String runType, String activityCode) {
+        return ( "MER".equals(runType) && ("MONTHLYDIST".equals(activityCode) || "NONGRADDIST".equals(activityCode)) ) || "MERYER".equals(runType) || "MERSUPP".equals(runType);
     }
 }
