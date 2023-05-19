@@ -368,6 +368,7 @@ public abstract class BaseProcess implements DistributionProcess {
             School school = new School();
             school.setMincode(traxSchool.getMinCode());
             school.setName(traxSchool.getSchoolName());
+            school.setTypeBanner("PRINCIPAL");
             Address address = new Address();
             address.setStreetLine1(traxSchool.getAddress1());
             address.setStreetLine2(traxSchool.getAddress2());
