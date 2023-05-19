@@ -100,17 +100,23 @@ public abstract class BaseProcess implements DistributionProcess {
         logger.debug("Create zip file for {}", processorData.getActivityCode());
         StringBuilder sourceFileBuilder = new StringBuilder().append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.DEL).append(batchId);
         File file = new File(EducDistributionApiConstants.TMP_DIR + "/EDGRAD.BATCH." + batchId + ".zip");
-        writeZipFile(sourceFileBuilder, file);
+        writeZipFile(sourceFileBuilder.toString(), file);
     }
 
-    protected void writeZipFile(StringBuilder sourceFileBuilder, File file) {
-        try (FileOutputStream fos = new FileOutputStream(file)) {
-            ZipOutputStream zipOut = new ZipOutputStream(fos);
-            File fileToZip = new File(sourceFileBuilder.toString());
+    protected void writeZipFile(String rootPath, File file) {
+        ZipOutputStream zipOut = null;
+        try (FileOutputStream fos = new FileOutputStream(file.getAbsolutePath())) {
+            zipOut = new ZipOutputStream(fos);
+            File fileToZip = new File(rootPath);
             EducDistributionApiUtils.zipFile(fileToZip, fileToZip.getName(), zipOut);
+            zipOut.close();
         } catch (IOException e) {
-            logger.debug(EXCEPTION, e.getLocalizedMessage());
+            logger.error(EXCEPTION, e.getLocalizedMessage());
         }
+        /**
+        if(!EducDistributionApiUtils.isValid(file)) {
+            throw new GradBusinessRuleException("Zip file " + file.getAbsolutePath() + " is not valid");
+        }**/
     }
 
     protected void createControlFile(Long batchId, ProcessorData processorData, int numberOfPdfs) {
@@ -277,6 +283,7 @@ public abstract class BaseProcess implements DistributionProcess {
             School school = new School();
             school.setMincode(traxSchool.getMinCode());
             school.setName(traxSchool.getSchoolName());
+            school.setTypeBanner("PRINCIPAL");
             Address address = new Address();
             address.setStreetLine1(traxSchool.getAddress1());
             address.setStreetLine2(traxSchool.getAddress2());

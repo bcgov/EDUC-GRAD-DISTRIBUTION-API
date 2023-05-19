@@ -11,6 +11,7 @@ import ca.bc.gov.educ.api.distribution.util.RestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -50,6 +51,33 @@ public class GradDistributionService {
         restUtils.fetchAccessToken(data);
         data = process.fire(data);
         return data.getDistributionResponse();
+    }
+
+    @Async("asyncExecutor")
+    public void asyncDistributeCredentials(String runType, Long batchId, Map<String, DistributionPrintRequest> mapDist, String activityCode, String transmissionMode,String localDownload, String accessToken) {
+        ProcessorData data = ProcessorData.builder().batchId(batchId).accessToken(accessToken).distributionResponse(null).mapDistribution(mapDist).activityCode(activityCode).transmissionMode(transmissionMode).localDownload(localDownload).build();
+        asyncProcessDistribution(runType, data);
+    }
+
+    private void asyncProcessDistribution(String processType, ProcessorData data) {
+        String status;
+        DistributionProcessType pType = DistributionProcessType.valueOf(processType);
+        DistributionProcess process = distributionProcessFactory.createProcess(pType);
+
+        try {
+            restUtils.fetchAccessToken(data);
+            data = process.fire(data);
+            if (data.getDistributionResponse().getMergeProcessResponse().toLowerCase().contains("successful")) {
+                status = "success";
+            } else {
+                status = "error";
+            }
+        } catch (Exception ex) {
+            logger.error("Distribution Process - unexpected exception occurred: {}", ex.getLocalizedMessage());
+            status = "error";
+        }
+        restUtils.fetchAccessToken(data);
+        restUtils.notifyDistributionJobIsCompleted(data.getBatchId(), status, data.getAccessToken());
     }
 
     //Grad2-1931 Changed the zipped folder path to fetch - mchintha

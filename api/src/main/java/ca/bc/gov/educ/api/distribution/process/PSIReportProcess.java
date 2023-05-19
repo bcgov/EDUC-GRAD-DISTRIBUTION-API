@@ -450,7 +450,7 @@ public class PSIReportProcess extends BaseProcess {
         }
         StringBuilder sourceFileBuilder = new StringBuilder().append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.FILES_FOLDER_STRUCTURE).append(transmissionMode.toUpperCase()).append(EducDistributionApiConstants.DEL).append(batchId);
         File file = new File(EducDistributionApiConstants.TMP_DIR + EducDistributionApiConstants.FILES_FOLDER_STRUCTURE + transmissionMode.toUpperCase() + "/EDGRAD.BATCH." + batchId + ".zip");
-        writeZipFile(sourceFileBuilder, file);
+        writeZipFile(sourceFileBuilder.toString(), file);
     }
 
     @Override
