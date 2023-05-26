@@ -41,7 +41,7 @@ public class YearEndMergeProcess extends MergeProcess {
         int numberOfCreatedSchoolReports = 0;
         int numberOfProcessedSchoolReports = 0;
         int numberOfCreatedSchoolLabelReports = 0;
-        List<School> schoolsForLabels = distributionRequest.getSchools();
+        List<School> schoolsForLabels = new ArrayList<>();
         List<School> districtsForLabels = new ArrayList<>();
         for (String mincode : mapDist.keySet()) {
 
