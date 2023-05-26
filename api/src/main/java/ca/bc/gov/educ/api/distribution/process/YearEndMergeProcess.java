@@ -80,17 +80,19 @@ public class YearEndMergeProcess extends MergeProcess {
             }
         }
         response.setTranscriptResponse(numberOfPdfs + " transcripts have been processed in batch " + processorData.getBatchId());
-        logger.debug("***** Create and Store district labels reports *****");
-        for(School sch: districtsForLabels) {
-            List<School> districts = new ArrayList<>();
-            districts.add(sch);
-            numberOfCreatedSchoolLabelReports += createSchoolLabelsReport(districts, ADDRESS_LABEL_YE);
+        if(!districtsForLabels.isEmpty()) {
+            logger.debug("***** Create and Store district labels reports *****");
+            for (School sch : districtsForLabels) {
+                List<School> districts = new ArrayList<>();
+                districts.add(sch);
+                numberOfCreatedSchoolLabelReports += createSchoolLabelsReport(districts, ADDRESS_LABEL_YE);
+            }
+            logger.debug("***** Number of created district labels reports {} *****", numberOfCreatedSchoolLabelReports);
+            logger.debug("***** Distribute District Label reports *****");
+            List<String> mincodes = districtsForLabels.stream().map(s -> s.getMincode()).toList();
+            numberOfProcessedSchoolReports += processDistrictSchoolDistribution(batchId, mincodes, ADDRESS_LABEL_YE, null, null);
+            logger.debug("***** Number of distributed District Label reports {} *****", numberOfProcessedSchoolReports);
         }
-        logger.debug("***** Number of created district labels reports {} *****", numberOfCreatedSchoolLabelReports);
-        logger.debug("***** Distribute District Label reports *****");
-        List<String> mincodes = districtsForLabels.stream().map(s->s.getMincode()).toList();
-        numberOfProcessedSchoolReports += processDistrictSchoolDistribution(batchId, mincodes, ADDRESS_LABEL_YE, null, null);
-        logger.debug("***** Number of distributed District Label reports {} *****", numberOfProcessedSchoolReports);
 
         if(!schoolsForLabels.isEmpty()) {
             logger.debug("***** Create and Store school labels reports *****");
