@@ -13,8 +13,12 @@ public class DistributionResponse {
     private String yedbResponse;
     private String mergeProcessResponse;
     private int numberOfPdfs;
+    private String jobStatus;
     //Grad2-1931
-    private String batchId;
+    private Long batchId;
     private String localDownload;
+    private int totalCyclesCount;
+    private int processedCyclesCount;
+    private String activityCode;
     private List<School> schools = new ArrayList<>();
 }

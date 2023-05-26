@@ -14,6 +14,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.List;
 import java.util.zip.ZipOutputStream;
 
@@ -183,8 +184,12 @@ public abstract class BaseProcess implements DistributionProcess {
         return postingDistributionService.createDistrictSchoolSuppReport(schooLabelReportType, districtReportType, schoolReportType);
     }
 
-    protected int processDistrictSchoolDistribution(ProcessorData processorData, String schooLabelReportType, String districtReportType, String schoolReportType) {
-        return postingDistributionService.processDistrictSchoolDistribution(processorData, schooLabelReportType, districtReportType, schoolReportType);
+    public int processSchoolLabelsDistribution(Long batchId, String schooLabelReportType) {
+        return postingDistributionService.processSchoolLabelsDistribution(batchId, schooLabelReportType);
+    }
+
+    protected int processDistrictSchoolDistribution(Long batchId, Collection<String> mincodes, String schooLabelReportType, String districtReportType, String schoolReportType) {
+        return postingDistributionService.processDistrictSchoolDistribution(batchId, mincodes, schooLabelReportType, districtReportType, schoolReportType);
     }
 
     /**
@@ -278,6 +283,8 @@ public abstract class BaseProcess implements DistributionProcess {
     }
 
     protected void processSchoolsForLabels(List<School> schools, String mincode, String accessToken, ExceptionMessage exception) {
+        School existSchool = schools.stream().filter(s->mincode.equalsIgnoreCase(s.getMincode())).findAny().orElse(null);
+        if(existSchool != null) return;
         TraxSchool traxSchool = schoolService.getTraxSchool(mincode, accessToken, exception);
         if (traxSchool != null) {
             School school = new School();
@@ -297,11 +304,14 @@ public abstract class BaseProcess implements DistributionProcess {
     }
 
     protected void processDistrictsForLabels(List<School> schools, String distcode, ExceptionMessage exception) {
+        School existSchool = schools.stream().filter(s->distcode.equalsIgnoreCase(s.getMincode())).findAny().orElse(null);
+        if(existSchool != null) return;
         TraxDistrict traxDistrict = schoolService.getTraxDistrict(distcode, exception);
         if (traxDistrict != null) {
             School school = new School();
             school.setMincode(traxDistrict.getDistrictNumber());
             school.setName(traxDistrict.getSuperIntendent());
+            school.setTypeBanner("SUPERINTENDANT");
             Address address = new Address();
             address.setStreetLine1(traxDistrict.getAddress1());
             address.setStreetLine2(traxDistrict.getAddress2());
@@ -310,9 +320,7 @@ public abstract class BaseProcess implements DistributionProcess {
             address.setCountry(traxDistrict.getCountryCode());
             address.setCode(traxDistrict.getPostal());
             school.setAddress(address);
-            if(!schools.contains(school)) {
-                schools.add(school);
-            }
+            schools.add(school);
         }
     }
 

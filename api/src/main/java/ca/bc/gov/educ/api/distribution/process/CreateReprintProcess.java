@@ -30,7 +30,8 @@ public class CreateReprintProcess extends BaseProcess {
 		logger.debug("************* TIME START  ************ {}",startTime);
 		DistributionResponse response = new DistributionResponse();
 		ExceptionMessage exception = new ExceptionMessage();
-		Map<String,DistributionPrintRequest> mapDist = processorData.getMapDistribution();
+		DistributionRequest distributionRequest = processorData.getDistributionRequest();
+		Map<String, DistributionPrintRequest> mapDist = distributionRequest.getMapDist();
 		Long batchId = processorData.getBatchId();
 		int numberOfPdfs = 0;
 		int counter=0;

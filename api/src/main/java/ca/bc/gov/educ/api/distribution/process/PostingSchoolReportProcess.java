@@ -33,7 +33,8 @@ public class PostingSchoolReportProcess extends BaseProcess {
 		long startTime = System.currentTimeMillis();
 		logger.debug("************* TIME START  ************ {}",startTime);
 		DistributionResponse response = new DistributionResponse();
-		Map<String,DistributionPrintRequest> mapDist = processorData.getMapDistribution();
+		DistributionRequest distributionRequest = processorData.getDistributionRequest();
+		Map<String, DistributionPrintRequest> mapDist = distributionRequest.getMapDist();
 		int numberOfPdfs = 0;
 		int counter=0;
 		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("PST"), Locale.CANADA);

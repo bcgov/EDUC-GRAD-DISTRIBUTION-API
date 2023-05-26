@@ -94,9 +94,10 @@ class DistributionControllerTest {
 		DistributionResponse res = new DistributionResponse();
 		res.setMergeProcessResponse("MERGED");
 
-		Mockito.when(gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode, transmissionMode.toUpperCase(),null,"accessToken")).thenReturn(res);
-		distributionController.distributeCredentials(runType,batchId,activityCode,transmissionMode.toUpperCase(),mapDist,null,"accessToken");
-		Mockito.verify(gradDistributionService).distributeCredentials(runType,batchId,mapDist,activityCode,transmissionMode.toUpperCase(),null,"accessToken");
+		DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).build();
+		Mockito.when(gradDistributionService.distributeCredentials(runType,batchId,distributionRequest,activityCode, transmissionMode.toUpperCase(),null,"accessToken")).thenReturn(res);
+		distributionController.distributeCredentials(runType,batchId,activityCode,transmissionMode.toUpperCase(),distributionRequest,null,"accessToken");
+		Mockito.verify(gradDistributionService).distributeCredentials(runType,batchId,distributionRequest,activityCode,transmissionMode.toUpperCase(),null,"accessToken");
 	}
 
 	@Test
@@ -156,9 +157,10 @@ class DistributionControllerTest {
 		DistributionResponse res = new DistributionResponse();
 		res.setMergeProcessResponse("MERGED");
 
-		Mockito.doNothing().when(gradDistributionService).asyncDistributeCredentials(runType,batchId,mapDist,activityCode, transmissionMode.toUpperCase(),null,"accessToken");
-		distributionController.distributeCredentials(runType,batchId,activityCode,transmissionMode.toUpperCase(),mapDist,null,"accessToken");
-		Mockito.verify(gradDistributionService).asyncDistributeCredentials(runType,batchId,mapDist,activityCode,transmissionMode.toUpperCase(),null,"accessToken");
+		DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).build();
+		Mockito.doNothing().when(gradDistributionService).asyncDistributeCredentials(runType,batchId,distributionRequest,activityCode, transmissionMode.toUpperCase(),null,"accessToken");
+		distributionController.distributeCredentials(runType,batchId,activityCode,transmissionMode.toUpperCase(),distributionRequest,null,"accessToken");
+		Mockito.verify(gradDistributionService).asyncDistributeCredentials(runType,batchId,distributionRequest,activityCode,transmissionMode.toUpperCase(),null,"accessToken");
 	}
 
 

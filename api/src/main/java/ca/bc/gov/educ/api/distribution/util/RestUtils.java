@@ -90,13 +90,12 @@ public class RestUtils {
 		return null;
 	}
 
-	public void notifyDistributionJobIsCompleted(Long batchId, String status, String accessToken) {
+	public void notifyDistributionJobIsCompleted(Long batchId, ProcessorData data) {
 		final UUID correlationID = UUID.randomUUID();
-		webClient.get().uri(String.format(constants.getDistributionJobCompleteNotification(), batchId, status))
-				.headers(h -> {
-					h.setBearerAuth(accessToken);
-					h.set(EducDistributionApiConstants.CORRELATION_ID, correlationID.toString());
-				}).retrieve().bodyToMono(Void.class).block();
+		webClient.post().uri(String.format(constants.getDistributionJobCompleteNotification(), batchId, data.getDistributionResponse().getJobStatus())).headers(h -> {
+			h.setBearerAuth(data.getAccessToken());
+			h.set(EducDistributionApiConstants.CORRELATION_ID, correlationID.toString());
+		}).body(BodyInserters.fromValue(data.getDistributionResponse())).retrieve().bodyToMono(Void.class).block();
 	}
 
 	public ResponseEntity<Void> FORBIDDEN() {

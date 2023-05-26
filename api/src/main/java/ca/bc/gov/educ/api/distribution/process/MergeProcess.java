@@ -39,7 +39,8 @@ public class MergeProcess extends BaseProcess {
 		logger.debug("************* TIME START  ************ {}",startTime);
 		DistributionResponse response = new DistributionResponse();
 		ExceptionMessage exception = new ExceptionMessage();
-		Map<String,DistributionPrintRequest> mapDist = processorData.getMapDistribution();
+		DistributionRequest distributionRequest = processorData.getDistributionRequest();
+		Map<String, DistributionPrintRequest> mapDist = distributionRequest.getMapDist();
 		Long batchId = processorData.getBatchId();
 		int numberOfPdfs = 0;
 		int counter=0;
@@ -90,7 +91,7 @@ public class MergeProcess extends BaseProcess {
 			numberOfCreatedSchoolReports += createSchoolLabelsReport(schoolsForLabels, ADDRESS_LABEL_SCHL);
 			logger.debug("***** Number of created Monthly school reports {} *****", numberOfCreatedSchoolReports);
 			logger.debug("***** Distribute Monthly school reports *****");
-			numberOfProcessedSchoolReports += processDistrictSchoolDistribution(processorData, ADDRESS_LABEL_SCHL, null, null);
+			numberOfProcessedSchoolReports += processDistrictSchoolDistribution(batchId, mapDist.keySet(), ADDRESS_LABEL_SCHL, null, null);
 			logger.debug("***** Number of distributed Monthly school reports {} *****", numberOfProcessedSchoolReports);
 		}
 		if (SUPPDIST.equalsIgnoreCase(processorData.getActivityCode())) {
@@ -99,7 +100,7 @@ public class MergeProcess extends BaseProcess {
 			numberOfCreatedSchoolReports += createDistrictSchoolSuppReport( null, null, DISTREP_SC);
 			logger.debug("***** Number of created Supplemental school reports {} *****", numberOfCreatedSchoolReports);
 			logger.debug("***** Distribute Supplemental school reports *****");
-			numberOfProcessedSchoolReports += processDistrictSchoolDistribution(processorData, ADDRESS_LABEL_SCHL, null, DISTREP_SC);
+			numberOfProcessedSchoolReports += processDistrictSchoolDistribution(batchId, mapDist.keySet(), ADDRESS_LABEL_SCHL, null, DISTREP_SC);
 			logger.debug("***** Number of distributed Supplemental school reports {} *****", numberOfProcessedSchoolReports);
 		}
 		numberOfPdfs += numberOfProcessedSchoolReports;

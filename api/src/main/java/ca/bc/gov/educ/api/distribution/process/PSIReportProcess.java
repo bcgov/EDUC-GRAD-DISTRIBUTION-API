@@ -41,12 +41,13 @@ public class PSIReportProcess extends BaseProcess {
         long sTime = System.currentTimeMillis();
         logger.debug("************* TIME START   ************ {}", sTime);
         DistributionResponse disRes = new DistributionResponse();
-        Map<String, DistributionPrintRequest> mDist = processorData.getMapDistribution();
-        Long bId = processorData.getBatchId();
+        DistributionRequest distributionRequest = processorData.getDistributionRequest();
+        Map<String, DistributionPrintRequest> mapDist = distributionRequest.getMapDist();
+        Long batchId = processorData.getBatchId();
         int numOfPdfs = 0;
         int cnter = 0;
         List<School> schoolsForLabels = new ArrayList<>();
-        for (Map.Entry<String, DistributionPrintRequest> entry : mDist.entrySet()) {
+        for (Map.Entry<String, DistributionPrintRequest> entry : mapDist.entrySet()) {
             cnter++;
             int currentSlipCount = 0;
             String psiCode = entry.getKey();
@@ -62,7 +63,7 @@ public class PSIReportProcess extends BaseProcess {
                 if (cnter % 50 == 0) {
                     restUtils.fetchAccessToken(processorData);
                 }
-                logger.debug("PSI {}/{}", cnter, mDist.size());
+                logger.debug("PSI {}/{}", cnter, mapDist.size());
             }
         }
         restUtils.fetchAccessToken(processorData);
@@ -70,10 +71,10 @@ public class PSIReportProcess extends BaseProcess {
         int numberOfCreatedSchoolLabelReports = createSchoolLabelsReport(schoolsForLabels, ADDRESS_LABEL_PSI);
         logger.debug("***** Number of created school labels reports {} *****", numberOfCreatedSchoolLabelReports);
         logger.debug("***** Distribute school labels reports *****");
-        int numberOfProcessedSchoolLabelsReports = processDistrictSchoolDistribution(processorData, ADDRESS_LABEL_PSI, null, null);
+        int numberOfProcessedSchoolLabelsReports = processDistrictSchoolDistribution(batchId, mapDist.keySet(), ADDRESS_LABEL_PSI, null, null);
         logger.debug("***** Number of distributed school labels reports {} *****", numberOfProcessedSchoolLabelsReports);
         numOfPdfs += numberOfProcessedSchoolLabelsReports;
-        postingProcess(bId, processorData, numOfPdfs);
+        postingProcess(batchId, processorData, numOfPdfs);
         long eTime = System.currentTimeMillis();
         long difference = (eTime - sTime) / 1000;
         logger.debug("************* TIME Taken  ************ {} secs", difference);

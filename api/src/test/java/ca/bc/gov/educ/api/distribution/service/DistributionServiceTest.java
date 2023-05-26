@@ -511,7 +511,8 @@ public class DistributionServiceTest {
 
 		Mockito.when(schoolService.getCommonSchoolDetails(mincode,exception)).thenReturn(schObj);
 
-		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,transmissionMode.toUpperCase(),null,accessToken);
+		DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).build();
+		return gradDistributionService.distributeCredentials(runType,batchId,distributionRequest,activityCode,transmissionMode.toUpperCase(),null,accessToken);
 	}
 
 	private ResponseObj getMockResponseObject(){
@@ -588,7 +589,8 @@ public class DistributionServiceTest {
 		when(this.responseMock.bodyToMono(CommonSchool.class)).thenReturn(inputResponseSchool);
 		when(this.inputResponseSchool.block()).thenReturn(schObj);
 
-		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,null,transmissionMode,localDownload,accessToken);
+		DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).build();
+		return gradDistributionService.distributeCredentials(runType,batchId,distributionRequest,null,transmissionMode,localDownload,accessToken);
 	}
 
 	private DistributionResponse testdistributeCredentials_certificate_blank(String runType,String paperType) {
@@ -654,7 +656,8 @@ public class DistributionServiceTest {
 		Mockito.doReturn(getMockResponseObject()).when(this.restUtils).getTokenResponseObject();
 
 		Mockito.when(schoolService.getCommonSchoolDetails(mincode,exception)).thenReturn(schObj);
-		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,null, transmissionMode,null,accessToken);
+		DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).build();
+		return gradDistributionService.distributeCredentials(runType,batchId,distributionRequest,null, transmissionMode,null,accessToken);
 	}
 
 	private DistributionResponse testdistributeCredentials_transcript(String runType, String activityCode,boolean schoolNull,String localDownload, boolean isAsyncProcess) {
@@ -772,18 +775,27 @@ public class DistributionServiceTest {
 		Mockito.doReturn(getMockResponseObject()).when(this.restUtils).getTokenResponseObject();
 //		Mockito.doReturn(schObj).when(schoolService).getCommonSchoolDetails(mincode,exception);
 
-		if (isAsyncProcess) {
-			Mockito.doNothing().when(this.restUtils).notifyDistributionJobIsCompleted(batchId, "success", MOCK_TOKEN);
-			Mockito.doNothing().when(this.restUtils).notifyDistributionJobIsCompleted(batchId, "error", MOCK_TOKEN);
+		ProcessorData data = new ProcessorData();
+		data.setAccessToken(MOCK_TOKEN);
+		DistributionResponse response = new DistributionResponse();
+		response.setBatchId(batchId);
+		data.setDistributionResponse(response);
 
-			gradDistributionService.asyncDistributeCredentials(runType, batchId, mapDist, activityCode, transmissionMode, localDownload, accessToken);
+		DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).build();
+		if (isAsyncProcess) {
+			response.setJobStatus("success");
+			Mockito.doNothing().when(this.restUtils).notifyDistributionJobIsCompleted(batchId, data);
+			response.setJobStatus("error");
+			Mockito.doNothing().when(this.restUtils).notifyDistributionJobIsCompleted(batchId, data);
+
+			gradDistributionService.asyncDistributeCredentials(runType, batchId, distributionRequest, activityCode, transmissionMode, localDownload, accessToken);
 			DistributionResponse disRes = new DistributionResponse();
-			disRes.setBatchId(batchId.toString());
+			disRes.setBatchId(batchId);
 			disRes.setLocalDownload(localDownload);
 			disRes.setMergeProcessResponse("Merge Successful and File Uploaded");
 			return disRes;
 		} else {
-			return gradDistributionService.distributeCredentials(runType, batchId, mapDist, activityCode, transmissionMode, localDownload, accessToken);
+			return gradDistributionService.distributeCredentials(runType, batchId, distributionRequest, activityCode, transmissionMode, localDownload, accessToken);
 		}
 	}
 
@@ -921,18 +933,27 @@ public class DistributionServiceTest {
 		else
 			Mockito.doReturn(schObj).when(schoolService).getCommonSchoolDetailsForPackingSlip(properName);
 
-		if (isAsyncProcess) {
-			Mockito.doNothing().when(this.restUtils).notifyDistributionJobIsCompleted(batchId, "success", MOCK_TOKEN);
-			Mockito.doNothing().when(this.restUtils).notifyDistributionJobIsCompleted(batchId, "error", MOCK_TOKEN);
+		ProcessorData data = new ProcessorData();
+		data.setAccessToken(MOCK_TOKEN);
+		DistributionResponse response = new DistributionResponse();
+		response.setBatchId(batchId);
+		data.setDistributionResponse(response);
 
-			gradDistributionService.asyncDistributeCredentials(runType, batchId, mapDist, activityCode, transmissionMode, localDownload, accessToken);
+		DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).build();
+		if (isAsyncProcess) {
+			response.setJobStatus("success");
+			Mockito.doNothing().when(this.restUtils).notifyDistributionJobIsCompleted(batchId, data);
+			response.setJobStatus("error");
+			Mockito.doNothing().when(this.restUtils).notifyDistributionJobIsCompleted(batchId, data);
+
+			gradDistributionService.asyncDistributeCredentials(runType, batchId, distributionRequest, activityCode, transmissionMode, localDownload, accessToken);
 			DistributionResponse disRes = new DistributionResponse();
-			disRes.setBatchId(batchId.toString());
+			disRes.setBatchId(batchId);
 			disRes.setLocalDownload(localDownload);
 			disRes.setMergeProcessResponse("Merge Successful and File Uploaded");
 			return disRes;
 		} else {
-			return gradDistributionService.distributeCredentials(runType, batchId, mapDist, activityCode, transmissionMode, localDownload, accessToken);
+			return gradDistributionService.distributeCredentials(runType, batchId, distributionRequest, activityCode, transmissionMode, localDownload, accessToken);
 		}
 	}
 
@@ -1078,7 +1099,8 @@ public class DistributionServiceTest {
 
 		Mockito.doReturn(getMockResponseObject()).when(this.restUtils).getTokenResponseObject();
 
-		return gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,transmissionMode,localDownload,accessToken);
+		DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).build();
+		return gradDistributionService.distributeCredentials(runType,batchId,distributionRequest,activityCode,transmissionMode,localDownload,accessToken);
 	}
 
 	@Test
@@ -1237,7 +1259,8 @@ public class DistributionServiceTest {
 
 		Mockito.doReturn(getMockResponseObject()).when(this.restUtils).getTokenResponseObject();
 
-        return gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,transmissionMode.toUpperCase(),localDownload,accessToken);
+		DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).build();
+        return gradDistributionService.distributeCredentials(runType,batchId,distributionRequest,activityCode,transmissionMode.toUpperCase(),localDownload,accessToken);
 	}
 
 	protected void mockTraxSchool(String mincode) {
