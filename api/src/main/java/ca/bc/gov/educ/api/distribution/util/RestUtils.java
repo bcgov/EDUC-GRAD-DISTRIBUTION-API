@@ -90,6 +90,7 @@ public class RestUtils {
 		return null;
 	}
 
+	@Retry(name = "rt-notifyDistributionJob", fallbackMethod = "rtNotifyDistributionJobFallBack")
 	public void notifyDistributionJobIsCompleted(Long batchId, String status, String accessToken) {
 		final UUID correlationID = UUID.randomUUID();
 		webClient.get().uri(String.format(constants.getDistributionJobCompleteNotification(), batchId, status))
@@ -97,6 +98,11 @@ public class RestUtils {
 					h.setBearerAuth(accessToken);
 					h.set(EducDistributionApiConstants.CORRELATION_ID, correlationID.toString());
 				}).retrieve().bodyToMono(Void.class).block();
+	}
+
+	public ResponseObj rtNotifyDistributionJobFallBack(HttpServerErrorException exception){
+		LOGGER.error("{} NOT REACHABLE after many attempts.", constants.getDistributionJobCompleteNotification(), exception);
+		return null;
 	}
 
 	public ResponseEntity<Void> FORBIDDEN() {
