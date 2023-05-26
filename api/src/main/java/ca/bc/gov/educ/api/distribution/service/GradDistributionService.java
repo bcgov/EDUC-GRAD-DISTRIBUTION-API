@@ -78,6 +78,7 @@ public class GradDistributionService {
         }
         restUtils.fetchAccessToken(data);
         restUtils.notifyDistributionJobIsCompleted(data.getBatchId(), status, data.getAccessToken());
+        logger.info("Async distribution job is completed and notify it's status back to grad-batch-api: batchId [{}]", data.getBatchId());
     }
 
     //Grad2-1931 Changed the zipped folder path to fetch - mchintha
