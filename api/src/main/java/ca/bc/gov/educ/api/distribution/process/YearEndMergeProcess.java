@@ -30,10 +30,6 @@ public class YearEndMergeProcess extends MergeProcess {
         DistributionResponse response = new DistributionResponse();
         ExceptionMessage exception = new ExceptionMessage();
         DistributionRequest distributionRequest = processorData.getDistributionRequest();
-        response.setBatchId(processorData.getBatchId());
-        response.setLocalDownload(processorData.getLocalDownload());
-        response.setTotalCyclesCount(distributionRequest.getTotalCyclesCount());
-        response.setActivityCode(processorData.getActivityCode());
         Long batchId = processorData.getBatchId();
         Map<String, DistributionPrintRequest> mapDist = distributionRequest.getMapDist();
         int numberOfPdfs = 0;
@@ -104,14 +100,18 @@ public class YearEndMergeProcess extends MergeProcess {
         }
 
         numberOfPdfs += numberOfProcessedSchoolReports;
-        postingDistributionService.postingProcess(processorData.getBatchId(), processorData.getLocalDownload(), processorData.getActivityCode(), numberOfPdfs);
         long endTime = System.currentTimeMillis();
         long diff = (endTime - startTime) / 1000;
         logger.debug("************* TIME Taken  ************ {} secs", diff);
         response.setMergeProcessResponse("Merge Successful and File Uploaded");
         response.setNumberOfPdfs(numberOfPdfs);
         response.setProcessedCyclesCount(distributionRequest.getProcessedCyclesCount());
+        response.setBatchId(processorData.getBatchId());
+        response.setLocalDownload(processorData.getLocalDownload());
+        response.setTotalCyclesCount(distributionRequest.getTotalCyclesCount());
+        response.setActivityCode(processorData.getActivityCode());
         response.getSchools().addAll(schoolsForLabels);
+        response.getDistricts().addAll(districtsForLabels);
         processorData.setDistributionResponse(response);
         return processorData;
     }

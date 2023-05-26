@@ -1,5 +1,6 @@
 package ca.bc.gov.educ.api.distribution.service;
 
+import ca.bc.gov.educ.api.distribution.model.dto.DistributionResponse;
 import ca.bc.gov.educ.api.distribution.model.dto.School;
 import ca.bc.gov.educ.api.distribution.model.dto.SchoolReports;
 import ca.bc.gov.educ.api.distribution.model.dto.TraxDistrict;
@@ -49,7 +50,11 @@ public class PostingDistributionService {
         this.restService = restService;
     }
 
-    public boolean postingProcess(Long batchId, String download, String activityCode, Integer numberOfPdfs) {
+    public boolean postingProcess(DistributionResponse distributionResponse) {
+        Long batchId = distributionResponse.getBatchId();
+        String activityCode = distributionResponse.getActivityCode();
+        String download = distributionResponse.getLocalDownload();
+        int numberOfPdfs = distributionResponse.getNumberOfPdfs();
         if(YEARENDDIST.equalsIgnoreCase(activityCode)) {
             createDistrictSchoolYearEndReport(null, DISTREP_YE_SD, DISTREP_YE_SC);
             numberOfPdfs += processDistrictSchoolDistribution(batchId, null, DISTREP_YE_SD, DISTREP_YE_SC);

@@ -21,4 +21,5 @@ public class DistributionResponse {
     private int processedCyclesCount;
     private String activityCode;
     private List<School> schools = new ArrayList<>();
+    private List<School> districts = new ArrayList<>();
 }

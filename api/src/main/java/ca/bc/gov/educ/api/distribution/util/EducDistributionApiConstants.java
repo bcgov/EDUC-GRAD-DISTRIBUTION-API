@@ -19,7 +19,7 @@ public class EducDistributionApiConstants {
 
     public static final String DISTRIBUTION_RUN = "/run/{runType}";
     public static final String LOCAL_DOWNLOAD = "/download/{batchId}";
-    public static final String POST_DISTRIBUTION = "/zipandupload/{batchId}";
+    public static final String POST_DISTRIBUTION = "/zipandupload";
     //Default Date format constants
     public static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd";
     public static final String SECONDARY_DATE_FORMAT = "yyyy/MM/dd";
