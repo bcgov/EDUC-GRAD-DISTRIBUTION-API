@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
 
 @Service
 public class GradDistributionService {
@@ -79,6 +80,7 @@ public class GradDistributionService {
         DistributionResponse response = data.getDistributionResponse();
         response.setJobStatus(status);
         restUtils.notifyDistributionJobIsCompleted(data.getBatchId(), data);
+        logger.info("Async distribution job is completed and notify it's status back to grad-batch-api: batchId [{}]", data.getBatchId());
     }
 
     //Grad2-1931 Changed the zipped folder path to fetch - mchintha
