@@ -90,7 +90,7 @@ public class DistributionServiceTest {
 
 	@Test
 	public void testdistributeCredentialsMonthly() {
-		DistributionResponse res = testdistributeCredentials_transcript("MER","MONTHLYDIST",false,null, true);
+		DistributionResponse res = testdistributeCredentials_transcript("MER","MONTHLYDIST",false,"Y", true);
 		assertNotNull(res);
 		res = testdistributeCredentials_certificate("MER","MONTHLYDIST","YED2",null,true, true);
 		assertNotNull(res);
@@ -102,7 +102,7 @@ public class DistributionServiceTest {
 
 	@Test
 	public void testdistributeCredentialsUserRequest() {
-		DistributionResponse res = testdistributeCredentials_transcript("MER","USERDIST",false,null, false);
+		DistributionResponse res = testdistributeCredentials_transcript("MER","USERDIST",false,"Y", false);
 		assertNotNull(res);
 		res = testdistributeCredentials_certificate("MER","USERDIST","YED2",null,true, false);
 		assertNotNull(res);
@@ -126,7 +126,7 @@ public class DistributionServiceTest {
 
 	@Test
 	public void testdistributeCredentialsMonthly_schoolNull() {
-		DistributionResponse res = testdistributeCredentials_transcript("MER","USERDIST",true,null, false);
+		DistributionResponse res = testdistributeCredentials_transcript("MER","USERDIST",true,"Y", false);
 		assertNotNull(res);
 		res = testdistributeCredentials_certificate("MER","USERDIST","YED2",null,false, false);
 		assertNotNull(res);
@@ -148,7 +148,7 @@ public class DistributionServiceTest {
 
 	@Test
 	public void testdistributeCredentialsYearly() {
-		DistributionResponse res = testdistributeCredentials_transcript("MERYER","DISTRUN_YE",false,null, true);
+		DistributionResponse res = testdistributeCredentials_transcript("MERYER","DISTRUN_YE",false,"Y", true);
 		assertNotNull(res);
 		res = testdistributeCredentials_certificate("MERYER","DISTRUN_YE","YED2",null,false, true);
 		assertNotNull(res);
@@ -182,7 +182,7 @@ public class DistributionServiceTest {
 
 	@Test
 	public void testdistributeCredentialsBlankSchoolNUll() {
-		DistributionResponse res = testdistributeCredentials_transcript_blank("BCPR",false,null);
+		DistributionResponse res = testdistributeCredentials_transcript_blank("BCPR",false,"Y");
 		assertNotNull(res);
 		res = testdistributeCredentials_certificate_blank("BCPR","YED2");
 		assertNotNull(res);
@@ -226,7 +226,7 @@ public class DistributionServiceTest {
 	private DistributionResponse testdistributeSchoolReport(String runType, String reportType, String activityCode) {
 		Long batchId= 9029L;
 		Map<String, DistributionPrintRequest > mapDist = new HashMap<>();
-		String localDownload = null;
+		String localDownload = "Y";
 		String transmissionMode = "ftp";
 		String accessToken = MOCK_TOKEN;
 		String mincode = "123123133";
@@ -512,7 +512,7 @@ public class DistributionServiceTest {
 		Mockito.when(schoolService.getCommonSchoolDetails(mincode,exception)).thenReturn(schObj);
 
 		DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).build();
-		return gradDistributionService.distributeCredentials(runType,batchId,distributionRequest,activityCode,transmissionMode.toUpperCase(),null,accessToken);
+		return gradDistributionService.distributeCredentials(runType,batchId,distributionRequest,activityCode,transmissionMode.toUpperCase(),"Y",accessToken);
 	}
 
 	private ResponseObj getMockResponseObject(){
@@ -596,7 +596,7 @@ public class DistributionServiceTest {
 	private DistributionResponse testdistributeCredentials_certificate_blank(String runType,String paperType) {
 		Long batchId= 9029L;
 		Map<String, DistributionPrintRequest > mapDist= new HashMap<>();
-		String localDownload = null;
+		String localDownload = "Y";
 		String transmissionMode = "ftp";
 		String accessToken = MOCK_TOKEN;
 		String mincode = "123123133";
@@ -657,7 +657,7 @@ public class DistributionServiceTest {
 
 		Mockito.when(schoolService.getCommonSchoolDetails(mincode,exception)).thenReturn(schObj);
 		DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).build();
-		return gradDistributionService.distributeCredentials(runType,batchId,distributionRequest,null, transmissionMode,null,accessToken);
+		return gradDistributionService.distributeCredentials(runType,batchId,distributionRequest,null, transmissionMode,"Y",accessToken);
 	}
 
 	private DistributionResponse testdistributeCredentials_transcript(String runType, String activityCode,boolean schoolNull,String localDownload, boolean isAsyncProcess) {
@@ -803,7 +803,7 @@ public class DistributionServiceTest {
 	private DistributionResponse testdistributeCredentials_certificate(String runType, String activityCode,String paperType,String properName,boolean noSchoolDis, boolean isAsyncProcess) {
 		Long batchId= 9029L;
 		Map<String, DistributionPrintRequest > mapDist= new HashMap<>();
-		String localDownload = null;
+		String localDownload = "Y";
 		String transmissionMode = "ftp";
 		String accessToken = MOCK_TOKEN;
 		String mincode = "123123133";
@@ -960,7 +960,7 @@ public class DistributionServiceTest {
 	private DistributionResponse testdistributeCredentials_certificate_reprint(String runType, String activityCode,String paperType,boolean schoolNull) {
 		Long batchId= 9029L;
 		Map<String, DistributionPrintRequest > mapDist= new HashMap<>();
-		String localDownload = null;
+		String localDownload = "Y";
 		String accessToken = MOCK_TOKEN;
 		String transmissionMode = "ftp";
 		String mincode = "123123133";

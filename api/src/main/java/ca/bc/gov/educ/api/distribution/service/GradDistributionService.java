@@ -54,7 +54,7 @@ public class GradDistributionService {
 
     @Async("asyncExecutor")
     public void asyncDistributeCredentials(String runType, Long batchId, DistributionRequest distributionRequest, String activityCode, String transmissionMode, String localDownload, String accessToken) {
-        ProcessorData data = ProcessorData.builder().batchId(batchId).accessToken(accessToken).distributionResponse(null).distributionRequest(distributionRequest).activityCode(activityCode).transmissionMode(transmissionMode).localDownload(localDownload).build();
+        ProcessorData data = ProcessorData.builder().batchId(batchId).accessToken(accessToken).distributionResponse(new DistributionResponse()).distributionRequest(distributionRequest).activityCode(activityCode).transmissionMode(transmissionMode).localDownload(localDownload).build();
         asyncProcessDistribution(runType, data);
     }
 
