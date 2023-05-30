@@ -45,11 +45,11 @@ public class SFTPUtils {
     private static final String RSA_PRV = "/.ssh/id_rsa";
 
     private static Logger logger = LoggerFactory.getLogger(SFTPUtils.class);
-
-    public boolean sftpUploadBCMail(Long batchId) {
-        String localFile = EducDistributionApiConstants.TMP_DIR + "/EDGRAD.BATCH."+batchId+".zip";
-        String remoteFile = BC_MAIL_LOCATION+"EDGRAD.BATCH."+batchId+".zip";
-        String localControlFile = EducDistributionApiConstants.TMP_DIR + "/EDGRAD.BATCH."+batchId+".txt";
+    //Grad2-1931 - setting SFTP root folder location where it has to pick zip folders from, to send to BC mail - mchintha
+    public boolean sftpUploadBCMail(Long batchId, String rootFolder) {
+        String localFile = rootFolder + "/EDGRAD.BATCH."+batchId+".zip";
+        String remoteFile = BC_MAIL_LOCATION +"EDGRAD.BATCH."+batchId+".zip";
+        String localControlFile = rootFolder + "/EDGRAD.BATCH."+batchId+".txt";
         String remoteControlFile = BC_MAIL_LOCATION+"EDGRAD.BATCH."+batchId+".txt";
         Session jschSession = null;
 
@@ -80,11 +80,11 @@ public class SFTPUtils {
             }
         }
     }
-
-    public boolean sftpUploadBCMail(Long batchId, String mincode) {
-        String localFile = EducDistributionApiConstants.TMP_DIR + "/EDGRAD.BATCH."+batchId+"."+mincode+".zip";
+    //Grad2-2052 set common root folder for all the dis runs to pick the folders and send to BC mail. - mchintha
+    public boolean sftpUploadBCMail(Long batchId, String rootFolder, String mincode) {
+        String localFile = rootFolder + "/EDGRAD.BATCH."+batchId+"."+mincode+".zip";
         String remoteFile = BC_MAIL_LOCATION+"EDGRAD.BATCH."+batchId+"."+mincode+".zip";
-        String localControlFile = EducDistributionApiConstants.TMP_DIR + "/EDGRAD.BATCH."+batchId+"."+mincode+".txt";
+        String localControlFile = rootFolder + "/EDGRAD.BATCH."+batchId+"."+mincode+".txt";
         String remoteControlFile = BC_MAIL_LOCATION+"EDGRAD.BATCH."+batchId+"."+mincode+".txt";
         Session jschSession = null;
 
