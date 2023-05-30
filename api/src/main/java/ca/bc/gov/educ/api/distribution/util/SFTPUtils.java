@@ -172,8 +172,7 @@ public class SFTPUtils {
             fileWriter.write(content);
             logger.debug("Write File Complete! - {} ",filename);
         } catch (IOException e) {
-            logger.debug("Write File Failed! - {}",filename);
-            e.printStackTrace();
+            logger.error("Write File Failed! - {}",filename);
         }
         return true;
     }
