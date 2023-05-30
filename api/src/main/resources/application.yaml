@@ -18,20 +18,22 @@ spring:
 #Logging properties
 logging:
   file:
-    max-history: 1
-    clean-history-on-start: true
-    max-size: 20MB
     name: /logs/app.log
-  #pattern:
-  #  file: %d | [${HOSTNAME}] | %clr(%5p) | [%t]   | %logger{36}:%L | %msg%n
-  #  console: %d | [${HOSTNAME}] | %clr(%5p) | [%t]   | %logger{36}:%L | %msg%n
+  logback:
+    rollingpolicy:
+      max-history: 1
+      max-file-size: 20MB
+      clean-history-on-start: true
+  pattern:
+    file: '{"time_stamp":"%d{yyyy-MM-dd HH:mm:ss.SSS}","level":"%3p" ,"thread":"%t" ,"class":"%logger{36}","msg":"%replace(%msg){"[\n\r\"]",""}", "exception":"%replace(%rEx{10}){"[\n\r\"]",""}","http_event":%X{httpEvent:-""},"message_event":%X{messageEvent:-""}}%nopex%n'
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%5p] [%t] [%logger{36}] [%replace(%msg){'[\n\r\"]',''} %X{httpEvent} %X{messageEvent}] %replace(%rEx{10}){'[\n\r\"]',''}%nopex%n"
   level:
     ca:
       bc:
         gov:
           educ:
             api:
-              graduation: ${APP_LOG_LEVEL}
+              distribution: ${APP_LOG_LEVEL}
     org:
       springframework:
         web: ${SPRING_WEB_LOG_LEVEL}
@@ -56,9 +58,28 @@ springdoc:
     path: /api/v1/api-docs-ui.html
     operationsSorter: alpha
 
+#Resilience
+resilience4j.retry:
+  instances:
+    rt-getToken:
+      maxAttempts: 35
+      waitDuration: 5s
+      retryExceptions:
+        - org.springframework.web.client.HttpServerErrorException
+      ignoreExceptions:
+        - java.lang.NullPointerException
+    rt-notifyDistributionJob:
+      maxAttempts: 35
+      waitDuration: 5s
+      retryExceptions:
+        - org.springframework.web.client.HttpServerErrorException
+      ignoreExceptions:
+        - java.lang.NullPointerException
+
 authorization:
   user: ${GRAD_CLIENT_NAME}
   password: ${GRAD_CLIENT_SECRET}
+  token-expiry-offset: '30'
 
 sftp:
   bcmail:
@@ -67,6 +88,7 @@ sftp:
     priv-key: ${BCMAIL_SSH_PRIVATE_KEY}
     pub-key: ${BCMAIL_SSH_PUBLIC_KEY}
     known-hosts: ${BCMAIL_KNOWN_HOSTS_ENTRY}
+    location: ${BCMAIL_LOCATION}
   tsw:
     host: ${TSW_SFTP_HOST}
     username: ${TSW_SFTP_USER}
@@ -88,6 +110,16 @@ endpoint:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/studentcertificate?studentID=%s&certificateType=%s&documentStatusCode=%s
     update-grad-school-report:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/schoolreport
+    school-report:
+      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/schoolreport?mincode=%s&reportType=%s
+    school-report-by-report-type:
+      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/schoolreport/type/%s?mincode=%s
+    get-achievement-report:
+      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/studentreport?studentID=%s&reportType=%s&documentStatusCode=%s
+    get-transcript-psi-by-student-id:
+      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/psi/studenttranscript/%s
+    get-transcript-by-student-id:
+        url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/studenttranscript/%s
   grad-student-api:
     get-student-record:
       url: ${GRAD_STUDENT_API}api/v1/student/stdid/%s
@@ -101,9 +133,39 @@ endpoint:
     transcript_report:
       url: ${GRAD_REPORT_API}api/v1/reports/transcriptreport
     student_non_grad: ${GRAD_REPORT_API}api/v1/reports/studentnongrad
-  grad-trax-api:
-    school-by-min-code:
-      url: ${GRAD_TRAX_API}api/v1/trax/school/%s
   grad-graduation-api:
+    student-report-by-pen:
+      url: ${GRAD_GRADUATION_API}api/v1/graduate/report/data/%s
     report-by-pen:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/report/data/%s?type=CERT
+    school_district_year_end_report:
+      url: ${GRAD_GRADUATION_API}api/v1/graduate/report/schooldistrictyearend?slrt=%s&drt=%s&srt=%s
+    school_district_month_report:
+      url: ${GRAD_GRADUATION_API}api/v1/graduate/report/schooldistrictmonth?slrt=%s&drt=%s&srt=%s
+    school_district_supplemental_report:
+      url: ${GRAD_GRADUATION_API}api/v1/graduate/report/schooldistrictsupp?slrt=%s&drt=%s&srt=%s
+    school_district_student_nongrad_report:
+      url: ${GRAD_GRADUATION_API}api/v1/graduate/report/schooldistrictstudentnongrad?slrt=%s&drt=%s&srt=%s
+    school_labels_report:
+      url: ${GRAD_GRADUATION_API}api/v1/graduate/report/school/labels?reportType=%s
+  educ-school-api:
+    school-by-min-code:
+      url: ${EDUC_SCHOOL_API}api/v1/schools/%s
+  grad-trax-api:
+    psi-by-psi-code:
+      url: ${GRAD_TRAX_API}api/v1/trax/psi/%s
+    school-by-min-code:
+      url: ${GRAD_TRAX_API}api/v1/trax/school/%s
+  grad-batch-graduation-api:
+    distribution:
+      notify-completion:
+        url: ${GRAD_BATCH_API}api/v1/batch/notifyDistributionJobCompleted?batchId=%s&status=%s
+
+#Splunk LogHelper
+splunk:
+  log-helper:
+    enabled: ${ENABLE_SPLUNK_LOG_HELPER}
+
+scheduler:
+  clean-tmp-cache-cron: ${CLEAN_TMP_CACHE_CRON}
+

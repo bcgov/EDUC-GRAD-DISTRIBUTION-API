@@ -8,6 +8,7 @@ public class Address implements Serializable {
 
     private String streetLine1;
     private String streetLine2;
+    private String streetLine3;
     private String city;
     private String region;
     private String country;
@@ -27,6 +28,14 @@ public class Address implements Serializable {
 
     public void setStreetLine2(String value) {
         this.streetLine2 = value;
+    }
+
+    public String getStreetLine3() {
+        return streetLine3;
+    }
+
+    public void setStreetLine3(String streetLine3) {
+        this.streetLine3 = streetLine3;
     }
 
     public String getCity() {

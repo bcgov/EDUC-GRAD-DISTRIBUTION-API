@@ -1,5 +1,5 @@
 ---
-apiVersion: v1
+apiVersion: template.openshift.io/v1
 kind: Template
 labels:
   template: "${REPO_NAME}-deploy-template"
@@ -15,7 +15,7 @@ objects:
         app.openshift.io/runtime: spring-boot
       name: "${REPO_NAME}-dc"
     spec:
-      replicas: 2
+      replicas: 1
       revisionHistoryLimit: 1
       triggers: []
       selector:
@@ -31,7 +31,7 @@ objects:
             deploymentConfig: "${REPO_NAME}-dc"
         spec:
           containers:
-            - image: image-registry.openshift-image-registry.svc:5000/77c02f-tools/${REPO_NAME}:${TAG_NAME}
+            - image: image-registry.openshift-image-registry.svc:5000/${IS_NAMESPACE}/${REPO_NAME}:${TAG_NAME}
               imagePullPolicy: Always
               readinessProbe:
                 tcpSocket:
@@ -51,16 +51,21 @@ objects:
                 failureThreshold: 10
                 successThreshold: 1
               name: "${REPO_NAME}"
+              volumeMounts:
+                - name: log-storage
+                  mountPath: /logs
+                - name: distribution-data
+                  mountPath: /tmp
               ports:
                 - containerPort: ${{CONTAINER_PORT}}
                   protocol: TCP
               resources:
                 requests:
-                  cpu: "250m"
-                  memory: "1024Mi"
+                  cpu: "${MIN_CPU}"
+                  memory: "${MIN_MEM}"
                 limits:
-                  cpu: "500m"
-                  memory: "2048Mi"
+                  cpu: "${MAX_CPU}"
+                  memory: "${MAX_MEM}"
               envFrom:
                 - configMapRef:
                     name: educ-grad-api-config-map
@@ -72,6 +77,53 @@ objects:
                     name: api-distribution-ssh-keys-secret
                 - secretRef:
                     name: api-tsw-ssh-keys-secret
+            - image: artifacts.developer.gov.bc.ca/docker-remote/fluent/fluent-bit:1.5.7
+              name: "${REPO_NAME}-fluent-bit-sidecar"
+              imagePullPolicy: Always
+              imagePullSecrets:
+                - name: artifactory-creds
+              volumeMounts:
+                - name: log-storage
+                  mountPath: /mnt/log
+                - name: flb-sc-config-volume
+                  mountPath: /fluent-bit/etc/
+              readinessProbe:
+                tcpSocket:
+                  port: 2020
+                initialDelaySeconds: 10
+                periodSeconds: 30
+                timeoutSeconds: 5
+                failureThreshold: 5
+                successThreshold: 1
+              livenessProbe:
+                httpGet:
+                  path: /
+                  port: 2020
+                initialDelaySeconds: 10
+                periodSeconds: 30
+                timeoutSeconds: 5
+                failureThreshold: 5
+                successThreshold: 1
+              ports:
+                - containerPort: 2020
+                  protocol: TCP
+                  name: metrics
+              resources:
+                requests:
+                  cpu: "15m"
+                  memory: "50Mi"
+                limits:
+                  cpu: "30m"
+                  memory: "100Mi"
+          volumes:
+            - name: log-storage
+              emptyDir: { }
+            - name: flb-sc-config-volume
+              configMap:
+                name: "${REPO_NAME}-flb-sc-config-map"
+            - name: distribution-data
+              persistentVolumeClaim:
+                claimName: distribution-data
       test: false
   - apiVersion: v1
     kind: Service
@@ -87,30 +139,47 @@ objects:
       selector:
         app: "${REPO_NAME}"
         deploymentconfig: "${REPO_NAME}-dc"
-  - apiVersion: v1
-    kind: Route
+  - apiVersion: autoscaling/v2
+    kind: HorizontalPodAutoscaler
     metadata:
-      labels:
-        app: "${REPO_NAME}"
-      name: "${REPO_NAME}"
-      annotations:
-        haproxy.router.openshift.io/timeout: 180s
+      name: "${REPO_NAME}-cpu-autoscaler"
     spec:
-      host: "${HOST_ROUTE}"
-      path: ${HOST_PATH}
-      port:
-        targetPort: ${CONTAINER_PORT}-tcp
-      tls:
-        insecureEdgeTerminationPolicy: Redirect
-        termination: edge
-      to:
-        kind: Service
-        name: "${REPO_NAME}"
-        weight: 100
-      wildcardPolicy: None
+      scaleTargetRef:
+        apiVersion: apps.openshift.io/v1
+        kind: DeploymentConfig
+        name: "${REPO_NAME}-dc"
+      minReplicas: ${{MIN_REPLICAS}}
+      maxReplicas: ${{MAX_REPLICAS}}
+      #GRAD2-1947 Resource Optimization
+      metrics:
+        - type: Resource
+          resource:
+            name: cpu
+            target:
+              averageUtilization: 1000
+              type: Utilization
+        - type: Resource
+          resource:
+            name: memory
+            target:
+              averageUtilization: 1800
+              type: Utilization
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: distribution-data
+    spec:
+      accessModes:
+        - ReadWriteMany
+      resources:
+        requests:
+          storage: ${{STORAGE_LIMIT}}
 parameters:
   - name: REPO_NAME
     description: Application repository name
+    required: true
+  - name: IS_NAMESPACE
+    description: The namespace where the imagestream lives
     required: true
   - name: TAG_NAME
     description: Imagestream tag name
@@ -127,3 +196,24 @@ parameters:
     description: The path appended to the HOST_ROUTE where the root of this project will be served
     required: false
     value: "/"
+  - name: MIN_REPLICAS
+    description: The minimum amount of replicas
+    required: true
+  - name: MAX_REPLICAS
+    description: The maximum amount of replicas
+    required: true
+  - name: MIN_CPU
+    description: The minimum amount of cpu
+    required: true
+  - name: MAX_CPU
+    description: The maximum amount of cpu
+    required: true
+  - name: MIN_MEM
+    description: The minimum amount of memory
+    required: true
+  - name: MAX_MEM
+    description: The maximum amount of memory
+    required: true
+  - name: STORAGE_LIMIT
+    description: Max storage
+    required: true

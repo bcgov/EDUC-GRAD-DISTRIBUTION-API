@@ -59,6 +59,44 @@ springdoc:
   swagger-ui:
     path: /api/v1/api-docs-ui.html
     operationsSorter: alpha
+
+#Resilience
+resilience4j.retry:
+  instances:
+    rt-getToken:
+      maxAttempts: 35
+      waitDuration: 5s
+      retryExceptions:
+        - org.springframework.web.client.HttpServerErrorException
+      ignoreExceptions:
+        - java.lang.NullPointerException
+    rt-notifyDistributionJob:
+      maxAttempts: 35
+      waitDuration: 5s
+      retryExceptions:
+        - org.springframework.web.client.HttpServerErrorException
+      ignoreExceptions:
+        - java.lang.NullPointerException
+
+authorization:
+  user: batch-api
+  password: dsfs3434fddf
+  token-expiry-offset: '30'
+
+sftp:
+  bcmail:
+    host: 3234@bc.ail.com
+    username: bmail
+    priv-key: 232
+    pub-key: 676
+    known-hosts: 45fsdss
+    location: /Index/Dev
+  tsw:
+    host: 454@tsw.aril.com
+    username: tswmail
+    priv-key: 565
+    pub-key: 888
+    known-hosts: 5644ddww
   
 #Endpoints
 endpoint:
@@ -75,6 +113,16 @@ endpoint:
       url: https://educ-grad-graduation-report-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/studentcertificate?studentID=%s&certificateType=%s&documentStatusCode=%s
     update-grad-school-report:
       url: https://educ-grad-graduation-report-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/schoolreport
+    school-report:
+      url: https://educ-grad-graduation-report-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/schoolreport?mincode=%s&reportType=%s
+    school-report-by-report-type:
+      url: https://educ-grad-graduation-report-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/schoolreport/type/%s?mincode=%s
+    get-achievement-report:
+      url: https://educ-grad-graduation-report-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/studentreport?studentID=%s&reportType=%s&documentStatusCode=%s
+    get-transcript-psi-by-student-id:
+      url: https://educ-grad-graduation-report-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/psi/studenttranscript/%s
+    get-transcript-by-student-id:
+      url: https://educ-grad-graduation-report-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/studenttranscript/%s
   grad-student-api:
     get-student-record:
       url: https://educ-grad-student-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v1/student/stdid/%s
@@ -88,9 +136,38 @@ endpoint:
     transcript_report:
       url: https://educ-grad-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/reports/transcriptreport
     student_non_grad: https://educ-grad-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/reports/studentnongrad
-  grad-trax-api:
-    school-by-min-code:
-      url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/trax/school/%s
   grad-graduation-api:
+    student-report-by-pen:
+      url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduate/report/data/%s
     report-by-pen:
       url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduate/report/data/%s?type=CERT
+    school_district_year_end_report:
+      url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduate/report/schooldistrictyearend?slrt=%s&drt=%s&srt=%s
+    school_district_month_report:
+      url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduate/report/schooldistrictmonth?slrt=%s&drt=%s&srt=%s
+    school_district_supplemental_report:
+      url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduate/report/schooldistrictsupp?slrt=%s&drt=%s&srt=%s
+    school_district_student_nongrad_report:
+      url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduate/report/schooldistrictstudentnongrad?slrt=%s&drt=%s&srt=%s
+    school_labels_report:
+      url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.caapi/v1/graduate/report/school/labels?reportType=%s
+  educ-school-api:
+    school-by-min-code:
+      url: https://educ-school-api-75e61b-dev.apps.silver.devops.gov.bc.ca/api/v1/schools/%s
+  grad-trax-api:
+    psi-by-psi-code:
+      url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/trax/psi/%s
+    school-by-min-code:
+      url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/trax/school/%s
+  grad-batch-graduation-api:
+    distribution:
+      notify-completion:
+        url: https://educ-grad-batch-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/batch/notifyDistributionJobCompleted?batchId=%s&status=%s
+
+#Splunk LogHelper
+splunk:
+  log-helper:
+    enabled: false
+
+scheduler:
+  clean-tmp-cache-cron: 0 0 */4 * * *

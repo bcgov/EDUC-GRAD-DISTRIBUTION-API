@@ -7,7 +7,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
+import java.util.Objects;
 
 public class Student implements Serializable {
 
@@ -16,7 +16,9 @@ public class Student implements Serializable {
     private String middleName;
     private String lastName;
     private String gender;
+    private String citizenship;
     private Date birthdate;
+    private Date lastUpdateDate;
     private Address address;
     private String grade;
     private String gradProgram;
@@ -25,6 +27,8 @@ public class Student implements Serializable {
     private String mincodeGrad;
     private String englishCert;
     private String frenchCert;
+    //Grad2-1931
+    private String consumerEducReqt;
 
     private String localId;
     private String hasOtherProgram;
@@ -32,6 +36,9 @@ public class Student implements Serializable {
 
     @JsonDeserialize(as = GraduationData.class)
     private GraduationData graduationData;
+
+    @JsonDeserialize(as = GraduationStatus.class)
+    private GraduationStatus graduationStatus = new GraduationStatus();
 
     private List<NonGradReason> nonGradReasons = new ArrayList<>();
 
@@ -76,6 +83,14 @@ public class Student implements Serializable {
         this.gender = value;
     }
 
+    public String getCitizenship() {
+        return citizenship;
+    }
+
+    public void setCitizenship(String citizenship) {
+        this.citizenship = citizenship;
+    }
+
     @JsonFormat(pattern="yyyy-MM-dd")
     public Date getBirthdate() {
         return birthdate;
@@ -83,6 +98,15 @@ public class Student implements Serializable {
 
     public void setBirthdate(Date value) {
         this.birthdate = value;
+    }
+
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    public Date getLastUpdateDate() {
+        return lastUpdateDate;
+    }
+
+    public void setLastUpdateDate(Date lastUpdateDate) {
+        this.lastUpdateDate = lastUpdateDate;
     }
 
     @JsonDeserialize(as = Address.class)
@@ -154,6 +178,17 @@ public class Student implements Serializable {
         return localId;
     }
 
+    //Grad2-1931
+
+
+    public String getConsumerEducReqt() {
+        return consumerEducReqt;
+    }
+
+    public void setConsumerEducReqt(String consumerEducReqt) {
+        this.consumerEducReqt = consumerEducReqt;
+    }
+
     public void setLocalId(String localId) {
         this.localId = localId;
     }
@@ -182,11 +217,32 @@ public class Student implements Serializable {
         this.graduationData = graduationData;
     }
 
+    public GraduationStatus getGraduationStatus() {
+        return graduationStatus;
+    }
+
+    public void setGraduationStatus(GraduationStatus graduationStatus) {
+        this.graduationStatus = graduationStatus;
+    }
+
     public List<NonGradReason> getNonGradReasons() {
         return nonGradReasons;
     }
 
     public void setNonGradReasons(List<NonGradReason> nonGradReasons) {
         this.nonGradReasons = nonGradReasons;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Student student = (Student) o;
+        return Objects.equals(pen, student.pen);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(pen);
     }
 }

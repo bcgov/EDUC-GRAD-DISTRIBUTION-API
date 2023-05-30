@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 
 @Data
 @Component
-public class SchoolTrax {
+public class TraxSchool {
 
 	private String minCode;
     private String schoolName;
