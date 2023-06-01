@@ -59,11 +59,11 @@ public class PostingDistributionService {
             List<String> mincodes = distributionResponse.getSchools().stream().map(s->s.getMincode()).toList();
             if(!districtCodes.isEmpty()) {
                 forAllSchools = false;
-                createDistrictSchoolYearEndReport(null, DISTREP_YE_SD, null, searchRequest.getDistricts());
+                createDistrictSchoolYearEndReport(null, DISTREP_YE_SD, null, districtCodes);
             }
             if(!mincodes.isEmpty()) {
                 forAllSchools = false;
-                createDistrictSchoolYearEndReport(null, null, DISTREP_YE_SC, searchRequest.getSchoolOfRecords());
+                createDistrictSchoolYearEndReport(null, null, DISTREP_YE_SC, mincodes);
             }
             if(forAllSchools) {
                 createDistrictSchoolYearEndReport(null, DISTREP_YE_SD, DISTREP_YE_SC);
