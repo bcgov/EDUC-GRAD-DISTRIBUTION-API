@@ -14,4 +14,5 @@ public class DistributionRequest {
     private String activityCode;
     private List<School> schools;
     private Map<String, DistributionPrintRequest> mapDist;
+    private StudentSearchRequest studentSearchRequest;
 }

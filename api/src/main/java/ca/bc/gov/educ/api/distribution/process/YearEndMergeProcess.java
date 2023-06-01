@@ -32,6 +32,7 @@ public class YearEndMergeProcess extends MergeProcess {
         DistributionRequest distributionRequest = processorData.getDistributionRequest();
         Long batchId = processorData.getBatchId();
         Map<String, DistributionPrintRequest> mapDist = distributionRequest.getMapDist();
+        StudentSearchRequest searchRequest = distributionRequest.getStudentSearchRequest();
         int numberOfPdfs = 0;
         int schoolCounter = 0;
         int numberOfCreatedSchoolReports = 0;
@@ -41,14 +42,19 @@ public class YearEndMergeProcess extends MergeProcess {
         List<School> districtsForLabels = new ArrayList<>();
         for (String mincode : mapDist.keySet()) {
 
-            String distcode = getDistrictCodeFromMincode(mincode);
-            processDistrictsForLabels(districtsForLabels, distcode, exception);
-
             CommonSchool commonSchool = getBaseSchoolDetails(null, mincode, exception);
             if (commonSchool != null) {
+                String schoolCategoryCode = commonSchool.getSchoolCategoryCode();
+                if(searchRequest != null && searchRequest.getSchoolCategoryCodes() != null && !searchRequest.getSchoolCategoryCodes().isEmpty() && !searchRequest.getSchoolCategoryCodes().contains(schoolCategoryCode)) {
+                    continue;
+                }
+
+                String distcode = getDistrictCodeFromMincode(mincode);
+                processDistrictsForLabels(districtsForLabels, distcode, exception);
+
                 int currentSlipCount = 0;
                 schoolCounter++;
-                String schoolCategoryCode = commonSchool.getSchoolCategoryCode();
+
                 logger.debug("*** School Details Acquired {} category {}", mincode, schoolCategoryCode);
                 if("02".equals(schoolCategoryCode)) {
                     processSchoolsForLabels(schoolsForLabels, mincode, restUtils.getAccessToken(), exception);
