@@ -22,4 +22,5 @@ public class DistributionResponse {
     private String activityCode;
     private List<School> schools = new ArrayList<>();
     private List<School> districts = new ArrayList<>();
+    private StudentSearchRequest studentSearchRequest;
 }

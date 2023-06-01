@@ -46,6 +46,7 @@ public class YearEndMergeProcess extends MergeProcess {
             if (commonSchool != null) {
                 String schoolCategoryCode = commonSchool.getSchoolCategoryCode();
                 if(searchRequest != null && searchRequest.getSchoolCategoryCodes() != null && !searchRequest.getSchoolCategoryCodes().isEmpty() && !searchRequest.getSchoolCategoryCodes().contains(schoolCategoryCode)) {
+                    logger.debug("Skip School {}/{} category code doesn't match filter \"{}\"", commonSchool.getSchoolName(), commonSchool.getSchoolCategoryCode(), String.join(",", searchRequest.getSchoolCategoryCodes()));
                     continue;
                 }
 
@@ -118,6 +119,7 @@ public class YearEndMergeProcess extends MergeProcess {
         response.setActivityCode(processorData.getActivityCode());
         response.getSchools().addAll(schoolsForLabels);
         response.getDistricts().addAll(districtsForLabels);
+        response.setStudentSearchRequest(searchRequest);
         processorData.setDistributionResponse(response);
         return processorData;
     }

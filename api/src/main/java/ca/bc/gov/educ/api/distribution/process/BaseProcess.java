@@ -305,7 +305,11 @@ public abstract class BaseProcess implements DistributionProcess {
 
     protected void processDistrictsForLabels(List<School> schools, String distcode, ExceptionMessage exception) {
         School existSchool = schools.stream().filter(s->distcode.equalsIgnoreCase(s.getMincode())).findAny().orElse(null);
-        if(existSchool != null) return;
+        if(existSchool != null) {
+            logger.debug("District {} already exists in the district labels", existSchool.getMincode());
+            return;
+        }
+        logger.debug("Acquiring new district {} from TRAX API", distcode);
         TraxDistrict traxDistrict = schoolService.getTraxDistrict(distcode, exception);
         if (traxDistrict != null) {
             School school = new School();
@@ -321,6 +325,7 @@ public abstract class BaseProcess implements DistributionProcess {
             address.setCode(traxDistrict.getPostal());
             school.setAddress(address);
             schools.add(school);
+            logger.debug("District {} has been added to the district labels", school.getMincode());
         }
     }
 

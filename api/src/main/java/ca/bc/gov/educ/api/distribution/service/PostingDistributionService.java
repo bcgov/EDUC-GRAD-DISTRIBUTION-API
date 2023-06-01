@@ -1,9 +1,6 @@
 package ca.bc.gov.educ.api.distribution.service;
 
-import ca.bc.gov.educ.api.distribution.model.dto.DistributionResponse;
-import ca.bc.gov.educ.api.distribution.model.dto.School;
-import ca.bc.gov.educ.api.distribution.model.dto.SchoolReports;
-import ca.bc.gov.educ.api.distribution.model.dto.TraxDistrict;
+import ca.bc.gov.educ.api.distribution.model.dto.*;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils;
 import ca.bc.gov.educ.api.distribution.util.RestUtils;
@@ -55,8 +52,15 @@ public class PostingDistributionService {
         String activityCode = distributionResponse.getActivityCode();
         String download = distributionResponse.getLocalDownload();
         int numberOfPdfs = distributionResponse.getNumberOfPdfs();
+        StudentSearchRequest searchRequest = distributionResponse.getStudentSearchRequest();
         if(YEARENDDIST.equalsIgnoreCase(activityCode)) {
-            createDistrictSchoolYearEndReport(null, DISTREP_YE_SD, DISTREP_YE_SC);
+            if(searchRequest != null && (searchRequest.getDistricts() != null && !searchRequest.getDistricts().isEmpty())) {
+                createDistrictSchoolYearEndReport(null, DISTREP_YE_SD, DISTREP_YE_SC, searchRequest.getDistricts());
+            } else if(searchRequest != null && (searchRequest.getSchoolOfRecords() != null && !searchRequest.getSchoolOfRecords().isEmpty())) {
+                createDistrictSchoolYearEndReport(null, DISTREP_YE_SD, DISTREP_YE_SC, searchRequest.getSchoolOfRecords());
+            } else {
+                createDistrictSchoolYearEndReport(null, DISTREP_YE_SD, DISTREP_YE_SC);
+            }
             numberOfPdfs += processDistrictSchoolDistribution(batchId, null, DISTREP_YE_SD, DISTREP_YE_SC);
         }
         return zipBatchDirectory(batchId, download, numberOfPdfs);
@@ -139,6 +143,10 @@ public class PostingDistributionService {
 
     public Integer createDistrictSchoolYearEndReport(String schooLabelReportType, String districtReportType, String schoolReportType) {
         return restService.executeGet(educDistributionApiConstants.getSchoolDistrictYearEndReport(), Integer.class, schooLabelReportType, districtReportType, schoolReportType);
+    }
+
+    public Integer createDistrictSchoolYearEndReport(String schooLabelReportType, String districtReportType, String schoolReportType, List<String> schools) {
+        return restService.executePost(educDistributionApiConstants.getSchoolDistrictYearEndReport(), Integer.class, schools, schooLabelReportType, districtReportType, schoolReportType);
     }
 
     public int processSchoolLabelsDistribution(Long batchId, String schooLabelReportType) {
