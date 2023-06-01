@@ -59,6 +59,7 @@ public class YearEndMergeProcess extends MergeProcess {
                 logger.debug("*** School Details Acquired {} category {}", mincode, schoolCategoryCode);
                 if("02".equals(schoolCategoryCode)) {
                     processSchoolsForLabels(schoolsForLabels, mincode, restUtils.getAccessToken(), exception);
+                    logger.debug("Added Independent School {} for processing", commonSchool.getSchoolName());
                 }
                 logger.debug("School {}/{}", schoolCounter, mapDist.size());
                 List<Student> studListNonGrad = new ArrayList<>();

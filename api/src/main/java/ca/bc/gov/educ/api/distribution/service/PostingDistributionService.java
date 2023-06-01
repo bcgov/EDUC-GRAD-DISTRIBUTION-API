@@ -54,11 +54,18 @@ public class PostingDistributionService {
         int numberOfPdfs = distributionResponse.getNumberOfPdfs();
         StudentSearchRequest searchRequest = distributionResponse.getStudentSearchRequest();
         if(YEARENDDIST.equalsIgnoreCase(activityCode)) {
-            if(searchRequest != null && (searchRequest.getDistricts() != null && !searchRequest.getDistricts().isEmpty())) {
-                createDistrictSchoolYearEndReport(null, DISTREP_YE_SD, DISTREP_YE_SC, searchRequest.getDistricts());
-            } else if(searchRequest != null && (searchRequest.getSchoolOfRecords() != null && !searchRequest.getSchoolOfRecords().isEmpty())) {
-                createDistrictSchoolYearEndReport(null, DISTREP_YE_SD, DISTREP_YE_SC, searchRequest.getSchoolOfRecords());
-            } else {
+            boolean forAllSchools = true;
+            List<String> districtCodes = distributionResponse.getDistricts().stream().map(s->s.getMincode()).toList();
+            List<String> mincodes = distributionResponse.getSchools().stream().map(s->s.getMincode()).toList();
+            if(!districtCodes.isEmpty()) {
+                forAllSchools = false;
+                createDistrictSchoolYearEndReport(null, DISTREP_YE_SD, null, searchRequest.getDistricts());
+            }
+            if(!mincodes.isEmpty()) {
+                forAllSchools = false;
+                createDistrictSchoolYearEndReport(null, null, DISTREP_YE_SC, searchRequest.getSchoolOfRecords());
+            }
+            if(forAllSchools) {
                 createDistrictSchoolYearEndReport(null, DISTREP_YE_SD, DISTREP_YE_SC);
             }
             numberOfPdfs += processDistrictSchoolDistribution(batchId, null, DISTREP_YE_SD, DISTREP_YE_SC);
