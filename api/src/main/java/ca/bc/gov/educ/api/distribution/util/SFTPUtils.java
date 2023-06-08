@@ -51,6 +51,8 @@ public class SFTPUtils {
         String remoteFile = BC_MAIL_LOCATION +"EDGRAD.BATCH."+batchId+".zip";
         String localControlFile = rootFolder + "/EDGRAD.BATCH."+batchId+".txt";
         String remoteControlFile = BC_MAIL_LOCATION+"EDGRAD.BATCH."+batchId+".txt";
+        logger.debug("localFile location" + localFile);
+        logger.debug("remoteFile location" + remoteFile);
         Session jschSession = null;
 
         setupBCMailSFTP();
@@ -58,8 +60,13 @@ public class SFTPUtils {
         try {
             JSch jsch = new JSch();
             jsch.setKnownHosts(KNOWN_HOST);
+            logger.debug("BCMailKNOWN_HOST" + KNOWN_HOST);
             jschSession = jsch.getSession(BCMAIL_SFTP_USERNAME, BCMAIL_REMOTE_HOST, REMOTE_PORT);
+            logger.debug("BCMAIL_SFTP_USERNAME" + BCMAIL_SFTP_USERNAME);
+            logger.debug("BCMAIL_REMOTE_HOST" + BCMAIL_REMOTE_HOST);
+            logger.debug("REMOTE_PORT" + REMOTE_PORT);
             jsch.addIdentity(RSA_PRV);
+            logger.debug("RSA_PRV" + RSA_PRV);
             jschSession.connect(SESSION_TIMEOUT);
 
             Channel sftp = jschSession.openChannel("sftp");
@@ -67,47 +74,16 @@ public class SFTPUtils {
             ChannelSftp channelSftp = (ChannelSftp) sftp;
 
             // transfer file from local to remote server
+            logger.debug("channelSftp" + channelSftp.toString());
             channelSftp.put(localFile, remoteFile);
+            logger.debug("localFile sent to remoteFile");
             channelSftp.put(localControlFile, remoteControlFile);
+            logger.debug("localControlFile sent to remoteControlFile");
             channelSftp.exit();
+            logger.debug("channelsftp exited successfully");
             return true;
         } catch (JSchException | SftpException e) {
-            logger.debug("Error {} ",e.getLocalizedMessage());
-            return false;
-        } finally {
-            if (jschSession != null) {
-                jschSession.disconnect();
-            }
-        }
-    }
-    //Grad2-2052 set common root folder for all the dis runs to pick the folders and send to BC mail. - mchintha
-    public boolean sftpUploadBCMail(Long batchId, String rootFolder, String mincode) {
-        String localFile = rootFolder + "/EDGRAD.BATCH."+batchId+"."+mincode+".zip";
-        String remoteFile = BC_MAIL_LOCATION+"EDGRAD.BATCH."+batchId+"."+mincode+".zip";
-        String localControlFile = rootFolder + "/EDGRAD.BATCH."+batchId+"."+mincode+".txt";
-        String remoteControlFile = BC_MAIL_LOCATION+"EDGRAD.BATCH."+batchId+"."+mincode+".txt";
-        Session jschSession = null;
-
-        setupBCMailSFTP();
-
-        try {
-            JSch jsch = new JSch();
-            jsch.setKnownHosts(KNOWN_HOST);
-            jschSession = jsch.getSession(BCMAIL_SFTP_USERNAME, BCMAIL_REMOTE_HOST, REMOTE_PORT);
-            jsch.addIdentity(RSA_PRV);
-            jschSession.connect(SESSION_TIMEOUT);
-
-            Channel sftp = jschSession.openChannel("sftp");
-            sftp.connect(CHANNEL_TIMEOUT);
-            ChannelSftp channelSftp = (ChannelSftp) sftp;
-
-            // transfer file from local to remote server
-            channelSftp.put(localFile, remoteFile);
-            channelSftp.put(localControlFile, remoteControlFile);
-            channelSftp.exit();
-            return true;
-        } catch (JSchException | SftpException e) {
-            logger.debug("Error {} ",e.getLocalizedMessage());
+            logger.error("Error {} ",e.getLocalizedMessage());
             return false;
         } finally {
             if (jschSession != null) {
