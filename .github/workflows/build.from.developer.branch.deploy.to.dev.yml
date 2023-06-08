@@ -36,6 +36,7 @@ on:
           - develop/chris
           - develop/jinil
           - develop/km
+          - develop/mchintha
           - grad-hotfix
 
 jobs:
