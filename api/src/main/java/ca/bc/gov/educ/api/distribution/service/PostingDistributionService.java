@@ -23,7 +23,10 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 import java.util.zip.ZipOutputStream;
 
 import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils.*;
@@ -118,7 +121,6 @@ public class PostingDistributionService {
     public Integer createSchoolLabelsReport(List<School> schools, String schooLabelReportType) {
         logger.debug("***** Distribute School Label Reports {} *****", schooLabelReportType);
         Integer reportCount = 0;
-        final UUID correlationID = UUID.randomUUID();
         String url = String.format(educDistributionApiConstants.getSchoolLabelsReport(), schooLabelReportType);
         List<School> processSchools = new ArrayList<>();
         if(StringUtils.equalsIgnoreCase(ADDRESS_LABEL_SCHL, schooLabelReportType)) {
