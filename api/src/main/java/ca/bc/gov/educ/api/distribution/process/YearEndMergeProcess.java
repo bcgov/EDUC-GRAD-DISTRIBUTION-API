@@ -93,7 +93,7 @@ public class YearEndMergeProcess extends MergeProcess {
             }
             logger.debug("***** Number of created district labels reports {} *****", numberOfCreatedSchoolLabelReports);
             logger.debug("***** Distribute District Label reports *****");
-            List<String> mincodes = districtsForLabels.stream().map(s -> s.getMincode()).toList();
+            List<String> mincodes = districtsForLabels.stream().map(School::getMincode).toList();
             numberOfProcessedSchoolReports += processDistrictSchoolDistribution(batchId, mincodes, ADDRESS_LABEL_YE, null, null);
             logger.debug("***** Number of distributed District Label reports {} *****", numberOfProcessedSchoolReports);
         }

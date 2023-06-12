@@ -1,6 +1,9 @@
 package ca.bc.gov.educ.api.distribution.service;
 
-import ca.bc.gov.educ.api.distribution.model.dto.*;
+import ca.bc.gov.educ.api.distribution.model.dto.DistributionResponse;
+import ca.bc.gov.educ.api.distribution.model.dto.School;
+import ca.bc.gov.educ.api.distribution.model.dto.SchoolReports;
+import ca.bc.gov.educ.api.distribution.model.dto.TraxDistrict;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils;
 import ca.bc.gov.educ.api.distribution.util.RestUtils;
@@ -52,7 +55,6 @@ public class PostingDistributionService {
         String activityCode = distributionResponse.getActivityCode();
         String download = distributionResponse.getLocalDownload();
         int numberOfPdfs = distributionResponse.getNumberOfPdfs();
-        StudentSearchRequest searchRequest = distributionResponse.getStudentSearchRequest();
         if(YEARENDDIST.equalsIgnoreCase(activityCode)) {
             boolean forAllSchools = true;
             List<String> districtCodes = distributionResponse.getDistricts().stream().map(s->s.getMincode()).toList();
@@ -106,17 +108,11 @@ public class PostingDistributionService {
     }
 
     public Integer createDistrictSchoolSuppReport(String schooLabelReportType, String districtReportType, String schoolReportType) {
-        Integer reportCount = 0;
-        final UUID correlationID = UUID.randomUUID();
-        reportCount += restService.executeGet(educDistributionApiConstants.getSchoolDistrictSupplementalReport(), Integer.class, schooLabelReportType, districtReportType, schoolReportType );
-        return reportCount;
+        return restService.executeGet(educDistributionApiConstants.getSchoolDistrictSupplementalReport(), Integer.class, schooLabelReportType, districtReportType, schoolReportType );
     }
 
     public Integer createDistrictSchoolMonthReport(String schooLabelReportType, String districtReportType, String schoolReportType) {
-        Integer reportCount = 0;
-        final UUID correlationID = UUID.randomUUID();
-        reportCount += restService.executeGet(educDistributionApiConstants.getSchoolDistrictMonthReport(), Integer.class, schooLabelReportType, districtReportType, schoolReportType);
-        return reportCount;
+        return restService.executeGet(educDistributionApiConstants.getSchoolDistrictMonthReport(), Integer.class, schooLabelReportType, districtReportType, schoolReportType);
     }
 
     public Integer createSchoolLabelsReport(List<School> schools, String schooLabelReportType) {

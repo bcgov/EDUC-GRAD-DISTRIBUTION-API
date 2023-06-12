@@ -40,6 +40,7 @@ public class ReportService {
 	}
 
 	public InputStreamResource getPackingSlip(ReportRequest packingSlipReq) {
+		logger.debug("Getting packing slip for order {}", packingSlipReq.getData().getPackingSlip().getOrderNumber());
 		byte[] packingSlip = restService.executePost(educDistributionApiConstants.getPackingSlip(), byte[].class, packingSlipReq, "");
 		ByteArrayInputStream bis = new ByteArrayInputStream(packingSlip);
 		return new InputStreamResource(bis);

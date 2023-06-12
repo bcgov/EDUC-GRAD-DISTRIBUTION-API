@@ -39,6 +39,8 @@ public abstract class BaseProcess implements DistributionProcess {
     protected static final String DISTREP_SC = "DISTREP_SC";
     protected static final String NONGRADDISTREP_SC = "NONGRADDISTREP_SC";
 
+    private static final String EDGRAD_BATCH = "/EDGRAD.BATCH.";
+
     @Autowired
     GradValidation validation;
 
@@ -75,7 +77,7 @@ public abstract class BaseProcess implements DistributionProcess {
 
     protected void createZipFile(Long batchId) {
         StringBuilder sourceFileBuilder = new StringBuilder().append(EducDistributionApiConstants.TMP_DIR).append(DEL).append(batchId);
-        try (FileOutputStream fos = new FileOutputStream(EducDistributionApiConstants.TMP_DIR + "/EDGRAD.BATCH." + batchId + ".zip")) {
+        try (FileOutputStream fos = new FileOutputStream(EducDistributionApiConstants.TMP_DIR + EDGRAD_BATCH + batchId + ".zip")) {
             ZipOutputStream zipOut = new ZipOutputStream(fos);
             File fileToZip = new File(sourceFileBuilder.toString());
             EducDistributionApiUtils.zipFile(fileToZip, fileToZip.getName(), zipOut);
@@ -86,7 +88,7 @@ public abstract class BaseProcess implements DistributionProcess {
     }
 
     protected void createControlFile(Long batchId, int numberOfPdfs) {
-        try (FileOutputStream fos = new FileOutputStream(EducDistributionApiConstants.TMP_DIR + "/EDGRAD.BATCH." + batchId + ".txt")) {
+        try (FileOutputStream fos = new FileOutputStream(EducDistributionApiConstants.TMP_DIR + EDGRAD_BATCH + batchId + ".txt")) {
             byte[] contentInBytes = String.valueOf(numberOfPdfs).getBytes();
             fos.write(contentInBytes);
             fos.flush();
@@ -100,7 +102,7 @@ public abstract class BaseProcess implements DistributionProcess {
     protected void createZipFile(Long batchId, ProcessorData processorData) {
         logger.debug("Create zip file for {}", processorData.getActivityCode());
         StringBuilder sourceFileBuilder = new StringBuilder().append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.DEL).append(batchId);
-        File file = new File(EducDistributionApiConstants.TMP_DIR + "/EDGRAD.BATCH." + batchId + ".zip");
+        File file = new File(EducDistributionApiConstants.TMP_DIR + EDGRAD_BATCH + batchId + ".zip");
         writeZipFile(sourceFileBuilder.toString(), file);
     }
 
@@ -122,7 +124,7 @@ public abstract class BaseProcess implements DistributionProcess {
 
     protected void createControlFile(Long batchId, ProcessorData processorData, int numberOfPdfs) {
         logger.debug("Create control file for {}", processorData.getActivityCode());
-        File file = new File(EducDistributionApiConstants.TMP_DIR + "/EDGRAD.BATCH." + batchId + ".txt");
+        File file = new File(EducDistributionApiConstants.TMP_DIR + EDGRAD_BATCH + batchId + ".txt");
         writeControlFile(numberOfPdfs, file);
 
     }
