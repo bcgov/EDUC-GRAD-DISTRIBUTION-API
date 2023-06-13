@@ -60,8 +60,8 @@ public class PostingDistributionService {
         int numberOfPdfs = distributionResponse.getNumberOfPdfs();
         if(YEARENDDIST.equalsIgnoreCase(activityCode)) {
             boolean forAllSchools = true;
-            List<String> districtCodes = distributionResponse.getDistricts().stream().map(s->s.getMincode()).toList();
-            List<String> mincodes = distributionResponse.getSchools().stream().map(s->s.getMincode()).toList();
+            List<String> districtCodes = distributionResponse.getDistricts().stream().map(School::getMincode).toList();
+            List<String> mincodes = distributionResponse.getSchools().stream().map(School::getMincode).toList();
             if(!districtCodes.isEmpty()) {
                 forAllSchools = false;
                 createDistrictSchoolYearEndReport(null, DISTREP_YE_SD, null, districtCodes);
