@@ -2,6 +2,7 @@ package ca.bc.gov.educ.api.distribution.controller;
 
 import ca.bc.gov.educ.api.distribution.model.dto.*;
 import ca.bc.gov.educ.api.distribution.service.GradDistributionService;
+import ca.bc.gov.educ.api.distribution.service.PostingDistributionService;
 import ca.bc.gov.educ.api.distribution.util.GradValidation;
 import ca.bc.gov.educ.api.distribution.util.MessageHelper;
 import ca.bc.gov.educ.api.distribution.util.RestUtils;
@@ -21,6 +22,9 @@ class DistributionControllerTest {
 
 	@Mock
 	private GradDistributionService gradDistributionService;
+
+	@Mock
+	private PostingDistributionService postingDistributionService;
 	
 	@Mock
     RestUtils response;
@@ -172,6 +176,14 @@ class DistributionControllerTest {
 		Mockito.when(gradDistributionService.getDownload(batchId, transmissionMode.toUpperCase())).thenReturn(bytesSAR);
 		distributionController.downloadZipFile(batchId, transmissionMode.toUpperCase());
 		Mockito.verify(gradDistributionService).getDownload(batchId, transmissionMode.toUpperCase());
+	}
+
+	@Test
+	void testPostingDistribution() {
+		DistributionResponse response = new DistributionResponse();
+		Mockito.when(postingDistributionService.postingProcess(response)).thenReturn(Boolean.TRUE);
+		distributionController.postingDistribution(response);
+		Mockito.verify(postingDistributionService).postingProcess(response);
 	}
 	
 }
