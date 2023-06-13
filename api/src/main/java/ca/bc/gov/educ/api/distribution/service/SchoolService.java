@@ -28,9 +28,10 @@ public class SchoolService {
 	}
 
 	public CommonSchool getCommonSchoolDetails(String mincode, ExceptionMessage exception) {
+		CommonSchool commonSchool = null;
 		try
 		{
-			return restService.executeGet(
+			commonSchool = restService.executeGet(
 					educDistributionApiConstants.getCommonSchoolByMincode(),
 					CommonSchool.class,
 					mincode
@@ -38,9 +39,8 @@ public class SchoolService {
 		} catch (Exception e) {
 			exception.setExceptionName("SCHOOL-API IS DOWN");
 			exception.setExceptionDetails(e.getLocalizedMessage());
-			logger.error(exception.getExceptionName(), e);
-			return null;
 		}
+		return commonSchool;
 	}
 
 	public CommonSchool getCommonSchoolDetailsForPackingSlip(String properName) {
@@ -69,7 +69,6 @@ public class SchoolService {
 			} catch (Exception e) {
 				exception.setExceptionName("TRAX-API IS DOWN");
 				exception.setExceptionDetails(e.getLocalizedMessage());
-				logger.error(exception.getExceptionName(), e);
 			}
 		}
 		return traxSchool;
@@ -87,7 +86,6 @@ public class SchoolService {
 			} catch (Exception e) {
 				exception.setExceptionName("TRAX-API IS DOWN");
 				exception.setExceptionDetails(e.getLocalizedMessage());
-				logger.error(exception.getExceptionName(), e);
 			}
 		}
 		return traxDistrict;

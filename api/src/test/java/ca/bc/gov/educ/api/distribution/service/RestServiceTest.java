@@ -97,7 +97,7 @@ public class RestServiceTest {
     public void testPost_Given4xxErrorFromService_ExpectServiceError() {
         String testBody = "test";
         when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
-        when(this.requestBodyUriMock.uri(any(String.class))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri("https://fake.url.com?p=1")).thenReturn(this.requestBodyUriMock);
         when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
         when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
         when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
@@ -105,7 +105,7 @@ public class RestServiceTest {
         when(this.responseMock.onStatus(any(), any())).thenThrow(new ServiceException());
         when(this.responseMock.bodyToMono(byte[].class)).thenReturn(Mono.just(TEST_BYTES));
 
-        this.restService.executePost("https://fake.url.com", byte[].class, testBody, "1234");
+        this.restService.executePost("https://fake.url.com", byte[].class, testBody, "");
     }
 
     @Test

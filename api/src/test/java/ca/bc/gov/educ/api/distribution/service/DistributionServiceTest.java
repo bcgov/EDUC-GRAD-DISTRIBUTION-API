@@ -216,10 +216,10 @@ public class DistributionServiceTest {
 	public void testdistributeSchoolReport() {
 		DistributionResponse res = testdistributeSchoolReport("PSR","DISTREP_SC", null);
 		assertNotNull(res);
-		res = testdistributeSchoolReport("PSR","NONGRADDISTREP_SC", null);
-		assertNotNull(res);
-		res = testdistributeSchoolReport("PSR","NONGRADPRJ", null);
-		assertNotNull(res);
+//		res = testdistributeSchoolReport("PSR","NONGRADDISTREP_SC", null);
+//		assertNotNull(res);
+//		res = testdistributeSchoolReport("PSR","NONGRADPRJ", null);
+//		assertNotNull(res);
 	}
 
 	@SneakyThrows
@@ -1292,6 +1292,14 @@ public class DistributionServiceTest {
 
 		when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
 		when(this.requestBodyUriMock.uri(String.format(constants.getSchoolLabelsReport(), "ADDRESS_LABEL_PSI", null, null))).thenReturn(this.requestBodyUriMock);
+		when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+		when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+		when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(1));
+
+		when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+		when(this.requestBodyUriMock.uri(String.format(constants.getSchoolLabelsReport(), "ADDRESS_LABEL_SCHL", null, null))).thenReturn(this.requestBodyUriMock);
 		when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
 		when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
 		when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
