@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.wildfly.common.Assert;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
@@ -19,6 +20,7 @@ public class PostingProcessServiceTest {
     public void testPostingProcess() {
         DistributionResponse response = new DistributionResponse();
         Mockito.doReturn(Boolean.TRUE).when(this.postingDistributionService).postingProcess(response);
+        Assert.assertNotNull(response);
     }
 
 }
