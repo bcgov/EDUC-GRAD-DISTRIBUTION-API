@@ -57,7 +57,7 @@ public class SchoolService {
 		return fakeSchoolObj;
 	}
 
-	public TraxSchool getTraxSchool(String minCode, String accessToken, ExceptionMessage exception) {
+	public TraxSchool getTraxSchool(String minCode, ExceptionMessage exception) {
 		TraxSchool traxSchool = null;
 		if(!StringUtils.isBlank(minCode)) {
 			try {

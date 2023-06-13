@@ -287,7 +287,7 @@ public abstract class BaseProcess implements DistributionProcess {
     protected void processSchoolsForLabels(List<School> schools, String mincode, String accessToken, ExceptionMessage exception) {
         School existSchool = schools.stream().filter(s->mincode.equalsIgnoreCase(s.getMincode())).findAny().orElse(null);
         if(existSchool != null) return;
-        TraxSchool traxSchool = schoolService.getTraxSchool(mincode, accessToken, exception);
+        TraxSchool traxSchool = schoolService.getTraxSchool(mincode, exception);
         if (traxSchool != null) {
             School school = new School();
             school.setMincode(traxSchool.getMinCode());
