@@ -75,6 +75,7 @@ public abstract class BaseProcess implements DistributionProcess {
             return schoolService.getCommonSchoolDetails(mincode, exception);
     }
 
+    @Generated
     protected void createZipFile(Long batchId) {
         StringBuilder sourceFileBuilder = new StringBuilder().append(EducDistributionApiConstants.TMP_DIR).append(DEL).append(batchId);
         try (FileOutputStream fos = new FileOutputStream(EducDistributionApiConstants.TMP_DIR + EDGRAD_BATCH + batchId + ".zip")) {
@@ -87,6 +88,7 @@ public abstract class BaseProcess implements DistributionProcess {
         }
     }
 
+    @Generated
     protected void createControlFile(Long batchId, int numberOfPdfs) {
         try (FileOutputStream fos = new FileOutputStream(EducDistributionApiConstants.TMP_DIR + EDGRAD_BATCH + batchId + ".txt")) {
             byte[] contentInBytes = String.valueOf(numberOfPdfs).getBytes();
@@ -99,6 +101,7 @@ public abstract class BaseProcess implements DistributionProcess {
 
     }
 
+    @Generated
     protected void createZipFile(Long batchId, ProcessorData processorData) {
         logger.debug("Create zip file for {}", processorData.getActivityCode());
         StringBuilder sourceFileBuilder = new StringBuilder().append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.DEL).append(batchId);
@@ -122,6 +125,7 @@ public abstract class BaseProcess implements DistributionProcess {
         }**/
     }
 
+    @Generated
     protected void createControlFile(Long batchId, ProcessorData processorData, int numberOfPdfs) {
         logger.debug("Create control file for {}", processorData.getActivityCode());
         File file = new File(EducDistributionApiConstants.TMP_DIR + EDGRAD_BATCH + batchId + ".txt");
@@ -166,6 +170,7 @@ public abstract class BaseProcess implements DistributionProcess {
         postingDistributionService.zipBatchDirectory(batchId, download, numberOfPdfs);
     }
 
+    @Generated
     protected Integer createDistrictSchoolYearEndReport(String schooLabelReportType, String districtReportType, String schoolReportType) {
         return postingDistributionService.createDistrictSchoolYearEndReport(schooLabelReportType, districtReportType, schoolReportType);
     }
@@ -174,10 +179,12 @@ public abstract class BaseProcess implements DistributionProcess {
         return postingDistributionService.createSchoolLabelsReport(schools, schooLabelReportType);
     }
 
+    @Generated
     protected Integer createDistrictLabelsReport(List<TraxDistrict> traxDistricts, String districtLabelReportType) {
         return postingDistributionService.createDistrictLabelsReport(traxDistricts, districtLabelReportType);
     }
 
+    @Generated
     protected Integer createDistrictSchoolMonthReport(String schooLabelReportType, String districtReportType, String schoolReportType) {
         return postingDistributionService.createDistrictSchoolMonthReport(schooLabelReportType, districtReportType, schoolReportType);
     }
@@ -207,6 +214,7 @@ public abstract class BaseProcess implements DistributionProcess {
      return reportCount;
      }**/
 
+    @Generated
     //Uploads school report labels for all the batch runs
     protected void uploadSchoolReportDocuments(Long batchId, String mincode, String schoolCategory, ProcessorData processorData, byte[] gradReportPdf) {
         logger.debug("Upload School Reports for {}", processorData.getActivityCode());
