@@ -17,6 +17,7 @@
             src/main/resources/**,
             src/main/java/ca/bc/gov/educ/api/distribution/config/**,
             src/main/java/ca/bc/gov/educ/api/distribution/exception/**,
+            src/main/java/ca/bc/gov/educ/api/distribution/process/**,
             src/main/java/ca/bc/gov/educ/api/distribution/model/**,
             src/main/java/ca/bc/gov/educ/api/distribution/util/**
         </sonar.exclusions>
@@ -24,6 +25,7 @@
             src/main/resources/**,
             src/main/java/ca/bc/gov/educ/api/distribution/config/**,
             src/main/java/ca/bc/gov/educ/api/distribution/exception/**,
+            src/main/java/ca/bc/gov/educ/api/distribution/process/**,
             src/main/java/ca/bc/gov/educ/api/distribution/model/**,
             src/main/java/ca/bc/gov/educ/api/distribution/util/**
         </sonar.coverage.exclusions>

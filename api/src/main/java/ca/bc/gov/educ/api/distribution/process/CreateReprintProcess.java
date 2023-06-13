@@ -1,11 +1,9 @@
 package ca.bc.gov.educ.api.distribution.process;
 
 import ca.bc.gov.educ.api.distribution.model.dto.*;
-import ca.bc.gov.educ.api.distribution.util.Generated;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -26,7 +24,6 @@ public class CreateReprintProcess extends BaseProcess {
 	private static Logger logger = LoggerFactory.getLogger(CreateReprintProcess.class);
 
 	@Override
-	@Generated
 	public ProcessorData fire(ProcessorData processorData) {
 		long startTime = System.currentTimeMillis();
 		logger.debug("************* TIME START  ************ {}",startTime);
@@ -102,12 +99,12 @@ public class CreateReprintProcess extends BaseProcess {
 		}
 		return numberOfPdfs;
 	}
+
 	private void processCertificatePrintFile(ReportRequest packSlipReq, CertificatePrintRequest certificatePrintRequest, String mincode, int currentSlipCount, DistributionPrintRequest obj, ProcessorData processorData, String paperType) {
 		PackingSlipRequest request = PackingSlipRequest.builder().mincode(mincode).currentSlip(currentSlipCount).total(obj.getTotal()).paperType(paperType).build();
 		mergeCertificates(packSlipReq, certificatePrintRequest,request,processorData);
 	}
 
-	@SneakyThrows
 	private void mergeCertificates(ReportRequest packSlipReq, CertificatePrintRequest certificatePrintRequest, PackingSlipRequest request, ProcessorData processorData) {
 		List<StudentCredentialDistribution> scdList = certificatePrintRequest.getCertificateList();
 		String mincode = request.getMincode();
