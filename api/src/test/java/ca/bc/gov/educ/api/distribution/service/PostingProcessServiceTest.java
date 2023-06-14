@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.distribution.service;
 
 import ca.bc.gov.educ.api.distribution.model.dto.DistributionResponse;
+import ca.bc.gov.educ.api.distribution.model.dto.School;
 import ca.bc.gov.educ.api.distribution.model.dto.SchoolReports;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import lombok.SneakyThrows;
@@ -13,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.wildfly.common.Assert;
 import reactor.core.publisher.Mono;
@@ -57,7 +59,7 @@ public class PostingProcessServiceTest {
         DistributionResponse response = new DistributionResponse();
         response.setBatchId(12345L);
         response.setActivityCode(YEARENDDIST);
-        response.setLocalDownload("Y");
+        response.setLocalDownload("N");
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
         when(this.requestHeadersUriMock.uri(String.format(educDistributionApiConstants.getSchoolDistrictYearEndReport(), null, DISTREP_YE_SD, DISTREP_YE_SC))).thenReturn(this.requestHeadersMock);
@@ -67,25 +69,42 @@ public class PostingProcessServiceTest {
         when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(1));
 
         SchoolReports distrepYeSd = new SchoolReports();
+        String distrepYeSdMincode = RandomStringUtils.randomNumeric(3);
         distrepYeSd.setId(UUID.randomUUID());
         distrepYeSd.setReportTypeCode(DISTREP_YE_SD);
-        distrepYeSd.setSchoolOfRecord(RandomStringUtils.randomNumeric(3));
+        distrepYeSd.setSchoolOfRecord(distrepYeSdMincode);
         distrepYeSd.setSchoolOfRecordName(RandomStringUtils.randomAlphabetic(15));
         distrepYeSd.setSchoolCategory(RandomStringUtils.randomNumeric(3));
         distrepYeSd.setReport(Base64.getEncoder().encodeToString(RandomStringUtils.randomAlphanumeric(25).getBytes()));
 
         SchoolReports distrepYeSc = new SchoolReports();
+        String distrepYeScMincode = RandomStringUtils.randomNumeric(6);
         distrepYeSc.setId(UUID.randomUUID());
         distrepYeSc.setReportTypeCode(DISTREP_YE_SC);
-        distrepYeSc.setSchoolOfRecord(RandomStringUtils.randomNumeric(6));
+        distrepYeSc.setSchoolOfRecord(distrepYeScMincode);
         distrepYeSc.setSchoolOfRecordName(RandomStringUtils.randomAlphabetic(15));
         distrepYeSc.setSchoolCategory(RandomStringUtils.randomNumeric(3));
         distrepYeSc.setReport(Base64.getEncoder().encodeToString(RandomStringUtils.randomAlphanumeric(25).getBytes()));
 
+        School district = new School();
+        district.setMincode(distrepYeSd.getSchoolOfRecord());
+        district.setName(distrepYeSd.getSchoolOfRecordName());
+        district.setSchoolCategoryCode(distrepYeSd.getSchoolCategory());
+
+        response.getDistricts().add(district);
+
+        School school = new School();
+        school.setMincode(distrepYeSc.getSchoolOfRecord());
+        school.setName(distrepYeSc.getSchoolOfRecordName());
+        school.setSchoolCategoryCode(distrepYeSc.getSchoolCategory());
+
+        response.getSchools().add(school);
+
         SchoolReports addressLabelSchl = new SchoolReports();
+        String addressLabelSchlMincode = RandomStringUtils.randomNumeric(6);
         addressLabelSchl.setId(UUID.randomUUID());
         addressLabelSchl.setReportTypeCode(ADDRESS_LABEL_SCHL);
-        addressLabelSchl.setSchoolOfRecord(RandomStringUtils.randomNumeric(6));
+        addressLabelSchl.setSchoolOfRecord(addressLabelSchlMincode);
         addressLabelSchl.setSchoolOfRecordName(RandomStringUtils.randomAlphabetic(15));
         addressLabelSchl.setSchoolCategory(RandomStringUtils.randomNumeric(3));
         addressLabelSchl.setReport(Base64.getEncoder().encodeToString(RandomStringUtils.randomAlphanumeric(25).getBytes()));
@@ -137,6 +156,22 @@ public class PostingProcessServiceTest {
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
         })).thenReturn(Mono.just(List.of(distrepYeSc)));
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(educDistributionApiConstants.getSchoolDistrictYearEndReport(), null, distrepYeSd.getReportTypeCode(), null))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(1));
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(educDistributionApiConstants.getSchoolDistrictYearEndReport(), null, null, distrepYeSc.getReportTypeCode()))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(1));
 
         byte[] bytesPdf = readBinaryFile("data/sample.pdf");
 
