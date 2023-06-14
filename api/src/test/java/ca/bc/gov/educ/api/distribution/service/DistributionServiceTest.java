@@ -216,10 +216,10 @@ public class DistributionServiceTest {
 	public void testdistributeSchoolReport() {
 		DistributionResponse res = testdistributeSchoolReport("PSR","DISTREP_SC", null);
 		assertNotNull(res);
-//		res = testdistributeSchoolReport("PSR","NONGRADDISTREP_SC", null);
-//		assertNotNull(res);
-//		res = testdistributeSchoolReport("PSR","NONGRADPRJ", null);
-//		assertNotNull(res);
+		res = testdistributeSchoolReport("PSR","NONGRADDISTREP_SC", null);
+		assertNotNull(res);
+		res = testdistributeSchoolReport("PSR","NONGRADPRJ", null);
+		assertNotNull(res);
 	}
 
 	@SneakyThrows
