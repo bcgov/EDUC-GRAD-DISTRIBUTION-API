@@ -3,6 +3,7 @@ package ca.bc.gov.educ.api.distribution.service;
 import ca.bc.gov.educ.api.distribution.model.dto.DistributionResponse;
 import ca.bc.gov.educ.api.distribution.model.dto.School;
 import ca.bc.gov.educ.api.distribution.model.dto.SchoolReports;
+import ca.bc.gov.educ.api.distribution.model.dto.TraxDistrict;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -74,7 +75,7 @@ public class PostingProcessServiceTest {
         distrepYeSd.setReportTypeCode(DISTREP_YE_SD);
         distrepYeSd.setSchoolOfRecord(distrepYeSdMincode);
         distrepYeSd.setSchoolOfRecordName(RandomStringUtils.randomAlphabetic(15));
-        distrepYeSd.setSchoolCategory(RandomStringUtils.randomNumeric(3));
+        distrepYeSd.setSchoolCategory(RandomStringUtils.randomNumeric(2));
         distrepYeSd.setReport(Base64.getEncoder().encodeToString(RandomStringUtils.randomAlphanumeric(25).getBytes()));
 
         SchoolReports distrepYeSc = new SchoolReports();
@@ -83,7 +84,7 @@ public class PostingProcessServiceTest {
         distrepYeSc.setReportTypeCode(DISTREP_YE_SC);
         distrepYeSc.setSchoolOfRecord(distrepYeScMincode);
         distrepYeSc.setSchoolOfRecordName(RandomStringUtils.randomAlphabetic(15));
-        distrepYeSc.setSchoolCategory(RandomStringUtils.randomNumeric(3));
+        distrepYeSc.setSchoolCategory(RandomStringUtils.randomNumeric(2));
         distrepYeSc.setReport(Base64.getEncoder().encodeToString(RandomStringUtils.randomAlphanumeric(25).getBytes()));
 
         School district = new School();
@@ -106,7 +107,7 @@ public class PostingProcessServiceTest {
         addressLabelSchl.setReportTypeCode(ADDRESS_LABEL_SCHL);
         addressLabelSchl.setSchoolOfRecord(addressLabelSchlMincode);
         addressLabelSchl.setSchoolOfRecordName(RandomStringUtils.randomAlphabetic(15));
-        addressLabelSchl.setSchoolCategory(RandomStringUtils.randomNumeric(3));
+        addressLabelSchl.setSchoolCategory(RandomStringUtils.randomNumeric(2));
         addressLabelSchl.setReport(Base64.getEncoder().encodeToString(RandomStringUtils.randomAlphanumeric(25).getBytes()));
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
@@ -198,6 +199,122 @@ public class PostingProcessServiceTest {
 
         var result = this.postingDistributionService.postingProcess(response);
         Assert.assertTrue(result);
+    }
+
+    @Test
+    public void testCreateSchoolLabelsReport() {
+        School district = new School();
+        district.setMincode(RandomStringUtils.randomNumeric(6));
+        district.setName(RandomStringUtils.randomAlphabetic(15));
+        district.setSchoolCategoryCode(RandomStringUtils.randomNumeric(2));
+
+        School school = new School();
+        school.setMincode(RandomStringUtils.randomNumeric(6));
+        school.setName(RandomStringUtils.randomAlphabetic(15));
+        school.setSchoolCategoryCode(RandomStringUtils.randomNumeric(2));
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(educDistributionApiConstants.getSchoolLabelsReport(), DISTREP_YE_SD))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(1));
+
+        var result = this.postingDistributionService.createSchoolLabelsReport(List.of(district), DISTREP_YE_SD);
+        Assert.assertTrue(1 == result);
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(educDistributionApiConstants.getSchoolLabelsReport(), DISTREP_YE_SC))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(1));
+
+        result = this.postingDistributionService.createSchoolLabelsReport(List.of(school), DISTREP_YE_SC);
+        Assert.assertTrue(1 == result);
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(educDistributionApiConstants.getSchoolLabelsReport(), ADDRESS_LABEL_SCHL))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(1));
+
+        result = this.postingDistributionService.createSchoolLabelsReport(List.of(school), ADDRESS_LABEL_SCHL);
+        Assert.assertTrue(1 == result);
+    }
+
+    @Test
+    public void testCreateDistrictLabelsReport() {
+        TraxDistrict district = new TraxDistrict();
+        district.setDistrictNumber(RandomStringUtils.randomNumeric(3));
+        district.setDistrictName(RandomStringUtils.randomAlphabetic(15));
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(educDistributionApiConstants.getSchoolLabelsReport(), ADDRESS_LABEL_YE))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(1));
+
+        var result = this.postingDistributionService.createDistrictLabelsReport(List.of(district), ADDRESS_LABEL_YE);
+        Assert.assertTrue(1 == result);
+    }
+
+    @Test
+    public void testCreateDistrictSchoolMonthReport() {
+        TraxDistrict district = new TraxDistrict();
+        district.setDistrictNumber(RandomStringUtils.randomNumeric(3));
+        district.setDistrictName(RandomStringUtils.randomAlphabetic(15));
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(String.format(educDistributionApiConstants.getSchoolDistrictMonthReport(), ADDRESS_LABEL_SCHL, DISTREP_SD, DISTREP_SC))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(1));
+
+        var result = this.postingDistributionService.createDistrictSchoolMonthReport(ADDRESS_LABEL_SCHL, DISTREP_SD, DISTREP_SC);
+        Assert.assertTrue(1 == result);
+    }
+    @Test
+    public void testCreateDistrictSchoolYearEndReport() {
+        TraxDistrict district = new TraxDistrict();
+        district.setDistrictNumber(RandomStringUtils.randomNumeric(3));
+        district.setDistrictName(RandomStringUtils.randomAlphabetic(15));
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(String.format(educDistributionApiConstants.getSchoolDistrictYearEndReport(), ADDRESS_LABEL_YE, DISTREP_YE_SD, DISTREP_YE_SC))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(1));
+
+        var result = this.postingDistributionService.createDistrictSchoolYearEndReport(ADDRESS_LABEL_YE, DISTREP_YE_SD, DISTREP_YE_SC);
+        Assert.assertTrue(1 == result);
+    }
+
+    @Test
+    public void testCreateDistrictSchoolYearEndReportFromListOfSchools() {
+        School school = new School();
+        school.setMincode(RandomStringUtils.randomNumeric(6));
+        school.setName(RandomStringUtils.randomAlphabetic(15));
+        school.setSchoolCategoryCode(RandomStringUtils.randomNumeric(2));
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(educDistributionApiConstants.getSchoolDistrictYearEndReport(), ADDRESS_LABEL_YE, DISTREP_YE_SD, DISTREP_YE_SC))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(1));
+
+        var result = this.postingDistributionService.createDistrictSchoolYearEndReport(ADDRESS_LABEL_YE, DISTREP_YE_SD, DISTREP_YE_SC, List.of(school.getMincode()));
+        Assert.assertTrue(1 == result);
     }
 
     @SneakyThrows
