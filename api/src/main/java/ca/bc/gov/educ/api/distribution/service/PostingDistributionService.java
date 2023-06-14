@@ -158,13 +158,6 @@ public class PostingDistributionService {
         return processSchoolLabelsDistribution(batchId, "", schooLabelReportType);
     }
 
-    public int processSchoolLabelsDistribution(Long batchId, String mincode, String schooLabelReportType) {
-        List<SchoolReports> yeSchooLabelsReports = restService.executeGet(educDistributionApiConstants.getSchoolReportsByReportType(), new ParameterizedTypeReference<List<SchoolReports>>() {
-        }, schooLabelReportType, mincode);
-        assert yeSchooLabelsReports != null;
-        return processDistrictSchoolReports(yeSchooLabelsReports, batchId, schooLabelReportType);
-    }
-
     public int processDistrictSchoolDistribution(Long batchId, Collection<String> mincodes, String schooLabelReportType, String districtReportType, String schoolReportType) {
         int numberOfPdfs = 0;
         if (StringUtils.isNotBlank(schooLabelReportType)) {
@@ -231,7 +224,14 @@ public class PostingDistributionService {
         return numberOfPdfs;
     }
 
-    public int processDistrictSchoolDistribution(Long batchId, String schooLabelReportType, String districtReportType, String schoolReportType) {
+    protected int processSchoolLabelsDistribution(Long batchId, String mincode, String schooLabelReportType) {
+        List<SchoolReports> yeSchooLabelsReports = restService.executeGet(educDistributionApiConstants.getSchoolReportsByReportType(), new ParameterizedTypeReference<List<SchoolReports>>() {
+        }, schooLabelReportType, mincode);
+        assert yeSchooLabelsReports != null;
+        return processDistrictSchoolReports(yeSchooLabelsReports, batchId, schooLabelReportType);
+    }
+
+    protected int processDistrictSchoolDistribution(Long batchId, String schooLabelReportType, String districtReportType, String schoolReportType) {
         int numberOfPdfs = 0;
         if (StringUtils.isNotBlank(schooLabelReportType)) {
             numberOfPdfs += processSchoolLabelsDistribution(batchId, schooLabelReportType);
