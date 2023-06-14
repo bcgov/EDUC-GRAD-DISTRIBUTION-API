@@ -77,6 +77,22 @@ public class RestServiceTest {
     }
 
     @Test(expected = ServiceException.class)
+    public void testGet_GivenParameterData_ExpectServiceErrorResponse(){
+        ParameterizedTypeReference reference = new ParameterizedTypeReference<SchoolReports>() {
+        };
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(any(String.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(reference)).thenReturn(Mono.just(new ServiceException()));
+
+        this.restService.executeGet("https://httpstat.us/503?p=%s&a=%s", reference, "");
+
+    }
+
+    @Test(expected = ServiceException.class)
     public void testGet_Given5xxErrorFromService_ExpectServiceError(){
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
         when(this.requestHeadersUriMock.uri(any(String.class))).thenReturn(this.requestHeadersMock);

@@ -33,9 +33,10 @@ public class RestService {
     }
 
     public <T> T executeGet(String url, Class<T> boundClass, String... params) {
-        String serviceUrl = parseUrlParameters(url, params);
-        final UUID correlationId = UUID.randomUUID();
+        String serviceUrl = null;
         try {
+            serviceUrl = parseUrlParameters(url, params);
+            final UUID correlationId = UUID.randomUUID();
             return webClient.get().uri(serviceUrl).headers(h -> {
                 h.setBearerAuth(restUtils.getAccessToken());
                 h.set(EducDistributionApiConstants.CORRELATION_ID, correlationId.toString());
@@ -47,9 +48,10 @@ public class RestService {
     }
 
     public <T> T executeGet(String url, ParameterizedTypeReference<T> typeReference, String... params) {
-        String serviceUrl = parseUrlParameters(url, params);
-        final UUID correlationId = UUID.randomUUID();
+        String serviceUrl = null;
         try {
+            serviceUrl = parseUrlParameters(url, params);
+            final UUID correlationId = UUID.randomUUID();
             return webClient.get().uri(serviceUrl).headers(h -> {
                 h.setBearerAuth(restUtils.getAccessToken());
                 h.set(EducDistributionApiConstants.CORRELATION_ID, correlationId.toString());
@@ -61,9 +63,10 @@ public class RestService {
     }
 
     public <T> T executePost(String url, Class<T> boundClass, Object requestBody, String... params) {
-        String serviceUrl = parseUrlParameters(url, params);
-        final UUID correlationId = UUID.randomUUID();
+        String serviceUrl = null;
         try {
+            serviceUrl = parseUrlParameters(url, params);
+            final UUID correlationId = UUID.randomUUID();
             return webClient.post().uri(serviceUrl).headers(h -> {
                 h.setBearerAuth(restUtils.getAccessToken());
                 h.set(EducDistributionApiConstants.CORRELATION_ID, correlationId.toString());
@@ -75,9 +78,10 @@ public class RestService {
     }
 
     public <T> T executeDelete(String url, Class<T> boundClass, String... params) {
-        String serviceUrl = parseUrlParameters(url, params);
-        final UUID correlationId = UUID.randomUUID();
+        String serviceUrl = null;
         try {
+            serviceUrl = parseUrlParameters(url, params);
+            final UUID correlationId = UUID.randomUUID();
             return webClient.delete().uri(serviceUrl).headers(h -> {
                 h.setBearerAuth(restUtils.getAccessToken());
                 h.set(EducDistributionApiConstants.CORRELATION_ID, correlationId.toString());
