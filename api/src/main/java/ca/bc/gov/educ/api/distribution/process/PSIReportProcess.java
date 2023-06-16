@@ -113,14 +113,17 @@ public class PSIReportProcess extends BaseProcess {
         int failedToAdd = 0;
 
         for (PsiCredentialDistribution scd : scdList) {
-            InputStreamResource transcriptPdf = webClient.get().uri(String.format(educDistributionApiConstants.getTranscriptUsingStudentID(), scd.getStudentID())).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).retrieve().bodyToMono(InputStreamResource.class).block();
-            if (transcriptPdf != null) {
-                locations.add(transcriptPdf.getInputStream());
-                currentTranscript++;
-                logger.debug("*** Added PDFs {}/{} Current student {}", currentTranscript, scdList.size(), scd.getStudentID());
-            } else {
-                failedToAdd++;
-                logger.debug("*** Failed to Add PDFs {} Current student {}", failedToAdd, scd.getStudentID());
+            //Skipping preparing the student's transcripts whose student id is null -hotfix -mchintha
+            if(scd.getStudentID() != null) {
+                InputStreamResource transcriptPdf = webClient.get().uri(String.format(educDistributionApiConstants.getTranscriptUsingStudentID(), scd.getStudentID())).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).retrieve().bodyToMono(InputStreamResource.class).block();
+                if (transcriptPdf != null) {
+                    locations.add(transcriptPdf.getInputStream());
+                    currentTranscript++;
+                    logger.debug("*** Added PDFs {}/{} Current student {}", currentTranscript, scdList.size(), scd.getStudentID());
+                } else {
+                    failedToAdd++;
+                    logger.debug("*** Failed to Add PDFs {} Current student {}", failedToAdd, scd.getStudentID());
+                }
             }
         }
     }
@@ -367,7 +370,10 @@ public class PSIReportProcess extends BaseProcess {
         if(StringUtils.isBlank(transmissionMode)) {
             throw new GradBusinessRuleException(TRANSMISSION_MODE_ERROR);
         }
+
         try {
+            //Skipping the creation of district label reports for FTP files - hotfix - mchintha
+            if (EducDistributionApiConstants.TRANSMISSION_MODE_PAPER.equalsIgnoreCase(transmissionMode)) {
             StringBuilder fileLocBuilder = buildFileLocationPath(batchId, mincode, schoolCategory, isDistrict, districtCode, transmissionMode);
             Path path = Paths.get(fileLocBuilder.toString());
             Files.createDirectories(path);
@@ -378,7 +384,7 @@ public class PSIReportProcess extends BaseProcess {
                 fileNameBuilder.append("/EDGRAD.R.").append("324W.");
             }
             fileNameBuilder.append(EducDistributionApiUtils.getFileNameSchoolReports(mincode)).append(".pdf");
-            if (EducDistributionApiConstants.TRANSMISSION_MODE_PAPER.equalsIgnoreCase(transmissionMode)) {
+
                 try (OutputStream out = new FileOutputStream(fileNameBuilder.toString())) {
                     out.write(gradReportPdf);
                 }
@@ -447,6 +453,12 @@ public class PSIReportProcess extends BaseProcess {
         StringBuilder sourceFileBuilder = new StringBuilder().append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.FILES_FOLDER_STRUCTURE).append(transmissionMode.toUpperCase()).append(EducDistributionApiConstants.DEL).append(batchId);
         File file = new File(EducDistributionApiConstants.TMP_DIR + EducDistributionApiConstants.FILES_FOLDER_STRUCTURE + transmissionMode.toUpperCase() + "/EDGRAD.BATCH." + batchId + ".zip");
         writeZipFile(sourceFileBuilder, file);
+    }
+
+    public static void main(String[] args) {
+        StringBuilder sourceFileBuilder = new StringBuilder().append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.FILES_FOLDER_STRUCTURE).append("FTP/36056");
+        File file = new File(EducDistributionApiConstants.TMP_DIR + EducDistributionApiConstants.FILES_FOLDER_STRUCTURE + "FTP/EDGRAD.BATCH.36056.zip");
+        new PSIReportProcess().writeZipFile(sourceFileBuilder, file);
     }
     //Grad2-2052 - setting SFTP root folder location for PSIRUN paper where it has to pick zip folders from, to send them to BC mail - mchintha
     @Override
