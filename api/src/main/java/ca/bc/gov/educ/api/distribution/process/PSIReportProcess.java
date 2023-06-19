@@ -47,11 +47,10 @@ public class PSIReportProcess extends BaseProcess {
         int numOfPdfs = 0;
         int cnter = 0;
         List<School> schoolsForLabels = new ArrayList<>();
-        for (Map.Entry<String, DistributionPrintRequest> entry : mapDist.entrySet()) {
+        for (String psiCode : mapDist.keySet()) {
             cnter++;
             int currentSlipCount = 0;
-            String psiCode = entry.getKey();
-            DistributionPrintRequest obj = entry.getValue();
+            DistributionPrintRequest obj = mapDist.get(psiCode);
             Psi psiDetails = psiService.getPsiDetails(psiCode, restUtils.getAccessToken());
             if (psiDetails != null) {
                 logger.debug("*** PSI Details Acquired {}", psiDetails.getPsiName());

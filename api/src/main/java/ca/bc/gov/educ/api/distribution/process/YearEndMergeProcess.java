@@ -41,7 +41,6 @@ public class YearEndMergeProcess extends MergeProcess {
         List<School> schoolsForLabels = new ArrayList<>();
         List<School> districtsForLabels = new ArrayList<>();
         for (String mincode : mapDist.keySet()) {
-
             CommonSchool commonSchool = getBaseSchoolDetails(null, mincode, exception);
             if (commonSchool != null) {
                 String schoolCategoryCode = commonSchool.getSchoolCategoryCode();

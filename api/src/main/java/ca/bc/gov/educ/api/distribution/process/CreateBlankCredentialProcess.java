@@ -37,11 +37,10 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 		Long batchId = processorData.getBatchId();
 		int numberOfPdfs = 0;
 		int counter=0;
-		for (Map.Entry<String, DistributionPrintRequest> entry : mapDist.entrySet()) {
+		for (String mincode : mapDist.keySet()) {
 			counter++;
 			int currentSlipCount = 0;
-			String mincode = entry.getKey();
-			DistributionPrintRequest obj = entry.getValue();
+			DistributionPrintRequest obj = mapDist.get(mincode);
 			CommonSchool schoolDetails = getBaseSchoolDetails(obj,mincode,exception);
 			if(schoolDetails != null) {
 				logger.debug("*** School Details Acquired {}", schoolDetails.getSchoolName());

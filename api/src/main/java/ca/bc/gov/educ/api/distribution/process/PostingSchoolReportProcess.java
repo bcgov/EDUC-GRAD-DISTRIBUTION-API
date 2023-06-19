@@ -38,10 +38,9 @@ public class PostingSchoolReportProcess extends BaseProcess {
 		int numberOfPdfs = 0;
 		int counter=0;
 		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("PST"), Locale.CANADA);
-		for (Map.Entry<String, DistributionPrintRequest> entry : mapDist.entrySet()) {
+		for (String mincode : mapDist.keySet()) {
 			counter++;
-			String mincode = entry.getKey();
-			DistributionPrintRequest obj = entry.getValue();
+			DistributionPrintRequest obj = mapDist.get(mincode);
 			if (obj.getSchoolReportPostRequest() != null) {
 				SchoolReportPostRequest schoolRepPostReq = obj.getSchoolReportPostRequest();
 				numberOfPdfs = processFile(schoolRepPostReq.getGradReport(),mincode,numberOfPdfs,processorData);

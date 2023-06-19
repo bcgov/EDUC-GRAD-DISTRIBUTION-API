@@ -43,11 +43,10 @@ public class MergeProcess extends BaseProcess {
 		int numberOfPdfs = 0;
 		int counter=0;
 		List<School> schoolsForLabels = new ArrayList<>();
-		for (Map.Entry<String, DistributionPrintRequest> entry : mapDist.entrySet()) {
+		for (String mincode : mapDist.keySet()) {
 			counter++;
 			int currentSlipCount = 0;
-			String mincode = entry.getKey();
-			DistributionPrintRequest distributionPrintRequest = entry.getValue();
+			DistributionPrintRequest distributionPrintRequest = mapDist.get(mincode);
 			CommonSchool schoolDetails = getBaseSchoolDetails(distributionPrintRequest,mincode,exception);
 			if(schoolDetails != null) {
 				String schoolCategoryCode = schoolDetails.getSchoolCategoryCode();
