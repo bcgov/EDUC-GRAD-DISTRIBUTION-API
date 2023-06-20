@@ -102,7 +102,7 @@ public class PSIReportProcess extends BaseProcess {
                 numOfPdfs++;
                 logger.debug("*** Transcript Documents Merged");
             } catch (IOException e) {
-                logger.debug(EXCEPTION, e.getLocalizedMessage());
+                logger.error(EXCEPTION, e.getLocalizedMessage());
             }
         }
         return Pair.of(currentSlipCount, numOfPdfs);
@@ -390,7 +390,7 @@ public class PSIReportProcess extends BaseProcess {
             }
 
         } catch (Exception e) {
-            logger.debug(EXCEPTION, e.getLocalizedMessage());
+            logger.error(EXCEPTION, e.getLocalizedMessage());
         }
     }
 
