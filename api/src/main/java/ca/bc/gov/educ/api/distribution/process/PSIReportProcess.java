@@ -143,9 +143,7 @@ public class PSIReportProcess extends BaseProcess {
 
         try {
             StringBuilder filePathBuilder = createFolderStructureInTempDirectory(processorData, psiCode, "02");
-
             filePathBuilder.append(EducDistributionApiConstants.FTP_FILENAME_PREFIX).append(psiCode).append(EducDistributionApiConstants.FTP_FILENAME_SUFFIX).append(".").append(EducDistributionApiUtils.getFileNameSchoolReports(psiCode)).append(".DAT");
-
             if (filePathBuilder != null) {
                 path = Paths.get(filePathBuilder.toString());
                 newFile = new File(Files.createFile(path).toUri());
@@ -211,6 +209,7 @@ public class PSIReportProcess extends BaseProcess {
         }
 
     }
+
     //Grad2-1931 : Writes all rows data together on CSV - mchintha
     private void writesFormattedAllRowsDataOnCSV(String csv, File newFile) {
         try (FileWriter fWriter = new FileWriter(newFile)) {
@@ -307,12 +306,11 @@ public class PSIReportProcess extends BaseProcess {
 
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat(EducDistributionApiConstants.DATE_FORMAT);
 
-            if(studentDetails.getBirthdate() == null || StringUtils.isBlank(studentDetails.getBirthdate().toString())) {
+            if (studentDetails.getBirthdate() == null || StringUtils.isBlank(studentDetails.getBirthdate().toString())) {
                 birthDate = "";
-            }
-            else {
+            } else {
                 birthDate = simpleDateFormat.format(studentDetails.getBirthdate());
-                }
+            }
             String dogWoodFlag = String.valueOf(studentDetails.getGraduationData().getDogwoodFlag()).isBlank() ? "" : String.valueOf(studentDetails.getGraduationData().getDogwoodFlag());
             String honorsFlag = String.valueOf(studentDetails.getGraduationData().getHonorsFlag()).isBlank() ? "" : String.valueOf(studentDetails.getGraduationData().getHonorsFlag());
 
@@ -372,25 +370,25 @@ public class PSIReportProcess extends BaseProcess {
         boolean isDistrict = StringUtils.isNotBlank(mincode) && StringUtils.length(mincode) == 3;
         String districtCode = StringUtils.substring(mincode, 0, 3);
         String transmissionMode = processorData.getTransmissionMode();
-        if(StringUtils.isBlank(transmissionMode)) {
+        if (StringUtils.isBlank(transmissionMode)) {
             throw new GradBusinessRuleException(TRANSMISSION_MODE_ERROR);
         }
         try {
             if (EducDistributionApiConstants.TRANSMISSION_MODE_PAPER.equalsIgnoreCase(transmissionMode)) {
-            StringBuilder fileLocBuilder = buildFileLocationPath(batchId, mincode, schoolCategory, isDistrict, districtCode, transmissionMode);
-            Path path = Paths.get(fileLocBuilder.toString());
-            Files.createDirectories(path);
-            StringBuilder fileNameBuilder = buildFileLocationPath(batchId, mincode, schoolCategory, isDistrict, districtCode, transmissionMode);
-            if (SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode)) {
-                fileNameBuilder.append("/EDGRAD.L.").append("3L14.");
-            } else {
-                fileNameBuilder.append("/EDGRAD.R.").append("324W.");
-            }
-            fileNameBuilder.append(EducDistributionApiUtils.getFileNameSchoolReports(mincode)).append(".pdf");
+                StringBuilder fileLocBuilder = buildFileLocationPath(batchId, mincode, schoolCategory, isDistrict, districtCode, transmissionMode);
+                Path path = Paths.get(fileLocBuilder.toString());
+                Files.createDirectories(path);
+                StringBuilder fileNameBuilder = buildFileLocationPath(batchId, mincode, schoolCategory, isDistrict, districtCode, transmissionMode);
+                if (SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode)) {
+                    fileNameBuilder.append("/EDGRAD.L.").append("3L14.");
+                } else {
+                    fileNameBuilder.append("/EDGRAD.R.").append("324W.");
+                }
+                fileNameBuilder.append(EducDistributionApiUtils.getFileNameSchoolReports(mincode)).append(".pdf");
 
-            try (OutputStream out = new FileOutputStream(fileNameBuilder.toString())) {
-                out.write(gradReportPdf);
-                out.flush();
+                try (OutputStream out = new FileOutputStream(fileNameBuilder.toString())) {
+                    out.write(gradReportPdf);
+                    out.flush();
                 }
             }
 
@@ -451,13 +449,14 @@ public class PSIReportProcess extends BaseProcess {
     protected void createZipFile(Long batchId, ProcessorData processorData) {
         logger.debug("Create zip file for {}", processorData.getActivityCode());
         String transmissionMode = processorData.getTransmissionMode();
-        if(StringUtils.isBlank(transmissionMode)) {
+        if (StringUtils.isBlank(transmissionMode)) {
             throw new GradBusinessRuleException(TRANSMISSION_MODE_ERROR);
         }
         StringBuilder sourceFileBuilder = new StringBuilder().append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.FILES_FOLDER_STRUCTURE).append(transmissionMode.toUpperCase()).append(EducDistributionApiConstants.DEL).append(batchId);
         File file = new File(EducDistributionApiConstants.TMP_DIR + EducDistributionApiConstants.FILES_FOLDER_STRUCTURE + transmissionMode.toUpperCase() + "/EDGRAD.BATCH." + batchId + ".zip");
-        writeZipFile(sourceFileBuilder, file);
+        writeZipFile(sourceFileBuilder.toString(), file);
     }
+
     //Grad2-2052 - setting SFTP root folder location for PSIRUN paper where it has to pick zip folders from, to send them to BC mail - mchintha
     @Override
     protected String getZipFolderFromRootLocation() {
@@ -468,7 +467,7 @@ public class PSIReportProcess extends BaseProcess {
     //Grad2-1931 Changed the folder structure of created files to be placed - mchintha
     protected void createControlFile(Long batchId, ProcessorData processorData, int numberOfPdfs) {
         String transmissionMode = processorData.getTransmissionMode();
-        if(StringUtils.isBlank(transmissionMode)) {
+        if (StringUtils.isBlank(transmissionMode)) {
             throw new GradBusinessRuleException(TRANSMISSION_MODE_ERROR);
         }
         File file = new File(EducDistributionApiConstants.TMP_DIR + EducDistributionApiConstants.FILES_FOLDER_STRUCTURE + transmissionMode.toUpperCase() + "/EDGRAD.BATCH." + batchId + ".txt");

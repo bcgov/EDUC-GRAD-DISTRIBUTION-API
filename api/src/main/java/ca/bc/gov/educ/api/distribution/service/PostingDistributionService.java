@@ -93,7 +93,7 @@ public class PostingDistributionService {
             ZipOutputStream zipOut = new ZipOutputStream(fos);
             File fileToZip = new File(sourceFileBuilder.toString());
             EducDistributionApiUtils.zipFile(fileToZip, fileToZip.getName(), zipOut);
-            zipOut.close();
+            zipOut.finish();
         } catch (IOException e) {
             logger.error(e.getLocalizedMessage());
         }
