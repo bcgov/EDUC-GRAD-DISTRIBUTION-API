@@ -208,7 +208,7 @@ public class PSIReportProcess extends BaseProcess {
 
     }
     //Grad2-1931 : Writes all rows data together on CSV - mchintha
-    private static void writesFormattedAllRowsDataOnCSV(String csv, File newFile) {
+    private void writesFormattedAllRowsDataOnCSV(String csv, File newFile) {
         try (FileWriter fWriter = new FileWriter(newFile)) {
             fWriter.write(csv);
             fWriter.flush();
