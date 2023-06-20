@@ -82,23 +82,18 @@ public abstract class BaseProcess implements DistributionProcess {
         logger.debug("Create zip file for {}", processorData.getActivityCode());
         StringBuilder sourceFileBuilder = new StringBuilder().append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.DEL).append(batchId);
         File file = new File(EducDistributionApiConstants.TMP_DIR + "/EDGRAD.BATCH." + batchId + ".zip");
-        writeZipFile(sourceFileBuilder.toString(), file);
+        writeZipFile(sourceFileBuilder, file);
     }
 
-    protected void writeZipFile(String rootPath, File file) {
-        ZipOutputStream zipOut = null;
-        try (FileOutputStream fos = new FileOutputStream(file.getAbsolutePath())) {
-            zipOut = new ZipOutputStream(fos);
-            File fileToZip = new File(rootPath);
+    protected void writeZipFile(StringBuilder sourceFileBuilder, File file) {
+        try (FileOutputStream fos = new FileOutputStream(file)) {
+            ZipOutputStream zipOut = new ZipOutputStream(fos);
+            File fileToZip = new File(sourceFileBuilder.toString());
             EducDistributionApiUtils.zipFile(fileToZip, fileToZip.getName(), zipOut);
-            zipOut.close();
+            zipOut.finish();
         } catch (IOException e) {
             logger.error(EXCEPTION, e.getLocalizedMessage());
         }
-        /**
-        if(!EducDistributionApiUtils.isValid(file)) {
-            throw new GradBusinessRuleException("Zip file " + file.getAbsolutePath() + " is not valid");
-        }**/
     }
 
     protected void createControlFile(Long batchId, ProcessorData processorData, int numberOfPdfs) {
@@ -114,7 +109,7 @@ public abstract class BaseProcess implements DistributionProcess {
             fos.write(contentInBytes);
             fos.flush();
         } catch (IOException e) {
-            logger.debug(EXCEPTION, e.getLocalizedMessage());
+            logger.error(EXCEPTION, e.getLocalizedMessage());
         }
         logger.debug("Created Control file ");
     }
@@ -141,8 +136,12 @@ public abstract class BaseProcess implements DistributionProcess {
         createZipFile(batchId, processorData);
         if (processorData.getLocalDownload() == null || !processorData.getLocalDownload().equalsIgnoreCase("Y")) {
             createControlFile(batchId, processorData, numberOfPdfs);
-            sftpUtils.sftpUploadBCMail(batchId);
+            sftpUtils.sftpUploadBCMail(batchId, getZipFolderFromRootLocation());
         }
+    }
+    //Grad2-2052 - setting SFTP root folder location where it has to pick zip folders from, to send them to BC mail - mchintha
+    protected String getZipFolderFromRootLocation() {
+        return EducDistributionApiConstants.TMP_DIR;
     }
 
     protected Integer createDistrictSchoolYearEndReport(String accessToken, String schooLabelReportType, String districtReportType, String schoolReportType) {
@@ -279,7 +278,7 @@ public abstract class BaseProcess implements DistributionProcess {
                     logger.debug("*** Failed to Add PDFs Current Report Type {} for school {} category {}", report.getReportTypeCode(), report.getSchoolOfRecord(), report.getSchoolCategory());
                 }
             } catch (Exception e) {
-                logger.debug(EXCEPTION, e.getLocalizedMessage());
+                logger.error(EXCEPTION, e.getLocalizedMessage());
             }
         }
         return numberOfPdfs;
@@ -305,7 +304,7 @@ public abstract class BaseProcess implements DistributionProcess {
                 out.write(gradReportPdf);
             }
         } catch (Exception e) {
-            logger.debug(EXCEPTION, e.getLocalizedMessage());
+            logger.error(EXCEPTION, e.getLocalizedMessage());
         }
     }
 
