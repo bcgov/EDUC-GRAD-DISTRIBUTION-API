@@ -102,17 +102,16 @@ public abstract class BaseProcess implements DistributionProcess {
     protected void createZipFile(Long batchId, ProcessorData processorData) {
         logger.debug("Create zip file for {}", processorData.getActivityCode());
         StringBuilder sourceFileBuilder = new StringBuilder().append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.DEL).append(batchId);
-        File file = new File(EducDistributionApiConstants.TMP_DIR + EDGRAD_BATCH + batchId + ".zip");
+        File file = new File(EducDistributionApiConstants.TMP_DIR + "/EDGRAD.BATCH." + batchId + ".zip");
         writeZipFile(sourceFileBuilder.toString(), file);
     }
 
     protected void writeZipFile(String rootPath, File file) {
-        ZipOutputStream zipOut = null;
         try (FileOutputStream fos = new FileOutputStream(file.getAbsolutePath())) {
-            zipOut = new ZipOutputStream(fos);
+            ZipOutputStream zipOut = new ZipOutputStream(fos);
             File fileToZip = new File(rootPath);
             EducDistributionApiUtils.zipFile(fileToZip, fileToZip.getName(), zipOut);
-            zipOut.close();
+            zipOut.finish();
         } catch (IOException e) {
             logger.error(EXCEPTION, e.getLocalizedMessage());
         }
@@ -135,7 +134,7 @@ public abstract class BaseProcess implements DistributionProcess {
             fos.write(contentInBytes);
             fos.flush();
         } catch (IOException e) {
-            logger.debug(EXCEPTION, e.getLocalizedMessage());
+            logger.error(EXCEPTION, e.getLocalizedMessage());
         }
         logger.debug("Created Control file ");
     }
@@ -173,6 +172,10 @@ public abstract class BaseProcess implements DistributionProcess {
     protected Integer createSchoolLabelsReport(List<School> schools, String schooLabelReportType) {
         return postingDistributionService.createSchoolLabelsReport(schools, schooLabelReportType);
     }
+    //Grad2-2052 - setting SFTP root folder location where it has to pick zip folders from, to send them to BC mail - mchintha
+    protected String getZipFolderFromRootLocation() {
+        return EducDistributionApiConstants.TMP_DIR;
+    }
 
     protected Integer createDistrictLabelsReport(List<TraxDistrict> traxDistricts, String districtLabelReportType) {
         return postingDistributionService.createDistrictLabelsReport(traxDistricts, districtLabelReportType);
@@ -195,17 +198,17 @@ public abstract class BaseProcess implements DistributionProcess {
     }
 
     /**
-     protected Integer createDistrictSchoolMonthReport(String accessToken, String schooLabelReportType, String districtReportType, String schoolReportType) {
-     Integer reportCount = 0;
-     final UUID correlationID = UUID.randomUUID();
-     reportCount += webClient.get().uri(String.format(educDistributionApiConstants.getSchoolDistrictMonthReport(), schooLabelReportType, districtReportType, schoolReportType))
-     .headers(h -> {
-     h.setBearerAuth(accessToken);
-     h.set(EducDistributionApiConstants.CORRELATION_ID, correlationID.toString());
-     })
-     .retrieve().bodyToMono(Integer.class).block();
-     return reportCount;
-     }**/
+    protected Integer createDistrictSchoolMonthReport(String accessToken, String schooLabelReportType, String districtReportType, String schoolReportType) {
+        Integer reportCount = 0;
+        final UUID correlationID = UUID.randomUUID();
+        reportCount += webClient.get().uri(String.format(educDistributionApiConstants.getSchoolDistrictMonthReport(), schooLabelReportType, districtReportType, schoolReportType))
+                .headers(h -> {
+                    h.setBearerAuth(accessToken);
+                    h.set(EducDistributionApiConstants.CORRELATION_ID, correlationID.toString());
+                })
+                .retrieve().bodyToMono(Integer.class).block();
+        return reportCount;
+    }**/
 
     protected void uploadSchoolReportDocuments(Long batchId, String mincode, String schoolCategory, ProcessorData processorData, byte[] gradReportPdf) {
         logger.debug("Upload School Reports for {}", processorData.getActivityCode());
@@ -224,9 +227,10 @@ public abstract class BaseProcess implements DistributionProcess {
             fileNameBuilder.append(EducDistributionApiUtils.getFileNameSchoolReports(mincode)).append(".pdf");
             try (OutputStream out = new FileOutputStream(fileNameBuilder.toString())) {
                 out.write(gradReportPdf);
+                out.flush();
             }
         } catch (Exception e) {
-            logger.debug(EXCEPTION, e.getLocalizedMessage());
+            logger.error(EXCEPTION, e.getLocalizedMessage());
         }
     }
 
