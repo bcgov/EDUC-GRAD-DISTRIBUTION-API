@@ -113,18 +113,13 @@ public class PSIReportProcess extends BaseProcess {
         int failedToAdd = 0;
 
         for (PsiCredentialDistribution scd : scdList) {
-            InputStreamResource transcriptPdf = restService.executeGet(
-                    educDistributionApiConstants.getTranscriptUsingStudentID(),
-                    InputStreamResource.class,
-                    scd.getStudentID().toString()
-            );
-            if (transcriptPdf != null) {
-                locations.add(transcriptPdf.getInputStream());
-                currentTranscript++;
-                logger.debug("*** Added PDFs {}/{} Current student {}", currentTranscript, scdList.size(), scd.getStudentID());
-            } else {
+            int result = addStudentTranscriptToLocations(scd.getStudentID().toString(), locations);
+            if(result == 0) {
                 failedToAdd++;
                 logger.debug("*** Failed to Add PDFs {} Current student {}", failedToAdd, scd.getStudentID());
+            } else {
+                currentTranscript++;
+                logger.debug("*** Added PDFs {}/{} Current student {}", currentTranscript, scdList.size(), scd.getStudentID());
             }
         }
     }

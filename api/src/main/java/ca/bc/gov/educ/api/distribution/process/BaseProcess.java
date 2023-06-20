@@ -3,6 +3,7 @@ package ca.bc.gov.educ.api.distribution.process;
 import ca.bc.gov.educ.api.distribution.model.dto.*;
 import ca.bc.gov.educ.api.distribution.service.*;
 import ca.bc.gov.educ.api.distribution.util.*;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pdfbox.io.MemoryUsageSetting;
 import org.apache.pdfbox.multipdf.PDFMergerUtility;
@@ -267,6 +268,18 @@ public abstract class BaseProcess implements DistributionProcess {
             if (bufferDirectory != null) {
                 IOUtils.removeFileOrDirectory(bufferDirectory);
             }
+        }
+    }
+
+    protected int addStudentTranscriptToLocations(String studentId, List<InputStream> locations) {
+        List<GradStudentTranscripts> studentTranscripts = webClient.get().uri(String.format(educDistributionApiConstants.getTranscriptUsingStudentID(), studentId)).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).retrieve().bodyToMono(new ParameterizedTypeReference<List<GradStudentTranscripts>>() {}).block();
+        if(studentTranscripts != null && !studentTranscripts.isEmpty() ) {
+            GradStudentTranscripts studentTranscript = studentTranscripts.get(0);
+            byte[] transcriptPdf = Base64.decodeBase64(studentTranscript.getTranscript());
+            locations.add(new ByteArrayInputStream(transcriptPdf));
+            return 1;
+        } else {
+            return 0;
         }
     }
 
