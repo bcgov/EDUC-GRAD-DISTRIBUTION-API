@@ -133,7 +133,7 @@ public class PSIReportProcess extends BaseProcess {
         String csv;
         Path path;
         File newFile = null;
-        List<String[]> studentTranscriptdata = new ArrayList<>();
+        List<String[]> studentTranscriptdata = null;
         List<String> updatedStudentTranscriptdataList = new ArrayList<>();
         CsvMapper csvMapper = new CsvMapper();
 
@@ -149,51 +149,54 @@ public class PSIReportProcess extends BaseProcess {
                 throw new IOException(EducDistributionApiConstants.EXCEPTION_MSG_FILE_NOT_CREATED_AT_PATH);
             }
             for (PsiCredentialDistribution scd : scdList) {
+                if (scd.getPen() != null) {
 
-                ReportData transcriptCsv = psiService.getReportData(scd.getPen());
+                    studentTranscriptdata = new ArrayList<>();
+                    ReportData transcriptCsv = psiService.getReportData(scd.getPen());
 
-                if (transcriptCsv != null) {
-                    Student studentDetails = transcriptCsv.getStudent();
-                    School schoolDetails = transcriptCsv.getSchool();
-                    List<TranscriptResult> courseDetails = (transcriptCsv.getTranscript() != null ? transcriptCsv.getTranscript().getResults() : null);
+                    if (transcriptCsv != null) {
+                        Student studentDetails = transcriptCsv.getStudent();
+                        School schoolDetails = transcriptCsv.getSchool();
+                        List<TranscriptResult> courseDetails = (transcriptCsv.getTranscript() != null ? transcriptCsv.getTranscript().getResults() : null);
 
-                    //Writes the A's row's data on CSV
-                    writesCsvFileRowA(studentTranscriptdata, scd.getPen(), studentDetails);
+                        //Writes the A's row's data on CSV
+                        writesCsvFileRowA(studentTranscriptdata, scd.getPen(), studentDetails);
 
-                    //Writes the B's row's data on CSV
-                    if (schoolDetails != null) {
-                        schoolInfo = new String[]{
-                                scd.getPen(),
-                                EducDistributionApiConstants.LETTER_B,
-                                "", //Address blank
-                                "", //Address blank
-                                "", //City blank
-                                "", //Prov code blank
-                                "", //country code blank
-                                "" //postal blank
-                        };
+                        //Writes the B's row's data on CSV
+                        if (schoolDetails != null) {
+                            schoolInfo = new String[]{
+                                    scd.getPen(),
+                                    EducDistributionApiConstants.LETTER_B,
+                                    "", //Address blank
+                                    "", //Address blank
+                                    "", //City blank
+                                    "", //Prov code blank
+                                    "", //country code blank
+                                    "" //postal blank
+                            };
 
-                        setColumnsWidths(schoolInfo,
-                                IntStream.of(10, 1, 40, 40, 30, 2, 2, 7).toArray(),
-                                studentTranscriptdata);
+                            setColumnsWidths(schoolInfo,
+                                    IntStream.of(10, 1, 40, 40, 30, 2, 2, 7).toArray(),
+                                    studentTranscriptdata);
+                        }
+                        //Writes the C's data on CSV
+                        writesCsvFileRowC(studentTranscriptdata, scd.getPen(), courseDetails);
+
+                        //Writes D's rows data on CSV
+                        writesCsvFileRowD(studentTranscriptdata, scd.getPen(), courseDetails);
+                        currentTranscript++;
+                        logger.debug("*** Added csv {}/{} Current student {}", currentTranscript, scdList.size(), scd.getPen());
+                    } else {
+                        failedToAdd++;
+                        logger.debug("*** Failed to Add {} Current student {}", failedToAdd, scd.getPen());
                     }
-                    //Writes the C's data on CSV
-                    writesCsvFileRowC(studentTranscriptdata, scd.getPen(), courseDetails);
 
-                    //Writes D's rows data on CSV
-                    writesCsvFileRowD(studentTranscriptdata, scd.getPen(), courseDetails);
-                    currentTranscript++;
-                    logger.debug("*** Added csv {}/{} Current student {}", currentTranscript, scdList.size(), scd.getPen());
-                } else {
-                    failedToAdd++;
-                    logger.debug("*** Failed to Add {} Current student {}", failedToAdd, scd.getPen());
                 }
-
-            }
-            // Converts list of string array to list of string which removes double quotes surrounded by each string and commas in between.
-            for (String[] studentData : studentTranscriptdata) {
-                String stringArrayAsString = String.join("", studentData);
-                updatedStudentTranscriptdataList.add(stringArrayAsString);
+                // Converts list of string array to list of string which removes double quotes surrounded by each string and commas in between.
+                for (String[] studentData : studentTranscriptdata) {
+                    String stringArrayAsString = String.join("", studentData);
+                    updatedStudentTranscriptdataList.add(stringArrayAsString);
+                }
             }
 
             csv = csvMapper.writeValueAsString(updatedStudentTranscriptdataList);
@@ -369,6 +372,7 @@ public class PSIReportProcess extends BaseProcess {
             throw new GradBusinessRuleException(TRANSMISSION_MODE_ERROR);
         }
         try {
+            if (EducDistributionApiConstants.TRANSMISSION_MODE_PAPER.equalsIgnoreCase(transmissionMode)) {
             StringBuilder fileLocBuilder = buildFileLocationPath(batchId, mincode, schoolCategory, isDistrict, districtCode, transmissionMode);
             Path path = Paths.get(fileLocBuilder.toString());
             Files.createDirectories(path);
@@ -379,9 +383,9 @@ public class PSIReportProcess extends BaseProcess {
                 fileNameBuilder.append("/EDGRAD.R.").append("324W.");
             }
             fileNameBuilder.append(EducDistributionApiUtils.getFileNameSchoolReports(mincode)).append(".pdf");
-            if (EducDistributionApiConstants.TRANSMISSION_MODE_PAPER.equalsIgnoreCase(transmissionMode)) {
-                try (OutputStream out = new FileOutputStream(fileNameBuilder.toString())) {
-                    out.write(gradReportPdf);
+
+            try (OutputStream out = new FileOutputStream(fileNameBuilder.toString())) {
+                out.write(gradReportPdf);
                 }
             }
 
