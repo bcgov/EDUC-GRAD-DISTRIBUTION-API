@@ -92,7 +92,7 @@ public abstract class BaseProcess implements DistributionProcess {
             EducDistributionApiUtils.zipFile(fileToZip, fileToZip.getName(), zipOut);
             zipOut.finish();
         } catch (IOException e) {
-            logger.debug(EXCEPTION, e.getLocalizedMessage());
+            logger.error(EXCEPTION, e.getLocalizedMessage());
         }
     }
 
@@ -109,7 +109,7 @@ public abstract class BaseProcess implements DistributionProcess {
             fos.write(contentInBytes);
             fos.flush();
         } catch (IOException e) {
-            logger.debug(EXCEPTION, e.getLocalizedMessage());
+            logger.error(EXCEPTION, e.getLocalizedMessage());
         }
         logger.debug("Created Control file ");
     }
@@ -278,7 +278,7 @@ public abstract class BaseProcess implements DistributionProcess {
                     logger.debug("*** Failed to Add PDFs Current Report Type {} for school {} category {}", report.getReportTypeCode(), report.getSchoolOfRecord(), report.getSchoolCategory());
                 }
             } catch (Exception e) {
-                logger.debug(EXCEPTION, e.getLocalizedMessage());
+                logger.error(EXCEPTION, e.getLocalizedMessage());
             }
         }
         return numberOfPdfs;
@@ -304,7 +304,7 @@ public abstract class BaseProcess implements DistributionProcess {
                 out.write(gradReportPdf);
             }
         } catch (Exception e) {
-            logger.debug(EXCEPTION, e.getLocalizedMessage());
+            logger.error(EXCEPTION, e.getLocalizedMessage());
         }
     }
 
