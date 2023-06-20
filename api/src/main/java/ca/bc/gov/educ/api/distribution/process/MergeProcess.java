@@ -11,7 +11,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.internal.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -179,16 +178,13 @@ public class MergeProcess extends BaseProcess {
 				if(objStd != null)
 					studListNonGrad.add(objStd);
 			}
-			List<GradStudentTranscripts> studentTranscripts = webClient.get().uri(String.format(educDistributionApiConstants.getTranscriptUsingStudentID(), scd.getStudentID())).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).retrieve().bodyToMono(new ParameterizedTypeReference<List<GradStudentTranscripts>>() {}).block();
-			if(studentTranscripts != null && !studentTranscripts.isEmpty() ) {
-				GradStudentTranscripts studentTranscript = studentTranscripts.get(0);
-				byte[] transcriptPdf = Base64.decodeBase64(studentTranscript.getTranscript());
-				locations.add(new ByteArrayInputStream(transcriptPdf));
-				currentTranscript++;
-				logger.debug("*** Added PDFs {}/{} Current student {}", currentTranscript, scdList.size(), scd.getStudentID());
-			} else {
+			int result = addStudentTranscriptToLocations(scd.getStudentID().toString(), locations);
+			if(result == 0) {
 				failedToAdd++;
 				logger.debug("*** Failed to Add PDFs {} Current student {}", failedToAdd, scd.getStudentID());
+			} else {
+				currentTranscript++;
+				logger.debug("*** Added PDFs {}/{} Current student {}", currentTranscript, scdList.size(), scd.getStudentID());
 			}
 		}
 	}

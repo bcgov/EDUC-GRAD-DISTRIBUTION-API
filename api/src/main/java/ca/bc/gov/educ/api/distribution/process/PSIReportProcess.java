@@ -12,7 +12,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.internal.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
@@ -113,14 +112,13 @@ public class PSIReportProcess extends BaseProcess {
         int failedToAdd = 0;
 
         for (PsiCredentialDistribution scd : scdList) {
-            InputStreamResource transcriptPdf = webClient.get().uri(String.format(educDistributionApiConstants.getTranscriptUsingStudentID(), scd.getStudentID())).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).retrieve().bodyToMono(InputStreamResource.class).block();
-            if (transcriptPdf != null) {
-                locations.add(transcriptPdf.getInputStream());
-                currentTranscript++;
-                logger.debug("*** Added PDFs {}/{} Current student {}", currentTranscript, scdList.size(), scd.getStudentID());
-            } else {
+            int result = addStudentTranscriptToLocations(scd.getStudentID().toString(), locations);
+            if(result == 0) {
                 failedToAdd++;
                 logger.debug("*** Failed to Add PDFs {} Current student {}", failedToAdd, scd.getStudentID());
+            } else {
+                currentTranscript++;
+                logger.debug("*** Added PDFs {}/{} Current student {}", currentTranscript, scdList.size(), scd.getStudentID());
             }
         }
     }
