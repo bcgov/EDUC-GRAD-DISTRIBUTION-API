@@ -384,6 +384,7 @@ public class PSIReportProcess extends BaseProcess {
 
             try (OutputStream out = new FileOutputStream(fileNameBuilder.toString())) {
                 out.write(gradReportPdf);
+                out.flush();
                 }
             }
 
