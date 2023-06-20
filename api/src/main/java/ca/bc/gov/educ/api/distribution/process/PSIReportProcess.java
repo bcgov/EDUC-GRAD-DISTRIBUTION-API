@@ -208,6 +208,7 @@ public class PSIReportProcess extends BaseProcess {
     private static void writesFormattedAllRowsDataOnCSV(String csv, File newFile) {
         try (FileWriter fWriter = new FileWriter(newFile)) {
             fWriter.write(csv);
+            fWriter.flush();
         } catch (IOException e) {
             logger.error(EXCEPTION, e.getLocalizedMessage());
         }

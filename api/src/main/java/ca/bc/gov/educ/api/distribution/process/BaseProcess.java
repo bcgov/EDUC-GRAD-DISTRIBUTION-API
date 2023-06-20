@@ -90,6 +90,7 @@ public abstract class BaseProcess implements DistributionProcess {
             ZipOutputStream zipOut = new ZipOutputStream(fos);
             File fileToZip = new File(sourceFileBuilder.toString());
             EducDistributionApiUtils.zipFile(fileToZip, fileToZip.getName(), zipOut);
+            zipOut.finish();
         } catch (IOException e) {
             logger.debug(EXCEPTION, e.getLocalizedMessage());
         }
