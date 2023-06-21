@@ -12,10 +12,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.internal.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Component;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -25,6 +27,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants.TMP_DIR;
 
 
 @Data
@@ -41,6 +45,7 @@ public class PSIReportProcess extends BaseProcess {
         long sTime = System.currentTimeMillis();
         logger.debug("************* TIME START   ************ {}", sTime);
         DistributionResponse disRes = new DistributionResponse();
+        disRes.setTransmissionMode(processorData.getTransmissionMode());
         DistributionRequest distributionRequest = processorData.getDistributionRequest();
         Map<String, DistributionPrintRequest> mapDist = distributionRequest.getMapDist();
         Long batchId = processorData.getBatchId();
@@ -70,10 +75,10 @@ public class PSIReportProcess extends BaseProcess {
         int numberOfCreatedSchoolLabelReports = createSchoolLabelsReport(schoolsForLabels, ADDRESS_LABEL_PSI);
         logger.debug("***** Number of created school labels reports {} *****", numberOfCreatedSchoolLabelReports);
         logger.debug("***** Distribute school labels reports *****");
-        int numberOfProcessedSchoolLabelsReports = processDistrictSchoolDistribution(batchId, mapDist.keySet(), ADDRESS_LABEL_PSI, null, null);
+        int numberOfProcessedSchoolLabelsReports = processDistrictSchoolDistribution(batchId, new ArrayList<>(), ADDRESS_LABEL_PSI, null, null, processorData.getTransmissionMode());
         logger.debug("***** Number of distributed school labels reports {} *****", numberOfProcessedSchoolLabelsReports);
         numOfPdfs += numberOfProcessedSchoolLabelsReports;
-        postingProcess(batchId, processorData, numOfPdfs);
+        postingProcess(batchId, processorData, numOfPdfs, getZipFolderFromRootLocation(processorData));
         long eTime = System.currentTimeMillis();
         long difference = (eTime - sTime) / 1000;
         logger.debug("************* TIME Taken  ************ {} secs", difference);
@@ -137,7 +142,12 @@ public class PSIReportProcess extends BaseProcess {
         CsvMapper csvMapper = new CsvMapper();
 
         try {
-            StringBuilder filePathBuilder = createFolderStructureInTempDirectory(processorData, psiCode, "02");
+            String transmissionMode = processorData.getTransmissionMode();
+            if (StringUtils.isBlank(transmissionMode)) {
+                throw new GradBusinessRuleException(TRANSMISSION_MODE_ERROR);
+            }
+            String rootDirectory = EducDistributionApiConstants.TMP_DIR + EducDistributionApiConstants.FILES_FOLDER_STRUCTURE + transmissionMode.toUpperCase();
+            StringBuilder filePathBuilder = createFolderStructureInTempDirectory(rootDirectory, processorData, psiCode, "02");
             filePathBuilder.append(EducDistributionApiConstants.FTP_FILENAME_PREFIX).append(psiCode).append(EducDistributionApiConstants.FTP_FILENAME_SUFFIX).append(".").append(EducDistributionApiUtils.getFileNameSchoolReports(psiCode)).append(".DAT");
             if (filePathBuilder != null) {
                 path = Paths.get(filePathBuilder.toString());
@@ -359,114 +369,14 @@ public class PSIReportProcess extends BaseProcess {
 
     }
 
-    //Grad2-1931 : Uploads school reports for only PSIRUNs- mchintha
-    @Override
-    protected void uploadSchoolReportDocuments(Long batchId, String mincode, String schoolCategory, ProcessorData processorData, byte[] gradReportPdf) {
-        boolean isDistrict = StringUtils.isNotBlank(mincode) && StringUtils.length(mincode) == 3;
-        String districtCode = StringUtils.substring(mincode, 0, 3);
-        String transmissionMode = processorData.getTransmissionMode();
-        if (StringUtils.isBlank(transmissionMode)) {
-            throw new GradBusinessRuleException(TRANSMISSION_MODE_ERROR);
-        }
-        try {
-            if (EducDistributionApiConstants.TRANSMISSION_MODE_PAPER.equalsIgnoreCase(transmissionMode)) {
-                StringBuilder fileLocBuilder = buildFileLocationPath(batchId, mincode, schoolCategory, isDistrict, districtCode, transmissionMode);
-                Path path = Paths.get(fileLocBuilder.toString());
-                Files.createDirectories(path);
-                StringBuilder fileNameBuilder = buildFileLocationPath(batchId, mincode, schoolCategory, isDistrict, districtCode, transmissionMode);
-                if (SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode)) {
-                    fileNameBuilder.append("/EDGRAD.L.").append("3L14.");
-                } else {
-                    fileNameBuilder.append("/EDGRAD.R.").append("324W.");
-                }
-                fileNameBuilder.append(EducDistributionApiUtils.getFileNameSchoolReports(mincode)).append(".pdf");
-
-                try (OutputStream out = new FileOutputStream(fileNameBuilder.toString())) {
-                    out.write(gradReportPdf);
-                    out.flush();
-                }
-            }
-
-        } catch (Exception e) {
-            logger.error(EXCEPTION, e.getLocalizedMessage());
-        }
-    }
-
-    private StringBuilder buildFileLocationPath(Long batchId, String mincode, String schoolCategory, boolean isDistrict, String districtCode, String transmissionMode) {
-        StringBuilder fileLocBuilder = new StringBuilder();
-        if (SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode)) {
-            fileLocBuilder.append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.FILES_FOLDER_STRUCTURE).append(transmissionMode.toUpperCase()).append(EducDistributionApiConstants.DEL).append(batchId);
-        } else if (isDistrict) {
-            fileLocBuilder.append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.FILES_FOLDER_STRUCTURE).append(transmissionMode.toUpperCase()).append(EducDistributionApiConstants.DEL).append(batchId).append(EducDistributionApiConstants.DEL).append(districtCode);
-        } else if ("02".equalsIgnoreCase(schoolCategory)) {
-            fileLocBuilder.append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.FILES_FOLDER_STRUCTURE).append(transmissionMode.toUpperCase()).append(EducDistributionApiConstants.DEL).append(batchId).append(EducDistributionApiConstants.DEL).append(mincode);
-        } else {
-            fileLocBuilder.append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.FILES_FOLDER_STRUCTURE).append(transmissionMode.toUpperCase()).append(EducDistributionApiConstants.DEL).append(batchId).append(EducDistributionApiConstants.DEL).append(districtCode).append(EducDistributionApiConstants.DEL).append(mincode);
-        }
-        return fileLocBuilder;
-    }
-
-    @Override
-    //Grad2-1931 : Creates folder structure in temp directory only for PSIRUNs - mchintha
-    public StringBuilder createFolderStructureInTempDirectory(ProcessorData processorData, String minCode, String schoolCategoryCode) {
-        String districtCode = StringUtils.substring(minCode, 0, 3);
-        String activityCode = processorData.getActivityCode();
-        String transmissionMode = processorData.getTransmissionMode();
-        StringBuilder directoryPathBuilder = new StringBuilder();
-        StringBuilder filePathBuilder = new StringBuilder();
-        Path path;
-        try {
-
-            Boolean conditionResult = (MONTHLYDIST.equalsIgnoreCase(activityCode) || "02".equalsIgnoreCase(schoolCategoryCode));
-            if (Boolean.TRUE.equals(conditionResult)) {
-                directoryPathBuilder.append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.FILES_FOLDER_STRUCTURE).append(transmissionMode.toUpperCase()).append(EducDistributionApiConstants.DEL).append(processorData.getBatchId()).append(EducDistributionApiConstants.DEL).append(minCode).append(EducDistributionApiConstants.DEL);
-            } else {
-                directoryPathBuilder.append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.FILES_FOLDER_STRUCTURE).append(transmissionMode.toUpperCase()).append(EducDistributionApiConstants.DEL).append(processorData.getBatchId()).append(EducDistributionApiConstants.DEL).append(districtCode).append(EducDistributionApiConstants.DEL).append(minCode);
-            }
-            path = Paths.get(directoryPathBuilder.toString());
-            Files.createDirectories(path);
-
-            if (Boolean.TRUE.equals(conditionResult)) {
-                filePathBuilder.append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.FILES_FOLDER_STRUCTURE).append(transmissionMode.toUpperCase()).append(EducDistributionApiConstants.DEL).append(processorData.getBatchId()).append(EducDistributionApiConstants.DEL).append(minCode);
-            } else {
-                filePathBuilder.append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.FILES_FOLDER_STRUCTURE).append(transmissionMode.toUpperCase()).append(EducDistributionApiConstants.DEL).append(processorData.getBatchId()).append(EducDistributionApiConstants.DEL).append(districtCode).append(EducDistributionApiConstants.DEL).append(minCode);
-            }
-
-        } catch (Exception e) {
-            logger.error(EXCEPTION, e.getLocalizedMessage());
-        }
-
-        return filePathBuilder;
-    }
-
-    @Override
-    //Grad2-1931 Changed the folder structure of created files to be placed - mchintha
-    protected void createZipFile(Long batchId, ProcessorData processorData) {
-        logger.debug("Create zip file for {}", processorData.getActivityCode());
-        String transmissionMode = processorData.getTransmissionMode();
-        if (StringUtils.isBlank(transmissionMode)) {
-            throw new GradBusinessRuleException(TRANSMISSION_MODE_ERROR);
-        }
-        StringBuilder sourceFileBuilder = new StringBuilder().append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.FILES_FOLDER_STRUCTURE).append(transmissionMode.toUpperCase()).append(EducDistributionApiConstants.DEL).append(batchId);
-        File file = new File(EducDistributionApiConstants.TMP_DIR + EducDistributionApiConstants.FILES_FOLDER_STRUCTURE + transmissionMode.toUpperCase() + "/EDGRAD.BATCH." + batchId + ".zip");
-        writeZipFile(sourceFileBuilder.toString(), file);
-    }
-
     //Grad2-2052 - setting SFTP root folder location for PSIRUN paper where it has to pick zip folders from, to send them to BC mail - mchintha
     @Override
-    protected String getZipFolderFromRootLocation() {
-        return EducDistributionApiConstants.TMP_DIR + EducDistributionApiConstants.FILES_FOLDER_STRUCTURE + EducDistributionApiConstants.TRANSMISSION_MODE_PAPER;
-    }
-
-    @Override
-    //Grad2-1931 Changed the folder structure of created files to be placed - mchintha
-    protected void createControlFile(Long batchId, ProcessorData processorData, int numberOfPdfs) {
-        String transmissionMode = processorData.getTransmissionMode();
+    protected String getZipFolderFromRootLocation(ProcessorData processorData) {
+        String transmissionMode = StringUtils.upperCase(processorData.getTransmissionMode());
         if (StringUtils.isBlank(transmissionMode)) {
             throw new GradBusinessRuleException(TRANSMISSION_MODE_ERROR);
         }
-        File file = new File(EducDistributionApiConstants.TMP_DIR + EducDistributionApiConstants.FILES_FOLDER_STRUCTURE + transmissionMode.toUpperCase() + "/EDGRAD.BATCH." + batchId + ".txt");
-        writeControlFile(numberOfPdfs, file);
-
+        logger.debug("getZipFolderFromRootLocation {} transmission mode {}", TMP_DIR, transmissionMode);
+        return EducDistributionApiConstants.TMP_DIR + EducDistributionApiConstants.FILES_FOLDER_STRUCTURE + transmissionMode;
     }
 }

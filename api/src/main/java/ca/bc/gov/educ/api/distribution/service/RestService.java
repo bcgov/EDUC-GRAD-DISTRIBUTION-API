@@ -92,7 +92,7 @@ public class RestService {
         }
     }
 
-    private final String parseUrlParameters(String url, String... params) {
+    protected String parseUrlParameters(String url, String... params) {
         return String.format(url, params);
     }
 

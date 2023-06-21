@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.distribution.util;
 
 import com.jcraft.jsch.*;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -8,6 +9,8 @@ import org.springframework.stereotype.Component;
 
 import java.io.FileWriter;
 import java.io.IOException;
+
+import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants.TMP_DIR;
 
 @Component
 public class SFTPUtils {
@@ -45,47 +48,21 @@ public class SFTPUtils {
     private static final String RSA_PRV = "/.ssh/id_rsa";
 
     private static Logger logger = LoggerFactory.getLogger(SFTPUtils.class);
-    //Grad2-1931 - setting SFTP root folder location where it has to pick zip folders from, to send to BC mail - mchintha
+
+    public boolean sftpUploadBCMail(Long batchId) {
+        return sftpUploadBCMail(batchId, TMP_DIR);
+    }
+
     public boolean sftpUploadBCMail(Long batchId, String rootFolder) {
-        String localFile = rootFolder + "/EDGRAD.BATCH."+batchId+".zip";
-        String remoteFile = BC_MAIL_LOCATION +"EDGRAD.BATCH."+batchId+".zip";
-        String localControlFile = rootFolder + "/EDGRAD.BATCH."+batchId+".txt";
-        String remoteControlFile = BC_MAIL_LOCATION+"EDGRAD.BATCH."+batchId+".txt";
-        Session jschSession = null;
-
-        setupBCMailSFTP();
-
-        try {
-            JSch jsch = new JSch();
-            jsch.setKnownHosts(KNOWN_HOST);
-            jschSession = jsch.getSession(BCMAIL_SFTP_USERNAME, BCMAIL_REMOTE_HOST, REMOTE_PORT);
-            jsch.addIdentity(RSA_PRV);
-            jschSession.connect(SESSION_TIMEOUT);
-
-            Channel sftp = jschSession.openChannel("sftp");
-            sftp.connect(CHANNEL_TIMEOUT);
-            ChannelSftp channelSftp = (ChannelSftp) sftp;
-
-            // transfer file from local to remote server
-            channelSftp.put(localFile, remoteFile);
-            channelSftp.put(localControlFile, remoteControlFile);
-            channelSftp.exit();
-            return true;
-        } catch (JSchException | SftpException e) {
-            logger.debug("Error {} ",e.getLocalizedMessage());
-            return false;
-        } finally {
-            if (jschSession != null) {
-                jschSession.disconnect();
-            }
-        }
+        return sftpUploadBCMail(batchId, rootFolder, null);
     }
     //Grad2-2052 set common root folder for all the dis runs to pick the folders and send to BC mail. - mchintha
     public boolean sftpUploadBCMail(Long batchId, String rootFolder, String mincode) {
-        String localFile = rootFolder + "/EDGRAD.BATCH."+batchId+"."+mincode+".zip";
-        String remoteFile = BC_MAIL_LOCATION+"EDGRAD.BATCH."+batchId+"."+mincode+".zip";
-        String localControlFile = rootFolder + "/EDGRAD.BATCH."+batchId+"."+mincode+".txt";
-        String remoteControlFile = BC_MAIL_LOCATION+"EDGRAD.BATCH."+batchId+"."+mincode+".txt";
+        String mincodePath = StringUtils.isBlank(mincode) ? "" : mincode + ".";
+        String localFile = rootFolder + "/EDGRAD.BATCH."+batchId+mincodePath+".zip";
+        String remoteFile = BC_MAIL_LOCATION+"EDGRAD.BATCH."+batchId+mincodePath+".zip";
+        String localControlFile = rootFolder + "/EDGRAD.BATCH."+batchId+mincodePath+".txt";
+        String remoteControlFile = BC_MAIL_LOCATION+"EDGRAD.BATCH."+batchId+mincodePath+".txt";
         Session jschSession = null;
 
         setupBCMailSFTP();
@@ -107,7 +84,7 @@ public class SFTPUtils {
             channelSftp.exit();
             return true;
         } catch (JSchException | SftpException e) {
-            logger.debug("Error {} ",e.getLocalizedMessage());
+            logger.error("Error {} ",e.getLocalizedMessage());
             return false;
         } finally {
             if (jschSession != null) {
@@ -124,7 +101,7 @@ public class SFTPUtils {
     }
 
     public boolean sftpUploadTSW(Long batchId,String mincode,String fileName) {
-        String localFile = EducDistributionApiConstants.TMP_DIR + EducDistributionApiConstants.DEL + batchId + EducDistributionApiConstants.DEL + mincode + EducDistributionApiConstants.DEL + fileName+".pdf";
+        String localFile = TMP_DIR + EducDistributionApiConstants.DEL + batchId + EducDistributionApiConstants.DEL + mincode + EducDistributionApiConstants.DEL + fileName+".pdf";
         String remoteFile = "/$1$dga5037/EDUC/XTD";
         String location1 = remoteFile+"/WEB/"+fileName+".pdf";
         String location2 = remoteFile+"/TSWSFTP/"+fileName+".pdf";
@@ -151,7 +128,7 @@ public class SFTPUtils {
             channelSftp.exit();
             return true;
         } catch (JSchException | SftpException e) {
-            e.printStackTrace();
+            logger.error("Error {} ",e.getLocalizedMessage());
             return false;
         } finally {
             if (jschSession != null) {

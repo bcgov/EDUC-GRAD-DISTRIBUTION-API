@@ -20,6 +20,7 @@ public class DistributionResponse {
     private int totalCyclesCount;
     private int processedCyclesCount;
     private String activityCode;
+    private String transmissionMode;
     private List<School> schools = new ArrayList<>();
     private List<School> districts = new ArrayList<>();
     private StudentSearchRequest studentSearchRequest;

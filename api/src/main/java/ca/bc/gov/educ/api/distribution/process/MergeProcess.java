@@ -2,7 +2,6 @@ package ca.bc.gov.educ.api.distribution.process;
 
 import ca.bc.gov.educ.api.distribution.model.dto.*;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils;
-import ca.bc.gov.educ.api.distribution.util.Generated;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -11,10 +10,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.internal.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.BodyInserters;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -90,7 +87,7 @@ public class MergeProcess extends BaseProcess {
 			numberOfCreatedSchoolReports += createSchoolLabelsReport(schoolsForLabels, ADDRESS_LABEL_SCHL);
 			logger.debug("***** Number of created Monthly school reports {} *****", numberOfCreatedSchoolReports);
 			logger.debug("***** Distribute Monthly school reports *****");
-			numberOfProcessedSchoolReports += processDistrictSchoolDistribution(batchId, mapDist.keySet(), ADDRESS_LABEL_SCHL, null, null);
+			numberOfProcessedSchoolReports += processDistrictSchoolDistribution(batchId, mapDist.keySet(), ADDRESS_LABEL_SCHL, null, null, null);
 			logger.debug("***** Number of distributed Monthly school reports {} *****", numberOfProcessedSchoolReports);
 		}
 		if (SUPPDIST.equalsIgnoreCase(processorData.getActivityCode())) {
@@ -99,7 +96,7 @@ public class MergeProcess extends BaseProcess {
 			numberOfCreatedSchoolReports += createDistrictSchoolSuppReport( null, null, DISTREP_SC);
 			logger.debug("***** Number of created Supplemental school reports {} *****", numberOfCreatedSchoolReports);
 			logger.debug("***** Distribute Supplemental school reports *****");
-			numberOfProcessedSchoolReports += processDistrictSchoolDistribution(batchId, mapDist.keySet(), ADDRESS_LABEL_SCHL, null, DISTREP_SC);
+			numberOfProcessedSchoolReports += processDistrictSchoolDistribution(batchId, mapDist.keySet(), ADDRESS_LABEL_SCHL, null, DISTREP_SC, null);
 			logger.debug("***** Number of distributed Supplemental school reports {} *****", numberOfProcessedSchoolReports);
 		}
 		numberOfPdfs += numberOfProcessedSchoolReports;

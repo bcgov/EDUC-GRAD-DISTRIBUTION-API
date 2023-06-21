@@ -76,7 +76,7 @@ public class YearEndMergeProcess extends MergeProcess {
                     logger.debug("***** Distribute Student NonGrad School Reports *****");
                     List<String> mincodes = new ArrayList<>();
                     mincodes.add(mincode);
-                    numberOfProcessedSchoolReports += processDistrictSchoolDistribution(processorData.getBatchId(), mincodes, null, null, NONGRADDISTREP_SC);
+                    numberOfProcessedSchoolReports += processDistrictSchoolDistribution(processorData.getBatchId(), mincodes, null, null, NONGRADDISTREP_SC, null);
                     logger.debug("***** Number of distributed Student NonGrad School Reports {} *****", numberOfProcessedSchoolReports);
                 }
                 logger.debug("PDFs Merged {}", commonSchool.getSchoolName());
@@ -93,7 +93,7 @@ public class YearEndMergeProcess extends MergeProcess {
             logger.debug("***** Number of created district labels reports {} *****", numberOfCreatedSchoolLabelReports);
             logger.debug("***** Distribute District Label reports *****");
             List<String> mincodes = districtsForLabels.stream().map(School::getMincode).toList();
-            numberOfProcessedSchoolReports += processDistrictSchoolDistribution(batchId, mincodes, ADDRESS_LABEL_YE, null, null);
+            numberOfProcessedSchoolReports += processDistrictSchoolDistribution(batchId, mincodes, ADDRESS_LABEL_YE, null, null, null);
             logger.debug("***** Number of distributed District Label reports {} *****", numberOfProcessedSchoolReports);
         }
 
@@ -102,7 +102,7 @@ public class YearEndMergeProcess extends MergeProcess {
             numberOfCreatedSchoolLabelReports += createSchoolLabelsReport(schoolsForLabels, ADDRESS_LABEL_SCHL);
             logger.debug("***** Number of created district labels reports {} *****", numberOfCreatedSchoolLabelReports);
             logger.debug("***** Distribute School Label reports *****");
-            numberOfProcessedSchoolReports += processSchoolLabelsDistribution(batchId, ADDRESS_LABEL_SCHL);
+            numberOfProcessedSchoolReports += processSchoolLabelsDistribution(batchId, ADDRESS_LABEL_SCHL, null);
             logger.debug("***** Number of distributed School Label reports {} *****", numberOfProcessedSchoolReports);
         }
 

@@ -34,6 +34,7 @@ public class EducDistributionApiUtils {
 	public static final String DISTREP_YE_SC = "DISTREP_YE_SC";
 	public static final String ADDRESS_LABEL_SCHL = "ADDRESS_LABEL_SCHL";
 	public static final String ADDRESS_LABEL_YE = "ADDRESS_LABEL_YE";
+	public static final String ADDRESS_LABEL_PSI = "ADDRESS_LABEL_PSI";
 	public static final String DISTREP_SD = "DISTREP_SD";
 	public static final String DISTREP_SC = "DISTREP_SC";
 	public static final String NONGRADDISTREP_SC = "NONGRADDISTREP_SC";
