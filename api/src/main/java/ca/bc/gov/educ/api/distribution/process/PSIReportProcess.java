@@ -77,7 +77,7 @@ public class PSIReportProcess extends BaseProcess {
         int numberOfProcessedSchoolLabelsReports = processDistrictSchoolDistribution(batchId, new ArrayList<>(), ADDRESS_LABEL_PSI, null, null, processorData.getTransmissionMode());
         logger.debug("***** Number of distributed school labels reports {} *****", numberOfProcessedSchoolLabelsReports);
         numberOfPdfs += numberOfProcessedSchoolLabelsReports;
-        postingProcess(batchId, processorData, numberOfPdfs, getZipFolderFromRootLocation(processorData));
+        postingProcess(batchId, processorData, numberOfPdfs, getRootPathForFilesStorage(processorData));
         long eTime = System.currentTimeMillis();
         long difference = (eTime - sTime) / 1000;
         logger.debug("************* TIME Taken  ************ {} secs", difference);
@@ -378,7 +378,7 @@ public class PSIReportProcess extends BaseProcess {
 
     //Grad2-2052 - setting SFTP root folder location for PSIRUN paper where it has to pick zip folders from, to send them to BC mail - mchintha
     @Override
-    protected String getZipFolderFromRootLocation(ProcessorData processorData) {
+    protected String getRootPathForFilesStorage(ProcessorData processorData) {
         String transmissionMode = StringUtils.upperCase(processorData.getTransmissionMode());
         if (StringUtils.isBlank(transmissionMode)) {
             throw new GradBusinessRuleException(TRANSMISSION_MODE_ERROR);

@@ -141,7 +141,7 @@ public abstract class BaseProcess implements DistributionProcess {
         return postingDistributionService.createSchoolLabelsReport(schools, schooLabelReportType);
     }
     //Grad2-2052 - setting SFTP root folder location where it has to pick zip folders from, to send them to BC mail - mchintha
-    protected String getZipFolderFromRootLocation(ProcessorData data) {
+    protected String getRootPathForFilesStorage(ProcessorData data) {
         logger.debug("getZipFolderFromRootLocation {} transmission mode {}", TMP_DIR, StringUtils.trimToEmpty(data.getTransmissionMode()));
         return TMP_DIR;
     }
