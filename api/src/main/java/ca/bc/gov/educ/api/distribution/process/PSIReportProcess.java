@@ -44,12 +44,13 @@ public class PSIReportProcess extends BaseProcess {
     public ProcessorData fire(ProcessorData processorData) {
         long sTime = System.currentTimeMillis();
         logger.debug("************* TIME START   ************ {}", sTime);
-        DistributionResponse disRes = new DistributionResponse();
-        disRes.setTransmissionMode(processorData.getTransmissionMode());
+        DistributionResponse response = new DistributionResponse();
+        response.setTransmissionMode(processorData.getTransmissionMode());
         DistributionRequest distributionRequest = processorData.getDistributionRequest();
         Map<String, DistributionPrintRequest> mapDist = distributionRequest.getMapDist();
+        StudentSearchRequest searchRequest = distributionRequest.getStudentSearchRequest();
         Long batchId = processorData.getBatchId();
-        int numOfPdfs = 0;
+        int numberOfPdfs = 0;
         int cnter = 0;
         List<School> schoolsForLabels = new ArrayList<>();
         for (String psiCode : mapDist.keySet()) {
@@ -60,8 +61,8 @@ public class PSIReportProcess extends BaseProcess {
             if (psiDetails != null) {
                 logger.debug("*** PSI Details Acquired {}", psiDetails.getPsiName());
                 ReportRequest packSlipReq = reportService.preparePackingSlipDataPSI(psiDetails, processorData.getBatchId());
-                Pair<Integer, Integer> pV = processTranscriptPrintRequest(obj, currentSlipCount, packSlipReq, processorData, psiCode, numOfPdfs);
-                numOfPdfs = pV.getRight();
+                Pair<Integer, Integer> pV = processTranscriptPrintRequest(obj, currentSlipCount, packSlipReq, processorData, psiCode, numberOfPdfs);
+                numberOfPdfs = pV.getRight();
                 logger.debug("PDFs Merged {}", psiDetails.getPsiName());
                 processSchoolsForLabels(schoolsForLabels, psiDetails);
                 if (cnter % 50 == 0) {
@@ -77,13 +78,21 @@ public class PSIReportProcess extends BaseProcess {
         logger.debug("***** Distribute school labels reports *****");
         int numberOfProcessedSchoolLabelsReports = processDistrictSchoolDistribution(batchId, new ArrayList<>(), ADDRESS_LABEL_PSI, null, null, processorData.getTransmissionMode());
         logger.debug("***** Number of distributed school labels reports {} *****", numberOfProcessedSchoolLabelsReports);
-        numOfPdfs += numberOfProcessedSchoolLabelsReports;
-        postingProcess(batchId, processorData, numOfPdfs, getZipFolderFromRootLocation(processorData));
+        numberOfPdfs += numberOfProcessedSchoolLabelsReports;
+        postingProcess(batchId, processorData, numberOfPdfs, getZipFolderFromRootLocation(processorData));
         long eTime = System.currentTimeMillis();
         long difference = (eTime - sTime) / 1000;
         logger.debug("************* TIME Taken  ************ {} secs", difference);
-        disRes.setMergeProcessResponse("Merge Successful and File Uploaded");
-        processorData.setDistributionResponse(disRes);
+        response.setMergeProcessResponse("Merge Successful and File Uploaded");
+        response.setNumberOfPdfs(numberOfPdfs);
+        response.setProcessedCyclesCount(distributionRequest.getProcessedCyclesCount());
+        response.setBatchId(processorData.getBatchId());
+        response.setLocalDownload(processorData.getLocalDownload());
+        response.setTotalCyclesCount(distributionRequest.getTotalCyclesCount());
+        response.setActivityCode(processorData.getActivityCode());
+        response.getSchools().addAll(schoolsForLabels);
+        response.setStudentSearchRequest(searchRequest);
+        processorData.setDistributionResponse(response);
         return processorData;
     }
 
