@@ -112,13 +112,16 @@ public class PSIReportProcess extends BaseProcess {
         int failedToAdd = 0;
 
         for (PsiCredentialDistribution scd : scdList) {
-            int result = addStudentTranscriptToLocations(scd.getStudentID().toString(), locations);
-            if(result == 0) {
-                failedToAdd++;
-                logger.debug("*** Failed to Add PDFs {} Current student {}", failedToAdd, scd.getStudentID());
-            } else {
-                currentTranscript++;
-                logger.debug("*** Added PDFs {}/{} Current student {}", currentTranscript, scdList.size(), scd.getStudentID());
+            //Skipping preparing the student's transcripts whose student id is null -hotfix -mchintha
+            if(scd.getStudentID() != null) {
+                int result = addStudentTranscriptToLocations(scd.getStudentID().toString(), locations);
+                if (result == 0) {
+                    failedToAdd++;
+                    logger.debug("*** Failed to Add PDFs {} Current student {}", failedToAdd, scd.getStudentID());
+                } else {
+                    currentTranscript++;
+                    logger.debug("*** Added PDFs {}/{} Current student {}", currentTranscript, scdList.size(), scd.getStudentID());
+                }
             }
         }
     }
@@ -370,6 +373,7 @@ public class PSIReportProcess extends BaseProcess {
             throw new GradBusinessRuleException(TRANSMISSION_MODE_ERROR);
         }
         try {
+            //Skipping the creation of district label reports for FTP files - hotfix - mchintha
             if (EducDistributionApiConstants.TRANSMISSION_MODE_PAPER.equalsIgnoreCase(transmissionMode)) {
             StringBuilder fileLocBuilder = buildFileLocationPath(batchId, mincode, schoolCategory, isDistrict, districtCode, transmissionMode);
             Path path = Paths.get(fileLocBuilder.toString());
