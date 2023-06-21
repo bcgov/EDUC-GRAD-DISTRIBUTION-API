@@ -28,8 +28,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants.TMP_DIR;
-
 
 @Data
 @Component
@@ -89,7 +87,7 @@ public class PSIReportProcess extends BaseProcess {
         response.setBatchId(processorData.getBatchId());
         response.setLocalDownload(processorData.getLocalDownload());
         response.setTotalCyclesCount(distributionRequest.getTotalCyclesCount());
-        response.setActivityCode(processorData.getActivityCode());
+        response.setActivityCode(distributionRequest.getActivityCode());
         response.getSchools().addAll(schoolsForLabels);
         response.setStudentSearchRequest(searchRequest);
         processorData.setDistributionResponse(response);
@@ -385,7 +383,8 @@ public class PSIReportProcess extends BaseProcess {
         if (StringUtils.isBlank(transmissionMode)) {
             throw new GradBusinessRuleException(TRANSMISSION_MODE_ERROR);
         }
-        logger.debug("getZipFolderFromRootLocation {} transmission mode {}", TMP_DIR, transmissionMode);
-        return EducDistributionApiConstants.TMP_DIR + EducDistributionApiConstants.FILES_FOLDER_STRUCTURE + transmissionMode;
+        String rootPath = EducDistributionApiConstants.TMP_DIR + EducDistributionApiConstants.FILES_FOLDER_STRUCTURE + transmissionMode;
+        logger.debug("getZipFolderFromRootLocation {} transmission mode {}", rootPath, transmissionMode);
+        return rootPath;
     }
 }
