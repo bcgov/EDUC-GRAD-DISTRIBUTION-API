@@ -175,7 +175,10 @@ public class MergeProcess extends BaseProcess {
 				if(objStd != null)
 					studListNonGrad.add(objStd);
 			}
-			int result = addStudentTranscriptToLocations(scd.getStudentID().toString(), locations);
+			int result = 0;
+			if(scd.getStudentID() != null) {
+				result = addStudentTranscriptToLocations(scd.getStudentID().toString(), locations);
+			}
 			if(result == 0) {
 				failedToAdd++;
 				logger.debug("*** Failed to Add PDFs {} Current student {}", failedToAdd, scd.getStudentID());

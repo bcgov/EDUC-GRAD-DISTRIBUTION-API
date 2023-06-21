@@ -125,7 +125,10 @@ public class PSIReportProcess extends BaseProcess {
         int failedToAdd = 0;
 
         for (PsiCredentialDistribution scd : scdList) {
-            int result = addStudentTranscriptToLocations(scd.getStudentID().toString(), locations);
+            int result = 0;
+            if(scd.getStudentID() != null) {
+                result = addStudentTranscriptToLocations(scd.getStudentID().toString(), locations);
+            }
             if(result == 0) {
                 failedToAdd++;
                 logger.debug("*** Failed to Add PDFs {} Current student {}", failedToAdd, scd.getStudentID());
