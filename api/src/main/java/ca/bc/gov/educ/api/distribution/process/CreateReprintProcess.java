@@ -31,6 +31,7 @@ public class CreateReprintProcess extends BaseProcess {
 		ExceptionMessage exception = new ExceptionMessage();
 		DistributionRequest distributionRequest = processorData.getDistributionRequest();
 		Map<String, DistributionPrintRequest> mapDist = distributionRequest.getMapDist();
+		StudentSearchRequest searchRequest = distributionRequest.getStudentSearchRequest();
 		Long batchId = processorData.getBatchId();
 		int numberOfPdfs = 0;
 		int counter=0;
@@ -65,6 +66,13 @@ public class CreateReprintProcess extends BaseProcess {
 		long diff = (endTime - startTime)/1000;
 		logger.debug("************* TIME Taken  ************ {} secs",diff);
 		response.setMergeProcessResponse("Merge Successful and File Uploaded");
+		response.setNumberOfPdfs(numberOfPdfs);
+		response.setProcessedCyclesCount(distributionRequest.getProcessedCyclesCount());
+		response.setBatchId(processorData.getBatchId());
+		response.setLocalDownload(processorData.getLocalDownload());
+		response.setTotalCyclesCount(distributionRequest.getTotalCyclesCount());
+		response.setActivityCode(distributionRequest.getActivityCode());
+		response.setStudentSearchRequest(searchRequest);
 		processorData.setDistributionResponse(response);
 		return processorData;
 	}

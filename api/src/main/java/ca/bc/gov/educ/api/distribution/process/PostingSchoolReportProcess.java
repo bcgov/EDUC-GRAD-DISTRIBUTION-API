@@ -35,6 +35,7 @@ public class PostingSchoolReportProcess extends BaseProcess {
 		DistributionResponse response = new DistributionResponse();
 		DistributionRequest distributionRequest = processorData.getDistributionRequest();
 		Map<String, DistributionPrintRequest> mapDist = distributionRequest.getMapDist();
+		StudentSearchRequest searchRequest = distributionRequest.getStudentSearchRequest();
 		int numberOfPdfs = 0;
 		int counter=0;
 		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("PST"), Locale.CANADA);
@@ -57,6 +58,13 @@ public class PostingSchoolReportProcess extends BaseProcess {
 		long diff = (endTime - startTime)/1000;
 		logger.debug("************* TIME Taken  ************ {} secs",diff);
 		response.setMergeProcessResponse("Read Successful and Posting Done");
+		response.setNumberOfPdfs(numberOfPdfs);
+		response.setProcessedCyclesCount(distributionRequest.getProcessedCyclesCount());
+		response.setBatchId(processorData.getBatchId());
+		response.setLocalDownload(processorData.getLocalDownload());
+		response.setTotalCyclesCount(distributionRequest.getTotalCyclesCount());
+		response.setActivityCode(distributionRequest.getActivityCode());
+		response.setStudentSearchRequest(searchRequest);
 		processorData.setDistributionResponse(response);
 		return processorData;
 	}
