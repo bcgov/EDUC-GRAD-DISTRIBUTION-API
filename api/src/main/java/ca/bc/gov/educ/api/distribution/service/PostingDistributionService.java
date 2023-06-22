@@ -203,7 +203,7 @@ public class PostingDistributionService {
             }
 
             assert yeDistrictReports != null;
-            numberOfPdfs += processDistrictSchoolReports(yeDistrictReports, batchId, schooLabelReportType, transmissionMode);
+            numberOfPdfs += processDistrictSchoolReports(yeDistrictReports, batchId, districtReportType, transmissionMode);
         }
         if (StringUtils.isNotBlank(schoolReportType)) {
             List<SchoolReports> yeSchoolReports = new ArrayList<>();
@@ -223,7 +223,7 @@ public class PostingDistributionService {
                 }
             }
             assert yeSchoolReports != null;
-            numberOfPdfs += processDistrictSchoolReports(yeSchoolReports, batchId, schooLabelReportType, transmissionMode);
+            numberOfPdfs += processDistrictSchoolReports(yeSchoolReports, batchId, schoolReportType, transmissionMode);
         }
         return numberOfPdfs;
     }
@@ -258,7 +258,7 @@ public class PostingDistributionService {
         return numberOfPdfs;
     }
 
-    protected int processDistrictSchoolReports(List<SchoolReports> schoolReports, Long batchId, String schooLabelReportType, String transmissionMode) {
+    protected int processDistrictSchoolReports(List<SchoolReports> schoolReports, Long batchId, String reportType, String transmissionMode) {
         int numberOfPdfs = 0;
         for (SchoolReports report : schoolReports) {
             try {
@@ -267,7 +267,7 @@ public class PostingDistributionService {
                     logger.debug("*** Added PDFs Current Report Type {} for school {} category {}", report.getReportTypeCode(), report.getSchoolOfRecord(), report.getSchoolCategory());
                     uploadSchoolReportDocuments(
                             batchId,
-                            schooLabelReportType,
+                            reportType,
                             report.getSchoolOfRecord(),
                             report.getSchoolCategory(),
                             transmissionMode,
@@ -283,8 +283,8 @@ public class PostingDistributionService {
         return numberOfPdfs;
     }
 
-    protected void uploadSchoolReportDocuments(Long batchId, String schooLabelReportType, String mincode, String schoolCategory, String transmissionMode, byte[] gradReportPdf) {
-        boolean isDistrict = (StringUtils.isNotBlank(mincode) && StringUtils.length(mincode) == 3)  || ADDRESS_LABEL_YE.equalsIgnoreCase(schooLabelReportType);
+    protected void uploadSchoolReportDocuments(Long batchId, String reportType, String mincode, String schoolCategory, String transmissionMode, byte[] gradReportPdf) {
+        boolean isDistrict = (StringUtils.isNotBlank(mincode) && StringUtils.length(mincode) == 3)  || ADDRESS_LABEL_YE.equalsIgnoreCase(reportType);
         String districtCode = getDistrictCodeFromMincode(mincode);
         if(StringUtils.isNotBlank(transmissionMode) && EducDistributionApiConstants.TRANSMISSION_MODE_FTP.equalsIgnoreCase(transmissionMode)) return;
         String rootDirectory = StringUtils.isNotBlank(transmissionMode) ? TMP_DIR + EducDistributionApiConstants.FILES_FOLDER_STRUCTURE + StringUtils.upperCase(transmissionMode) : TMP_DIR;
@@ -292,7 +292,7 @@ public class PostingDistributionService {
             StringBuilder fileLocBuilder = new StringBuilder();
             if (isDistrict) {
                 fileLocBuilder.append(rootDirectory).append(DEL).append(batchId).append(DEL).append(districtCode);
-            } else if (SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode) || ADDRESS_LABEL_SCHL.equalsIgnoreCase(schooLabelReportType)) {
+            } else if (SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode) || ADDRESS_LABEL_SCHL.equalsIgnoreCase(reportType)) {
                 fileLocBuilder.append(rootDirectory).append(DEL).append(batchId);
             } else if ("02".equalsIgnoreCase(schoolCategory)) {
                 fileLocBuilder.append(rootDirectory).append(DEL).append(batchId).append(DEL).append(mincode);
@@ -304,14 +304,14 @@ public class PostingDistributionService {
             StringBuilder fileNameBuilder = new StringBuilder();
             if (isDistrict) {
                 fileNameBuilder.append(rootDirectory).append(DEL).append(batchId).append(DEL).append(districtCode);
-            } else if (SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode) || ADDRESS_LABEL_SCHL.equalsIgnoreCase(schooLabelReportType)) {
+            } else if (SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode) || ADDRESS_LABEL_SCHL.equalsIgnoreCase(reportType)) {
                 fileNameBuilder.append(rootDirectory).append(DEL).append(batchId);
             } else if ("02".equalsIgnoreCase(schoolCategory)) {
                 fileNameBuilder.append(rootDirectory).append(DEL).append(batchId).append(DEL).append(mincode);
             } else {
                 fileNameBuilder.append(rootDirectory).append(DEL).append(batchId).append(DEL).append(districtCode).append(DEL).append(mincode);
             }
-            if (SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode) || ADDRESS_LABEL_YE.equalsIgnoreCase(schooLabelReportType) || ADDRESS_LABEL_SCHL.equalsIgnoreCase(schooLabelReportType)) {
+            if (SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode) || ADDRESS_LABEL_YE.equalsIgnoreCase(reportType) || ADDRESS_LABEL_SCHL.equalsIgnoreCase(reportType)) {
                 fileNameBuilder.append("/EDGRAD.L.").append("3L14.");
             } else {
                 fileNameBuilder.append("/EDGRAD.R.").append("324W.");

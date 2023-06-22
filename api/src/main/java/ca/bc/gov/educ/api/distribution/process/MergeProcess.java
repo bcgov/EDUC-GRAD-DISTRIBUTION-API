@@ -41,10 +41,11 @@ public class MergeProcess extends BaseProcess {
 		StudentSearchRequest searchRequest = distributionRequest.getStudentSearchRequest();
 		Long batchId = processorData.getBatchId();
 		int numberOfPdfs = 0;
-		int counter=0;
+		int counter = 0;
 		List<School> schoolsForLabels = new ArrayList<>();
 		for (String mincode : mapDist.keySet()) {
 			counter++;
+			if(counter > 5) break;
 			int currentSlipCount = 0;
 			DistributionPrintRequest distributionPrintRequest = mapDist.get(mincode);
 			CommonSchool schoolDetails = getBaseSchoolDetails(distributionPrintRequest,mincode,exception);
