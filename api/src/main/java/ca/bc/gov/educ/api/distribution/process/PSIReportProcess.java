@@ -139,10 +139,9 @@ public class PSIReportProcess extends BaseProcess {
         CsvMapper csvMapper = new CsvMapper();
 
         try {
+            psiCode = StringUtils.trim(psiCode);
             StringBuilder filePathBuilder = createFolderStructureInTempDirectory(processorData, psiCode, "02");
-
             filePathBuilder.append(EducDistributionApiConstants.FTP_FILENAME_PREFIX).append(psiCode).append(EducDistributionApiConstants.FTP_FILENAME_SUFFIX).append(".").append(EducDistributionApiUtils.getFileNameSchoolReports(psiCode)).append(".DAT");
-
             if (filePathBuilder != null) {
                 path = Paths.get(filePathBuilder.toString());
                 newFile = new File(Files.createFile(path).toUri());
