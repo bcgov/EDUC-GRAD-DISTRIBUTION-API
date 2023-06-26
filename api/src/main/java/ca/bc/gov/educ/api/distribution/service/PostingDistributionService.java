@@ -27,8 +27,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.zip.ZipOutputStream;
 
-import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants.DEL;
-import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants.TMP_DIR;
+import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants.*;
 import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils.*;
 
 @Service
@@ -284,17 +283,18 @@ public class PostingDistributionService {
     }
 
     protected void uploadSchoolReportDocuments(Long batchId, String reportType, String mincode, String schoolCategory, String transmissionMode, byte[] gradReportPdf) {
-        boolean isDistrict = (StringUtils.isNotBlank(mincode) && StringUtils.length(mincode) == 3)  || ADDRESS_LABEL_YE.equalsIgnoreCase(reportType);
+        boolean isDistrict = (StringUtils.isNotBlank(mincode) && StringUtils.length(mincode) <= 3)  || ADDRESS_LABEL_YE.equalsIgnoreCase(reportType);
         String districtCode = getDistrictCodeFromMincode(mincode);
-        if(StringUtils.isNotBlank(transmissionMode) && EducDistributionApiConstants.TRANSMISSION_MODE_FTP.equalsIgnoreCase(transmissionMode)) return;
-        String rootDirectory = StringUtils.isNotBlank(transmissionMode) ? TMP_DIR + EducDistributionApiConstants.FILES_FOLDER_STRUCTURE + StringUtils.upperCase(transmissionMode) : TMP_DIR;
+        if(StringUtils.isNotBlank(transmissionMode) && TRANSMISSION_MODE_FTP.equalsIgnoreCase(transmissionMode)) return;
+        String rootDirectory = StringUtils.containsAnyIgnoreCase(transmissionMode, TRANSMISSION_MODE_PAPER, TRANSMISSION_MODE_FTP) ? TMP_DIR + EducDistributionApiConstants.FILES_FOLDER_STRUCTURE + StringUtils.upperCase(transmissionMode) : TMP_DIR;
+        Boolean schoolLevelFolders = "02".equalsIgnoreCase(schoolCategory) || MONTHLYDIST.equalsIgnoreCase(transmissionMode) || SUPPDIST.equalsIgnoreCase(transmissionMode);
         try {
             StringBuilder fileLocBuilder = new StringBuilder();
             if (isDistrict) {
                 fileLocBuilder.append(rootDirectory).append(DEL).append(batchId).append(DEL).append(districtCode);
             } else if (SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode) || ADDRESS_LABEL_SCHL.equalsIgnoreCase(reportType)) {
                 fileLocBuilder.append(rootDirectory).append(DEL).append(batchId);
-            } else if ("02".equalsIgnoreCase(schoolCategory)) {
+            } else if (schoolLevelFolders) {
                 fileLocBuilder.append(rootDirectory).append(DEL).append(batchId).append(DEL).append(mincode);
             } else {
                 fileLocBuilder.append(rootDirectory).append(DEL).append(batchId).append(DEL).append(districtCode).append(DEL).append(mincode);
@@ -306,7 +306,7 @@ public class PostingDistributionService {
                 fileNameBuilder.append(rootDirectory).append(DEL).append(batchId).append(DEL).append(districtCode);
             } else if (SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode) || ADDRESS_LABEL_SCHL.equalsIgnoreCase(reportType)) {
                 fileNameBuilder.append(rootDirectory).append(DEL).append(batchId);
-            } else if ("02".equalsIgnoreCase(schoolCategory)) {
+            } else if (schoolLevelFolders) {
                 fileNameBuilder.append(rootDirectory).append(DEL).append(batchId).append(DEL).append(mincode);
             } else {
                 fileNameBuilder.append(rootDirectory).append(DEL).append(batchId).append(DEL).append(districtCode).append(DEL).append(mincode);

@@ -74,7 +74,7 @@ public class PSIReportProcess extends BaseProcess {
         int numberOfCreatedSchoolLabelReports = createSchoolLabelsReport(schoolsForLabels, ADDRESS_LABEL_PSI);
         logger.debug("***** Number of created school labels reports {} *****", numberOfCreatedSchoolLabelReports);
         logger.debug("***** Distribute school labels reports *****");
-        int numberOfProcessedSchoolLabelsReports = processDistrictSchoolDistribution(batchId, new ArrayList<>(), ADDRESS_LABEL_PSI, null, null, processorData.getTransmissionMode());
+        int numberOfProcessedSchoolLabelsReports = processDistrictSchoolDistribution(batchId, List.of(SCHOOL_LABELS_CODE), ADDRESS_LABEL_PSI, null, null, processorData.getTransmissionMode());
         logger.debug("***** Number of distributed school labels reports {} *****", numberOfProcessedSchoolLabelsReports);
         numberOfPdfs += numberOfProcessedSchoolLabelsReports;
         postingProcess(batchId, processorData, numberOfPdfs, getRootPathForFilesStorage(processorData));
