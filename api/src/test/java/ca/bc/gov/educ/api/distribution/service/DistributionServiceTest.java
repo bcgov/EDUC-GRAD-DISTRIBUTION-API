@@ -1160,6 +1160,13 @@ public class DistributionServiceTest {
 		when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
 		})).thenReturn(Mono.just(List.of(new SchoolReports())));
 
+		when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+		when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolReportsByReportType(), "ADDRESS_LABEL_PSI", "001"))).thenReturn(this.requestHeadersMock);
+		when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
+		})).thenReturn(Mono.just(List.of(new SchoolReports())));
+
 		when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
 		when(this.requestBodyUriMock.uri(String.format(constants.getSchoolLabelsReport(), "ADDRESS_LABEL_PSI", null, null))).thenReturn(this.requestBodyUriMock);
 		when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
