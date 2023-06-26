@@ -3,6 +3,7 @@ package ca.bc.gov.educ.api.distribution.process;
 import ca.bc.gov.educ.api.distribution.model.dto.*;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils;
+import ca.bc.gov.educ.api.distribution.util.Generated;
 import ca.bc.gov.educ.api.distribution.util.GradBusinessRuleException;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import lombok.Data;
@@ -48,7 +49,7 @@ public class PSIReportProcess extends BaseProcess {
         for (Map.Entry<String, DistributionPrintRequest> entry : mDist.entrySet()) {
             cnter++;
             int currentSlipCount = 0;
-            String psiCode = entry.getKey();
+            String psiCode = entry.getKey().trim();
             DistributionPrintRequest obj = entry.getValue();
             Psi psiDetails = psiService.getPsiDetails(psiCode, restUtils.getAccessToken());
             if (psiDetails != null) {
@@ -69,7 +70,8 @@ public class PSIReportProcess extends BaseProcess {
         int numberOfCreatedSchoolLabelReports = createSchoolLabelsReport(schoolsForLabels, processorData.getAccessToken(), ADDRESS_LABEL_PSI);
         logger.debug("***** Number of created school labels reports {} *****", numberOfCreatedSchoolLabelReports);
         logger.debug("***** Distribute school labels reports *****");
-        int numberOfProcessedSchoolLabelsReports = processDistrictSchoolDistribution(processorData, ADDRESS_LABEL_PSI, null, null);
+        String schoolLabelCode = schoolsForLabels.size() == 1 ? schoolsForLabels.get(0).getMincode() : SCHOOL_LABELS_CODE;
+        int numberOfProcessedSchoolLabelsReports = processDistrictSchoolDistribution(processorData, schoolLabelCode, ADDRESS_LABEL_PSI, null, null);
         logger.debug("***** Number of distributed school labels reports {} *****", numberOfProcessedSchoolLabelsReports);
         numOfPdfs += numberOfProcessedSchoolLabelsReports;
         postingProcess(bId, processorData, numOfPdfs);
@@ -127,6 +129,7 @@ public class PSIReportProcess extends BaseProcess {
     }
 
     //Grad2-1931 : Writes students transcripts data on CSV and formatting them - mchintha
+    @Generated
     private void processStudentsForCSVs(List<PsiCredentialDistribution> scdList, String psiCode, ProcessorData processorData) throws IOException {
         int currentTranscript = 0;
         int failedToAdd = 0;
@@ -139,7 +142,6 @@ public class PSIReportProcess extends BaseProcess {
         CsvMapper csvMapper = new CsvMapper();
 
         try {
-            psiCode = StringUtils.trim(psiCode);
             StringBuilder filePathBuilder = createFolderStructureInTempDirectory(processorData, psiCode, "02");
             filePathBuilder.append(EducDistributionApiConstants.FTP_FILENAME_PREFIX).append(psiCode).append(EducDistributionApiConstants.FTP_FILENAME_SUFFIX).append(".").append(EducDistributionApiUtils.getFileNameSchoolReports(psiCode)).append(".DAT");
             if (filePathBuilder != null) {
@@ -364,8 +366,9 @@ public class PSIReportProcess extends BaseProcess {
 
     //Grad2-1931 : Uploads school reports for only PSIRUNs- mchintha
     @Override
-    protected void uploadSchoolReportDocuments(Long batchId, String mincode, String schoolCategory, ProcessorData processorData, byte[] gradReportPdf) {
-        boolean isDistrict = StringUtils.isNotBlank(mincode) && StringUtils.length(mincode) == 3;
+    @Generated
+    protected void uploadSchoolReportDocuments(Long batchId, String mincode, String singleLabel, String schoolCategory, ProcessorData processorData, byte[] gradReportPdf) {
+        boolean isDistrict = StringUtils.isNotBlank(mincode) && StringUtils.length(mincode) <= 3;
         String districtCode = StringUtils.substring(mincode, 0, 3);
         String transmissionMode = processorData.getTransmissionMode();
         if (StringUtils.isBlank(transmissionMode)) {
@@ -374,16 +377,16 @@ public class PSIReportProcess extends BaseProcess {
         try {
             //Skipping the creation of district label reports for FTP files - hotfix - mchintha
             if (EducDistributionApiConstants.TRANSMISSION_MODE_PAPER.equalsIgnoreCase(transmissionMode)) {
-                StringBuilder fileLocBuilder = buildFileLocationPath(batchId, mincode, schoolCategory, isDistrict, districtCode, transmissionMode);
+                StringBuilder fileLocBuilder = buildFileLocationPath(batchId, mincode, singleLabel, schoolCategory, isDistrict, districtCode, transmissionMode);
                 Path path = Paths.get(fileLocBuilder.toString());
                 Files.createDirectories(path);
-                StringBuilder fileNameBuilder = buildFileLocationPath(batchId, mincode, schoolCategory, isDistrict, districtCode, transmissionMode);
-                if (SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode)) {
+                StringBuilder fileNameBuilder = buildFileLocationPath(batchId, mincode, singleLabel, schoolCategory, isDistrict, districtCode, transmissionMode);
+                if (SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode) || SCHOOL_LABELS_CODE.equalsIgnoreCase(singleLabel)) {
                     fileNameBuilder.append("/EDGRAD.L.").append("3L14.");
                 } else {
                     fileNameBuilder.append("/EDGRAD.R.").append("324W.");
                 }
-                fileNameBuilder.append(EducDistributionApiUtils.getFileNameSchoolReports(StringUtils.trim(mincode))).append(".pdf");
+                fileNameBuilder.append(EducDistributionApiUtils.getFileNameSchoolReports(mincode)).append(".pdf");
 
                 try (OutputStream out = new FileOutputStream(fileNameBuilder.toString())) {
                     out.write(gradReportPdf);
@@ -396,11 +399,10 @@ public class PSIReportProcess extends BaseProcess {
         }
     }
 
-    private StringBuilder buildFileLocationPath(Long batchId, String mincode, String schoolCategory, boolean isDistrict, String districtCode, String transmissionMode) {
+    @Generated
+    private StringBuilder buildFileLocationPath(Long batchId, String mincode, String singleLabel, String schoolCategory, boolean isDistrict, String districtCode, String transmissionMode) {
         StringBuilder fileLocBuilder = new StringBuilder();
-        mincode = StringUtils.trim(mincode);
-        districtCode = StringUtils.trim(districtCode);
-        if (SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode)) {
+        if (SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode) || SCHOOL_LABELS_CODE.equalsIgnoreCase(singleLabel)) {
             fileLocBuilder.append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.FILES_FOLDER_STRUCTURE).append(transmissionMode.toUpperCase()).append(EducDistributionApiConstants.DEL).append(batchId);
         } else if (isDistrict) {
             fileLocBuilder.append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.FILES_FOLDER_STRUCTURE).append(transmissionMode.toUpperCase()).append(EducDistributionApiConstants.DEL).append(batchId).append(EducDistributionApiConstants.DEL).append(districtCode);
@@ -413,6 +415,7 @@ public class PSIReportProcess extends BaseProcess {
     }
 
     @Override
+    @Generated
     //Grad2-1931 : Creates folder structure in temp directory only for PSIRUNs - mchintha
     public StringBuilder createFolderStructureInTempDirectory(ProcessorData processorData, String minCode, String schoolCategoryCode) {
         String districtCode = StringUtils.substring(minCode, 0, 3);
@@ -443,6 +446,22 @@ public class PSIReportProcess extends BaseProcess {
         }
 
         return filePathBuilder;
+    }
+
+    @Override
+    @Generated
+    protected StringBuilder buildFileLocationPath(Long batchId, String mincode, String singleLabel, String schoolCategory, boolean isDistrict, String districtCode) {
+        StringBuilder fileLocBuilder = new StringBuilder();
+        if (SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode) || SCHOOL_LABELS_CODE.equalsIgnoreCase(singleLabel)) {
+            fileLocBuilder.append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.DEL).append(batchId);
+        } else if (isDistrict) {
+            fileLocBuilder.append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.DEL).append(batchId).append(EducDistributionApiConstants.DEL).append(districtCode);
+        } else if ("02".equalsIgnoreCase(schoolCategory)) {
+            fileLocBuilder.append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.DEL).append(batchId).append(EducDistributionApiConstants.DEL).append(mincode);
+        } else {
+            fileLocBuilder.append(EducDistributionApiConstants.TMP_DIR).append(EducDistributionApiConstants.DEL).append(batchId).append(EducDistributionApiConstants.DEL).append(districtCode).append(EducDistributionApiConstants.DEL).append(mincode);
+        }
+        return fileLocBuilder;
     }
 
     @Override
