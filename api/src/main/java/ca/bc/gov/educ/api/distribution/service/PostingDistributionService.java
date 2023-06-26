@@ -115,7 +115,7 @@ public class PostingDistributionService {
     }
 
     public Integer createSchoolLabelsReport(List<School> schools, String schooLabelReportType) {
-        logger.debug("***** Distribute School Label Reports {} *****", schooLabelReportType);
+        logger.debug("***** Create School Label Reports {} *****", schooLabelReportType);
         Integer reportCount = 0;
         String url = String.format(educDistributionApiConstants.getSchoolLabelsReport(), schooLabelReportType);
         List<School> processSchools = new ArrayList<>();
@@ -135,13 +135,13 @@ public class PostingDistributionService {
         }
         if(StringUtils.equalsIgnoreCase(ADDRESS_LABEL_PSI, schooLabelReportType)) {
             for(School s: schools) {
-                if(s.getMincode().length() == 3) {
+                if(s.getMincode().length() <= 3) {
                     processSchools.add(s);
                 }
             }
         }
         reportCount += restService.executePost(url, Integer.class, processSchools);
-        logger.debug("***** Number of distributed School Label Reports {} *****", reportCount);
+        logger.debug("***** Number of created School Label Reports {} *****", reportCount);
         return reportCount;
     }
 

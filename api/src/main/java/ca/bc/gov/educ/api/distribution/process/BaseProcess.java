@@ -301,7 +301,7 @@ public abstract class BaseProcess implements DistributionProcess {
         StringBuilder filePathBuilder = new StringBuilder();
         Path path;
         try {
-            Boolean conditionResult = (MONTHLYDIST.equalsIgnoreCase(activityCode) || "02".equalsIgnoreCase(schoolCategoryCode));
+            Boolean conditionResult = (MONTHLYDIST.equalsIgnoreCase(activityCode) || SUPPDIST.equalsIgnoreCase(activityCode) || "02".equalsIgnoreCase(schoolCategoryCode));
             if (Boolean.TRUE.equals(conditionResult)) {
                 directoryPathBuilder.append(rootDirectory).append(EducDistributionApiConstants.DEL).append(processorData.getBatchId()).append(EducDistributionApiConstants.DEL).append(minCode).append(EducDistributionApiConstants.DEL);
             } else {

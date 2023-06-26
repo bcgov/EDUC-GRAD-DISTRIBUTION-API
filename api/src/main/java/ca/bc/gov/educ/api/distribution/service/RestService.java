@@ -13,6 +13,8 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -93,7 +95,9 @@ public class RestService {
     }
 
     protected String parseUrlParameters(String url, String... params) {
-        return String.format(url, params);
+        List<String> l = Arrays.asList(params);
+        l.replaceAll(t-> Objects.isNull(t) ? "" : t);
+        return String.format(url, l.toArray());
     }
 
     private String getErrorMessage(String url, String errorMessage) {
