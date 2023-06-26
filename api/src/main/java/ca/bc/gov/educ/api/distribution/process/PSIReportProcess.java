@@ -3,6 +3,7 @@ package ca.bc.gov.educ.api.distribution.process;
 import ca.bc.gov.educ.api.distribution.model.dto.*;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils;
+import ca.bc.gov.educ.api.distribution.util.Generated;
 import ca.bc.gov.educ.api.distribution.util.GradBusinessRuleException;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import lombok.Data;
@@ -128,6 +129,7 @@ public class PSIReportProcess extends BaseProcess {
     }
 
     //Grad2-1931 : Writes students transcripts data on CSV and formatting them - mchintha
+    @Generated
     private void processStudentsForCSVs(List<PsiCredentialDistribution> scdList, String psiCode, ProcessorData processorData) throws IOException {
         int currentTranscript = 0;
         int failedToAdd = 0;
@@ -364,6 +366,7 @@ public class PSIReportProcess extends BaseProcess {
 
     //Grad2-1931 : Uploads school reports for only PSIRUNs- mchintha
     @Override
+    @Generated
     protected void uploadSchoolReportDocuments(Long batchId, String mincode, String singleLabel, String schoolCategory, ProcessorData processorData, byte[] gradReportPdf) {
         boolean isDistrict = StringUtils.isNotBlank(mincode) && StringUtils.length(mincode) <= 3;
         String districtCode = StringUtils.substring(mincode, 0, 3);
@@ -396,6 +399,7 @@ public class PSIReportProcess extends BaseProcess {
         }
     }
 
+    @Generated
     private StringBuilder buildFileLocationPath(Long batchId, String mincode, String singleLabel, String schoolCategory, boolean isDistrict, String districtCode, String transmissionMode) {
         StringBuilder fileLocBuilder = new StringBuilder();
         if (SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode) || SCHOOL_LABELS_CODE.equalsIgnoreCase(singleLabel)) {
@@ -411,6 +415,7 @@ public class PSIReportProcess extends BaseProcess {
     }
 
     @Override
+    @Generated
     //Grad2-1931 : Creates folder structure in temp directory only for PSIRUNs - mchintha
     public StringBuilder createFolderStructureInTempDirectory(ProcessorData processorData, String minCode, String schoolCategoryCode) {
         String districtCode = StringUtils.substring(minCode, 0, 3);
@@ -444,6 +449,7 @@ public class PSIReportProcess extends BaseProcess {
     }
 
     @Override
+    @Generated
     protected StringBuilder buildFileLocationPath(Long batchId, String mincode, String singleLabel, String schoolCategory, boolean isDistrict, String districtCode) {
         StringBuilder fileLocBuilder = new StringBuilder();
         if (SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode) || SCHOOL_LABELS_CODE.equalsIgnoreCase(singleLabel)) {

@@ -292,6 +292,7 @@ public abstract class BaseProcess implements DistributionProcess {
     }
 
     //Uploads school report labels for all the batch runs
+    @Generated
     protected void uploadSchoolReportDocuments(Long batchId, String mincode, String singleLabel, String schoolCategory, ProcessorData processorData, byte[] gradReportPdf) {
         logger.debug("Upload School Reports for {}", processorData.getActivityCode());
         boolean isDistrict = StringUtils.isNotBlank(mincode) && StringUtils.length(mincode) == 3;
@@ -315,6 +316,7 @@ public abstract class BaseProcess implements DistributionProcess {
         }
     }
 
+    @Generated
     protected StringBuilder buildFileLocationPath(Long batchId, String mincode, String singleLabel, String schoolCategory, boolean isDistrict, String districtCode) {
         StringBuilder fileLocBuilder = new StringBuilder();
         if (SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode) || SCHOOL_LABELS_CODE.equalsIgnoreCase(singleLabel)) {
