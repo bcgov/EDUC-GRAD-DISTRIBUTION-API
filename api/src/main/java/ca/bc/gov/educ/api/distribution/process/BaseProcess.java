@@ -282,7 +282,7 @@ public abstract class BaseProcess implements DistributionProcess {
                             gradReportPdf);
                     numberOfPdfs++;
                 } else {
-                    logger.debug("*** Failed to Add PDFs Current Report Type {} for school {} category {}", report.getReportTypeCode(), report.getSchoolOfRecord(), report.getSchoolCategory());
+                    logger.info("*** Failed to Add PDFs Current Report Type {} for school {} category {} in batch {}", report.getReportTypeCode(), report.getSchoolOfRecord(), report.getSchoolCategory(), processorData.getBatchId());
                 }
             } catch (Exception e) {
                 logger.error(EXCEPTION, e.getLocalizedMessage());
@@ -354,15 +354,17 @@ public abstract class BaseProcess implements DistributionProcess {
     }
 
     protected int addStudentTranscriptToLocations(String studentId, List<InputStream> locations) {
+        int numberOfPdfs = 0;
         List<GradStudentTranscripts> studentTranscripts = webClient.get().uri(String.format(educDistributionApiConstants.getTranscriptUsingStudentID(), studentId)).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).retrieve().bodyToMono(new ParameterizedTypeReference<List<GradStudentTranscripts>>() {}).block();
         if(studentTranscripts != null && !studentTranscripts.isEmpty() ) {
             GradStudentTranscripts studentTranscript = studentTranscripts.get(0);
             byte[] transcriptPdf = Base64.decodeBase64(studentTranscript.getTranscript());
-            locations.add(new ByteArrayInputStream(transcriptPdf));
-            return 1;
-        } else {
-            return 0;
+            if(transcriptPdf != null) {
+                locations.add(new ByteArrayInputStream(transcriptPdf));
+                numberOfPdfs = 1;
+            }
         }
+        return numberOfPdfs;
     }
 
     protected void processSchoolsForLabels(List<School> schools, Psi psi) {

@@ -97,7 +97,7 @@ public class PSIReportProcess extends BaseProcess {
                 if (EducDistributionApiConstants.TRANSMISSION_MODE_FTP.equalsIgnoreCase(processorData.getTransmissionMode())) {
                     processStudentsForCSVs(scdList, psiCode, processorData);
                 } else {
-                    processStudentsForPDFs(scdList, locations);
+                    processStudentsForPDFs(processorData, scdList, locations);
                     mergeDocumentsPDFs(processorData, psiCode, "02", "/EDGRAD.T.", "YED4", locations);
                 }
                 numOfPdfs++;
@@ -109,7 +109,7 @@ public class PSIReportProcess extends BaseProcess {
         return Pair.of(currentSlipCount, numOfPdfs);
     }
 
-    private void processStudentsForPDFs(List<PsiCredentialDistribution> scdList, List<InputStream> locations) throws IOException {
+    private void processStudentsForPDFs(ProcessorData processorData, List<PsiCredentialDistribution> scdList, List<InputStream> locations) {
         int currentTranscript = 0;
         int failedToAdd = 0;
 
@@ -119,7 +119,7 @@ public class PSIReportProcess extends BaseProcess {
                 int result = addStudentTranscriptToLocations(scd.getStudentID().toString(), locations);
                 if (result == 0) {
                     failedToAdd++;
-                    logger.debug("*** Failed to Add PDFs {} Current student {}", failedToAdd, scd.getStudentID());
+                    logger.info("*** Failed to Add PDFs {} Current student {} in batch {}", failedToAdd, scd.getStudentID(), processorData.getBatchId());
                 } else {
                     currentTranscript++;
                     logger.debug("*** Added PDFs {}/{} Current student {}", currentTranscript, scdList.size(), scd.getStudentID());
