@@ -2,6 +2,7 @@ package ca.bc.gov.educ.api.distribution.process;
 
 import ca.bc.gov.educ.api.distribution.model.dto.*;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils;
+import ca.bc.gov.educ.api.distribution.util.Generated;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -31,6 +32,7 @@ public class MergeProcess extends BaseProcess {
 	private static Logger logger = LoggerFactory.getLogger(MergeProcess.class);
 
 	@Override
+	@Generated
 	public ProcessorData fire(ProcessorData processorData) {
 		long startTime = System.currentTimeMillis();
 		logger.debug("************* TIME START  ************ {}",startTime);
@@ -94,14 +96,10 @@ public class MergeProcess extends BaseProcess {
 		if (SUPPDIST.equalsIgnoreCase(processorData.getActivityCode())) {
 			logger.debug("***** Create and Store Supplemental school reports *****");
 			numberOfCreatedSchoolReports += createSchoolLabelsReport(schoolsForLabels, ADDRESS_LABEL_SCHL);
-			numberOfCreatedSchoolReports += createDistrictSchoolSuppReport( null, null, DISTREP_SC);
 			logger.debug("***** Number of created Supplemental school reports {} *****", numberOfCreatedSchoolReports);
 			logger.debug("***** Distribute Supplemental school label reports *****");
 			numberOfProcessedSchoolReports += processDistrictSchoolDistribution(batchId, List.of(SCHOOL_LABELS_CODE), ADDRESS_LABEL_SCHL, null, null, processorData.getActivityCode());
 			logger.debug("***** Number of distributed Supplemental school label reports {} *****", numberOfProcessedSchoolReports);
-			logger.debug("***** Distribute Supplemental school reports *****");
-			numberOfProcessedSchoolReports += processDistrictSchoolDistribution(batchId, null, null, null, DISTREP_SC, processorData.getActivityCode());
-			logger.debug("***** Number of distributed Supplemental school reports {} *****", numberOfProcessedSchoolReports);
 		}
 		numberOfPdfs += numberOfProcessedSchoolReports;
 		postingProcess(batchId,processorData,numberOfPdfs);

@@ -1154,7 +1154,7 @@ public class DistributionServiceTest {
 	public void testdistributeCredentialsPSI() {
 		DistributionResponse res = testpsidistributeCredential("PSPR","Y", "ftp");
 		assertNotNull(res);
-		res = testpsidistributeCredential("PSPR","N", "paper");
+		res = testpsidistributeCredential("PSPR","Y", "paper");
 		assertNotNull(res);
 	}
 
@@ -1277,6 +1277,13 @@ public class DistributionServiceTest {
 
 		when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
 		when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolReportsByReportType(), "ADDRESS_LABEL_PSI", "000000000"))).thenReturn(this.requestHeadersMock);
+		when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
+		})).thenReturn(Mono.just(List.of(new SchoolReports())));
+
+		when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+		when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolReportsByReportType(), "ADDRESS_LABEL_PSI", "001"))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {

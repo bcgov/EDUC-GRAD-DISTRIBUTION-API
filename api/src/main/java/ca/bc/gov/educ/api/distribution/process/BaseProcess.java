@@ -11,6 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -18,6 +20,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.zip.ZipOutputStream;
 
 import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants.TMP_DIR;
@@ -41,6 +45,8 @@ public abstract class BaseProcess implements DistributionProcess {
     protected static final String ADDRESS_LABEL_PSI = "ADDRESS_LABEL_PSI";
     protected static final String DISTREP_SD = "DISTREP_SD";
     protected static final String DISTREP_SC = "DISTREP_SC";
+
+
     protected static final String NONGRADDISTREP_SC = "NONGRADDISTREP_SC";
 
     private static final String EDGRAD_BATCH = "/EDGRAD.BATCH.";
