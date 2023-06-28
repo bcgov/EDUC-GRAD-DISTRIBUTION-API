@@ -4,7 +4,6 @@ import ca.bc.gov.educ.api.distribution.model.dto.*;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import ca.bc.gov.educ.api.distribution.util.JsonTransformer;
 import ca.bc.gov.educ.api.distribution.util.RestUtils;
-import lombok.SneakyThrows;
 import org.apache.commons.codec.binary.Base64;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -222,8 +221,7 @@ public class DistributionServiceTest {
 		assertNotNull(res);
 	}
 
-	@SneakyThrows
-	private DistributionResponse testdistributeSchoolReport(String runType, String reportType, String activityCode) {
+	private synchronized DistributionResponse testdistributeSchoolReport(String runType, String reportType, String activityCode) {
 		Long batchId= 9029L;
 		Map<String, DistributionPrintRequest > mapDist = new HashMap<>();
 		String localDownload = "Y";
@@ -293,8 +291,6 @@ public class DistributionServiceTest {
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(CommonSchool.class)).thenReturn(inputResponseSchool);
 		when(this.inputResponseSchool.block()).thenReturn(schObj);
-
-		System.out.println(jsonTransformer.marshall(printRequest));
 
 			SchoolReports schoolLabelsReports = new SchoolReports();
 			schoolLabelsReports.setSchoolOfRecord("000000000");
@@ -465,13 +461,13 @@ public class DistributionServiceTest {
 			when(this.responseMock.bodyToMono(byte[].class)).thenReturn(Mono.just(UUID.randomUUID().toString().getBytes()));
 
 			when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-			when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolDistrictYearEndReport(), "null", "DISTREP_YE_SD", "DISTREP_YE_SC"))).thenReturn(this.requestHeadersMock);
+			when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolDistrictYearEndReport(), "", "DISTREP_YE_SD", "DISTREP_YE_SC"))).thenReturn(this.requestHeadersMock);
 			when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
 			when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 			when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(4));
 
 			when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-			when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolDistrictMonthReport(), "ADDRESS_LABEL_SCHL", null, null))).thenReturn(this.requestHeadersMock);
+			when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolDistrictMonthReport(), "ADDRESS_LABEL_SCHL", "", ""))).thenReturn(this.requestHeadersMock);
 			when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
 			when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 			when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(2));
@@ -485,25 +481,25 @@ public class DistributionServiceTest {
 		when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(1));
 
 		when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-		when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolDistrictSupplementalReport(), "ADDRESS_LABEL_SCHL", null, "DISTREP_SC"))).thenReturn(this.requestHeadersMock);
+		when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolDistrictSupplementalReport(), "ADDRESS_LABEL_SCHL", "", "DISTREP_SC"))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(2));
 
 		when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-		when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolDistrictSupplementalReport(), "ADDRESS_LABEL_SCHL", null, null))).thenReturn(this.requestHeadersMock);
+		when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolDistrictSupplementalReport(), "ADDRESS_LABEL_SCHL", "", ""))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(2));
 
 		when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-		when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolDistrictSupplementalReport(), null, null, "DISTREP_SC"))).thenReturn(this.requestHeadersMock);
+		when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolDistrictSupplementalReport(), "", "", "DISTREP_SC"))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(2));
 
 		when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-		when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolDistrictStudentNonGradReport(), "ADDRESS_LABEL_YE", null, null))).thenReturn(this.requestHeadersMock);
+		when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolDistrictStudentNonGradReport(), "ADDRESS_LABEL_YE", "", ""))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(1));
@@ -538,14 +534,14 @@ public class DistributionServiceTest {
 		return gradDistributionService.distributeCredentials(runType,batchId,distributionRequest,activityCode,transmissionMode.toUpperCase(),"Y",accessToken);
 	}
 
-	private ResponseObj getMockResponseObject(){
+	private synchronized ResponseObj getMockResponseObject(){
 		ResponseObj obj = new ResponseObj();
 		obj.setAccess_token(MOCK_TOKEN);
 		obj.setRefresh_token("456");
 		return obj;
 	}
 
-	private DistributionResponse testdistributeCredentials_transcript_blank(String runType,boolean schoolNull,String localDownload) {
+	private synchronized DistributionResponse testdistributeCredentials_transcript_blank(String runType,boolean schoolNull,String localDownload) {
 		Long batchId= 9029L;
 		Map<String, DistributionPrintRequest > mapDist= new HashMap<>();
 		String accessToken = MOCK_TOKEN;
@@ -616,7 +612,7 @@ public class DistributionServiceTest {
 		return gradDistributionService.distributeCredentials(runType,batchId,distributionRequest,null,transmissionMode,localDownload,accessToken);
 	}
 
-	private DistributionResponse testdistributeCredentials_certificate_blank(String runType,String paperType) {
+	private synchronized DistributionResponse testdistributeCredentials_certificate_blank(String runType,String paperType) {
 		Long batchId= 9029L;
 		Map<String, DistributionPrintRequest > mapDist= new HashMap<>();
 		String localDownload = "Y";
@@ -683,7 +679,7 @@ public class DistributionServiceTest {
 		return gradDistributionService.distributeCredentials(runType,batchId,distributionRequest,null, transmissionMode,"Y",accessToken);
 	}
 
-	private DistributionResponse testdistributeCredentials_transcript(String runType, String activityCode,boolean schoolNull,String localDownload, boolean isAsyncProcess) {
+	private synchronized DistributionResponse testdistributeCredentials_transcript(String runType, String activityCode,boolean schoolNull,String localDownload, boolean isAsyncProcess) {
 		Long batchId= 9029L;
 		Map<String, DistributionPrintRequest > mapDist= new HashMap<>();
 		String accessToken = MOCK_TOKEN;
@@ -833,7 +829,7 @@ public class DistributionServiceTest {
 	}
 
 
-	private DistributionResponse testdistributeCredentials_certificate(String runType, String activityCode,String paperType,String properName,boolean noSchoolDis, boolean isAsyncProcess) {
+	private synchronized DistributionResponse testdistributeCredentials_certificate(String runType, String activityCode,String paperType,String properName,boolean noSchoolDis, boolean isAsyncProcess) {
 		Long batchId= 9029L;
 		Map<String, DistributionPrintRequest > mapDist= new HashMap<>();
 		String localDownload = "Y";
@@ -882,6 +878,7 @@ public class DistributionServiceTest {
 		scdCert.setLegalFirstName("asda");
 		scdCert.setLegalMiddleNames("sd");
 		scdCert.setLegalLastName("322f");
+		scdCert.setDocumentStatusCode("COMP");
 		scdCert.setNonGradReasons(nongradReasons);
 
 		scdCertList.add(scdCert);
@@ -1004,7 +1001,7 @@ public class DistributionServiceTest {
 		}
 	}
 
-	private DistributionResponse testdistributeCredentials_certificate_reprint(String runType, String activityCode,String paperType,boolean schoolNull) {
+	private synchronized DistributionResponse testdistributeCredentials_certificate_reprint(String runType, String activityCode,String paperType,boolean schoolNull) {
 		Long batchId= 9029L;
 		Map<String, DistributionPrintRequest > mapDist= new HashMap<>();
 		String localDownload = "Y";
@@ -1056,6 +1053,7 @@ public class DistributionServiceTest {
 		scdCert.setLegalFirstName("asda");
 		scdCert.setLegalMiddleNames("sd");
 		scdCert.setLegalLastName("322f");
+		scdCert.setDocumentStatusCode("COMP");
 		scdCert.setNonGradReasons(nongradReasons);
 
 		scdCertList.add(scdCert);
@@ -1151,7 +1149,7 @@ public class DistributionServiceTest {
 	}
 
 	@Test
-	public void testdistributeCredentialsPSI() {
+	public synchronized void testdistributeCredentialsPSI() {
 		DistributionResponse res = testpsidistributeCredential("PSPR","Y", "ftp");
 		assertNotNull(res);
 		res = testpsidistributeCredential("PSPR","Y", "paper");
@@ -1159,7 +1157,7 @@ public class DistributionServiceTest {
 	}
 
     // testcase for PSIRUNs for both ftp and paper.
-	private DistributionResponse testpsidistributeCredential(String runType, String localDownload, String transmissionMode) {
+	private synchronized DistributionResponse testpsidistributeCredential(String runType, String localDownload, String transmissionMode) {
 		String activityCode = null;
 		Long batchId= 9029L;
 		Map<String, DistributionPrintRequest > mapDist= new HashMap<>();
@@ -1302,7 +1300,7 @@ public class DistributionServiceTest {
 		})).thenReturn(Mono.just(List.of(new SchoolReports())));
 
 		when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
-		when(this.requestBodyUriMock.uri(String.format(constants.getSchoolLabelsReport(), "ADDRESS_LABEL_PSI", null, null))).thenReturn(this.requestBodyUriMock);
+		when(this.requestBodyUriMock.uri(String.format(constants.getSchoolLabelsReport(), "ADDRESS_LABEL_PSI", "", ""))).thenReturn(this.requestBodyUriMock);
 		when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
 		when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
 		when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
@@ -1310,7 +1308,7 @@ public class DistributionServiceTest {
 		when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(1));
 
 		when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
-		when(this.requestBodyUriMock.uri(String.format(constants.getSchoolLabelsReport(), "ADDRESS_LABEL_SCHL", null, null))).thenReturn(this.requestBodyUriMock);
+		when(this.requestBodyUriMock.uri(String.format(constants.getSchoolLabelsReport(), "ADDRESS_LABEL_SCHL", "", ""))).thenReturn(this.requestBodyUriMock);
 		when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
 		when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
 		when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
@@ -1338,7 +1336,7 @@ public class DistributionServiceTest {
         return gradDistributionService.distributeCredentials(runType,batchId,distributionRequest,activityCode,transmissionMode.toUpperCase(),localDownload,accessToken);
 	}
 
-	protected void mockTraxSchool(String mincode) {
+	protected synchronized void mockTraxSchool(String mincode) {
 		TraxSchool traxSchool = new TraxSchool();
 		traxSchool.setMinCode(mincode);
 		when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);

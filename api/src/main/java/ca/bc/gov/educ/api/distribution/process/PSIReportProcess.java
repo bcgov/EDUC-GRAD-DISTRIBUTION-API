@@ -14,7 +14,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -46,10 +49,16 @@ public class PSIReportProcess extends BaseProcess {
         StudentSearchRequest searchRequest = distributionRequest.getStudentSearchRequest();
         Long batchId = processorData.getBatchId();
         int numberOfPdfs = 0;
-        int cnter = 0;
+        int counter = 0;
         List<School> schoolsForLabels = new ArrayList<>();
+        List<Integer> valueList = mapDist.values()
+                .stream()
+                .map(e -> e.getPsiCredentialPrintRequest().getPsiList().size())
+                .collect(Collectors.toList());
+        int studentsCount = valueList.stream().mapToInt(i->i).sum();
+        logger.debug("Total number of students to be processed: {}", studentsCount);
         for (String psiCode : mapDist.keySet()) {
-            cnter++;
+            counter++;
             int currentSlipCount = 0;
             psiCode = StringUtils.trim(psiCode);
             DistributionPrintRequest obj = mapDist.get(psiCode);
@@ -61,10 +70,10 @@ public class PSIReportProcess extends BaseProcess {
                 numberOfPdfs = pV.getRight();
                 logger.debug("PDFs Merged {}", psiDetails.getPsiName());
                 processSchoolsForLabels(schoolsForLabels, psiDetails);
-                if (cnter % 50 == 0) {
+                if (counter % 50 == 0) {
                     restUtils.fetchAccessToken(processorData);
                 }
-                logger.debug("PSI {}/{}", cnter, mapDist.size());
+                logger.debug("PSI {}/{}", counter, mapDist.size());
             }
         }
         restUtils.fetchAccessToken(processorData);
