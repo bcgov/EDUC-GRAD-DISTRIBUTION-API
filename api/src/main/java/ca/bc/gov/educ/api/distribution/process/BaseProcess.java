@@ -282,7 +282,7 @@ public abstract class BaseProcess implements DistributionProcess {
                             gradReportPdf);
                     numberOfPdfs++;
                 } else {
-                    logger.info("*** Failed to Add PDFs Current Report Type {} for school {} category {}", report.getReportTypeCode(), report.getSchoolOfRecord(), report.getSchoolCategory());
+                    logger.info("*** Failed to Add PDFs Current Report Type {} for school {} category {} in batch {}", report.getReportTypeCode(), report.getSchoolOfRecord(), report.getSchoolCategory(), processorData.getBatchId());
                 }
             } catch (Exception e) {
                 logger.error(EXCEPTION, e.getLocalizedMessage());
