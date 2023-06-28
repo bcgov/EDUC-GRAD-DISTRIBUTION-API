@@ -245,14 +245,14 @@ public class PostingDistributionService {
                     }, districtReportType, "");
 
             assert yeDistrictReports != null;
-            numberOfPdfs += processDistrictSchoolReports(yeDistrictReports, batchId, schooLabelReportType, transmissionMode);
+            numberOfPdfs += processDistrictSchoolReports(yeDistrictReports, batchId, districtReportType, transmissionMode);
         }
         if (StringUtils.isNotBlank(schoolReportType)) {
             List<SchoolReports> yeSchoolReports = restService.executeGet(educDistributionApiConstants.getSchoolReportsByReportType(),
                     new ParameterizedTypeReference<List<SchoolReports>>() {
                     }, schoolReportType, "");
             assert yeSchoolReports != null;
-            numberOfPdfs += processDistrictSchoolReports(yeSchoolReports, batchId, schooLabelReportType, transmissionMode);
+            numberOfPdfs += processDistrictSchoolReports(yeSchoolReports, batchId, schoolReportType, transmissionMode);
         }
         return numberOfPdfs;
     }
@@ -283,7 +283,7 @@ public class PostingDistributionService {
     }
 
     protected void uploadSchoolReportDocuments(Long batchId, String reportType, String mincode, String schoolCategory, String transmissionMode, byte[] gradReportPdf) {
-        boolean isDistrict = ADDRESS_LABEL_YE.equalsIgnoreCase(reportType);
+        boolean isDistrict = ADDRESS_LABEL_YE.equalsIgnoreCase(reportType) || DISTREP_YE_SD.equalsIgnoreCase(reportType);
         String districtCode = getDistrictCodeFromMincode(mincode);
         if(StringUtils.isNotBlank(transmissionMode) && TRANSMISSION_MODE_FTP.equalsIgnoreCase(transmissionMode)) return;
         String rootDirectory = StringUtils.containsAnyIgnoreCase(transmissionMode, TRANSMISSION_MODE_PAPER, TRANSMISSION_MODE_FTP) ? TMP_DIR + EducDistributionApiConstants.FILES_FOLDER_STRUCTURE + StringUtils.upperCase(transmissionMode) : TMP_DIR;
