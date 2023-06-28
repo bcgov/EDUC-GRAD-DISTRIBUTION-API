@@ -282,7 +282,7 @@ public abstract class BaseProcess implements DistributionProcess {
                             gradReportPdf);
                     numberOfPdfs++;
                 } else {
-                    logger.debug("*** Failed to Add PDFs Current Report Type {} for school {} category {}", report.getReportTypeCode(), report.getSchoolOfRecord(), report.getSchoolCategory());
+                    logger.warn("*** Failed to Add PDFs Current Report Type {} for school {} category {}", report.getReportTypeCode(), report.getSchoolOfRecord(), report.getSchoolCategory());
                 }
             } catch (Exception e) {
                 logger.error(EXCEPTION, e.getLocalizedMessage());
@@ -358,8 +358,13 @@ public abstract class BaseProcess implements DistributionProcess {
         if(studentTranscripts != null && !studentTranscripts.isEmpty() ) {
             GradStudentTranscripts studentTranscript = studentTranscripts.get(0);
             byte[] transcriptPdf = Base64.decodeBase64(studentTranscript.getTranscript());
-            locations.add(new ByteArrayInputStream(transcriptPdf));
-            return 1;
+            if(transcriptPdf != null) {
+                locations.add(new ByteArrayInputStream(transcriptPdf));
+                return 1;
+            } else {
+                logger.warn("*** Failed to Add PDFs current student {} ", studentId);
+                return 0;
+            }
         } else {
             return 0;
         }
