@@ -180,7 +180,7 @@ public class MergeProcess extends BaseProcess {
 			int result = addStudentTranscriptToLocations(scd.getStudentID().toString(), locations);
 			if(result == 0) {
 				failedToAdd++;
-				logger.warn("*** Failed to Add PDFs {} Current student {}", failedToAdd, scd.getStudentID());
+				logger.info("*** Failed to Add PDFs {} Current student {}", failedToAdd, scd.getStudentID());
 			} else {
 				currentTranscript++;
 				logger.debug("*** Added PDFs {}/{} Current student {}", currentTranscript, scdList.size(), scd.getStudentID());
@@ -247,9 +247,9 @@ public class MergeProcess extends BaseProcess {
 					locations.add(certificatePdf.getInputStream());
 					currentCertificate++;
 					logger.debug("*** Added PDFs {}/{} Current student {}",currentCertificate,scdList.size(),scd.getStudentID());
-				}else {
+				} else {
 					failedToAdd++;
-					logger.warn("*** Failed to Add PDFs {} Current student {} papertype : {}",failedToAdd,scd.getStudentID(),paperType);
+					logger.info("*** Failed to Add PDFs {} Current student {} papertype : {}",failedToAdd,scd.getStudentID(),paperType);
 				}
 			}
 			mergeDocumentsPDFs(processorData,mincode,schoolCategoryCode,"/EDGRAD.C.",paperType,locations);

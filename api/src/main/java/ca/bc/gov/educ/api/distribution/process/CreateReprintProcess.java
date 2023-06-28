@@ -136,7 +136,7 @@ public class CreateReprintProcess extends BaseProcess {
 					logger.debug("*** Added PDFs {}/{} Current student {}", currentCertificate, scdList.size(), scd.getStudentID());
 				} else {
 					failedToAdd++;
-					logger.warn("*** Failed to Add PDFs {} Current student {}", failedToAdd, scd.getStudentID());
+					logger.info("*** Failed to Add PDFs {} Current student {}", failedToAdd, scd.getStudentID());
 				}
 			}
 			mergeDocumentsPDFs(processorData,mincode,"02","/EDGRAD.C.",paperType,locations);

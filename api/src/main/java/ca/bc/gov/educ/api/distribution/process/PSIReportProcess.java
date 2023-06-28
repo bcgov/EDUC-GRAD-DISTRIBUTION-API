@@ -119,7 +119,7 @@ public class PSIReportProcess extends BaseProcess {
                 int result = addStudentTranscriptToLocations(scd.getStudentID().toString(), locations);
                 if (result == 0) {
                     failedToAdd++;
-                    logger.warn("*** Failed to Add PDFs {} Current student {}", failedToAdd, scd.getStudentID());
+                    logger.info("*** Failed to Add PDFs {} Current student {}", failedToAdd, scd.getStudentID());
                 } else {
                     currentTranscript++;
                     logger.debug("*** Added PDFs {}/{} Current student {}", currentTranscript, scdList.size(), scd.getStudentID());

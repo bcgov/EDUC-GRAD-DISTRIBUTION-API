@@ -98,7 +98,7 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 						logger.debug("*** Added PDFs {}/{} Current Credential {}", currentTranscript, bcdList.size(), bcd.getCredentialTypeCode());
 					} else {
 						failedToAdd++;
-						logger.warn("*** Failed to Add PDFs {} Current Credential {}", failedToAdd, bcd.getCredentialTypeCode());
+						logger.info("*** Failed to Add PDFs {} Current Credential {}", failedToAdd, bcd.getCredentialTypeCode());
 					}
 				}
 				mergeDocumentsPDFs(processorData,mincode,"02","/EDGRAD.T.","YED4",locations);
@@ -173,7 +173,7 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 					logger.debug("*** Added PDFs {}/{} Current Credential {}", currentCertificate, bcdList.size(), bcd.getCredentialTypeCode());
 				} else {
 					failedToAdd++;
-					logger.warn("*** Failed to Add PDFs {} Current Credential {}", failedToAdd, bcd.getCredentialTypeCode());
+					logger.info("*** Failed to Add PDFs {} Current Credential {}", failedToAdd, bcd.getCredentialTypeCode());
 				}
 			}
 			mergeDocumentsPDFs(processorData,mincode,"02","/EDGRAD.C.",paperType,locations);
