@@ -109,7 +109,7 @@ public class PSIReportProcess extends BaseProcess {
         return Pair.of(currentSlipCount, numOfPdfs);
     }
 
-    private void processStudentsForPDFs(ProcessorData processorData, List<PsiCredentialDistribution> scdList, List<InputStream> locations) throws IOException {
+    private void processStudentsForPDFs(ProcessorData processorData, List<PsiCredentialDistribution> scdList, List<InputStream> locations) {
         int currentTranscript = 0;
         int failedToAdd = 0;
 
@@ -119,7 +119,7 @@ public class PSIReportProcess extends BaseProcess {
                 int result = addStudentTranscriptToLocations(scd.getStudentID().toString(), locations);
                 if (result == 0) {
                     failedToAdd++;
-                    logger.info("*** Failed to Add PDFs {} Current student {} in batch", failedToAdd, scd.getStudentID(), processorData.getBatchId());
+                    logger.info("*** Failed to Add PDFs {} Current student {} in batch {}", failedToAdd, scd.getStudentID(), processorData.getBatchId());
                 } else {
                     currentTranscript++;
                     logger.debug("*** Added PDFs {}/{} Current student {}", currentTranscript, scdList.size(), scd.getStudentID());
