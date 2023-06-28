@@ -273,7 +273,7 @@ public class PostingDistributionService {
                             gradReportPdf);
                     numberOfPdfs++;
                 } else {
-                    logger.debug("*** Failed to Add PDFs Current Report Type {} for school {} category {}", report.getReportTypeCode(), report.getSchoolOfRecord(), report.getSchoolCategory());
+                    logger.debug("*** Failed to Add PDFs Current Report Type {} for school {} category {} in batch {}", report.getReportTypeCode(), report.getSchoolOfRecord(), report.getSchoolCategory(), batchId);
                 }
             } catch (Exception e) {
                 logger.error(e.getLocalizedMessage());
@@ -283,7 +283,7 @@ public class PostingDistributionService {
     }
 
     protected void uploadSchoolReportDocuments(Long batchId, String reportType, String mincode, String schoolCategory, String transmissionMode, byte[] gradReportPdf) {
-        boolean isDistrict = (StringUtils.isNotBlank(mincode) && StringUtils.length(mincode) <= 3)  || ADDRESS_LABEL_YE.equalsIgnoreCase(reportType);
+        boolean isDistrict = ADDRESS_LABEL_YE.equalsIgnoreCase(reportType);
         String districtCode = getDistrictCodeFromMincode(mincode);
         if(StringUtils.isNotBlank(transmissionMode) && TRANSMISSION_MODE_FTP.equalsIgnoreCase(transmissionMode)) return;
         String rootDirectory = StringUtils.containsAnyIgnoreCase(transmissionMode, TRANSMISSION_MODE_PAPER, TRANSMISSION_MODE_FTP) ? TMP_DIR + EducDistributionApiConstants.FILES_FOLDER_STRUCTURE + StringUtils.upperCase(transmissionMode) : TMP_DIR;
@@ -292,7 +292,7 @@ public class PostingDistributionService {
             StringBuilder fileLocBuilder = new StringBuilder();
             if (isDistrict) {
                 fileLocBuilder.append(rootDirectory).append(DEL).append(batchId).append(DEL).append(districtCode);
-            } else if (SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode) || ADDRESS_LABEL_SCHL.equalsIgnoreCase(reportType)) {
+            } else if (SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode) || ADDRESS_LABEL_SCHL.equalsIgnoreCase(reportType) || ADDRESS_LABEL_PSI.equalsIgnoreCase(reportType)) {
                 fileLocBuilder.append(rootDirectory).append(DEL).append(batchId);
             } else if (schoolLevelFolders) {
                 fileLocBuilder.append(rootDirectory).append(DEL).append(batchId).append(DEL).append(mincode);
@@ -304,14 +304,14 @@ public class PostingDistributionService {
             StringBuilder fileNameBuilder = new StringBuilder();
             if (isDistrict) {
                 fileNameBuilder.append(rootDirectory).append(DEL).append(batchId).append(DEL).append(districtCode);
-            } else if (SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode) || ADDRESS_LABEL_SCHL.equalsIgnoreCase(reportType)) {
+            } else if (SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode) || ADDRESS_LABEL_SCHL.equalsIgnoreCase(reportType) || ADDRESS_LABEL_PSI.equalsIgnoreCase(reportType)) {
                 fileNameBuilder.append(rootDirectory).append(DEL).append(batchId);
             } else if (schoolLevelFolders) {
                 fileNameBuilder.append(rootDirectory).append(DEL).append(batchId).append(DEL).append(mincode);
             } else {
                 fileNameBuilder.append(rootDirectory).append(DEL).append(batchId).append(DEL).append(districtCode).append(DEL).append(mincode);
             }
-            if (SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode) || ADDRESS_LABEL_YE.equalsIgnoreCase(reportType) || ADDRESS_LABEL_SCHL.equalsIgnoreCase(reportType)) {
+            if (SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode) || ADDRESS_LABEL_YE.equalsIgnoreCase(reportType) || ADDRESS_LABEL_SCHL.equalsIgnoreCase(reportType) || ADDRESS_LABEL_PSI.equalsIgnoreCase(reportType)) {
                 fileNameBuilder.append("/EDGRAD.L.").append("3L14.");
             } else {
                 fileNameBuilder.append("/EDGRAD.R.").append("324W.");

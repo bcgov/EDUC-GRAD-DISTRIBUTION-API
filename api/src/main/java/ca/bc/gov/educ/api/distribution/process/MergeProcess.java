@@ -190,7 +190,7 @@ public class MergeProcess extends BaseProcess {
 			}
 			if(result == 0) {
 				failedToAdd++;
-				logger.info("*** Failed to Add PDFs {} Current student {} in batch {}", failedToAdd, scd.getStudentID(), processorData);
+				logger.info("*** Failed to Add PDFs {} Current student {} in batch {}", failedToAdd, scd.getStudentID(), processorData.getBatchId());
 			} else {
 				currentTranscript++;
 				logger.debug("*** Added PDFs {}/{} Current student {}", currentTranscript, scdList.size(), scd.getStudentID());

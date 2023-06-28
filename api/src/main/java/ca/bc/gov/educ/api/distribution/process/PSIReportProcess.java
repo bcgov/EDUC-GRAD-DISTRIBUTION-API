@@ -60,8 +60,8 @@ public class PSIReportProcess extends BaseProcess {
         for (String psiCode : mapDist.keySet()) {
             counter++;
             int currentSlipCount = 0;
-            psiCode = StringUtils.trim(psiCode);
             DistributionPrintRequest obj = mapDist.get(psiCode);
+            psiCode = StringUtils.trim(psiCode);
             Psi psiDetails = psiService.getPsiDetails(psiCode, restUtils.getAccessToken());
             if (psiDetails != null) {
                 logger.debug("*** PSI Details Acquired {}", psiDetails.getPsiName());
@@ -116,7 +116,7 @@ public class PSIReportProcess extends BaseProcess {
                 if (EducDistributionApiConstants.TRANSMISSION_MODE_FTP.equalsIgnoreCase(processorData.getTransmissionMode())) {
                     processStudentsForCSVs(scdList, psiCode, processorData);
                 } else {
-                    processStudentsForPDFs(scdList, locations);
+                    processStudentsForPDFs(processorData.getBatchId(), scdList, locations);
                     mergeDocumentsPDFs(processorData, psiCode, "02", "/EDGRAD.T.", "YED4", locations);
                 }
                 numOfPdfs++;
@@ -128,7 +128,7 @@ public class PSIReportProcess extends BaseProcess {
         return Pair.of(currentSlipCount, numOfPdfs);
     }
 
-    private void processStudentsForPDFs(List<PsiCredentialDistribution> scdList, List<InputStream> locations) throws IOException {
+    private void processStudentsForPDFs(Long batchId, List<PsiCredentialDistribution> scdList, List<InputStream> locations) throws IOException {
         int currentTranscript = 0;
         int failedToAdd = 0;
 
@@ -139,7 +139,7 @@ public class PSIReportProcess extends BaseProcess {
             }
             if(result == 0) {
                 failedToAdd++;
-                logger.debug("*** Failed to Add PDFs {} Current student {}", failedToAdd, scd.getStudentID());
+                logger.debug("*** Failed to Add PDFs {} Current student {} in batch {}", failedToAdd, scd.getStudentID(), batchId);
             } else {
                 currentTranscript++;
                 logger.debug("*** Added PDFs {}/{} Current student {}", currentTranscript, scdList.size(), scd.getStudentID());
