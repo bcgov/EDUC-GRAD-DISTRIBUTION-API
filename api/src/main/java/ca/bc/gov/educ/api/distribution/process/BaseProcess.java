@@ -11,8 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.web.reactive.function.BodyInserters;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -20,8 +18,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
 import java.util.zip.ZipOutputStream;
 
 import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants.TMP_DIR;
@@ -224,15 +220,17 @@ public abstract class BaseProcess implements DistributionProcess {
     }
 
     protected int addStudentTranscriptToLocations(String studentId, List<InputStream> locations) {
+        int numberOfPdfs = 0;
         List<GradStudentTranscripts> studentTranscripts = restService.executeGet(educDistributionApiConstants.getTranscriptUsingStudentID(), new ParameterizedTypeReference<List<GradStudentTranscripts>>() {}, studentId);
         if(studentTranscripts != null && !studentTranscripts.isEmpty() ) {
             GradStudentTranscripts studentTranscript = studentTranscripts.get(0);
             byte[] transcriptPdf = Base64.decodeBase64(studentTranscript.getTranscript());
-            locations.add(new ByteArrayInputStream(transcriptPdf));
-            return 1;
-        } else {
-            return 0;
+            if(transcriptPdf != null) {
+                locations.add(new ByteArrayInputStream(transcriptPdf));
+                numberOfPdfs = 1;
+            }
         }
+        return numberOfPdfs;
     }
 
     protected void processSchoolsForLabels(List<School> schools, Psi psi) {
