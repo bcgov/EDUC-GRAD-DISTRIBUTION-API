@@ -44,6 +44,7 @@ public abstract class BaseProcess implements DistributionProcess {
 
 
     protected static final String NONGRADDISTREP_SC = "NONGRADDISTREP_SC";
+    protected static final String NONGRADDISTREP_SD = "NONGRADDISTREP_SD";
 
     private static final String EDGRAD_BATCH = "/EDGRAD.BATCH.";
 
