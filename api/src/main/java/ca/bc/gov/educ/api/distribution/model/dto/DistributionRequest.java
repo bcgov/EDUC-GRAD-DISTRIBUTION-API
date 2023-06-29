@@ -9,8 +9,6 @@ import java.util.Map;
 @Data
 @Builder
 public class DistributionRequest {
-    private int totalCyclesCount;
-    private int processedCyclesCount;
     private String activityCode;
     private List<School> schools;
     private Map<String, DistributionPrintRequest> mapDist;

@@ -17,8 +17,6 @@ public class DistributionResponse {
     //Grad2-1931
     private Long batchId;
     private String localDownload;
-    private int totalCyclesCount;
-    private int processedCyclesCount;
     private String activityCode;
     private String transmissionMode;
     private List<School> schools = new ArrayList<>();

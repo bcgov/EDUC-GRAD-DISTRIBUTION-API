@@ -91,10 +91,8 @@ public class PSIReportProcess extends BaseProcess {
         logger.debug("************* TIME Taken  ************ {} secs", difference);
         response.setMergeProcessResponse("Merge Successful and File Uploaded");
         response.setNumberOfPdfs(numberOfPdfs);
-        response.setProcessedCyclesCount(distributionRequest.getProcessedCyclesCount());
         response.setBatchId(processorData.getBatchId());
         response.setLocalDownload(processorData.getLocalDownload());
-        response.setTotalCyclesCount(distributionRequest.getTotalCyclesCount());
         response.setActivityCode(distributionRequest.getActivityCode());
         response.getSchools().addAll(schoolsForLabels);
         response.setStudentSearchRequest(searchRequest);

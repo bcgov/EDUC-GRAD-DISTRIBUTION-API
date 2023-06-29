@@ -59,10 +59,8 @@ public class PostingSchoolReportProcess extends BaseProcess {
 		logger.debug("************* TIME Taken  ************ {} secs",diff);
 		response.setMergeProcessResponse("Read Successful and Posting Done");
 		response.setNumberOfPdfs(numberOfPdfs);
-		response.setProcessedCyclesCount(distributionRequest.getProcessedCyclesCount());
 		response.setBatchId(processorData.getBatchId());
 		response.setLocalDownload(processorData.getLocalDownload());
-		response.setTotalCyclesCount(distributionRequest.getTotalCyclesCount());
 		response.setActivityCode(distributionRequest.getActivityCode());
 		response.setStudentSearchRequest(searchRequest);
 		processorData.setDistributionResponse(response);

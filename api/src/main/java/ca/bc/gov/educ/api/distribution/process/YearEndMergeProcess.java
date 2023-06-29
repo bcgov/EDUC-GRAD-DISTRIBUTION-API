@@ -112,10 +112,8 @@ public class YearEndMergeProcess extends MergeProcess {
         logger.debug("************* TIME Taken  ************ {} secs", diff);
         response.setMergeProcessResponse("Merge Successful and File Uploaded");
         response.setNumberOfPdfs(numberOfPdfs);
-        response.setProcessedCyclesCount(distributionRequest.getProcessedCyclesCount());
         response.setBatchId(processorData.getBatchId());
         response.setLocalDownload(processorData.getLocalDownload());
-        response.setTotalCyclesCount(distributionRequest.getTotalCyclesCount());
         response.setActivityCode(processorData.getActivityCode());
         response.getSchools().addAll(schoolsForLabels);
         response.getDistricts().addAll(districtsForLabels);

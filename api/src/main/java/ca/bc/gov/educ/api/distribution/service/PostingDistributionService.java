@@ -222,6 +222,7 @@ public class PostingDistributionService {
                 }
             }
             assert yeSchoolReports != null;
+
             numberOfPdfs += processDistrictSchoolReports(yeSchoolReports, batchId, schoolReportType, transmissionMode);
         }
         return numberOfPdfs;
