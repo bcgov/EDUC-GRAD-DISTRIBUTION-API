@@ -28,6 +28,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils.ADDRESS_LABEL_PSI;
+import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils.SCHOOL_LABELS_CODE;
+
 
 @Data
 @Component

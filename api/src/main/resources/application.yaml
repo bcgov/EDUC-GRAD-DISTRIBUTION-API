@@ -140,6 +140,8 @@ endpoint:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/report/data/%s?type=CERT
     school_district_year_end_report:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/report/schooldistrictyearend?slrt=%s&drt=%s&srt=%s
+    school_district_year_end_nongrad_report:
+      url: ${GRAD_GRADUATION_API}api/v1/graduate/report/schooldistrictnongradyearend?slrt=%s&drt=%s&srt=%s
     school_district_month_report:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/report/schooldistrictmonth?slrt=%s&drt=%s&srt=%s
     school_district_supplemental_report:

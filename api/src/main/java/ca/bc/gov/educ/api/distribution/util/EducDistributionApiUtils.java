@@ -38,6 +38,7 @@ public class EducDistributionApiUtils {
 	public static final String DISTREP_SD = "DISTREP_SD";
 	public static final String DISTREP_SC = "DISTREP_SC";
 	public static final String NONGRADDISTREP_SC = "NONGRADDISTREP_SC";
+	public static final String NONGRADDISTREP_SD = "NONGRADDISTREP_SD";
 
 	private EducDistributionApiUtils() {}
 

@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils.*;
+
 @Data
 @Component
 @NoArgsConstructor
@@ -285,7 +287,7 @@ public class MergeProcess extends BaseProcess {
 				byte[] encoded = Base64.encodeBase64(bytesSAR);
 				String encodedPdf = new String(encoded, StandardCharsets.US_ASCII);
 				if(!processorData.getActivityCode().contains("USERDIST"))
-					saveSchoolDistributionReport(encodedPdf,mincode,"DISTREP_SC");
+					saveSchoolDistributionReport(encodedPdf,mincode,DISTREP_SC);
 			}
 			mergeDocumentsPDFs(processorData,mincode,schoolCategoryCode,"/EDGRAD.R.","324W",locations);
 		} catch (Exception e) {

@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils.getDistrictCodeFromMincode;
+import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils.*;
 
 @Data
 @Component

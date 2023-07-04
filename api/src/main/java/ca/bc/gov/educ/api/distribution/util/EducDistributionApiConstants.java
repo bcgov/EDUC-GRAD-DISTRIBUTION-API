@@ -124,6 +124,9 @@ public class EducDistributionApiConstants {
     @Value("${endpoint.grad-graduation-api.school_district_year_end_report.url}")
     private String schoolDistrictYearEndReport;
 
+    @Value("${endpoint.grad-graduation-api.school_district_year_end_nongrad_report.url}")
+    private String schoolDistrictYearEndNonGradReport;
+
     @Value("${endpoint.grad-graduation-api.school_district_month_report.url}")
     private String schoolDistrictMonthReport;
 

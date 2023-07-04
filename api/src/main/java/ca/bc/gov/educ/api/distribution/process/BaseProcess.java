@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.zip.ZipOutputStream;
 
 import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants.TMP_DIR;
+import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils.*;
 
 public abstract class BaseProcess implements DistributionProcess {
 
@@ -28,24 +29,6 @@ public abstract class BaseProcess implements DistributionProcess {
 
     protected static final String DEL = "/";
     protected static final String EXCEPTION = "Error {} ";
-    protected static final String SCHOOL_LABELS_CODE = "000000000";
-
-    protected static final String YEARENDDIST = "YEARENDDIST";
-    protected static final String MONTHLYDIST = "MONTHLYDIST";
-    protected static final String NONGRADDIST = "NONGRADDIST";
-    protected static final String SUPPDIST = "SUPPDIST";
-    protected static final String DISTREP_YE_SD = "DISTREP_YE_SD";
-    protected static final String DISTREP_YE_SC = "DISTREP_YE_SC";
-    protected static final String ADDRESS_LABEL_SCHL = "ADDRESS_LABEL_SCHL";
-    protected static final String ADDRESS_LABEL_YE = "ADDRESS_LABEL_YE";
-    protected static final String ADDRESS_LABEL_PSI = "ADDRESS_LABEL_PSI";
-    protected static final String DISTREP_SD = "DISTREP_SD";
-    protected static final String DISTREP_SC = "DISTREP_SC";
-
-
-    protected static final String NONGRADDISTREP_SC = "NONGRADDISTREP_SC";
-    protected static final String NONGRADDISTREP_SD = "NONGRADDISTREP_SD";
-
     private static final String EDGRAD_BATCH = "/EDGRAD.BATCH.";
 
     @Autowired
