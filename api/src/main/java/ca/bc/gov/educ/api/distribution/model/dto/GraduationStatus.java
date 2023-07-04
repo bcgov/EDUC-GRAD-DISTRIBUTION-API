@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -13,7 +14,7 @@ public class GraduationStatus implements Serializable {
 
     private static final long serialVersionUID = 2L;
 
-    private String programCompletionDate = "";
+    private LocalDate programCompletionDate;
     private String honours = "";
     private String gpa = "";
     private String studentGrade = "";
@@ -25,11 +26,11 @@ public class GraduationStatus implements Serializable {
     private String graduationMessage = "";
     private String programName = "";
 
-    public String getProgramCompletionDate() {
+    public LocalDate getProgramCompletionDate() {
         return programCompletionDate;
     }
 
-    public void setProgramCompletionDate(String programCompletionDate) {
+    public void setProgramCompletionDate(LocalDate programCompletionDate) {
         this.programCompletionDate = programCompletionDate;
     }
 

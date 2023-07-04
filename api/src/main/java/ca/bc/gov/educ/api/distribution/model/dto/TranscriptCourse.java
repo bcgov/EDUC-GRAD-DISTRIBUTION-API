@@ -12,6 +12,7 @@ public class TranscriptCourse {
     private String relatedLevel;
     //Grad2-1931
     private String specialCase;
+    private Boolean isUsed;
 
     public String getName() {
         return name;
@@ -83,5 +84,13 @@ public class TranscriptCourse {
 
     public void setSpecialCase(String specialCase) {
         this.specialCase = specialCase;
+    }
+
+    public Boolean getUsed() {
+        return isUsed;
+    }
+
+    public void setUsed(Boolean isUsed) {
+        isUsed = isUsed;
     }
 }
