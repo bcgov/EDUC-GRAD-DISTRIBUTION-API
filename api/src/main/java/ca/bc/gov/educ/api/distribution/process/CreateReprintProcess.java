@@ -78,8 +78,7 @@ public class CreateReprintProcess extends BaseProcess {
 	private int processYedrCertificate(DistributionPrintRequest obj, int currentSlipCount, ReportRequest packSlipReq, String mincode,ProcessorData processorData, int numberOfPdfs) {
 		if (obj.getYedrCertificatePrintRequest() != null) {
 			currentSlipCount++;
-			processCertificatePrintFile(packSlipReq,obj.getYedrCertificatePrintRequest(),mincode,currentSlipCount,obj,processorData,"YEDR");
-			numberOfPdfs++;
+			numberOfPdfs = numberOfPdfs + processCertificatePrintFile(packSlipReq,obj.getYedrCertificatePrintRequest(),mincode,currentSlipCount,obj,processorData,"YEDR");
 			logger.debug("*** YEDR Documents Merged");
 		}
 		return numberOfPdfs;
@@ -88,8 +87,7 @@ public class CreateReprintProcess extends BaseProcess {
 	private int processYedbCertificate(DistributionPrintRequest obj, int currentSlipCount, ReportRequest packSlipReq, String mincode,ProcessorData processorData, int numberOfPdfs) {
 		if (obj.getYedbCertificatePrintRequest() != null) {
 			currentSlipCount++;
-			processCertificatePrintFile(packSlipReq,obj.getYedbCertificatePrintRequest(),mincode,currentSlipCount,obj,processorData,"YEDB");
-			numberOfPdfs++;
+			numberOfPdfs = numberOfPdfs + processCertificatePrintFile(packSlipReq,obj.getYedbCertificatePrintRequest(),mincode,currentSlipCount,obj,processorData,"YEDB");
 			logger.debug("*** YEDB Documents Merged");
 		}
 		return numberOfPdfs;
@@ -98,31 +96,34 @@ public class CreateReprintProcess extends BaseProcess {
 	private int processYed2Certificate(DistributionPrintRequest obj, int currentSlipCount, ReportRequest packSlipReq, String mincode, ProcessorData processorData, int numberOfPdfs) {
 		if (obj.getYed2CertificatePrintRequest() != null) {
 			currentSlipCount++;
-			processCertificatePrintFile(packSlipReq,obj.getYed2CertificatePrintRequest(),mincode,currentSlipCount,obj,processorData,"YED2");
-			numberOfPdfs++;
+			numberOfPdfs = numberOfPdfs + processCertificatePrintFile(packSlipReq,obj.getYed2CertificatePrintRequest(),mincode,currentSlipCount,obj,processorData,"YED2");
 			logger.debug("*** YED2 Documents Merged");
 		}
 		return numberOfPdfs;
 	}
 
-	private void processCertificatePrintFile(ReportRequest packSlipReq, CertificatePrintRequest certificatePrintRequest, String mincode, int currentSlipCount, DistributionPrintRequest obj, ProcessorData processorData, String paperType) {
+	private int processCertificatePrintFile(ReportRequest packSlipReq, CertificatePrintRequest certificatePrintRequest, String mincode, int currentSlipCount, DistributionPrintRequest obj, ProcessorData processorData, String paperType) {
 		PackingSlipRequest request = PackingSlipRequest.builder().mincode(mincode).currentSlip(currentSlipCount).total(obj.getTotal()).paperType(paperType).build();
-		mergeCertificates(packSlipReq, certificatePrintRequest,request,processorData);
+		return mergeCertificates(packSlipReq, certificatePrintRequest,request,processorData);
 	}
 
-	private void mergeCertificates(ReportRequest packSlipReq, CertificatePrintRequest certificatePrintRequest, PackingSlipRequest request, ProcessorData processorData) {
+	private int mergeCertificates(ReportRequest packSlipReq, CertificatePrintRequest certificatePrintRequest, PackingSlipRequest request, ProcessorData processorData) {
 		List<StudentCredentialDistribution> scdList = certificatePrintRequest.getCertificateList();
 		String mincode = request.getMincode();
 		String paperType = request.getPaperType();
 		List<InputStream> locations=new ArrayList<>();
-		setExtraDataForPackingSlip(packSlipReq,paperType,request.getTotal(),scdList.size(),request.getCurrentSlip(), certificatePrintRequest.getBatchId());
+		int currentCertificate = 0;
+		int failedToAdd = 0;
 		try {
+			setExtraDataForPackingSlip(packSlipReq,paperType,request.getTotal(),scdList.size(),request.getCurrentSlip(),"Certificate", certificatePrintRequest.getBatchId());
 			locations.add(reportService.getPackingSlip(packSlipReq).getInputStream());
-			int currentCertificate = 0;
-			int failedToAdd = 0;
 			for (StudentCredentialDistribution scd : scdList) {
 				ReportData data = restService.executeGet(educDistributionApiConstants.getCertDataReprint(), ReportData.class, scd.getPen());
 				if(data != null) {
+					if(data.getCertificate() == null) {
+						logger.info("Certificate doesn't exists for student {}", scd.getPen());
+						continue;
+					}
 					data.getCertificate().setCertStyle("Reprint");
 					data.getCertificate().getOrderType().getCertificateType().setReportName(scd.getCredentialTypeCode());
 					data.getCertificate().getOrderType().getCertificateType().getPaperType().setCode(scd.getPaperType());
@@ -147,6 +148,7 @@ public class CreateReprintProcess extends BaseProcess {
 		} catch (IOException e) {
 			logger.debug(EXCEPTION,e.getMessage());
 		}
+		return currentCertificate;
 	}
 
 	private void createAndSaveDistributionReport(ReportRequest distributionRequest,String mincode,ProcessorData processorData) {

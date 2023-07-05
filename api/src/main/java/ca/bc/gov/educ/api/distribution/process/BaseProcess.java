@@ -89,15 +89,6 @@ public abstract class BaseProcess implements DistributionProcess {
 
     }
 
-    protected void setExtraDataForPackingSlip(ReportRequest packSlipReq, String paperType, int total, int quantity, int currentSlip, Long batchId) {
-        packSlipReq.getData().getPackingSlip().setTotal(total);
-        packSlipReq.getData().getPackingSlip().setCurrent(currentSlip);
-        packSlipReq.getData().getPackingSlip().setQuantity(quantity);
-        packSlipReq.getData().getPackingSlip().getOrderType().getPackingSlipType().getPaperType().setCode(paperType);
-        packSlipReq.getData().getPackingSlip().getOrderType().setName("Certificate");
-        packSlipReq.getData().getPackingSlip().setOrderNumber(batchId);
-    }
-
     protected void setExtraDataForPackingSlip(ReportRequest packSlipReq, String paperType, int total, int quantity, int currentSlip, String orderType, Long batchId) {
         packSlipReq.getData().getPackingSlip().setTotal(total);
         packSlipReq.getData().getPackingSlip().setCurrent(currentSlip);
@@ -289,7 +280,7 @@ public abstract class BaseProcess implements DistributionProcess {
         StringBuilder filePathBuilder = new StringBuilder();
         Path path;
         try {
-            Boolean conditionResult = (MONTHLYDIST.equalsIgnoreCase(activityCode) || SUPPDIST.equalsIgnoreCase(activityCode) || "02".equalsIgnoreCase(schoolCategoryCode));
+            Boolean conditionResult = StringUtils.containsAnyIgnoreCase(activityCode, USERDIST, USERDISTOC, USERDISTRC, MONTHLYDIST, SUPPDIST) || "02".equalsIgnoreCase(schoolCategoryCode);
             if (Boolean.TRUE.equals(conditionResult)) {
                 directoryPathBuilder.append(rootDirectory).append(EducDistributionApiConstants.DEL).append(processorData.getBatchId()).append(EducDistributionApiConstants.DEL).append(minCode).append(EducDistributionApiConstants.DEL);
             } else {

@@ -113,7 +113,6 @@ public class PSIReportProcess extends BaseProcess {
             try {
                 locations.add(reportService.getPackingSlip(packSlipReq).getInputStream());
                 logger.debug("*** Packing Slip Added");
-                //Grad2-1931 : processing students transcripts, merging them and placing in tmp location for transmission mode FTP to generate CSV files- mchintha
                 if (EducDistributionApiConstants.TRANSMISSION_MODE_FTP.equalsIgnoreCase(processorData.getTransmissionMode())) {
                     processStudentsForCSVs(scdList, psiCode, processorData);
                 } else {

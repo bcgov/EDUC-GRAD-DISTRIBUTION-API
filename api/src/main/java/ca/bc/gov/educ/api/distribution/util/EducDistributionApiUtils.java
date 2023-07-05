@@ -26,6 +26,10 @@ public class EducDistributionApiUtils {
 	private static final String PARSE_EXP = "Parse Exception {}";
 
 	public static final String SCHOOL_LABELS_CODE = "000000000";
+	public static final String USERDIST = "USERDIST";
+
+	public static final String USERDISTRC = "USERDIST";
+	public static final String USERDISTOC = "USERDISTOC";
 	public static final String YEARENDDIST = "YEARENDDIST";
 	public static final String MONTHLYDIST = "MONTHLYDIST";
 	public static final String NONGRADDIST = "NONGRADDIST";

@@ -80,7 +80,7 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 			List<InputStream> locations = new ArrayList<>();
 			currentSlipCount++;
 			int totalQuantity = transcriptPrintRequest.getBlankTranscriptList().get(0).getQuantity() * bcdList.size();
-			setExtraDataForPackingSlip(packSlipReq, "YED4", obj.getTotal(), totalQuantity, currentSlipCount, transcriptPrintRequest.getBatchId());
+			setExtraDataForPackingSlip(packSlipReq, "YED4", obj.getTotal(), totalQuantity, currentSlipCount, "Transcript", transcriptPrintRequest.getBatchId());
 			try {
 				locations.add(reportService.getPackingSlip(packSlipReq).getInputStream());
 				logger.debug("*** Packing Slip Added");
@@ -156,7 +156,7 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 		String paperType = request.getPaperType();
 		List<InputStream> locations=new ArrayList<>();
 		int totalQuantity = certificatePrintRequest.getBlankCertificateList().get(0).getQuantity() * bcdList.size();
-		setExtraDataForPackingSlip(packSlipReq,paperType,request.getTotal(),totalQuantity,request.getCurrentSlip(),certificatePrintRequest.getBatchId());
+		setExtraDataForPackingSlip(packSlipReq,paperType,request.getTotal(),totalQuantity,request.getCurrentSlip(),"Certificate",certificatePrintRequest.getBatchId());
 		try {
 			locations.add(reportService.getPackingSlip(packSlipReq).getInputStream());
 			int currentCertificate = 0;

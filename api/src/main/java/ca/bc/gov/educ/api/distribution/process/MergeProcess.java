@@ -241,7 +241,6 @@ public class MergeProcess extends BaseProcess {
 		String mincode = request.getMincode();
 		String paperType = request.getPaperType();
 		List<InputStream> locations=new ArrayList<>();
-		setExtraDataForPackingSlip(packSlipReq,paperType,request.getTotal(),scdList.size(),request.getCurrentSlip(),"Certificate", certificatePrintRequest.getBatchId());
 		try {
 			locations.add(reportService.getPackingSlip(packSlipReq).getInputStream());
 			int currentCertificate = 0;
@@ -268,6 +267,7 @@ public class MergeProcess extends BaseProcess {
 					logger.info("*** Failed to Add PDFs {} Current student {} papertype {} in batch {}",failedToAdd,scd.getStudentID(),paperType,processorData.getBatchId());
 				}
 			}
+			setExtraDataForPackingSlip(packSlipReq,paperType,request.getTotal(),currentCertificate,request.getCurrentSlip(),"Certificate", certificatePrintRequest.getBatchId());
 			mergeDocumentsPDFs(processorData,mincode,schoolCategoryCode,"/EDGRAD.C.",paperType,locations);
 		} catch (IOException e) {
 			logger.debug(EXCEPTION,e.getLocalizedMessage());
