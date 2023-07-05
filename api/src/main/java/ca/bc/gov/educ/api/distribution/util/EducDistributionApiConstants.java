@@ -50,6 +50,8 @@ public class EducDistributionApiConstants {
     public static final int NUMBER_FOUR = 4;
     public static final int NUMBER_FIVE = 5;
     public static final String DATE_FORMAT2 = "yyyyMM";
+    public static final String ASSESSMENT_LTE = "LTE10";
+    public static final String ASSESSMENT_LTP = "LTP10";
 
     @Value("${endpoint.grad-graduation-report-api.get-transcript-list.url}")
     private String transcriptDistributionList;

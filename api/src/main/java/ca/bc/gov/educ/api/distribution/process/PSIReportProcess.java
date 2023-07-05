@@ -289,7 +289,9 @@ public class PSIReportProcess extends BaseProcess {
                     String credits = null;
                     Double proficiencyScore = course.getCourse().getProficiencyScore() == null || Double.isNaN(course.getCourse().getProficiencyScore()) ? 0.0 : course.getCourse().getProficiencyScore();
                     DecimalFormat decimalFormat = new DecimalFormat("#");
-                    boolean assessmentsConditionTrue = course.getCourse().getCode().equalsIgnoreCase("LTE10") || course.getCourse().getCode().equalsIgnoreCase("LTP10");
+                    boolean assessmentsConditionTrue = course.getCourse().getCode() == null || StringUtils.isBlank(course.getCourse().getCode()) ?
+                            false :
+                            (course.getCourse().getCode().equalsIgnoreCase(EducDistributionApiConstants.ASSESSMENT_LTE) || course.getCourse().getCode().equalsIgnoreCase(EducDistributionApiConstants.ASSESSMENT_LTP));
                     //Grad2-2182 setting used for grad as per coursetype is assessments - mchintha
                     //Used for Grad and final percentage
                     if(courseType.equals("3")) {
