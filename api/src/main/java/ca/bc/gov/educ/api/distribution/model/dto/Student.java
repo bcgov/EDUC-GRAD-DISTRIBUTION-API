@@ -41,10 +41,6 @@ public class Student implements Serializable {
     @JsonDeserialize(as = GraduationStatus.class)
     private GraduationStatus graduationStatus = new GraduationStatus();
 
-    //Grad2-2182 - mchintha
-    @JsonDeserialize(as = GraduationStudentRecord.class)
-    private GraduationStudentRecord graduationStudentRecord = new GraduationStudentRecord();
-
     private List<NonGradReason> nonGradReasons = new ArrayList<>();
 
     @JsonDeserialize(as = Pen.class)
@@ -235,10 +231,6 @@ public class Student implements Serializable {
     public void setNonGradReasons(List<NonGradReason> nonGradReasons) {
         this.nonGradReasons = nonGradReasons;
     }
-
-    public GraduationStudentRecord getGraduationStudentRecord() { return graduationStudentRecord; }
-
-    public void setGraduationStudentRecord(GraduationStudentRecord graduationStudentRecord) { this.graduationStudentRecord = graduationStudentRecord; }
 
     @Override
     public boolean equals(Object o) {

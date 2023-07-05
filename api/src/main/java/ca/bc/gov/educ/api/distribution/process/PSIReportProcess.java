@@ -20,6 +20,7 @@ import java.lang.String;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.DecimalFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -227,10 +228,15 @@ public class PSIReportProcess extends BaseProcess {
     //Grad2-1931 : Writes Row D's data on CSV - mchintha
     private void writesCsvFileRowD(List<String[]> studentTranscriptdata, String pen, List<TranscriptResult> courseDetails) {
         String[] nonExaminableCoursesInfo = null;
+        String partialFlag = null;
         if (courseDetails != null) {
             for (TranscriptResult course : courseDetails) {
-                String credits = (course.getUsedForGrad() == null || course.getUsedForGrad().isBlank()) ? "" : course.getUsedForGrad();
+                String usedForGrad = (course.getUsedForGrad() == null || course.getUsedForGrad().isBlank()) ? "" : course.getUsedForGrad();
                 String courseType = (course.getCourse().getType() == null || course.getCourse().getType().isBlank()) ? "" : course.getCourse().getType();
+                String gradReqtType = (course.getCourse().getGenericCourseType() == null || course.getCourse().getGenericCourseType().isBlank()) ? "" : course.getCourse().getGenericCourseType();
+                Integer courseOriginalCredits = course.getCourse().getOriginalCredits() == null ? 0 : course.getCourse().getOriginalCredits();
+                Integer credits = course.getCourse().getCredit() == null ? 0 : course.getCourse().getCredit();
+
                 //D rows writes only Non-Examinable Courses
                 if (courseType.equals("2")) {
 
@@ -240,18 +246,20 @@ public class PSIReportProcess extends BaseProcess {
                             (course.getCourse().getCode() == null || course.getCourse().getCode().isBlank()) ? "" : course.getCourse().getCode(),
                             (course.getCourse().getLevel() == null || course.getCourse().getLevel().isBlank()) ? "" : course.getCourse().getLevel(),
                             (course.getCourse().getSessionDate() != null || StringUtils.isNotBlank(course.getCourse().getSessionDate())) ? course.getCourse().getSessionDate() : "",
-                            (course.getMark().getInterimLetterGrade() == null || course.getMark().getInterimLetterGrade().isBlank()) ? "" : course.getMark().getInterimLetterGrade(),
+                            //(course.getMark().getInterimLetterGrade() == null || course.getMark().getInterimLetterGrade().isBlank()) ? "" : course.getMark().getInterimLetterGrade(),
+                            "",
                             (course.getMark().getFinalLetterGrade() == null || course.getMark().getFinalLetterGrade().isBlank()) ? "" : course.getMark().getFinalLetterGrade(),
-                            (course.getMark().getInterimPercent() == null || StringUtils.isBlank(course.getMark().getInterimPercent())) ? EducDistributionApiConstants.THREE_ZEROES : String.format("%03d", extractNumericValue(course.getMark().getInterimPercent())),
-                            (course.getMark().getFinalPercent() == null || StringUtils.isBlank(course.getMark().getFinalPercent())) ? EducDistributionApiConstants.THREE_ZEROES : String.format("%03d", extractNumericValue(course.getMark().getFinalPercent())),
+                            //(course.getMark().getInterimPercent() == null || StringUtils.isBlank(course.getMark().getInterimPercent())) ? EducDistributionApiConstants.THREE_ZEROES : String.format("%03d", extractNumericValue(course.getMark().getInterimPercent())),
+                            EducDistributionApiConstants.THREE_ZEROES,
+                            (course.getMark().getFinalPercent() == null || StringUtils.isBlank(course.getMark().getFinalPercent().toString())) ? EducDistributionApiConstants.THREE_ZEROES : String.format("%03d", extractNumericValue(course.getMark().getFinalPercent().toString())),
                             (course.getCourse().getCredits() == null || StringUtils.isBlank(course.getCourse().getCredits())) ? EducDistributionApiConstants.TWO_ZEROES : String.format("%02d", extractNumericValue(course.getCourse().getCredits())),
                             (course.getCourse().getRelatedCourse() == null || course.getCourse().getRelatedCourse().isBlank()) ? "" : course.getCourse().getRelatedCourse(),
                             (course.getCourse().getRelatedLevel() == null || course.getCourse().getRelatedLevel().isBlank()) ? "" : course.getCourse().getRelatedLevel(),
-                            (course.getCourse().getName() == null || course.getCourse().getName().isBlank()) ? "" : course.getCourse().getName(),
+                            (course.getCourse().getCustomizedCourseName() == null || course.getCourse().getCustomizedCourseName().isBlank()) ? "" : course.getCourse().getCustomizedCourseName(),
                             (course.getEquivalency() == null || course.getEquivalency().isBlank()) ? "" : course.getEquivalency(),
-                            courseType,
-                            "",// partial flag
-                            extractNumericValue(credits) > 0 ? EducDistributionApiConstants.LETTER_Y : ""
+                            gradReqtType,
+                            courseOriginalCredits > credits ? "Y" : "",// partial flag
+                            extractNumericValue(usedForGrad) > 0 ? EducDistributionApiConstants.LETTER_Y : ""
                     };
 
                     setColumnsWidths(nonExaminableCoursesInfo,
@@ -268,6 +276,7 @@ public class PSIReportProcess extends BaseProcess {
         String[] examinableCoursesAndAssessmentsInfo = null;
         List<String[]> cRowsSortingArray = null;
         String used = null;
+        String finalLetterGrade = null;
         if (courseDetails != null) {
             for (TranscriptResult course : courseDetails) {
                 String courseType = (course.getCourse().getType() == null || course.getCourse().getType().isBlank()) ? "" : course.getCourse().getType();
@@ -276,13 +285,24 @@ public class PSIReportProcess extends BaseProcess {
                 if (courseType.equals("1") || courseType.equals("3")) {
                     String credits = null;
                     //Grad2-2182 setting used for grad as per coursetype is assessments - mchintha
+                    //Used for Grad
                     if(courseType.equals("3")) {
                         credits = course.getCourse().getUsed() == null ? "" : String.valueOf(course.getCourse().getUsed());
-                        used = credits.equalsIgnoreCase("true") ? EducDistributionApiConstants.LETTER_Y : "";
+                        used = (credits != null && credits.equalsIgnoreCase("true")) ? EducDistributionApiConstants.LETTER_Y : "";
                     } else {
                         credits = (course.getUsedForGrad() == null || course.getUsedForGrad().isBlank()) ? "" : course.getUsedForGrad();
                         used = extractNumericValue(credits) > 0 ? EducDistributionApiConstants.LETTER_Y : "";
                     }
+                    //Final letter Grade
+                    if(course.getCourse().getCode().equalsIgnoreCase("LTE10") || course.getCourse().getCode().equalsIgnoreCase("LTP10")) {
+                        Double proficiencyScore = course.getCourse().getProficiencyScore() == null || Double.isNaN(course.getCourse().getProficiencyScore()) ? 0.0 : course.getCourse().getProficiencyScore();
+                        finalLetterGrade = (proficiencyScore > 0.0) ? "RM" : "";
+                    } else {
+                        finalLetterGrade = (course.getMark().getFinalLetterGrade() == null || course.getMark().getFinalLetterGrade().isBlank()) ? "" : course.getMark().getFinalLetterGrade();
+                    }
+                    //Completed Course percentage
+                    DecimalFormat decimalFormat = new DecimalFormat("#");
+                    String completedCoursePercentage = course.getMark().getCompletedCoursePercentage() == null ? EducDistributionApiConstants.THREE_ZEROES : decimalFormat.format(course.getMark().getCompletedCoursePercentage()).toString() ;
 
                     examinableCoursesAndAssessmentsInfo = new String[]{
                             pen,
@@ -295,8 +315,8 @@ public class PSIReportProcess extends BaseProcess {
                             (course.getMark().getSchoolPercent() == null || StringUtils.isBlank(course.getMark().getSchoolPercent())) ? EducDistributionApiConstants.THREE_ZEROES : String.format("%03d", extractNumericValue(course.getMark().getSchoolPercent())),
                             (course.getCourse().getSpecialCase() == null || course.getCourse().getSpecialCase().isBlank()) ? "" : course.getCourse().getSpecialCase(),
                             (course.getMark().getExamPercent() == null || StringUtils.isBlank(course.getMark().getExamPercent())) ? EducDistributionApiConstants.THREE_ZEROES : String.format("%03d", extractNumericValue(course.getMark().getExamPercent())),
-                            (course.getMark().getFinalPercent() == null || StringUtils.isBlank(course.getMark().getFinalPercent())) ? EducDistributionApiConstants.THREE_ZEROES : String.format("%03d", extractNumericValue(course.getMark().getFinalPercent())),
-                            (course.getMark().getFinalLetterGrade() == null || course.getMark().getFinalLetterGrade().isBlank()) ? "" : course.getMark().getFinalLetterGrade(),
+                            String.format("%03d", extractNumericValue(completedCoursePercentage)),
+                            finalLetterGrade.equalsIgnoreCase("NA") ? "" : finalLetterGrade,
                             (course.getMark().getInterimPercent() == null || StringUtils.isBlank(course.getMark().getInterimPercent())) ? EducDistributionApiConstants.THREE_ZEROES : String.format("%03d", extractNumericValue(course.getMark().getInterimPercent())),
                             (course.getCourse().getCredits() == null || StringUtils.isBlank(course.getCourse().getCredits())) ? EducDistributionApiConstants.TWO_ZEROES : String.format("%02d", extractNumericValue(course.getCourse().getCredits())),
                             "", //Course case
