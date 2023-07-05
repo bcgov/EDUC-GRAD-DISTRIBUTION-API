@@ -277,32 +277,38 @@ public class PSIReportProcess extends BaseProcess {
         List<String[]> cRowsSortingArray = null;
         String used = null;
         String finalLetterGrade = null;
+        String finalPercent = null;
+
         if (courseDetails != null) {
             for (TranscriptResult course : courseDetails) {
                 String courseType = (course.getCourse().getType() == null || course.getCourse().getType().isBlank()) ? "" : course.getCourse().getType();
 
+
                 //C rows writes Examinable Courses and Assessments
                 if (courseType.equals("1") || courseType.equals("3")) {
                     String credits = null;
+                    Double proficiencyScore = course.getCourse().getProficiencyScore() == null || Double.isNaN(course.getCourse().getProficiencyScore()) ? 0.0 : course.getCourse().getProficiencyScore();
+                    DecimalFormat decimalFormat = new DecimalFormat("#");
+                    boolean assessmentsConditionTrue = course.getCourse().getCode().equalsIgnoreCase("LTE10") || course.getCourse().getCode().equalsIgnoreCase("LTP10");
                     //Grad2-2182 setting used for grad as per coursetype is assessments - mchintha
-                    //Used for Grad
+                    //Used for Grad and final percentage
                     if(courseType.equals("3")) {
                         credits = course.getCourse().getUsed() == null ? "" : String.valueOf(course.getCourse().getUsed());
                         used = (credits != null && credits.equalsIgnoreCase("true")) ? EducDistributionApiConstants.LETTER_Y : "";
+                        finalPercent = assessmentsConditionTrue ? EducDistributionApiConstants.THREE_ZEROES : decimalFormat.format(proficiencyScore);
                     } else {
                         credits = (course.getUsedForGrad() == null || course.getUsedForGrad().isBlank()) ? "" : course.getUsedForGrad();
                         used = extractNumericValue(credits) > 0 ? EducDistributionApiConstants.LETTER_Y : "";
+                        String completedCoursePercentage = course.getMark().getCompletedCoursePercentage() == null ? EducDistributionApiConstants.THREE_ZEROES : decimalFormat.format(course.getMark().getCompletedCoursePercentage());
+                        finalPercent = assessmentsConditionTrue ? EducDistributionApiConstants.THREE_ZEROES : completedCoursePercentage;
                     }
-                    //Final letter Grade
-                    if(course.getCourse().getCode().equalsIgnoreCase("LTE10") || course.getCourse().getCode().equalsIgnoreCase("LTP10")) {
-                        Double proficiencyScore = course.getCourse().getProficiencyScore() == null || Double.isNaN(course.getCourse().getProficiencyScore()) ? 0.0 : course.getCourse().getProficiencyScore();
+                    //Final letter Grade and final percent for assessements LTE10 and LTP10
+                    if(assessmentsConditionTrue) {
                         finalLetterGrade = (proficiencyScore > 0.0) ? "RM" : "";
                     } else {
                         finalLetterGrade = (course.getMark().getFinalLetterGrade() == null || course.getMark().getFinalLetterGrade().isBlank()) ? "" : course.getMark().getFinalLetterGrade();
                     }
-                    //Completed Course percentage
-                    DecimalFormat decimalFormat = new DecimalFormat("#");
-                    String completedCoursePercentage = course.getMark().getCompletedCoursePercentage() == null ? EducDistributionApiConstants.THREE_ZEROES : decimalFormat.format(course.getMark().getCompletedCoursePercentage()).toString() ;
+
 
                     examinableCoursesAndAssessmentsInfo = new String[]{
                             pen,
@@ -315,7 +321,7 @@ public class PSIReportProcess extends BaseProcess {
                             (course.getMark().getSchoolPercent() == null || StringUtils.isBlank(course.getMark().getSchoolPercent())) ? EducDistributionApiConstants.THREE_ZEROES : String.format("%03d", extractNumericValue(course.getMark().getSchoolPercent())),
                             (course.getCourse().getSpecialCase() == null || course.getCourse().getSpecialCase().isBlank()) ? "" : course.getCourse().getSpecialCase(),
                             (course.getMark().getExamPercent() == null || StringUtils.isBlank(course.getMark().getExamPercent())) ? EducDistributionApiConstants.THREE_ZEROES : String.format("%03d", extractNumericValue(course.getMark().getExamPercent())),
-                            String.format("%03d", extractNumericValue(completedCoursePercentage)),
+                            String.format("%03d", extractNumericValue(finalPercent)),
                             finalLetterGrade.equalsIgnoreCase("NA") ? "" : finalLetterGrade,
                             (course.getMark().getInterimPercent() == null || StringUtils.isBlank(course.getMark().getInterimPercent())) ? EducDistributionApiConstants.THREE_ZEROES : String.format("%03d", extractNumericValue(course.getMark().getInterimPercent())),
                             (course.getCourse().getCredits() == null || StringUtils.isBlank(course.getCourse().getCredits())) ? EducDistributionApiConstants.TWO_ZEROES : String.format("%02d", extractNumericValue(course.getCourse().getCredits())),
@@ -389,13 +395,13 @@ public class PSIReportProcess extends BaseProcess {
                         programCodesListSize >= EducDistributionApiConstants.NUMBER_THREE ? studentDetails.getGraduationData().getProgramCodes().get(2) : "",
                         programCodesListSize >= EducDistributionApiConstants.NUMBER_FOUR ? studentDetails.getGraduationData().getProgramCodes().get(3) : "",
                         programCodesListSize >= EducDistributionApiConstants.NUMBER_FIVE ? studentDetails.getGraduationData().getProgramCodes().get(4) : "",
-                        "", //18 Blanks
+                        "", //10 Blanks
                         (gradProgram == null || StringUtils.isBlank(gradProgram.getCode().getCode()) ? "" : gradProgram.getCode().getCode().substring(0, 4))
                 };
 
                 setColumnsWidths(
                         studentInfo,
-                        IntStream.of(10, 1, 25, 25, 25, 8, 1, 1, 2, 8, 12, 2, 1, 4, 6, 1, 1, 15, 2, 2, 2, 2, 18, 4).toArray(),
+                        IntStream.of(10, 1, 25, 25, 25, 8, 1, 1, 2, 8, 12, 2, 1, 4, 6, 1, 1, 15, 2, 2, 2, 2, 10, 4).toArray(),
                         studentTranscriptdata);
             }
 
