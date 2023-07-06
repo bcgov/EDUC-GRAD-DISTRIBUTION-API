@@ -227,7 +227,6 @@ public class PSIReportProcess extends BaseProcess {
     //Grad2-1931 : Writes Row D's data on CSV - mchintha
     private void writesCsvFileRowD(List<String[]> studentTranscriptdata, String pen, List<TranscriptResult> courseDetails) {
         String[] nonExaminableCoursesInfo = null;
-        String partialFlag = null;
         if (courseDetails != null) {
             for (TranscriptResult course : courseDetails) {
                 String usedForGrad = (course.getUsedForGrad() == null || course.getUsedForGrad().isBlank()) ? "" : course.getUsedForGrad();
