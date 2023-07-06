@@ -23,6 +23,7 @@ import reactor.core.publisher.Mono;
 
 import java.io.ByteArrayInputStream;
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -1082,7 +1083,7 @@ public class DistributionServiceTest {
 		Student student = new Student();
 		student.setFirstName("aaa");
 		student.setLastName("bbbb");
-		student.setBirthdate(new Date(270597));
+		student.setBirthdate(LocalDate.of(97,05,27));
 		GraduationData gradData = new GraduationData();
 		gradData.setDogwoodFlag(true);
 		gradData.setHonorsFlag(false);

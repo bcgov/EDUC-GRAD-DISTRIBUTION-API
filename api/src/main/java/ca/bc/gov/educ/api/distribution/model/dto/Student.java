@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -17,7 +18,7 @@ public class Student implements Serializable {
     private String lastName;
     private String gender;
     private String citizenship;
-    private Date birthdate;
+    private LocalDate birthdate;
     private Date lastUpdateDate;
     private Address address;
     private String grade;
@@ -92,11 +93,11 @@ public class Student implements Serializable {
     }
 
     @JsonFormat(pattern="yyyy-MM-dd")
-    public Date getBirthdate() {
+    public LocalDate getBirthdate() {
         return birthdate;
     }
 
-    public void setBirthdate(Date value) {
+    public void setBirthdate(LocalDate value) {
         this.birthdate = value;
     }
 
@@ -179,8 +180,6 @@ public class Student implements Serializable {
     }
 
     //Grad2-1931
-
-
     public String getConsumerEducReqt() {
         return consumerEducReqt;
     }
