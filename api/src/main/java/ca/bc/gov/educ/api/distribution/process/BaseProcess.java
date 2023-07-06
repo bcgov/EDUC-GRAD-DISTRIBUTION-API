@@ -12,13 +12,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.List;
-import java.util.zip.ZipOutputStream;
 
 import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants.TMP_DIR;
 import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils.*;
@@ -65,30 +66,6 @@ public abstract class BaseProcess implements DistributionProcess {
             return schoolService.getCommonSchoolDetails(mincode, exception);
     }
 
-    protected void createZipFile(Long batchId) {
-        StringBuilder sourceFileBuilder = new StringBuilder().append(TMP_DIR).append(DEL).append(batchId);
-        try (FileOutputStream fos = new FileOutputStream(TMP_DIR + EDGRAD_BATCH + batchId + ".zip")) {
-            ZipOutputStream zipOut = new ZipOutputStream(fos);
-            File fileToZip = new File(sourceFileBuilder.toString());
-            EducDistributionApiUtils.zipFile(fileToZip, fileToZip.getName(), zipOut);
-            zipOut.finish();
-        } catch (IOException e) {
-            logger.debug(EXCEPTION, e.getLocalizedMessage());
-        }
-    }
-
-    protected void createControlFile(Long batchId, int numberOfPdfs) {
-        try (FileOutputStream fos = new FileOutputStream(TMP_DIR + EDGRAD_BATCH + batchId + ".txt")) {
-            byte[] contentInBytes = String.valueOf(numberOfPdfs).getBytes();
-            fos.write(contentInBytes);
-            fos.flush();
-        } catch (IOException e) {
-            logger.debug(EXCEPTION, e.getLocalizedMessage());
-        }
-        logger.debug("Created Control file ");
-
-    }
-
     protected void setExtraDataForPackingSlip(ReportRequest packSlipReq, String paperType, int total, int quantity, int currentSlip, String orderType, Long batchId) {
         packSlipReq.getData().getPackingSlip().setTotal(total);
         packSlipReq.getData().getPackingSlip().setCurrent(currentSlip);
@@ -110,29 +87,14 @@ public abstract class BaseProcess implements DistributionProcess {
         postingDistributionService.zipBatchDirectory(batchId, download, numberOfPdfs, pathToZip);
     }
 
-    protected Integer createDistrictSchoolYearEndReport(String schooLabelReportType, String districtReportType, String schoolReportType) {
-        return postingDistributionService.createDistrictSchoolYearEndReport(schooLabelReportType, districtReportType, schoolReportType);
-    }
-
     protected Integer createSchoolLabelsReport(List<School> schools, String schooLabelReportType) {
         return postingDistributionService.createSchoolLabelsReport(schools, schooLabelReportType);
     }
+
     //Grad2-2052 - setting SFTP root folder location where it has to pick zip folders from, to send them to BC mail - mchintha
     protected String getRootPathForFilesStorage(ProcessorData data) {
         logger.debug("getZipFolderFromRootLocation {} transmission mode {}", TMP_DIR, StringUtils.trimToEmpty(data.getTransmissionMode()));
         return TMP_DIR;
-    }
-
-    protected Integer createDistrictLabelsReport(List<TraxDistrict> traxDistricts, String districtLabelReportType) {
-        return postingDistributionService.createDistrictLabelsReport(traxDistricts, districtLabelReportType);
-    }
-
-    protected Integer createDistrictSchoolMonthReport(String schooLabelReportType, String districtReportType, String schoolReportType) {
-        return postingDistributionService.createDistrictSchoolMonthReport(schooLabelReportType, districtReportType, schoolReportType);
-    }
-
-    protected Integer createDistrictSchoolSuppReport(String schooLabelReportType, String districtReportType, String schoolReportType) {
-        return postingDistributionService.createDistrictSchoolSuppReport(schooLabelReportType, districtReportType, schoolReportType);
     }
 
     public int processSchoolLabelsDistribution(Long batchId, String schooLabelReportType, String transmissionMode) {
@@ -141,33 +103,6 @@ public abstract class BaseProcess implements DistributionProcess {
 
     protected int processDistrictSchoolDistribution(Long batchId, Collection<String> mincodes, String schooLabelReportType, String districtReportType, String schoolReportType, String transmissionMode) {
         return postingDistributionService.processDistrictSchoolDistribution(batchId, mincodes, schooLabelReportType, districtReportType, schoolReportType, transmissionMode);
-    }
-
-    /**
-    protected Integer createDistrictSchoolMonthReport(String accessToken, String schooLabelReportType, String districtReportType, String schoolReportType) {
-        Integer reportCount = 0;
-        final UUID correlationID = UUID.randomUUID();
-        reportCount += webClient.get().uri(String.format(educDistributionApiConstants.getSchoolDistrictMonthReport(), schooLabelReportType, districtReportType, schoolReportType))
-                .headers(h -> {
-                    h.setBearerAuth(accessToken);
-                    h.set(EducDistributionApiConstants.CORRELATION_ID, correlationID.toString());
-                })
-                .retrieve().bodyToMono(Integer.class).block();
-        return reportCount;
-    }**/
-
-    protected StringBuilder buildFileLocationPath(Long batchId, String mincode, String schoolCategory, boolean isDistrict, String districtCode) {
-        StringBuilder fileLocBuilder = new StringBuilder();
-        if (SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode)) {
-            fileLocBuilder.append(TMP_DIR).append(EducDistributionApiConstants.DEL).append(batchId);
-        } else if (isDistrict) {
-            fileLocBuilder.append(TMP_DIR).append(EducDistributionApiConstants.DEL).append(batchId).append(EducDistributionApiConstants.DEL).append(districtCode);
-        } else if ("02".equalsIgnoreCase(schoolCategory)) {
-            fileLocBuilder.append(TMP_DIR).append(EducDistributionApiConstants.DEL).append(batchId).append(EducDistributionApiConstants.DEL).append(mincode);
-        } else {
-            fileLocBuilder.append(TMP_DIR).append(EducDistributionApiConstants.DEL).append(batchId).append(EducDistributionApiConstants.DEL).append(districtCode).append(EducDistributionApiConstants.DEL).append(mincode);
-        }
-        return fileLocBuilder;
     }
 
     protected void mergeDocumentsPDFs(ProcessorData processorData, String mincode, String schoolCategoryCode, String fileName, String paperType, List<InputStream> locations) {
@@ -196,11 +131,12 @@ public abstract class BaseProcess implements DistributionProcess {
 
     protected int addStudentTranscriptToLocations(String studentId, List<InputStream> locations) {
         int numberOfPdfs = 0;
-        List<GradStudentTranscripts> studentTranscripts = restService.executeGet(educDistributionApiConstants.getTranscriptUsingStudentID(), new ParameterizedTypeReference<List<GradStudentTranscripts>>() {}, studentId);
-        if(studentTranscripts != null && !studentTranscripts.isEmpty() ) {
+        List<GradStudentTranscripts> studentTranscripts = restService.executeGet(educDistributionApiConstants.getTranscriptUsingStudentID(), new ParameterizedTypeReference<List<GradStudentTranscripts>>() {
+        }, studentId);
+        if (studentTranscripts != null && !studentTranscripts.isEmpty()) {
             GradStudentTranscripts studentTranscript = studentTranscripts.get(0);
             byte[] transcriptPdf = Base64.decodeBase64(studentTranscript.getTranscript());
-            if(transcriptPdf != null) {
+            if (transcriptPdf != null) {
                 locations.add(new ByteArrayInputStream(transcriptPdf));
                 numberOfPdfs = 1;
             }
@@ -226,8 +162,8 @@ public abstract class BaseProcess implements DistributionProcess {
     }
 
     protected void processSchoolsForLabels(List<School> schools, String mincode, String accessToken, ExceptionMessage exception) {
-        School existSchool = schools.stream().filter(s->mincode.equalsIgnoreCase(s.getMincode())).findAny().orElse(null);
-        if(existSchool != null) return;
+        School existSchool = schools.stream().filter(s -> mincode.equalsIgnoreCase(s.getMincode())).findAny().orElse(null);
+        if (existSchool != null) return;
         TraxSchool traxSchool = schoolService.getTraxSchool(mincode, exception);
         if (traxSchool != null) {
             School school = new School();
@@ -247,8 +183,8 @@ public abstract class BaseProcess implements DistributionProcess {
     }
 
     protected void processDistrictsForLabels(List<School> schools, String distcode, ExceptionMessage exception) {
-        School existSchool = schools.stream().filter(s->distcode.equalsIgnoreCase(s.getMincode())).findAny().orElse(null);
-        if(existSchool != null) {
+        School existSchool = schools.stream().filter(s -> distcode.equalsIgnoreCase(s.getMincode())).findAny().orElse(null);
+        if (existSchool != null) {
             logger.debug("District {} already exists in the district labels", existSchool.getMincode());
             return;
         }

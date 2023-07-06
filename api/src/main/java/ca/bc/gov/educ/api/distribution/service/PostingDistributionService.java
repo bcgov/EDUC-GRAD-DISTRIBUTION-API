@@ -179,6 +179,7 @@ public class PostingDistributionService {
         return processSchoolLabelsDistribution(batchId, "", schooLabelReportType, transmissionMode);
     }
 
+    @Generated
     public int processDistrictSchoolDistribution(Long batchId, Collection<String> mincodes, String schooLabelReportType, String districtReportType, String schoolReportType, String transmissionMode) {
         int numberOfPdfs = 0;
         boolean processMincodes = !(mincodes != null && !mincodes.isEmpty());

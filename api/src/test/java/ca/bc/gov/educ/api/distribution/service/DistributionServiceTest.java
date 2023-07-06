@@ -813,9 +813,9 @@ public class DistributionServiceTest {
 		DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).build();
 		if (isAsyncProcess) {
 			response.setJobStatus("success");
-			Mockito.doNothing().when(this.restUtils).notifyDistributionJobIsCompleted(batchId, data);
+			Mockito.doNothing().when(this.restUtils).notifyDistributionJobIsCompleted(data);
 			response.setJobStatus("error");
-			Mockito.doNothing().when(this.restUtils).notifyDistributionJobIsCompleted(batchId, data);
+			Mockito.doNothing().when(this.restUtils).notifyDistributionJobIsCompleted(data);
 
 			gradDistributionService.asyncDistributeCredentials(runType, batchId, distributionRequest, activityCode, transmissionMode, localDownload, accessToken);
 			DistributionResponse disRes = new DistributionResponse();
@@ -986,9 +986,9 @@ public class DistributionServiceTest {
 		DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).build();
 		if (isAsyncProcess) {
 			response.setJobStatus("success");
-			Mockito.doNothing().when(this.restUtils).notifyDistributionJobIsCompleted(batchId, data);
+			Mockito.doNothing().when(this.restUtils).notifyDistributionJobIsCompleted(data);
 			response.setJobStatus("error");
-			Mockito.doNothing().when(this.restUtils).notifyDistributionJobIsCompleted(batchId, data);
+			Mockito.doNothing().when(this.restUtils).notifyDistributionJobIsCompleted(data);
 
 			gradDistributionService.asyncDistributeCredentials(runType, batchId, distributionRequest, activityCode, transmissionMode, localDownload, accessToken);
 			DistributionResponse disRes = new DistributionResponse();

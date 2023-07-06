@@ -17,7 +17,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -85,14 +84,9 @@ public class RestUtils {
 				.bodyToMono(ResponseObj.class).block();
 	}
 
-	public ResponseObj rtGetTokenFallBack(HttpServerErrorException exception){
-		LOGGER.error("{} NOT REACHABLE after many attempts.", constants.getTokenUrl(), exception);
-		return null;
-	}
-
-	public void notifyDistributionJobIsCompleted(Long batchId, ProcessorData data) {
+	public void notifyDistributionJobIsCompleted(ProcessorData data) {
 		final UUID correlationID = UUID.randomUUID();
-		webClient.post().uri(String.format(constants.getDistributionJobCompleteNotification(), batchId, data.getDistributionResponse().getJobStatus())).headers(h -> {
+		webClient.post().uri(String.format(constants.getDistributionJobCompleteNotification(), data.getBatchId(), data.getDistributionResponse().getJobStatus())).headers(h -> {
 			h.setBearerAuth(data.getAccessToken());
 			h.set(EducDistributionApiConstants.CORRELATION_ID, correlationID.toString());
 		}).body(BodyInserters.fromValue(data.getDistributionResponse())).retrieve().bodyToMono(Void.class).block();
