@@ -245,6 +245,10 @@ public class PostingProcessServiceTest {
 
         var result = this.postingDistributionService.postingProcess(response);
         Assert.assertTrue(result);
+
+        response.setActivityCode(NONGRADDIST);
+        result = this.postingDistributionService.postingProcess(response);
+        Assert.assertTrue(result);
     }
 
     @Test
