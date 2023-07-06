@@ -378,6 +378,23 @@ public class PostingProcessServiceTest {
     }
 
     @Test
+    public void testCreateDistrictSchoolYearEndNonGradReport() {
+        TraxDistrict district = new TraxDistrict();
+        district.setDistrictNumber(RandomStringUtils.randomNumeric(3));
+        district.setDistrictName(RandomStringUtils.randomAlphabetic(15));
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(String.format(educDistributionApiConstants.getSchoolDistrictYearEndNonGradReport(), ADDRESS_LABEL_YE, DISTREP_YE_SD, DISTREP_YE_SC))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(1));
+
+        var result = this.postingDistributionService.createDistrictSchoolYearEndNonGradReport(ADDRESS_LABEL_YE, DISTREP_YE_SD, DISTREP_YE_SC);
+        Assert.assertTrue(1 == result);
+    }
+
+    @Test
     public void testCreateDistrictSchoolYearEndReportFromListOfSchools() {
         School school = new School();
         school.setMincode(RandomStringUtils.randomNumeric(6));
@@ -393,6 +410,25 @@ public class PostingProcessServiceTest {
         when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(1));
 
         var result = this.postingDistributionService.createDistrictSchoolYearEndReport(ADDRESS_LABEL_YE, DISTREP_YE_SD, DISTREP_YE_SC, List.of(school.getMincode()));
+        Assert.assertTrue(1 == result);
+    }
+
+    @Test
+    public void testCreateDistrictSchoolYearEndNonGradReportFromListOfSchools() {
+        School school = new School();
+        school.setMincode(RandomStringUtils.randomNumeric(6));
+        school.setName(RandomStringUtils.randomAlphabetic(15));
+        school.setSchoolCategoryCode(RandomStringUtils.randomNumeric(2));
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(educDistributionApiConstants.getSchoolDistrictYearEndNonGradReport(), ADDRESS_LABEL_YE, DISTREP_YE_SD, DISTREP_YE_SC))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(1));
+
+        var result = this.postingDistributionService.createDistrictSchoolYearEndNonGradReport(ADDRESS_LABEL_YE, DISTREP_YE_SD, DISTREP_YE_SC, List.of(school.getMincode()));
         Assert.assertTrue(1 == result);
     }
 
