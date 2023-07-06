@@ -63,7 +63,14 @@ public class PostingProcessServiceTest {
         response.setLocalDownload("N");
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(String.format(educDistributionApiConstants.getSchoolDistrictYearEndReport(), "", DISTREP_YE_SD, DISTREP_YE_SC))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersUriMock.uri(String.format(educDistributionApiConstants.getSchoolDistrictYearEndReport(), "", DISTREP_YE_SD, ""))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(1));
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(String.format(educDistributionApiConstants.getSchoolDistrictYearEndReport(), "", NONGRADDISTREP_SD, ""))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
@@ -77,6 +84,15 @@ public class PostingProcessServiceTest {
         distrepYeSd.setSchoolOfRecordName(RandomStringUtils.randomAlphabetic(15));
         distrepYeSd.setSchoolCategory(RandomStringUtils.randomNumeric(2));
         distrepYeSd.setReport(Base64.getEncoder().encodeToString(RandomStringUtils.randomAlphanumeric(25).getBytes()));
+
+        SchoolReports distrepYeNgSd = new SchoolReports();
+        String distrepYeNgSdMincode = RandomStringUtils.randomNumeric(3);
+        distrepYeNgSd.setId(UUID.randomUUID());
+        distrepYeNgSd.setReportTypeCode(NONGRADDISTREP_SD);
+        distrepYeNgSd.setSchoolOfRecord(distrepYeNgSdMincode);
+        distrepYeNgSd.setSchoolOfRecordName(RandomStringUtils.randomAlphabetic(15));
+        distrepYeNgSd.setSchoolCategory(RandomStringUtils.randomNumeric(2));
+        distrepYeNgSd.setReport(Base64.getEncoder().encodeToString(RandomStringUtils.randomAlphanumeric(25).getBytes()));
 
         SchoolReports distrepYeSc = new SchoolReports();
         String distrepYeScMincode = RandomStringUtils.randomNumeric(6);
@@ -93,6 +109,13 @@ public class PostingProcessServiceTest {
         district.setSchoolCategoryCode(distrepYeSd.getSchoolCategory());
 
         response.getDistricts().add(district);
+
+        School districtNg = new School();
+        districtNg.setMincode(distrepYeNgSd.getSchoolOfRecord());
+        districtNg.setName(distrepYeNgSd.getSchoolOfRecordName());
+        districtNg.setSchoolCategoryCode(distrepYeNgSd.getSchoolCategory());
+
+        response.getDistricts().add(districtNg);
 
         School school = new School();
         school.setMincode(distrepYeSc.getSchoolOfRecord());
@@ -135,6 +158,14 @@ public class PostingProcessServiceTest {
         })).thenReturn(Mono.just(List.of(distrepYeSd)));
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(String.format(educDistributionApiConstants.getSchoolReportsByReportType(), distrepYeNgSd.getReportTypeCode(), ""))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
+        })).thenReturn(Mono.just(List.of(distrepYeNgSd)));
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
         when(this.requestHeadersUriMock.uri(String.format(educDistributionApiConstants.getSchoolReportsByReportType(), distrepYeSd.getReportTypeCode(), distrepYeSd.getSchoolOfRecord()))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
@@ -167,6 +198,14 @@ public class PostingProcessServiceTest {
         when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(1));
 
         when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(educDistributionApiConstants.getSchoolDistrictYearEndNonGradReport(), "", distrepYeNgSd.getReportTypeCode(), ""))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(1));
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
         when(this.requestBodyUriMock.uri(String.format(educDistributionApiConstants.getSchoolDistrictYearEndReport(), "", "", distrepYeSc.getReportTypeCode()))).thenReturn(this.requestBodyUriMock);
         when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
         when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
@@ -185,6 +224,13 @@ public class PostingProcessServiceTest {
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
         when(this.requestHeadersUriMock.uri(String.format(educDistributionApiConstants.getSchoolReport(), distrepYeSd.getSchoolOfRecord(), distrepYeSd.getReportTypeCode()))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(byte[].class)).thenReturn(Mono.just(bytesPdf));
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(String.format(educDistributionApiConstants.getSchoolReport(), distrepYeNgSd.getSchoolOfRecord(), ""))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);

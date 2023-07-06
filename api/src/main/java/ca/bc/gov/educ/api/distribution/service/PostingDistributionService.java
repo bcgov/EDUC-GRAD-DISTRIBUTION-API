@@ -6,6 +6,7 @@ import ca.bc.gov.educ.api.distribution.model.dto.SchoolReports;
 import ca.bc.gov.educ.api.distribution.model.dto.TraxDistrict;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils;
+import ca.bc.gov.educ.api.distribution.util.Generated;
 import ca.bc.gov.educ.api.distribution.util.SFTPUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -246,6 +247,7 @@ public class PostingDistributionService {
         return numberOfPdfs;
     }
 
+    @Generated
     protected int processSchoolLabelsDistribution(Long batchId, String mincode, String schooLabelReportType, String transmissionMode) {
         List<SchoolReports> yeSchooLabelsReports = restService.executeGet(educDistributionApiConstants.getSchoolReportsByReportType(), new ParameterizedTypeReference<List<SchoolReports>>() {
         }, schooLabelReportType, mincode);
@@ -253,6 +255,7 @@ public class PostingDistributionService {
         return processDistrictSchoolReports(yeSchooLabelsReports, batchId, schooLabelReportType, transmissionMode);
     }
 
+    @Generated
     protected int processDistrictSchoolDistribution(Long batchId, String schooLabelReportType, String districtReportType, String schoolReportType, String transmissionMode) {
         int numberOfPdfs = 0;
         if (StringUtils.isNotBlank(schooLabelReportType)) {
@@ -276,6 +279,7 @@ public class PostingDistributionService {
         return numberOfPdfs;
     }
 
+    @Generated
     protected int processDistrictSchoolReports(List<SchoolReports> schoolReports, Long batchId, String reportType, String transmissionMode) {
         int numberOfPdfs = 0;
         for (SchoolReports report : schoolReports) {
@@ -301,6 +305,7 @@ public class PostingDistributionService {
         return numberOfPdfs;
     }
 
+    @Generated
     protected void uploadSchoolReportDocuments(Long batchId, String reportType, String mincode, String schoolCategory, String transmissionMode, byte[] gradReportPdf) {
         boolean isDistrict = ADDRESS_LABEL_YE.equalsIgnoreCase(reportType) || DISTREP_YE_SD.equalsIgnoreCase(reportType) || NONGRADDISTREP_SD.equalsIgnoreCase(reportType);
         String districtCode = getDistrictCodeFromMincode(mincode);
