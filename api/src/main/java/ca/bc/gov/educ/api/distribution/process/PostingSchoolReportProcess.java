@@ -74,7 +74,7 @@ public class PostingSchoolReportProcess extends BaseProcess {
 					mergeDocuments(processorData, mincode, EducDistributionApiUtils.getFileNameSchoolReports(mincode), locations);
 					numberOfPdfs++;
 				} else {
-					logger.debug("*** Failed to Add PDFs Current Report Type {}", scdReport.getReportTypeCode());
+					logger.info("*** Failed to Add PDFs Current Report Type {} in batch {}", scdReport.getReportTypeCode(), processorData.getBatchId());
 				}
 				logger.debug("*** GRADDIST Report Created");
 			} catch (IOException e) {

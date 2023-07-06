@@ -23,6 +23,7 @@ import reactor.core.publisher.Mono;
 
 import java.io.ByteArrayInputStream;
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -1082,7 +1083,7 @@ public class DistributionServiceTest {
 		Student student = new Student();
 		student.setFirstName("aaa");
 		student.setLastName("bbbb");
-		student.setBirthdate(new Date(270597));
+		student.setBirthdate(LocalDate.of(97,05,27));
 		GraduationData gradData = new GraduationData();
 		gradData.setDogwoodFlag(true);
 		gradData.setHonorsFlag(false);
@@ -1155,6 +1156,13 @@ public class DistributionServiceTest {
 
 		when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
 		when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolReportsByReportType(), "ADDRESS_LABEL_PSI", "000000000"))).thenReturn(this.requestHeadersMock);
+		when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
+		})).thenReturn(Mono.just(List.of(new SchoolReports())));
+
+		when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+		when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolReportsByReportType(), "ADDRESS_LABEL_PSI", "001"))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
