@@ -339,8 +339,6 @@ public class PSIReportProcess extends BaseProcess {
                     cRowsSortingArray.add(examinableCoursesAndAssessmentsInfo);
                 }
             }
-            //Grad2-2182 sorting C rows based on course code - mchintha
-            cRowsSortingArray.sort(Comparator.comparing(a -> a[1]));
         }
     }
 
