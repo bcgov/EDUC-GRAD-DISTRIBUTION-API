@@ -67,7 +67,16 @@ public class YearEndMergeProcess extends MergeProcess {
 
                 ReportRequest packSlipReq = reportService.preparePackingSlipData(getBaseSchoolDetails(distributionPrintRequest, mincode, exception), processorData.getBatchId());
                 Pair<Integer, Integer> pV = processTranscriptPrintRequest(distributionPrintRequest, currentSlipCount, packSlipReq, studListNonGrad, processorData, mincode, schoolCategoryCode, numberOfPdfs);
-                numberOfPdfs += pV.getRight();
+                currentSlipCount = pV.getLeft();
+                numberOfPdfs = pV.getRight();
+                pV = processYed2CertificatePrintRequest(distributionPrintRequest,currentSlipCount,packSlipReq,studListNonGrad,processorData,mincode,schoolCategoryCode,numberOfPdfs);
+                currentSlipCount = pV.getLeft();
+                numberOfPdfs = pV.getRight();
+                pV = processYedbCertificatePrintRequest(distributionPrintRequest,currentSlipCount,packSlipReq,studListNonGrad,processorData,mincode,schoolCategoryCode,numberOfPdfs);
+                currentSlipCount = pV.getLeft();
+                numberOfPdfs = pV.getRight();
+                pV = processYedrCertificatePrintRequest(distributionPrintRequest,currentSlipCount,packSlipReq,studListNonGrad,processorData,mincode,schoolCategoryCode,numberOfPdfs);
+                numberOfPdfs = pV.getRight();
 
                 if (!studListNonGrad.isEmpty() && NONGRADDIST.equalsIgnoreCase(processorData.getActivityCode())) {
                     logger.debug("***** Create Student NonGrad School Reports *****");

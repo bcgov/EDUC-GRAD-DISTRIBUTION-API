@@ -1,7 +1,7 @@
 package ca.bc.gov.educ.api.distribution.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.Data;
-import org.codehaus.jackson.annotate.JsonTypeInfo;
 
 import java.io.Serializable;
 
