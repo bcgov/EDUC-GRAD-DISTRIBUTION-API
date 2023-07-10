@@ -24,13 +24,13 @@ public class EducDistributionApiConstants {
     public static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd";
     public static final String SECONDARY_DATE_FORMAT = "yyyy/MM/dd";
     //Grad2-1931 - mchintha
-    public static final String DATE_FORMAT = "yyyyMMdd";
+    public static final String DATE_FORMAT_YYYYMMDD = "yyyyMMdd";
     public static final String TMP_DIR = "/tmp";
     public static final String DEL = "/";
     public static final String FILES_FOLDER_STRUCTURE = "/Batch/PSI/";
     public static final String TRANSMISSION_MODE_FTP = "FTP";
     public static final String TRANSMISSION_MODE_PAPER = "PAPER";
-    public static final String FTP_FILENAME_PREFIX = "/GRAD_INT";
+    public static final String FTP_FILENAME_PREFIX = "/GRAD_FIN";
     public static final String FTP_FILENAME_SUFFIX = "_RESULTS";
     public static final String EXCEPTION_MSG_FILE_NOT_CREATED_AT_PATH = "Path is not available to create DAT file to write the student data";
     public static final String FOUR_ZEROES = "0000";
@@ -44,7 +44,15 @@ public class EducDistributionApiConstants {
     public static final String LETTER_Y = "Y";
     public static final String LETTER_N = "N";
 
-
+    //Grad2-2182 - mchintha
+    public static final int NUMBER_ONE = 1;
+    public static final int NUMBER_TWO = 2;
+    public static final int NUMBER_THREE = 3;
+    public static final int NUMBER_FOUR = 4;
+    public static final int NUMBER_FIVE = 5;
+    public static final String DATE_FORMAT_YYYYMM = "yyyyMM";
+    public static final String ASSESSMENT_LTE = "LTE10";
+    public static final String ASSESSMENT_LTP = "LTP10";
 
     @Value("${endpoint.grad-graduation-report-api.get-transcript-list.url}")
     private String transcriptDistributionList;

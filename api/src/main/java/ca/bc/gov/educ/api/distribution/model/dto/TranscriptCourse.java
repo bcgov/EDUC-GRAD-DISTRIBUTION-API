@@ -12,6 +12,13 @@ public class TranscriptCourse {
     private String relatedLevel;
     //Grad2-1931
     private String specialCase;
+    //Grad2-2182
+    private Boolean isUsed;
+    private Double proficiencyScore;
+    private String customizedCourseName;
+    private Integer originalCredits;
+    private String genericCourseType;
+    private Integer credit;
 
     public String getName() {
         return name;
@@ -83,5 +90,53 @@ public class TranscriptCourse {
 
     public void setSpecialCase(String specialCase) {
         this.specialCase = specialCase;
+    }
+
+    public Boolean getUsed() {
+        return isUsed;
+    }
+
+    public void setUsed(Boolean used) {
+        isUsed = used;
+    }
+
+    public Double getProficiencyScore() {
+        return proficiencyScore;
+    }
+
+    public void setProficiencyScore(Double proficiencyScore) {
+        this.proficiencyScore = proficiencyScore;
+    }
+
+    public String getCustomizedCourseName() {
+        return customizedCourseName;
+    }
+
+    public void setCustomizedCourseName(String customizedCourseName) {
+        this.customizedCourseName = customizedCourseName;
+    }
+
+    public Integer getOriginalCredits() {
+        return originalCredits;
+    }
+
+    public void setOriginalCredits(Integer originalCredits) {
+        this.originalCredits = originalCredits;
+    }
+
+    public String getGenericCourseType() {
+        return genericCourseType;
+    }
+
+    public void setGenericCourseType(String genericCourseType) {
+        this.genericCourseType = genericCourseType;
+    }
+
+    public Integer getCredit() {
+        return credit;
+    }
+
+    public void setCredit(Integer credit) {
+        this.credit = credit;
     }
 }
