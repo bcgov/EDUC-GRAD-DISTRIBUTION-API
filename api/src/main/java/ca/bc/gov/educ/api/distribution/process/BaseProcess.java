@@ -75,6 +75,12 @@ public abstract class BaseProcess implements DistributionProcess {
         packSlipReq.getData().getPackingSlip().setOrderNumber(batchId);
     }
 
+    protected void setExtraDataForPackingSlip(ReportRequest packSlipReq, String paperType, String orderType, Long batchId) {
+        packSlipReq.getData().getPackingSlip().getOrderType().getPackingSlipType().getPaperType().setCode(paperType);
+        packSlipReq.getData().getPackingSlip().getOrderType().setName(orderType);
+        packSlipReq.getData().getPackingSlip().setOrderNumber(batchId);
+    }
+
     protected void postingProcess(Long batchId, ProcessorData processorData, Integer numberOfPdfs) {
         postingProcess(batchId, processorData.getLocalDownload(), numberOfPdfs, TMP_DIR);
     }

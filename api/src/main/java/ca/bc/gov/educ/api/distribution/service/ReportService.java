@@ -4,6 +4,8 @@ import ca.bc.gov.educ.api.distribution.model.dto.*;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils;
 import ca.bc.gov.educ.api.distribution.util.RestUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,8 +41,10 @@ public class ReportService {
 		this.restService = restService;
 	}
 
+	@SneakyThrows
 	public InputStreamResource getPackingSlip(ReportRequest packingSlipReq) {
 		logger.debug("Getting packing slip for order {}", packingSlipReq.getData().getPackingSlip().getOrderNumber());
+		System.out.println(new ObjectMapper().writeValueAsString(packingSlipReq));
 		byte[] packingSlip = restService.executePost(educDistributionApiConstants.getPackingSlip(), byte[].class, packingSlipReq, "");
 		ByteArrayInputStream bis = new ByteArrayInputStream(packingSlip);
 		return new InputStreamResource(bis);
