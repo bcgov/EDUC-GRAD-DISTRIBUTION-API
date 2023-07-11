@@ -232,7 +232,8 @@ public class PSIReportProcess extends BaseProcess {
             for (TranscriptResult course : courseDetails) {
                 String usedForGrad = (course.getUsedForGrad() == null || course.getUsedForGrad().isBlank()) ? "" : course.getUsedForGrad();
                 String courseType = (course.getCourse().getType() == null || course.getCourse().getType().isBlank()) ? "" : course.getCourse().getType();
-                String gradReqtType = (course.getCourse().getFineArtsAppliedSkills() == null || course.getCourse().getFineArtsAppliedSkills().isBlank()) ? "" : course.getCourse().getFineArtsAppliedSkills();
+                String fineArtsAppliedSkills = course.getCourse().getFineArtsAppliedSkills();
+                String gradReqtType = (fineArtsAppliedSkills == null || fineArtsAppliedSkills.isBlank()) ? "" : fineArtsAppliedSkills;
                 Integer courseOriginalCredits = course.getCourse().getOriginalCredits() == null ? 0 : course.getCourse().getOriginalCredits();
                 Integer credits = course.getCourse().getCredit() == null ? 0 : course.getCourse().getCredit();
 
@@ -368,6 +369,11 @@ public class PSIReportProcess extends BaseProcess {
             String honorsFlag = String.valueOf(studentDetails.getGraduationData().getHonorsFlag()).isBlank() ? "" : String.valueOf(studentDetails.getGraduationData().getHonorsFlag());
             List<String> optionalOrCareerProgramCodes = studentDetails.getGraduationData().getProgramCodes();
             int programCodesListSize = optionalOrCareerProgramCodes != null ? optionalOrCareerProgramCodes.size() : 0;
+            String nonGradReasons = (nonGR == null || nonGR.isEmpty()) ? "" : nonGR.stream()
+                    .map(NonGradReason::getCode)
+                    .filter(Objects::nonNull)
+                    .limit(15)
+                    .collect(Collectors.joining(""));//Grad2-2205-Non grad reasons
 
                 studentInfo = new String[]{
                         pen,
@@ -387,11 +393,7 @@ public class PSIReportProcess extends BaseProcess {
                         programCompleteionDate,
                         dogWoodFlag.equals("false") ? EducDistributionApiConstants.LETTER_N : EducDistributionApiConstants.LETTER_Y,
                         honorsFlag.equals("false") ? EducDistributionApiConstants.LETTER_N : EducDistributionApiConstants.LETTER_Y,
-                        nonGR == null || nonGR.isEmpty() ? "" : nonGR.stream()
-                                .map(NonGradReason::getCode)
-                                .filter(Objects::nonNull)
-                                .limit(15)
-                                .collect(Collectors.joining("")),//Grad2-2205-Non grad reasons
+                        nonGradReasons,
                         programCodesListSize >= EducDistributionApiConstants.NUMBER_TWO ? studentDetails.getGraduationData().getProgramCodes().get(1) : "",
                         programCodesListSize >= EducDistributionApiConstants.NUMBER_THREE ? studentDetails.getGraduationData().getProgramCodes().get(2) : "",
                         programCodesListSize >= EducDistributionApiConstants.NUMBER_FOUR ? studentDetails.getGraduationData().getProgramCodes().get(3) : "",
