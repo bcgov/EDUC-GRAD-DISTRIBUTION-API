@@ -123,7 +123,6 @@ public class MergeProcess extends BaseProcess {
 			currentSlipCount++;
 			CertificatePrintRequest certificatePrintRequest = obj.getYedrCertificatePrintRequest();
 			PackingSlipRequest request = PackingSlipRequest.builder().mincode(mincode).currentSlip(currentSlipCount).total(obj.getTotal()).paperType("YEDR").build();
-			setExtraDataForPackingSlip(packSlipReq, "YEDR", "Certificate", obj.getYedrCertificatePrintRequest().getBatchId());
 			mergeCertificates(packSlipReq, certificatePrintRequest, request,processorData,studListNonGrad,schoolCategoryCode);
 			numberOfPdfs++;
 			logger.debug("*** YEDR Documents Merged ***");
@@ -136,7 +135,6 @@ public class MergeProcess extends BaseProcess {
 			currentSlipCount++;
 			CertificatePrintRequest certificatePrintRequest = obj.getYedbCertificatePrintRequest();
 			PackingSlipRequest request = PackingSlipRequest.builder().mincode(mincode).currentSlip(currentSlipCount).total(obj.getTotal()).paperType("YEDB").build();
-			setExtraDataForPackingSlip(packSlipReq, "YEDB", "Certificate", obj.getYedbCertificatePrintRequest().getBatchId());
 			mergeCertificates(packSlipReq, certificatePrintRequest, request,processorData,studListNonGrad, schoolCategoryCode);
 			numberOfPdfs++;
 			logger.debug("*** YEDB Documents Merged ***");
@@ -149,7 +147,6 @@ public class MergeProcess extends BaseProcess {
 			currentSlipCount++;
 			CertificatePrintRequest certificatePrintRequest = obj.getYed2CertificatePrintRequest();
 			PackingSlipRequest request = PackingSlipRequest.builder().mincode(mincode).currentSlip(currentSlipCount).total(obj.getTotal()).paperType("YED2").build();
-			setExtraDataForPackingSlip(packSlipReq, "YED2", "Certificate", obj.getYed2CertificatePrintRequest().getBatchId());
 			mergeCertificates(packSlipReq, certificatePrintRequest, request,processorData,studListNonGrad, schoolCategoryCode);
 			numberOfPdfs++;
 			logger.debug("*** YED2 Documents Merged ***");
@@ -243,9 +240,8 @@ public class MergeProcess extends BaseProcess {
 		List<StudentCredentialDistribution> scdList = certificatePrintRequest.getCertificateList();
 		String mincode = request.getMincode();
 		String paperType = request.getPaperType();
-		List<InputStream> locations=new ArrayList<>();
+		List<InputStream> locations = new ArrayList<>();
 		try {
-			locations.add(reportService.getPackingSlip(packSlipReq).getInputStream());
 			int currentCertificate = 0;
 			int failedToAdd = 0;
 			for (StudentCredentialDistribution scd : scdList) {
@@ -264,13 +260,14 @@ public class MergeProcess extends BaseProcess {
 				if(certificatePdf != null) {
 					locations.add(certificatePdf.getInputStream());
 					currentCertificate++;
-					logger.debug("*** Added PDFs {}/{} Current student {}",currentCertificate,scdList.size(),scd.getStudentID());
+					logger.debug("*** Added Certificate PDFs {}/{} Current student {}",currentCertificate,scdList.size(),scd.getStudentID());
 				} else {
 					failedToAdd++;
-					logger.info("*** Failed to Add PDFs {} Current student {} credentials {} document status {} in batch {}",failedToAdd,scd.getStudentID(),scd.getCredentialTypeCode(),scd.getDocumentStatusCode(),processorData.getBatchId());
+					logger.info("*** Failed to Add Certificate PDFs {} Current student {} credentials {} document status {} in batch {}",failedToAdd,scd.getStudentID(),scd.getCredentialTypeCode(),scd.getDocumentStatusCode(),processorData.getBatchId());
 				}
 			}
 			setExtraDataForPackingSlip(packSlipReq,paperType,request.getTotal(),currentCertificate,request.getCurrentSlip(),"Certificate", certificatePrintRequest.getBatchId());
+			locations.add(0, reportService.getPackingSlip(packSlipReq).getInputStream());
 			mergeDocumentsPDFs(processorData,mincode,schoolCategoryCode,"/EDGRAD.C.",paperType,locations);
 		} catch (IOException e) {
 			logger.debug(EXCEPTION,e.getLocalizedMessage());

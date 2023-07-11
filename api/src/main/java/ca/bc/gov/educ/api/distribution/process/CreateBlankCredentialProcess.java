@@ -100,10 +100,10 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 							locations.add(new ByteArrayInputStream(bytesSAR));
 						}
 						currentTranscript++;
-						logger.debug("*** Added PDFs {}/{} Current Credential {}", currentTranscript, bcdList.size(), bcd.getCredentialTypeCode());
+						logger.debug("*** Added transcript PDFs {}/{} Current Credential {}", currentTranscript, bcdList.size(), bcd.getCredentialTypeCode());
 					} else {
 						failedToAdd++;
-						logger.info("*** Failed to Add PDFs {} Current Credential {} in batch {}", failedToAdd, bcd.getCredentialTypeCode(), processorData.getBatchId());
+						logger.info("*** Failed to Add transcript PDFs {} Current Credential {} in batch {}", failedToAdd, bcd.getCredentialTypeCode(), processorData.getBatchId());
 					}
 				}
 				mergeDocumentsPDFs(processorData,mincode,"02","/EDGRAD.T.","YED4",locations);
@@ -175,7 +175,7 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 						locations.add(new ByteArrayInputStream(bytesSAR));
 					}
 					currentCertificate++;
-					logger.debug("*** Added PDFs {}/{} Current Credential {}", currentCertificate, bcdList.size(), bcd.getCredentialTypeCode());
+					logger.debug("*** Added Certificate PDFs {}/{} Current Credential {}", currentCertificate, bcdList.size(), bcd.getCredentialTypeCode());
 				} else {
 					failedToAdd++;
 					logger.info("*** Failed to Add PDFs {} Current Credential {} in batch {}", failedToAdd, bcd.getCredentialTypeCode(), processorData.getBatchId());

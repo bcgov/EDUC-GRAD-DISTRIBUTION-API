@@ -138,10 +138,10 @@ public class CreateReprintProcess extends BaseProcess {
 				if (bytesSAR != null) {
 					locations.add(new ByteArrayInputStream(bytesSAR));
 					currentCertificate++;
-					logger.debug("*** Added PDFs {}/{} Current student {}", currentCertificate, scdList.size(), scd.getStudentID());
+					logger.debug("*** Added Certificate PDFs {}/{} Current student {}", currentCertificate, scdList.size(), scd.getStudentID());
 				} else {
 					failedToAdd++;
-					logger.info("*** Failed to Add PDFs {} Current student {} in batch {}", failedToAdd, scd.getStudentID(), processorData.getBatchId());
+					logger.info("*** Failed to Add Certificate PDFs {} Current student {} in batch {}", failedToAdd, scd.getStudentID(), processorData.getBatchId());
 				}
 			}
 			mergeDocumentsPDFs(processorData,mincode,"02","/EDGRAD.C.",paperType,locations);
