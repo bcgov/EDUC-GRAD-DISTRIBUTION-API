@@ -23,7 +23,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -141,7 +144,7 @@ public class PSIReportProcess extends BaseProcess {
                 logger.debug("*** Failed to Add PDFs {} Current student {} in batch {}", failedToAdd, scd.getStudentID(), batchId);
             } else {
                 currentTranscript++;
-                logger.debug("*** Added PDFs {}/{} Current student {}", currentTranscript, scdList.size(), scd.getStudentID());
+                logger.debug("*** Added PSI PDFs {}/{} Current student {}", currentTranscript, scdList.size(), scd.getStudentID());
             }
         }
     }
