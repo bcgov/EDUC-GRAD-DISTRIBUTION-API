@@ -158,11 +158,12 @@ public class PSIReportProcess extends BaseProcess {
                     if (transcriptCsv != null) {
                         Student studentDetails = transcriptCsv.getStudent();
                         GradProgram gradProgram = transcriptCsv.getGradProgram();
+                        List<NonGradReason> nonGR = transcriptCsv.getNonGradReasons();
                         School schoolDetails = transcriptCsv.getSchool();
                         List<TranscriptResult> courseDetails = (transcriptCsv.getTranscript() != null ? transcriptCsv.getTranscript().getResults() : null);
 
                         //Writes the A's row's data on CSV
-                        writesCsvFileRowA(studentTranscriptdata, scd.getPen(), studentDetails, gradProgram);
+                        writesCsvFileRowA(studentTranscriptdata, scd.getPen(), studentDetails, gradProgram, nonGR);
 
                         //Writes the B's row's data on CSV
                         if (schoolDetails != null) {
@@ -231,7 +232,7 @@ public class PSIReportProcess extends BaseProcess {
             for (TranscriptResult course : courseDetails) {
                 String usedForGrad = (course.getUsedForGrad() == null || course.getUsedForGrad().isBlank()) ? "" : course.getUsedForGrad();
                 String courseType = (course.getCourse().getType() == null || course.getCourse().getType().isBlank()) ? "" : course.getCourse().getType();
-                String gradReqtType = (course.getCourse().getGenericCourseType() == null || course.getCourse().getGenericCourseType().isBlank()) ? "" : course.getCourse().getGenericCourseType();
+                String gradReqtType = (course.getCourse().getFineArtsAppliedSkills() == null || course.getCourse().getFineArtsAppliedSkills().isBlank()) ? "" : course.getCourse().getFineArtsAppliedSkills();
                 Integer courseOriginalCredits = course.getCourse().getOriginalCredits() == null ? 0 : course.getCourse().getOriginalCredits();
                 Integer credits = course.getCourse().getCredit() == null ? 0 : course.getCourse().getCredit();
 
@@ -341,7 +342,7 @@ public class PSIReportProcess extends BaseProcess {
     }
 
     //Grad2-1931 : Writes Row A's data on CSV - mchintha
-    private void writesCsvFileRowA(List<String[]> studentTranscriptdata, String pen, Student studentDetails, GradProgram gradProgram) {
+    private void writesCsvFileRowA(List<String[]> studentTranscriptdata, String pen, Student studentDetails, GradProgram gradProgram, List<NonGradReason> nonGR) {
         String[] studentInfo;
         String birthDate;
         String programCompleteionDate;
@@ -386,9 +387,11 @@ public class PSIReportProcess extends BaseProcess {
                         programCompleteionDate,
                         dogWoodFlag.equals("false") ? EducDistributionApiConstants.LETTER_N : EducDistributionApiConstants.LETTER_Y,
                         honorsFlag.equals("false") ? EducDistributionApiConstants.LETTER_N : EducDistributionApiConstants.LETTER_Y,
-                        studentDetails.getNonGradReasons().stream()
+                        nonGR == null || nonGR.isEmpty() ? "" : nonGR.stream()
                                 .map(NonGradReason::getCode)
-                                .collect(Collectors.joining(",")),//Non grad reasons
+                                .filter(Objects::nonNull)
+                                .limit(15)
+                                .collect(Collectors.joining("")),//Grad2-2205-Non grad reasons
                         programCodesListSize >= EducDistributionApiConstants.NUMBER_TWO ? studentDetails.getGraduationData().getProgramCodes().get(1) : "",
                         programCodesListSize >= EducDistributionApiConstants.NUMBER_THREE ? studentDetails.getGraduationData().getProgramCodes().get(2) : "",
                         programCodesListSize >= EducDistributionApiConstants.NUMBER_FOUR ? studentDetails.getGraduationData().getProgramCodes().get(3) : "",
