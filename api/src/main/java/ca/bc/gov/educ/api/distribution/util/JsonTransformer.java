@@ -23,7 +23,6 @@ public class JsonTransformer implements Transformer {
 
     @PostConstruct
     public void init() {
-        objectMapper = new ObjectMapper();
         objectMapper
                 .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                 .disable(SerializationFeature.INDENT_OUTPUT)
