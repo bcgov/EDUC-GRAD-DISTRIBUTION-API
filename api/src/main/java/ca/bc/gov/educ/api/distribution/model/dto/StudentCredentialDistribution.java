@@ -1,8 +1,10 @@
 package ca.bc.gov.educ.api.distribution.model.dto;
 
 import ca.bc.gov.educ.api.distribution.util.LocalDateDeserializer;
+import ca.bc.gov.educ.api.distribution.util.LocalDateSerializer;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -26,6 +28,7 @@ public class StudentCredentialDistribution {
 	private String legalLastName;
 	private String studentCitizenship;
 	@JsonDeserialize(using = LocalDateDeserializer.class)
+	@JsonSerialize(using = LocalDateSerializer.class)
 	private LocalDate programCompletionDate;
 	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
 	private Date lastUpdateDate;
