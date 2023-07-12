@@ -60,7 +60,7 @@ public class YearEndMergeProcess extends MergeProcess {
                     processSchoolsForLabels(schoolsForLabels, mincode, exception);
                     logger.debug("Added Independent School {} for processing", commonSchool.getSchoolName());
                 }
-                logger.debug("School {}/{}", schoolCounter, mapDist.size());
+                logger.debug("{} School {}/{}", mincode, schoolCounter, mapDist.size());
                 List<Student> studListNonGrad = new ArrayList<>();
 
                 DistributionPrintRequest distributionPrintRequest = mapDist.get(mincode);

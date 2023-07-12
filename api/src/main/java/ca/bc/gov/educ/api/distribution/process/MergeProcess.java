@@ -82,7 +82,7 @@ public class MergeProcess extends BaseProcess {
 				if (counter % 50 == 0) {
 					restUtils.fetchAccessToken(processorData);
 				}
-				logger.debug("School {}/{}",counter,mapDist.size());
+				logger.debug("{} School {}/{}",mincode,counter,mapDist.size());
 			}
 		}
 		int numberOfCreatedSchoolReports = 0;
@@ -190,7 +190,7 @@ public class MergeProcess extends BaseProcess {
 			}
 			if(result == 0) {
 				failedToAdd++;
-				logger.info("*** Failed to Add PDFs {} Current student {} in batch {}", failedToAdd, scd.getStudentID(), processorData.getBatchId());
+				logger.info("*** Failed to Add PDFs {} Current student {} school {} in batch {}", failedToAdd, scd.getStudentID(), scd.getSchoolOfRecord(), processorData.getBatchId());
 			} else {
 				currentTranscript++;
 				logger.debug("*** Added Transcript PDFs {}/{} Current student {}", currentTranscript, scdList.size(), scd.getStudentID());

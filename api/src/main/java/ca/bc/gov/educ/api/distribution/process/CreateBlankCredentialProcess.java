@@ -53,7 +53,7 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 				numberOfPdfs = processYedrCertificate(obj,currentSlipCount,packSlipReq,mincode,processorData,numberOfPdfs);
 
 				logger.debug("PDFs Merged {}", schoolDetails.getSchoolName());
-				logger.debug("School {}/{}",counter,mapDist.size());
+				logger.debug("{} School {}/{}",mincode,counter,mapDist.size());
 				if (counter % 50 == 0) {
 					restUtils.fetchAccessToken(processorData);
 				}
