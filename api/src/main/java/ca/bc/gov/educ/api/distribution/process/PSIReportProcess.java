@@ -286,7 +286,6 @@ public class PSIReportProcess extends BaseProcess {
     //Grad2-1931 : Writes Row C's data on CSV - mchintha
     private void writesCsvFileRowC(List<String[]> studentTranscriptdata, String pen, List<TranscriptResult> courseDetails) {
         String[] examinableCoursesAndAssessmentsInfo;
-        List<String[]> cRowsSortingArray = null;
         String used;
         String finalLetterGrade;
         String finalPercent;
@@ -347,8 +346,7 @@ public class PSIReportProcess extends BaseProcess {
                     setColumnsWidths(examinableCoursesAndAssessmentsInfo,
                             IntStream.of(10, 1, 5, 3, 6, 2, 1, 3, 1, 3, 3, 2, 3, 2, 1, 1).toArray(),
                             studentTranscriptdata);
-                    cRowsSortingArray = new ArrayList<>();
-                    cRowsSortingArray.add(examinableCoursesAndAssessmentsInfo);
+
                 }
             }
         }
