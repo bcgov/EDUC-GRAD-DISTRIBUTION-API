@@ -18,6 +18,8 @@ public class GraduationStatus implements Serializable {
 
     private static final long serialVersionUID = 2L;
 
+    @JsonDeserialize(using = LocalDateDeserializer.class)
+    @JsonSerialize(using = LocalDateSerializer.class)
     private LocalDate programCompletionDate;
     private String honours = "";
     private String gpa = "";
