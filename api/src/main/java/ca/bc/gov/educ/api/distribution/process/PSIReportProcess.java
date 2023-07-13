@@ -355,14 +355,9 @@ public class PSIReportProcess extends BaseProcess {
     //Grad2-1931 : Writes Row A's data on CSV - mchintha
     private void writesCsvFileRowA(List<String[]> studentTranscriptdata, String pen, Student studentDetails, GradProgram gradProgram, List<NonGradReason> nonGR) {
         String[] studentInfo;
-        String birthDate;
-        String programCompleteionDate;
+
         //Writes the A's row's data on CSV
         if (studentDetails != null) {
-            // fetching the birthdate of a student
-            birthDate = getBirthDate(studentDetails);
-            // fetching program completion date
-            programCompleteionDate = getProgramCompleteionDate(studentDetails);
 
             String dogWoodFlag = String.valueOf(studentDetails.getGraduationData().getDogwoodFlag()).isBlank() ? "" : String.valueOf(studentDetails.getGraduationData().getDogwoodFlag());
 
@@ -372,16 +367,13 @@ public class PSIReportProcess extends BaseProcess {
             List<String> optionalOrCareerProgramCodes = studentDetails.getGraduationData().getProgramCodes();
             int programCodesListSize = optionalOrCareerProgramCodes != null ? optionalOrCareerProgramCodes.size() : 0;
 
-            //Non Grad Reasons
-            String nonGradReasons = getNonGradReasons(nonGR);
-
             studentInfo = new String[]{
                         pen,
                         EducDistributionApiConstants.LETTER_A,
                         (studentDetails.getLastName() == null || StringUtils.isBlank(studentDetails.getLastName())) ? "" : studentDetails.getLastName(),
                         (studentDetails.getFirstName() == null || StringUtils.isBlank(studentDetails.getFirstName())) ? "" : studentDetails.getFirstName(),
                         (studentDetails.getMiddleName() == null || StringUtils.isBlank(studentDetails.getMiddleName())) ? "" : studentDetails.getMiddleName(),
-                        birthDate,
+                        getBirthDate(studentDetails),
                         (studentDetails.getGender() == null || StringUtils.isBlank(studentDetails.getGender())) ? "" : studentDetails.getGender(),
                         (studentDetails.getCitizenship() == null || StringUtils.isBlank(studentDetails.getCitizenship())) ? "" : studentDetails.getCitizenship(),
                         (studentDetails.getGrade() == null || StringUtils.isBlank(studentDetails.getGrade())) ? "" : studentDetails.getGrade(),
@@ -390,10 +382,10 @@ public class PSIReportProcess extends BaseProcess {
                         programCodesListSize >= EducDistributionApiConstants.NUMBER_ONE ? studentDetails.getGraduationData().getProgramCodes().get(0) : "",
                         (studentDetails.getConsumerEducReqt() == null || StringUtils.isBlank(studentDetails.getConsumerEducReqt())) ? "N" : studentDetails.getConsumerEducReqt(),
                         EducDistributionApiConstants.FOUR_ZEROES,
-                        programCompleteionDate,
+                        getProgramCompleteionDate(studentDetails),
                         dogWoodFlag.equals("false") ? EducDistributionApiConstants.LETTER_N : EducDistributionApiConstants.LETTER_Y,
                         honorsFlag.equals("false") ? EducDistributionApiConstants.LETTER_N : EducDistributionApiConstants.LETTER_Y,
-                        nonGradReasons,
+                        getNonGradReasons(nonGR),
                         programCodesListSize >= EducDistributionApiConstants.NUMBER_TWO ? studentDetails.getGraduationData().getProgramCodes().get(1) : "",
                         programCodesListSize >= EducDistributionApiConstants.NUMBER_THREE ? studentDetails.getGraduationData().getProgramCodes().get(2) : "",
                         programCodesListSize >= EducDistributionApiConstants.NUMBER_FOUR ? studentDetails.getGraduationData().getProgramCodes().get(3) : "",
