@@ -6,7 +6,7 @@
 
     <groupId>ca.bc.gov.educ</groupId>
     <artifactId>educ-grad-distribution-api</artifactId>
-    <version>1.8.44</version>
+    <version>1.8.45</version>
     <name>educ-grad-distribution-api</name>
     <description>Ministry of Education GRAD DISTRIBUTION API</description>
 
@@ -202,7 +202,12 @@
             <version>${resilience4j.version}</version>
         </dependency>
         <!--Grad2-1931-->
-
+        <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.datatype/jackson-datatype-jsr310 -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+            <version>2.15.2</version>
+        </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-csv</artifactId>
