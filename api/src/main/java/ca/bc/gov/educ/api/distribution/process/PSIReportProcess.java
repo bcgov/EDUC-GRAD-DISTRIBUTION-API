@@ -230,10 +230,9 @@ public class PSIReportProcess extends BaseProcess {
         String[] nonExaminableCoursesInfo;
         if (courseDetails != null) {
             for (TranscriptResult course : courseDetails) {
-                String usedForGrad = (course.getUsedForGrad() == null || course.getUsedForGrad().isBlank()) ? "" : course.getUsedForGrad();
-                String courseType = (course.getCourse().getType() == null || course.getCourse().getType().isBlank()) ? "" : course.getCourse().getType();
-                String fineArtsAppliedSkills = course.getCourse().getFineArtsAppliedSkills();
-                String gradReqtType = (fineArtsAppliedSkills == null || StringUtils.isBlank(fineArtsAppliedSkills)) ? "" : fineArtsAppliedSkills;
+                String usedForGrad = getUsedForGrad(course);
+                String courseType = getCourseType(course);
+                String gradReqtType = getGradReqtType(course);
                 Integer courseOriginalCredits = course.getCourse().getOriginalCredits() == null ? 0 : course.getCourse().getOriginalCredits();
                 Integer credits = course.getCourse().getCredit() == null ? 0 : course.getCourse().getCredit();
 
@@ -271,6 +270,19 @@ public class PSIReportProcess extends BaseProcess {
         }
     }
 
+    private static String getCourseType(TranscriptResult course) {
+        return (course.getCourse().getType() == null || course.getCourse().getType().isBlank()) ? "" : course.getCourse().getType();
+    }
+
+    private static String getUsedForGrad(TranscriptResult course) {
+        return (course.getUsedForGrad() == null || course.getUsedForGrad().isBlank()) ? "" : course.getUsedForGrad();
+    }
+
+    private static String getGradReqtType(TranscriptResult course) {
+        String fineArtsAppliedSkills = course.getCourse().getFineArtsAppliedSkills();
+        return (fineArtsAppliedSkills == null || StringUtils.isBlank(fineArtsAppliedSkills)) ? "" : fineArtsAppliedSkills;
+    }
+
     //Grad2-1931 : Writes Row C's data on CSV - mchintha
     private void writesCsvFileRowC(List<String[]> studentTranscriptdata, String pen, List<TranscriptResult> courseDetails) {
         String[] examinableCoursesAndAssessmentsInfo;
@@ -281,7 +293,7 @@ public class PSIReportProcess extends BaseProcess {
 
         if (courseDetails != null) {
             for (TranscriptResult course : courseDetails) {
-                String courseType = (course.getCourse().getType() == null || course.getCourse().getType().isBlank()) ? "" : course.getCourse().getType();
+                String courseType = getCourseType(course);
 
 
                 //C rows writes Examinable Courses and Assessments
