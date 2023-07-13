@@ -233,7 +233,7 @@ public class PSIReportProcess extends BaseProcess {
                 String usedForGrad = (course.getUsedForGrad() == null || course.getUsedForGrad().isBlank()) ? "" : course.getUsedForGrad();
                 String courseType = (course.getCourse().getType() == null || course.getCourse().getType().isBlank()) ? "" : course.getCourse().getType();
                 String fineArtsAppliedSkills = course.getCourse().getFineArtsAppliedSkills();
-                String gradReqtType = (fineArtsAppliedSkills == null || fineArtsAppliedSkills.isBlank()) ? "" : fineArtsAppliedSkills;
+                String gradReqtType = (fineArtsAppliedSkills == null || StringUtils.isBlank(fineArtsAppliedSkills)) ? "" : fineArtsAppliedSkills;
                 Integer courseOriginalCredits = course.getCourse().getOriginalCredits() == null ? 0 : course.getCourse().getOriginalCredits();
                 Integer credits = course.getCourse().getCredit() == null ? 0 : course.getCourse().getCredit();
 
@@ -349,33 +349,23 @@ public class PSIReportProcess extends BaseProcess {
         String programCompleteionDate;
         //Writes the A's row's data on CSV
         if (studentDetails != null) {
+            // fetching the birthdate of a student
+            birthDate = getBirthDate(studentDetails);
+            // fetching program completion date
+            programCompleteionDate = getProgramCompleteionDate(studentDetails);
 
-            DateTimeFormatter formatDateYYYYMMDD = DateTimeFormatter.ofPattern(EducDistributionApiConstants.DATE_FORMAT_YYYYMMDD);
-            DateTimeFormatter formatDateYYYYMM = DateTimeFormatter.ofPattern(EducDistributionApiConstants.DATE_FORMAT_YYYYMM);
-
-            if (studentDetails.getBirthdate() == null || StringUtils.isBlank(studentDetails.getBirthdate().toString())) {
-                birthDate = "";
-            } else {
-                birthDate = studentDetails.getBirthdate().format(formatDateYYYYMMDD);
-            }
-
-            if(studentDetails.getGraduationStatus().getProgramCompletionDate() == null || StringUtils.isBlank(studentDetails.getGraduationStatus().getProgramCompletionDate().toString()))
-            {
-                programCompleteionDate = EducDistributionApiConstants.SIX_ZEROES;
-            } else {
-                programCompleteionDate = studentDetails.getGraduationStatus().getProgramCompletionDate().format(formatDateYYYYMM);
-            }
             String dogWoodFlag = String.valueOf(studentDetails.getGraduationData().getDogwoodFlag()).isBlank() ? "" : String.valueOf(studentDetails.getGraduationData().getDogwoodFlag());
+
             String honorsFlag = String.valueOf(studentDetails.getGraduationData().getHonorsFlag()).isBlank() ? "" : String.valueOf(studentDetails.getGraduationData().getHonorsFlag());
+
+            //Optional or Career program codes
             List<String> optionalOrCareerProgramCodes = studentDetails.getGraduationData().getProgramCodes();
             int programCodesListSize = optionalOrCareerProgramCodes != null ? optionalOrCareerProgramCodes.size() : 0;
-            String nonGradReasons = (nonGR == null || nonGR.isEmpty()) ? "" : nonGR.stream()
-                    .map(NonGradReason::getCode)
-                    .filter(Objects::nonNull)
-                    .limit(15)
-                    .collect(Collectors.joining(""));//Grad2-2205-Non grad reasons
 
-                studentInfo = new String[]{
+            //Non Grad Reasons
+            String nonGradReasons = getNonGradReasons(nonGR);
+
+            studentInfo = new String[]{
                         pen,
                         EducDistributionApiConstants.LETTER_A,
                         (studentDetails.getLastName() == null || StringUtils.isBlank(studentDetails.getLastName())) ? "" : studentDetails.getLastName(),
@@ -408,6 +398,37 @@ public class PSIReportProcess extends BaseProcess {
                         studentTranscriptdata);
             }
 
+    }
+
+    private static String getNonGradReasons(List<NonGradReason> nonGR) {
+        return ((nonGR == null) || nonGR.isEmpty()) ? "" : nonGR.stream()
+                .map(NonGradReason::getCode)
+                .filter(Objects::nonNull)
+                .limit(15)
+                .collect(Collectors.joining(""));
+    }
+
+    private static String getProgramCompleteionDate(Student studentDetails) {
+        String programCompleteionDate;
+        DateTimeFormatter formatDateYYYYMM = DateTimeFormatter.ofPattern(EducDistributionApiConstants.DATE_FORMAT_YYYYMM);
+        if(studentDetails.getGraduationStatus().getProgramCompletionDate() == null || StringUtils.isBlank(studentDetails.getGraduationStatus().getProgramCompletionDate().toString()))
+        {
+            programCompleteionDate = EducDistributionApiConstants.SIX_ZEROES;
+        } else {
+            programCompleteionDate = studentDetails.getGraduationStatus().getProgramCompletionDate().format(formatDateYYYYMM);
+        }
+        return programCompleteionDate;
+    }
+
+    private static String getBirthDate(Student studentDetails) {
+        String birthDate;
+        DateTimeFormatter formatDateYYYYMMDD = DateTimeFormatter.ofPattern(EducDistributionApiConstants.DATE_FORMAT_YYYYMMDD);
+        if (studentDetails.getBirthdate() == null || StringUtils.isBlank(studentDetails.getBirthdate().toString())) {
+            birthDate = "";
+        } else {
+            birthDate = studentDetails.getBirthdate().format(formatDateYYYYMMDD);
+        }
+        return birthDate;
     }
 
 
