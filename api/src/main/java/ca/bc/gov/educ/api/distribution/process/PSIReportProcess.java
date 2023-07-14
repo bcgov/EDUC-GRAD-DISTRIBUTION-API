@@ -354,9 +354,13 @@ public class PSIReportProcess extends BaseProcess {
         return Pair.of(used, finalPercent);
     }
     private static boolean isAssessmentsConditionTrue(TranscriptResult course) {
-        return course.getCourse().getCode() == null || StringUtils.isBlank(course.getCourse().getCode()) ?
+        /*return course.getCourse().getCode() == null || StringUtils.isBlank(course.getCourse().getCode()) ?
                 false :
-                (course.getCourse().getCode().equalsIgnoreCase(EducDistributionApiConstants.ASSESSMENT_LTE) || course.getCourse().getCode().equalsIgnoreCase(EducDistributionApiConstants.ASSESSMENT_LTP));
+                (course.getCourse().getCode().equalsIgnoreCase(EducDistributionApiConstants.ASSESSMENT_LTE) || course.getCourse().getCode().equalsIgnoreCase(EducDistributionApiConstants.ASSESSMENT_LTP));*/
+        String code = course.getCourse().getCode();
+        return code != null && !code.isBlank() &&
+                (code.equalsIgnoreCase(EducDistributionApiConstants.ASSESSMENT_LTE) ||
+                        code.equalsIgnoreCase(EducDistributionApiConstants.ASSESSMENT_LTP));
     }
 
     //Grad2-1931 : Writes Row A's data on CSV - mchintha
