@@ -1086,8 +1086,8 @@ public class DistributionServiceTest {
 		gr1.setCode("g");
 		NonGradReason gr2 = new NonGradReason();
 		gr2.setCode("f");
-		nonGR.add(1, gr1);
-		nonGR.add(2, gr2);
+		nonGR.add(gr1);
+		nonGR.add(gr2);
 		student.setFirstName("aaa");
 		student.setLastName("bbbb");
 		student.setBirthdate(LocalDate.of(97,05,27));
