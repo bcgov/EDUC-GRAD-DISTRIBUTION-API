@@ -1081,9 +1081,19 @@ public class DistributionServiceTest {
 		//Grad2-1931 Setting properties for report data to test PSI FTP transmission mode.
 		ReportData data = new ReportData();
 		Student student = new Student();
+		List<NonGradReason> nonGR = new ArrayList<>();
+		NonGradReason gr1 = new NonGradReason();
+		gr1.setCode("g");
+		NonGradReason gr2 = new NonGradReason();
+		gr2.setCode("f");
+		nonGR.add(1, gr1);
+		nonGR.add(2, gr2);
 		student.setFirstName("aaa");
 		student.setLastName("bbbb");
 		student.setBirthdate(LocalDate.of(97,05,27));
+		student.setNonGradReasons(nonGR);
+		student.setCitizenship("C");
+		student.setGradProgram("2018-EN");
 		GraduationData gradData = new GraduationData();
 		gradData.setDogwoodFlag(true);
 		gradData.setHonorsFlag(false);
@@ -1091,6 +1101,7 @@ public class DistributionServiceTest {
 		GraduationStatus gradStatus = new GraduationStatus();
 		gradStatus.setSchoolOfRecord("cccc");
 		gradStatus.setGraduationMessage("xxxx");
+		gradStatus.setProgramCompletionDate(LocalDate.of(2022,05,27));
 		student.setGraduationData(gradData);
 		student.setGraduationStatus(gradStatus);
 		data.setStudent(student);
@@ -1117,6 +1128,20 @@ public class DistributionServiceTest {
 		course1.setType("1");
 		course2.setType("2");
 		course3.setType("3");
+		course1.setCode("g");
+		course1.setCustomizedCourseName("MMMM");
+		course1.setLevel("123");
+		course1.setCredits("00");
+		course1.setCredit(1);
+		course1.setRelatedCourse("L");
+		course1.setName("LTE10");
+		course1.setGenericCourseType("2");
+		course1.setFineArtsAppliedSkills("sd");
+		course1.setOriginalCredits(3);
+		course1.setSpecialCase("E");
+		course1.setRelatedLevel("sc");
+		course1.setUsed(false);
+		course1.setSessionDate("2023/07/14");
 		Mark mark = new Mark();
 		mark.setInterimLetterGrade("A");
 		result1.setMark(mark);

@@ -143,12 +143,8 @@ public class PSIReportProcess extends BaseProcess {
         try {
             StringBuilder filePathBuilder = createFolderStructureInTempDirectory(processorData, psiCode, "02");
             filePathBuilder.append(EducDistributionApiConstants.FTP_FILENAME_PREFIX).append(psiCode).append(EducDistributionApiConstants.FTP_FILENAME_SUFFIX).append(".").append(EducDistributionApiUtils.getFileNameSchoolReports(psiCode)).append(".DAT");
-            if (filePathBuilder != null) {
-                path = Paths.get(filePathBuilder.toString());
-                newFile = new File(Files.createFile(path).toUri());
-            } else {
-                throw new IOException(EducDistributionApiConstants.EXCEPTION_MSG_FILE_NOT_CREATED_AT_PATH);
-            }
+            path = Paths.get(filePathBuilder.toString());
+            newFile = new File(Files.createFile(path).toUri());
             for (PsiCredentialDistribution scd : scdList) {
                 if (scd.getPen() != null) {
 
@@ -170,8 +166,8 @@ public class PSIReportProcess extends BaseProcess {
                             schoolInfo = new String[]{
                                     scd.getPen(),
                                     EducDistributionApiConstants.LETTER_B,
-                                    "", //Address blank
-                                    "", //Address blank
+                                    "", //Address1 blank
+                                    "", //Address2 blank
                                     "", //City blank
                                     "", //Prov code blank
                                     "", //country code blank
@@ -246,10 +242,8 @@ public class PSIReportProcess extends BaseProcess {
                             (course.getCourse().getCode() == null || course.getCourse().getCode().isBlank()) ? "" : course.getCourse().getCode(),
                             (course.getCourse().getLevel() == null || course.getCourse().getLevel().isBlank()) ? "" : course.getCourse().getLevel(),
                             (course.getCourse().getSessionDate() != null || StringUtils.isNotBlank(course.getCourse().getSessionDate())) ? course.getCourse().getSessionDate() : "",
-                            //(course.getMark().getInterimLetterGrade() == null || course.getMark().getInterimLetterGrade().isBlank()) ? "" : course.getMark().getInterimLetterGrade(),
                             "",
                             (course.getMark().getFinalLetterGrade() == null || course.getMark().getFinalLetterGrade().isBlank()) ? "" : course.getMark().getFinalLetterGrade(),
-                            //(course.getMark().getInterimPercent() == null || StringUtils.isBlank(course.getMark().getInterimPercent())) ? EducDistributionApiConstants.THREE_ZEROES : String.format("%03d", extractNumericValue(course.getMark().getInterimPercent())),
                             EducDistributionApiConstants.THREE_ZEROES,
                             (course.getMark().getFinalPercent() == null || StringUtils.isBlank(course.getMark().getFinalPercent())) ? EducDistributionApiConstants.THREE_ZEROES : String.format("%03d", extractNumericValue(course.getMark().getFinalPercent())),
                             (course.getCourse().getCredits() == null || StringUtils.isBlank(course.getCourse().getCredits())) ? EducDistributionApiConstants.TWO_ZEROES : String.format("%02d", extractNumericValue(course.getCourse().getCredits())),
@@ -287,9 +281,7 @@ public class PSIReportProcess extends BaseProcess {
     //Grad2-1931 : Writes Row C's data on CSV - mchintha
     private void writesCsvFileRowC(List<String[]> studentTranscriptdata, String pen, List<TranscriptResult> courseDetails) {
         String[] examinableCoursesAndAssessmentsInfo;
-        String used;
         String finalLetterGrade;
-        String finalPercent;
 
         if (courseDetails != null) {
             for (TranscriptResult course : courseDetails) {
@@ -298,7 +290,6 @@ public class PSIReportProcess extends BaseProcess {
 
                 //C rows writes Examinable Courses and Assessments
                 if (courseType.equals("1") || courseType.equals("3")) {
-                    String credits;
                     Double proficiencyScore = course.getCourse().getProficiencyScore() == null || Double.isNaN(course.getCourse().getProficiencyScore()) ? 0.0 : course.getCourse().getProficiencyScore();
 
                     boolean assessmentsConditionTrue = isAssessmentsConditionTrue(course);
