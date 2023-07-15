@@ -354,9 +354,6 @@ public class PSIReportProcess extends BaseProcess {
         return Pair.of(used, finalPercent);
     }
     private static boolean isAssessmentsConditionTrue(TranscriptResult course) {
-        /*return course.getCourse().getCode() == null || StringUtils.isBlank(course.getCourse().getCode()) ?
-                false :
-                (course.getCourse().getCode().equalsIgnoreCase(EducDistributionApiConstants.ASSESSMENT_LTE) || course.getCourse().getCode().equalsIgnoreCase(EducDistributionApiConstants.ASSESSMENT_LTP));*/
         String code = course.getCourse().getCode();
         return code != null && !code.isBlank() &&
                 (code.equalsIgnoreCase(EducDistributionApiConstants.ASSESSMENT_LTE) ||
