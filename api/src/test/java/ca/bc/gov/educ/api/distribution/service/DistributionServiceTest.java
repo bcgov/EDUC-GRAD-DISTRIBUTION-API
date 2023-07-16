@@ -1090,11 +1090,15 @@ public class DistributionServiceTest {
 		nonGR.add(gr2);
 		student.setFirstName("aaa");
 		student.setLastName("bbbb");
+		student.setMiddleName("CCC");
 		student.setBirthdate(LocalDate.of(97,05,27));
 		student.setNonGradReasons(nonGR);
 		student.setCitizenship("C");
 		student.setGender("M");
+		student.setGrade("A");
+		student.setLocalId("TEST123");
 		student.setGradProgram("2018-EN");
+		student.setConsumerEducReqt("Y");
 		GraduationData gradData = new GraduationData();
 		GradProgram gp = new GradProgram();
 		Code code = new Code();
@@ -1106,6 +1110,8 @@ public class DistributionServiceTest {
 		List<String> progmCodes = new ArrayList<>();
 		progmCodes.add("g");
 		progmCodes.add("B");
+		progmCodes.add("h");
+		progmCodes.add("N");
 		gradData.setProgramCodes(progmCodes);
 		GraduationStatus gradStatus = new GraduationStatus();
 		gradStatus.setSchoolOfRecord("cccc");

@@ -387,13 +387,12 @@ public class PSIReportProcess extends BaseProcess {
         //Writes the A's row's data on CSV
         if (studentDetails != null) {
 
-            String dogWoodFlag = String.valueOf(studentDetails.getGraduationData().getDogwoodFlag()).isBlank() ? "" : String.valueOf(studentDetails.getGraduationData().getDogwoodFlag());
+            String dogWoodFlag = getDogWoodFlag(studentDetails);
 
-            String honorsFlag = String.valueOf(studentDetails.getGraduationData().getHonorsFlag()).isBlank() ? "" : String.valueOf(studentDetails.getGraduationData().getHonorsFlag());
+            String honorsFlag = getHonorsFlag(studentDetails);
 
             //Optional or Career program codes
-            List<String> optionalOrCareerProgramCodes = studentDetails.getGraduationData().getProgramCodes();
-            int programCodesListSize = optionalOrCareerProgramCodes != null ? optionalOrCareerProgramCodes.size() : 0;
+            int programCodesListSize = getProgramCodesListSize(studentDetails);
 
             studentInfo = new String[]{
                         pen,
@@ -411,8 +410,8 @@ public class PSIReportProcess extends BaseProcess {
                         (studentDetails.getConsumerEducReqt() == null || StringUtils.isBlank(studentDetails.getConsumerEducReqt())) ? "N" : studentDetails.getConsumerEducReqt(),
                         EducDistributionApiConstants.FOUR_ZEROES,
                         getProgramCompleteionDate(studentDetails),
-                        dogWoodFlag.equals("false") ? EducDistributionApiConstants.LETTER_N : EducDistributionApiConstants.LETTER_Y,
-                        honorsFlag.equals("false") ? EducDistributionApiConstants.LETTER_N : EducDistributionApiConstants.LETTER_Y,
+                        dogWoodFlag.equalsIgnoreCase("false") ? EducDistributionApiConstants.LETTER_N : EducDistributionApiConstants.LETTER_Y,
+                        honorsFlag.equalsIgnoreCase("false") ? EducDistributionApiConstants.LETTER_N : EducDistributionApiConstants.LETTER_Y,
                         getNonGradReasons(nonGR),
                         programCodesListSize >= EducDistributionApiConstants.NUMBER_TWO ? studentDetails.getGraduationData().getProgramCodes().get(1) : "",
                         programCodesListSize >= EducDistributionApiConstants.NUMBER_THREE ? studentDetails.getGraduationData().getProgramCodes().get(2) : "",
@@ -428,6 +427,19 @@ public class PSIReportProcess extends BaseProcess {
                         studentTranscriptdata);
             }
 
+    }
+
+    private static int getProgramCodesListSize(Student studentDetails) {
+        List<String> optionalOrCareerProgramCodes = studentDetails.getGraduationData().getProgramCodes();
+        return optionalOrCareerProgramCodes != null ? optionalOrCareerProgramCodes.size() : 0;
+    }
+
+    private static String getHonorsFlag(Student studentDetails) {
+        return String.valueOf(studentDetails.getGraduationData().getHonorsFlag()).isBlank() ? "" : String.valueOf(studentDetails.getGraduationData().getHonorsFlag());
+    }
+
+    private static String getDogWoodFlag(Student studentDetails) {
+        return String.valueOf(studentDetails.getGraduationData().getDogwoodFlag()).isBlank() ? "" : String.valueOf(studentDetails.getGraduationData().getDogwoodFlag());
     }
 
     private static String getNonGradReasons(List<NonGradReason> nonGR) {
