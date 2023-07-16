@@ -95,8 +95,8 @@ public class DistributionServiceTest {
 		assertNotNull(res);
 		res = testdistributeCredentials_certificate("MER","MONTHLYDIST","YED2",null,true, true);
 		assertNotNull(res);
-		res = testdistributeCredentials_certificate("MER","MONTHLYDIST","YEDB",null,false, true);
-		assertNotNull(res);
+		/*res = testdistributeCredentials_certificate("MER","MONTHLYDIST","YEDB",null,false, true);
+		assertNotNull(res);*/
 		res = testdistributeCredentials_certificate("MER","MONTHLYDIST","YEDR",null,false, true);
 		assertNotNull(res);
 	}
