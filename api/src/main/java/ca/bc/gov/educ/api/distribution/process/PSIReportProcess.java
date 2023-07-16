@@ -336,23 +336,43 @@ public class PSIReportProcess extends BaseProcess {
 
     private static Pair<String, String> calculateUsedAndFinalPercent(TranscriptResult course, boolean assessmentsConditionTrue, Double proficiencyScore) {
 
-        String credits;
-        String used;
-        String finalPercent;
+        String credits = "";
+        String used = "";
+        String finalPercent = "";
         DecimalFormat decimalFormat = new DecimalFormat("#");
         String courseType = getCourseType(course);
         if (courseType.equals("3")) {
-            credits = course.getCourse().getUsed() == null ? "" : String.valueOf(course.getCourse().getUsed());
-            used = (credits != null && credits.equalsIgnoreCase("true")) ? EducDistributionApiConstants.LETTER_Y : "";
+            credits = getCredits(course);
+            used = getUsedStatus(credits);
             finalPercent = assessmentsConditionTrue ? EducDistributionApiConstants.THREE_ZEROES : decimalFormat.format(proficiencyScore);
         } else {
-            credits = (course.getUsedForGrad() == null || course.getUsedForGrad().isBlank()) ? "" : course.getUsedForGrad();
-            used = extractNumericValue(credits) > 0 ? EducDistributionApiConstants.LETTER_Y : "";
-            String completedCoursePercentage = course.getMark().getCompletedCoursePercentage() == null ? EducDistributionApiConstants.THREE_ZEROES : decimalFormat.format(course.getMark().getCompletedCoursePercentage());
+            credits = getUFG(course);
+            used = getUsed(credits);
+            String completedCoursePercentage = getCompletedCoursePercentage(course, decimalFormat);
             finalPercent = assessmentsConditionTrue ? EducDistributionApiConstants.THREE_ZEROES : completedCoursePercentage;
         }
         return Pair.of(used, finalPercent);
     }
+
+    private static String getUsed(String credits) {
+        return extractNumericValue(credits) > 0 ? EducDistributionApiConstants.LETTER_Y : "";
+    }
+
+    private static String getCompletedCoursePercentage(TranscriptResult course, DecimalFormat decimalFormat) {
+        return course.getMark().getCompletedCoursePercentage() == null ? EducDistributionApiConstants.THREE_ZEROES : decimalFormat.format(course.getMark().getCompletedCoursePercentage());
+    }
+
+    private static String getUFG(TranscriptResult course) {
+        return (course.getUsedForGrad() == null || course.getUsedForGrad().isBlank()) ? "" : course.getUsedForGrad();
+    }
+
+    private static String getCredits(TranscriptResult course) {
+        return course.getCourse().getUsed() == null ? "" : String.valueOf(course.getCourse().getUsed());
+    }
+    private static String getUsedStatus(String credits) {
+        return credits.equalsIgnoreCase("true") ? EducDistributionApiConstants.LETTER_Y : "";
+    }
+
     private static boolean isAssessmentsConditionTrue(TranscriptResult course) {
         String code = course.getCourse().getCode();
         return code != null && !code.isBlank() &&

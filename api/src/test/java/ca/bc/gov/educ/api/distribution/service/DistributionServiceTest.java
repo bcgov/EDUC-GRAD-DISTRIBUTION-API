@@ -1168,6 +1168,7 @@ public class DistributionServiceTest {
 		course2.setSessionDate("2023/07/14");
 		Mark mark = new Mark();
 		mark.setInterimLetterGrade("A");
+		mark.setCompletedCoursePercentage(3.0);
 		result1.setMark(mark);
 		result2.setMark(mark);
 		result3.setMark(mark);
