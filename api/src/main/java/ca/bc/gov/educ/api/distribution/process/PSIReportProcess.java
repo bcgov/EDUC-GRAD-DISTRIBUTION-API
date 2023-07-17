@@ -409,7 +409,7 @@ public class PSIReportProcess extends BaseProcess {
                         programCodesListSize >= EducDistributionApiConstants.NUMBER_ONE ? studentDetails.getGraduationData().getProgramCodes().get(0) : "",
                         (studentDetails.getConsumerEducReqt() == null || StringUtils.isBlank(studentDetails.getConsumerEducReqt())) ? "N" : studentDetails.getConsumerEducReqt(),
                         EducDistributionApiConstants.FOUR_ZEROES,
-                        getProgramCompleteionDate(studentDetails),
+                        getProgramCompletionDate(studentDetails),
                         dogWoodFlag.equalsIgnoreCase("false") ? EducDistributionApiConstants.LETTER_N : EducDistributionApiConstants.LETTER_Y,
                         honorsFlag.equalsIgnoreCase("false") ? EducDistributionApiConstants.LETTER_N : EducDistributionApiConstants.LETTER_Y,
                         getNonGradReasons(nonGR),
@@ -450,7 +450,7 @@ public class PSIReportProcess extends BaseProcess {
                 .collect(Collectors.joining(""));
     }
 
-    private static String getProgramCompleteionDate(Student studentDetails) {
+    private static String getProgramCompletionDate(Student studentDetails) {
         String programCompleteionDate;
         DateTimeFormatter formatDateYYYYMM = DateTimeFormatter.ofPattern(EducDistributionApiConstants.DATE_FORMAT_YYYYMM);
         if(studentDetails.getGraduationStatus().getProgramCompletionDate() == null || StringUtils.isBlank(studentDetails.getGraduationStatus().getProgramCompletionDate().toString()))
