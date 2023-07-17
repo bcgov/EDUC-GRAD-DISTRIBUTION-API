@@ -135,7 +135,7 @@ endpoint:
     student_non_grad: ${GRAD_REPORT_API}api/v1/reports/studentnongrad
   grad-graduation-api:
     student-report-by-pen:
-      url: ${GRAD_GRADUATION_API}api/v1/graduate/report/data/%s
+      url: ${GRAD_GRADUATION_API}api/v1/graduate/report/data/%s?type=xml
     report-by-pen:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/report/data/%s?type=CERT
     school_district_year_end_report:

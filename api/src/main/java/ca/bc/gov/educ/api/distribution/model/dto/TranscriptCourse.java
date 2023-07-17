@@ -19,6 +19,8 @@ public class TranscriptCourse {
     private Integer originalCredits;
     private String genericCourseType;
     private Integer credit;
+    //Grad2-2205
+    private String fineArtsAppliedSkills;
 
     public String getName() {
         return name;
@@ -138,5 +140,13 @@ public class TranscriptCourse {
 
     public void setCredit(Integer credit) {
         this.credit = credit;
+    }
+
+    public String getFineArtsAppliedSkills() {
+        return fineArtsAppliedSkills;
+    }
+
+    public void setFineArtsAppliedSkills(String fineArtsAppliedSkills) {
+        this.fineArtsAppliedSkills = fineArtsAppliedSkills;
     }
 }
