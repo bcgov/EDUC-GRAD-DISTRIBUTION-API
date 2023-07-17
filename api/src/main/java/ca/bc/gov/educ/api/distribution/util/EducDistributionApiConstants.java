@@ -168,6 +168,6 @@ public class EducDistributionApiConstants {
     private String cleanTmpCacheBaseDir;
 
     @Value("${scheduler.clean-tmp-cache-ignore}")
-    private String[] cleanTmpCacheIgnore;
+    private List<String> cleanTmpCacheIgnore;
 
 }
