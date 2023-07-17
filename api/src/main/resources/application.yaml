@@ -168,4 +168,11 @@ splunk:
 
 scheduler:
   clean-tmp-cache-cron: ${CLEAN_TMP_CACHE_CRON}
+  clean-tmp-cache-interval-in-days: 5
+  clean-tmp-cache-base-dir: /tmp/Batch
+  clean-tmp-cache-ignore:
+    - batch
+    - psi
+    - ftp
+    - paper
 
