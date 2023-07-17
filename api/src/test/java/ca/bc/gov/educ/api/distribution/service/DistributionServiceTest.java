@@ -19,6 +19,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+import reactor.util.retry.RetryBackoffSpec;
 
 import java.io.ByteArrayInputStream;
 import java.nio.file.Path;
@@ -64,7 +65,8 @@ public class DistributionServiceTest {
 	private WebClient.RequestBodyUriSpec requestBodyUriMock;
 	@Mock
 	private WebClient.ResponseSpec responseMock;
-
+	@Mock
+	private RetryBackoffSpec retryBackoffSpecMock;
 	@Mock
 	private Mono<InputStreamResource> inputResponse;
 
@@ -89,14 +91,26 @@ public class DistributionServiceTest {
 	Path path;
 
 	@Test
-	public void testdistributeCredentialsMonthly() {
+	public void testdistributeCredentialsTranscriptMonthly() {
 		DistributionResponse res = testdistributeCredentials_transcript("MER","MONTHLYDIST",false,"Y", true);
 		assertNotNull(res);
-		res = testdistributeCredentials_certificate("MER","MONTHLYDIST","YED2",null,true, true);
+	}
+
+	@Test
+	public void testdistributeCredentialsYed2Monthly() {
+		DistributionResponse res = testdistributeCredentials_certificate("MER","MONTHLYDIST","YED2",null,true, true);
 		assertNotNull(res);
-		res = testdistributeCredentials_certificate("MER","MONTHLYDIST","YEDB",null,false, true);
+	}
+
+	@Test
+	public void testdistributeCredentialsYedbMonthly() {
+		DistributionResponse res = testdistributeCredentials_certificate("MER","MONTHLYDIST","YEDB",null,false, true);
 		assertNotNull(res);
-		res = testdistributeCredentials_certificate("MER","MONTHLYDIST","YEDR",null,false, true);
+	}
+
+	@Test
+	public void testdistributeCredentialsYedrMonthly() {
+		DistributionResponse res = testdistributeCredentials_certificate("MER","MONTHLYDIST","YEDR",null,false, true);
 		assertNotNull(res);
 	}
 
@@ -147,14 +161,26 @@ public class DistributionServiceTest {
 	}
 
 	@Test
-	public void testdistributeCredentialsYearly() {
+	public void testdistributeCredentialsTranscriptYearly() {
 		DistributionResponse res = testdistributeCredentials_transcript("MERYER","DISTRUN_YE",false,"Y", true);
 		assertNotNull(res);
-		res = testdistributeCredentials_certificate("MERYER","DISTRUN_YE","YED2",null,false, true);
+	}
+
+	@Test
+	public void testdistributeCredentialsYed2Yearly() {
+		DistributionResponse res = testdistributeCredentials_certificate("MERYER","DISTRUN_YE","YED2",null,false, true);
 		assertNotNull(res);
-		res = testdistributeCredentials_certificate("MERYER","DISTRUN_YE","YEDB",null,false, true);
+	}
+
+	@Test
+	public void testdistributeCredentialsYedbYearly() {
+		DistributionResponse res = testdistributeCredentials_certificate("MERYER","DISTRUN_YE","YEDB",null,false, true);
 		assertNotNull(res);
-		res = testdistributeCredentials_certificate("MERYER","DISTRUN_YE","YEDR",null,false, true);
+	}
+
+	@Test
+	public void testdistributeCredentialsYedrYearly() {
+		DistributionResponse res = testdistributeCredentials_certificate("MERYER","DISTRUN_YE","YEDR",null,false, true);
 		assertNotNull(res);
 	}
 
@@ -241,7 +267,7 @@ public class DistributionServiceTest {
 		obj.setReportTypeCode(reportType);
 		obj.setSchoolOfRecord(mincode);
 
-		Mockito.doReturn(getMockResponseObject()).when(this.restUtils).getTokenResponseObject();
+		mockTokenResponseObject();
 
 		SchoolReportPostRequest tPReq = new SchoolReportPostRequest();
 		tPReq.setBatchId(batchId);
@@ -277,6 +303,9 @@ public class DistributionServiceTest {
 		when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(InputStreamResource.class)).thenReturn(inputResponse);
+		when(this.retryBackoffSpecMock.filter(any())).thenReturn(retryBackoffSpecMock);
+		when(this.retryBackoffSpecMock.onRetryExhaustedThrow(any())).thenReturn(retryBackoffSpecMock);
+		when(this.inputResponse.retryWhen(any(reactor.util.retry.Retry.class))).thenReturn(inputResponse);
 		when(this.inputResponse.block()).thenReturn(inSRPack);
 
 		when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
@@ -284,6 +313,9 @@ public class DistributionServiceTest {
 		when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(InputStreamResource.class)).thenReturn(inputResponse);
+		when(this.retryBackoffSpecMock.filter(any())).thenReturn(retryBackoffSpecMock);
+		when(this.retryBackoffSpecMock.onRetryExhaustedThrow(any())).thenReturn(retryBackoffSpecMock);
+		when(this.inputResponse.retryWhen(any(reactor.util.retry.Retry.class))).thenReturn(inputResponse);
 		when(this.inputResponse.block()).thenReturn(inSRPack);
 
 		when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
@@ -600,7 +632,7 @@ public class DistributionServiceTest {
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(byte[].class)).thenReturn(Mono.just(bytesSAR));
 
-		Mockito.doReturn(getMockResponseObject()).when(this.restUtils).getTokenResponseObject();
+		mockTokenResponseObject();
 
 		when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
 		when(this.requestHeadersUriMock.uri(String.format(constants.getCommonSchoolByMincode(), mincode))).thenReturn(this.requestHeadersMock);
@@ -673,7 +705,7 @@ public class DistributionServiceTest {
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(byte[].class)).thenReturn(Mono.just(bytesSAR));
 
-		Mockito.doReturn(getMockResponseObject()).when(this.restUtils).getTokenResponseObject();
+		mockTokenResponseObject();
 
 		Mockito.when(schoolService.getCommonSchoolDetails(mincode,exception)).thenReturn(schObj);
 		DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).build();
@@ -742,6 +774,7 @@ public class DistributionServiceTest {
 		when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
 		when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(byte[].class)).thenReturn(Mono.just(bytesSAR));
 
 		SchoolReports schoolLabelsReports = new SchoolReports();
@@ -753,6 +786,9 @@ public class DistributionServiceTest {
 		when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolReportsByReportType(), "ADDRESS_LABEL_SCHL", schoolLabelsReports.getSchoolOfRecord()))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
+		when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
+		})).thenReturn(Mono.just(List.of(schoolLabelsReports)));
 
 		when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
 		when(this.requestBodyUriMock.uri(constants.getStudentNonGrad())).thenReturn(this.requestBodyUriMock);
@@ -760,6 +796,7 @@ public class DistributionServiceTest {
 		when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
 		when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(byte[].class)).thenReturn(Mono.just(bytesSAR));
 
 		when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
@@ -768,6 +805,7 @@ public class DistributionServiceTest {
 		when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
 		when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(SchoolReports.class)).thenReturn(Mono.just(new SchoolReports()));
 
 		byte[] greBPack = "Any String you want".getBytes();
@@ -782,6 +820,7 @@ public class DistributionServiceTest {
 		when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
 		when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(InputStreamResource.class)).thenReturn(Mono.just(inSRPack));
 
 		GradStudentTranscripts studentTranscripts = new GradStudentTranscripts();
@@ -792,6 +831,7 @@ public class DistributionServiceTest {
 		when(this.requestHeadersUriMock.uri(String.format(constants.getTranscriptUsingStudentID(), scd.getStudentID()))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<GradStudentTranscripts>>() {
 		})).thenReturn(Mono.just(List.of(studentTranscripts)));
 
@@ -799,11 +839,11 @@ public class DistributionServiceTest {
 		when(this.requestHeadersUriMock.uri(String.format(constants.getCommonSchoolByMincode(), mincode))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(CommonSchool.class)).thenReturn(inputResponseSchool);
 		when(this.inputResponseSchool.block()).thenReturn(schObj);
 
-		Mockito.doReturn(getMockResponseObject()).when(this.restUtils).getTokenResponseObject();
-//		Mockito.doReturn(schObj).when(schoolService).getCommonSchoolDetails(mincode,exception);
+		mockTokenResponseObject();
 
 		ProcessorData data = new ProcessorData();
 		data.setAccessToken(MOCK_TOKEN);
@@ -918,6 +958,7 @@ public class DistributionServiceTest {
 		when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
 		when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(byte[].class)).thenReturn(Mono.just(bytesSAR));
 
 		when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
@@ -926,6 +967,7 @@ public class DistributionServiceTest {
 		when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
 		when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(byte[].class)).thenReturn(Mono.just(bytesSAR));
 
 		when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
@@ -934,6 +976,7 @@ public class DistributionServiceTest {
 		when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
 		when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(SchoolReports.class)).thenReturn(Mono.just(new SchoolReports()));
 
 		SchoolReports schoolLabelsReports = new SchoolReports();
@@ -945,11 +988,17 @@ public class DistributionServiceTest {
 		when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolReportsByReportType(), "ADDRESS_LABEL_SCHL", schoolLabelsReports.getSchoolOfRecord()))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
+		when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
+		})).thenReturn(Mono.just(List.of(schoolLabelsReports)));
 
 		when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
 		when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolReportsByReportType(), "ADDRESS_LABEL_SCHL", ""))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
+		when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
+		})).thenReturn(Mono.just(List.of(schoolLabelsReports)));
 
 		byte[] greBPack = "Any String you want".getBytes();
 		byte[] greBCert = "DER".getBytes();
@@ -962,16 +1011,25 @@ public class DistributionServiceTest {
 		when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
 		when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-		when(this.responseMock.bodyToMono(InputStreamResource.class)).thenReturn(Mono.just(inSRPack));
+		when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
+		when(this.responseMock.bodyToMono(InputStreamResource.class)).thenReturn(inputResponse);
+		when(this.retryBackoffSpecMock.filter(any())).thenReturn(retryBackoffSpecMock);
+		when(this.retryBackoffSpecMock.onRetryExhaustedThrow(any())).thenReturn(retryBackoffSpecMock);
+		when(this.inputResponse.retryWhen(any(reactor.util.retry.Retry.class))).thenReturn(inputResponse);
+		when(this.inputResponse.block()).thenReturn(inSRPack);
 
 		when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
 		when(this.requestHeadersUriMock.uri(String.format(constants.getCertificate(), scdCert.getStudentID(),scdCert.getCredentialTypeCode(),scdCert.getDocumentStatusCode()))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(InputStreamResource.class)).thenReturn(inputResponse);
+		when(this.retryBackoffSpecMock.filter(any())).thenReturn(retryBackoffSpecMock);
+		when(this.retryBackoffSpecMock.onRetryExhaustedThrow(any())).thenReturn(retryBackoffSpecMock);
+		when(this.inputResponse.retryWhen(any(reactor.util.retry.Retry.class))).thenReturn(inputResponse);
 		when(this.inputResponse.block()).thenReturn(inSRCert);
 
-		Mockito.doReturn(getMockResponseObject()).when(this.restUtils).getTokenResponseObject();
+		mockTokenResponseObject();
 
 		if(properName == null)
 			Mockito.doReturn(schObj).when(schoolService).getCommonSchoolDetails(mincode,exception);
@@ -1088,6 +1146,7 @@ public class DistributionServiceTest {
 		when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
 		when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(byte[].class)).thenReturn(Mono.just(bytesSAR));
 
 		when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
@@ -1096,6 +1155,7 @@ public class DistributionServiceTest {
 		when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
 		when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(byte[].class)).thenReturn(Mono.just(bytesSAR));
 
 		byte[] greBPack = "Any String you want".getBytes();
@@ -1110,6 +1170,7 @@ public class DistributionServiceTest {
 		when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
 		when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(InputStreamResource.class)).thenReturn(Mono.just(inSRPack));
 
 		ReportData data = new ReportData();
@@ -1133,6 +1194,7 @@ public class DistributionServiceTest {
 		when(this.requestHeadersUriMock.uri(String.format(constants.getCertDataReprint(), scdCert.getPen()))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(ReportData.class)).thenReturn(inputResponseReport);
 		when(this.inputResponseReport.block()).thenReturn(data);
 
@@ -1140,10 +1202,11 @@ public class DistributionServiceTest {
 		when(this.requestHeadersUriMock.uri(String.format(constants.getCommonSchoolByMincode(), mincode))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(CommonSchool.class)).thenReturn(inputResponseSchool);
 		when(this.inputResponseSchool.block()).thenReturn(schObj);
 
-		Mockito.doReturn(getMockResponseObject()).when(this.restUtils).getTokenResponseObject();
+		mockTokenResponseObject();
 
 		DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).build();
 		return gradDistributionService.distributeCredentials(runType,batchId,distributionRequest,activityCode,transmissionMode,localDownload,accessToken);
@@ -1243,7 +1306,11 @@ public class DistributionServiceTest {
 		when(this.requestHeadersUriMock.uri(String.format(constants.getTranscriptPsiUsingStudentID(), scd.getStudentID()))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(InputStreamResource.class)).thenReturn(inputResponse);
+		when(this.retryBackoffSpecMock.filter(any())).thenReturn(retryBackoffSpecMock);
+		when(this.retryBackoffSpecMock.onRetryExhaustedThrow(any())).thenReturn(retryBackoffSpecMock);
+		when(this.inputResponse.retryWhen(any(reactor.util.retry.Retry.class))).thenReturn(inputResponse);
 		when(this.inputResponse.block()).thenReturn(inSRCert);
 
 		when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
@@ -1252,6 +1319,7 @@ public class DistributionServiceTest {
 		when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
 		when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(byte[].class)).thenReturn(Mono.just(bytesSAR));
 
 		byte[] greBPack = "Any String you want".getBytes();
@@ -1261,6 +1329,7 @@ public class DistributionServiceTest {
 		when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
 		when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(byte[].class)).thenReturn(Mono.just(greBPack));
 
 		GradStudentTranscripts studentTranscripts = new GradStudentTranscripts();
@@ -1271,6 +1340,7 @@ public class DistributionServiceTest {
 		when(this.requestHeadersUriMock.uri(String.format(constants.getTranscriptUsingStudentID(), scd.getStudentID()))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<GradStudentTranscripts>>() {
 		})).thenReturn(Mono.just(List.of(studentTranscripts)));
 
@@ -1278,6 +1348,7 @@ public class DistributionServiceTest {
 		when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolReportsByReportType(), "ADDRESS_LABEL_PSI", "000000000"))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
 		})).thenReturn(Mono.just(List.of(new SchoolReports())));
 
@@ -1285,6 +1356,7 @@ public class DistributionServiceTest {
 		when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolReportsByReportType(), "ADDRESS_LABEL_PSI", "001"))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
 		})).thenReturn(Mono.just(List.of(new SchoolReports())));
 
@@ -1292,6 +1364,7 @@ public class DistributionServiceTest {
 		when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolReportsByReportType(), "ADDRESS_LABEL_PSI", ""))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 
 		when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
 		when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolReportsByReportType(), "ADDRESS_LABEL_PSI", psiCode))).thenReturn(this.requestHeadersMock);
@@ -1306,6 +1379,7 @@ public class DistributionServiceTest {
 		when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
 		when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(1));
 
 		when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
@@ -1314,13 +1388,18 @@ public class DistributionServiceTest {
 		when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
 		when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(1));
 
 		when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
 		when(this.requestHeadersUriMock.uri(String.format(constants.getPsiByPsiCode(), psiCode))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(Psi.class)).thenReturn(inputResponsePsi);
+		when(this.retryBackoffSpecMock.filter(any())).thenReturn(retryBackoffSpecMock);
+		when(this.retryBackoffSpecMock.onRetryExhaustedThrow(any())).thenReturn(retryBackoffSpecMock);
+		when(this.inputResponsePsi.retryWhen(any(reactor.util.retry.Retry.class))).thenReturn(inputResponsePsi);
 		when(this.inputResponsePsi.block()).thenReturn(psiObj);
 
 		//Grad2-1931 checking for CSV transcripts - mchintha
@@ -1328,10 +1407,14 @@ public class DistributionServiceTest {
 		when(this.requestHeadersUriMock.uri(String.format(constants.getTranscriptCSVData(), scd.getPen()))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(ReportData.class)).thenReturn(inputResponseReport);
+		when(this.retryBackoffSpecMock.filter(any())).thenReturn(retryBackoffSpecMock);
+		when(this.retryBackoffSpecMock.onRetryExhaustedThrow(any())).thenReturn(retryBackoffSpecMock);
+		when(this.inputResponseReport.retryWhen(any(reactor.util.retry.Retry.class))).thenReturn(inputResponseReport);
 		when(this.inputResponseReport.block()).thenReturn(data);
 
-		Mockito.doReturn(getMockResponseObject()).when(this.restUtils).getTokenResponseObject();
+		mockTokenResponseObject();
 
 		DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).build();
         return gradDistributionService.distributeCredentials(runType,batchId,distributionRequest,activityCode,transmissionMode.toUpperCase(),localDownload,accessToken);
@@ -1344,6 +1427,22 @@ public class DistributionServiceTest {
 		when(this.requestHeadersUriMock.uri(String.format(constants.getTraxSchoolByMincode(),traxSchool.getMinCode()))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
 		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 		when(this.responseMock.bodyToMono(TraxSchool.class)).thenReturn(Mono.just(traxSchool));
+	}
+
+	private void mockTokenResponseObject() {
+		final ResponseObj tokenObject = new ResponseObj();
+		tokenObject.setAccess_token(MOCK_TOKEN);
+		tokenObject.setRefresh_token("456");
+
+		when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+		when(this.requestBodyUriMock.uri(constants.getTokenUrl())).thenReturn(this.requestBodyUriMock);
+		when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+		when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+		when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+		when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+		when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
+		when(this.responseMock.bodyToMono(ResponseObj.class)).thenReturn(Mono.just(tokenObject));
 	}
 }

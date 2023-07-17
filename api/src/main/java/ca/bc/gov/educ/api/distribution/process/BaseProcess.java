@@ -27,10 +27,7 @@ import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils.*;
 public abstract class BaseProcess implements DistributionProcess {
 
     private static final Logger logger = LoggerFactory.getLogger(BaseProcess.class);
-
-    protected static final String DEL = "/";
     protected static final String EXCEPTION = "Error {} ";
-    private static final String EDGRAD_BATCH = "/EDGRAD.BATCH.";
 
     @Autowired
     GradValidation validation;

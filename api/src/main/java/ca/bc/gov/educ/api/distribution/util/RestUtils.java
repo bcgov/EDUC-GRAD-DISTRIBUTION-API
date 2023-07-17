@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -82,6 +83,11 @@ public class RestUtils {
 				.body(BodyInserters.fromFormData(map))
 				.retrieve()
 				.bodyToMono(ResponseObj.class).block();
+	}
+
+	public ResponseObj rtGetTokenFallBack(HttpServerErrorException exception){
+		LOGGER.error("{} NOT REACHABLE after many attempts.", constants.getTokenUrl(), exception);
+		return null;
 	}
 
 	public void notifyDistributionJobIsCompleted(ProcessorData data) {

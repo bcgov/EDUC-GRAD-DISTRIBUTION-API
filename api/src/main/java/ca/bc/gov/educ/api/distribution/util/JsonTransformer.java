@@ -24,6 +24,7 @@ public class JsonTransformer implements Transformer {
     @PostConstruct
     public void init() {
         objectMapper
+                .findAndRegisterModules()
                 .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                 .disable(SerializationFeature.INDENT_OUTPUT)
                 .enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING)

@@ -2,18 +2,20 @@ package ca.bc.gov.educ.api.distribution.service;
 
 import ca.bc.gov.educ.api.distribution.exception.ServiceException;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
+import ca.bc.gov.educ.api.distribution.util.JsonTransformer;
 import ca.bc.gov.educ.api.distribution.util.RestUtils;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -26,6 +28,9 @@ public class RestService {
 
     private static final String GET_REST_SERVICE_ERROR = "Unable to call rest service {} method of {} with params {}";
     private static final String POST_REST_SERVICE_ERROR = "Unable to call rest service {} method of {} with params {} and payload: {}";
+    private static final String ERROR_500 = "5xx error.";
+
+    private static final String RETRY_MESSAGE = "Service failed to process after max retries.";
 
     private static final String DELETE_REST_SERVICE_ERROR = GET_REST_SERVICE_ERROR;
 
@@ -33,74 +38,129 @@ public class RestService {
 
     final RestUtils restUtils;
 
-    final ObjectMapper objectMapper;
+    final JsonTransformer jsonTransformer;
 
     @Autowired
-    public RestService(WebClient webClient, RestUtils restUtils, ObjectMapper objectMapper) {
+    public RestService(WebClient webClient, RestUtils restUtils, JsonTransformer jsonTransformer) {
         this.webClient = webClient;
         this.restUtils = restUtils;
-        this.objectMapper = objectMapper;
+        this.jsonTransformer = jsonTransformer;
     }
 
     public <T> T executeGet(String url, Class<T> boundClass, String... params) {
-        String serviceUrl = null;
+        T obj;
+        String executeUrl = null;
         try {
-            serviceUrl = parseUrlParameters(url, params);
+            final String serviceUrl = parseUrlParameters(url, params);
+            executeUrl = serviceUrl;
             final UUID correlationId = UUID.randomUUID();
-            return webClient.get().uri(serviceUrl).headers(h -> {
-                h.setBearerAuth(restUtils.getAccessToken());
-                h.set(EducDistributionApiConstants.CORRELATION_ID, correlationId.toString());
-            }).retrieve().bodyToMono(boundClass).block();
+            obj = this.webClient
+                    .get()
+                    .uri(serviceUrl)
+                    .headers(h -> {
+                        h.setBearerAuth(restUtils.getAccessToken());
+                        h.set(EducDistributionApiConstants.CORRELATION_ID, correlationId.toString());
+                    })
+                    .retrieve()
+                    .onStatus(HttpStatusCode::is5xxServerError,
+                            clientResponse -> Mono.error(new ServiceException(getErrorMessage(serviceUrl, ERROR_500), clientResponse.statusCode().value())))
+                    .bodyToMono(boundClass)
+                    // only does retry if initial error was 5xx as service may be temporarily down
+                    // 4xx errors will always happen if 404, 401, 403, etc. so does not retry
+                    .retryWhen(reactor.util.retry.Retry.backoff(3, Duration.ofSeconds(2))
+                            .filter(ServiceException.class::isInstance)
+                            .onRetryExhaustedThrow((retryBackoffSpec, retrySignal) -> {
+                                throw new ServiceException(getErrorMessage(serviceUrl, RETRY_MESSAGE), HttpStatus.SERVICE_UNAVAILABLE.value());
+                            }))
+                    .block();
         } catch(Exception e) {
-            logger.error(GET_REST_SERVICE_ERROR, "GET", serviceUrl, Arrays.toString(params));
+            logger.error(GET_REST_SERVICE_ERROR, "GET", executeUrl, Arrays.toString(params));
             throw new ServiceException(getErrorMessage(url, e.getLocalizedMessage()), HttpStatus.SERVICE_UNAVAILABLE.value(), e);
         }
+        return obj;
     }
 
     public <T> T executeGet(String url, ParameterizedTypeReference<T> typeReference, String... params) {
-        String serviceUrl = null;
+        T obj;
+        String executeUrl = null;
         try {
-            serviceUrl = parseUrlParameters(url, params);
+            final String serviceUrl = parseUrlParameters(url, params);
+            executeUrl = serviceUrl;
             final UUID correlationId = UUID.randomUUID();
-            return webClient.get().uri(serviceUrl).headers(h -> {
-                h.setBearerAuth(restUtils.getAccessToken());
-                h.set(EducDistributionApiConstants.CORRELATION_ID, correlationId.toString());
-            }).retrieve().bodyToMono(typeReference).block();
+            obj = this.webClient
+                    .get()
+                    .uri(serviceUrl)
+                    .headers(h -> {
+                        h.setBearerAuth(restUtils.getAccessToken());
+                        h.set(EducDistributionApiConstants.CORRELATION_ID, correlationId.toString());
+                    })
+                    .retrieve()
+                    // if 5xx errors, throw Service error
+                    .onStatus(HttpStatusCode::is5xxServerError,
+                            clientResponse -> Mono.error(new ServiceException(getErrorMessage(serviceUrl, ERROR_500), clientResponse.statusCode().value())))
+                    .bodyToMono(typeReference)
+                    // only does retry if initial error was 5xx as service may be temporarily down
+                    // 4xx errors will always happen if 404, 401, 403, etc. so does not retry
+                    .retryWhen(reactor.util.retry.Retry.backoff(3, Duration.ofSeconds(2))
+                            .filter(ServiceException.class::isInstance)
+                            .onRetryExhaustedThrow((retryBackoffSpec, retrySignal) -> {
+                                throw new ServiceException(getErrorMessage(serviceUrl, RETRY_MESSAGE), HttpStatus.SERVICE_UNAVAILABLE.value());
+                            }))
+                    .block();
         } catch(Exception e) {
-            logger.error(GET_REST_SERVICE_ERROR, "GET", serviceUrl, Arrays.toString(params));
+            logger.error(GET_REST_SERVICE_ERROR, "GET", executeUrl, Arrays.toString(params));
             throw new ServiceException(getErrorMessage(url, e.getLocalizedMessage()), HttpStatus.SERVICE_UNAVAILABLE.value(), e);
         }
+        return obj;
     }
 
-    @SneakyThrows
     public <T> T executePost(String url, Class<T> boundClass, Object requestBody, String... params) {
-        String serviceUrl = null;
+        T obj;
+        String executeUrl = null;
         try {
-            serviceUrl = parseUrlParameters(url, params);
+            final String serviceUrl = parseUrlParameters(url, params);
+            executeUrl = serviceUrl;
             final UUID correlationId = UUID.randomUUID();
-            return webClient.post().uri(serviceUrl).headers(h -> {
-                h.setBearerAuth(restUtils.getAccessToken());
-                h.set(EducDistributionApiConstants.CORRELATION_ID, correlationId.toString());
-            }).body(BodyInserters.fromValue(requestBody)).retrieve().bodyToMono(boundClass).block();
+            obj = this.webClient.post()
+                    .uri(serviceUrl)
+                    .headers(h -> {
+                        h.setBearerAuth(restUtils.getAccessToken());
+                        h.set(EducDistributionApiConstants.CORRELATION_ID, correlationId.toString());
+                    })
+                    .body(BodyInserters.fromValue(requestBody))
+                    .retrieve()
+                    .onStatus(HttpStatusCode::is5xxServerError,
+                            clientResponse -> Mono.error(new ServiceException(getErrorMessage(url, ERROR_500), clientResponse.statusCode().value())))
+                    .bodyToMono(boundClass)
+                    .retryWhen(reactor.util.retry.Retry.backoff(3, Duration.ofSeconds(2))
+                            .filter(ServiceException.class::isInstance)
+                            .onRetryExhaustedThrow((retryBackoffSpec, retrySignal) -> {
+                                throw new ServiceException(getErrorMessage(url, RETRY_MESSAGE), HttpStatus.SERVICE_UNAVAILABLE.value());
+                            }))
+                    .block();
         } catch(Exception e) {
-            logger.error(POST_REST_SERVICE_ERROR, "POST", serviceUrl, Arrays.toString(params), objectMapper.writeValueAsString(requestBody));
+            logger.error(POST_REST_SERVICE_ERROR, "POST", executeUrl, Arrays.toString(params), jsonTransformer.marshall(requestBody));
             throw new ServiceException(getErrorMessage(url, e.getLocalizedMessage()), HttpStatus.SERVICE_UNAVAILABLE.value(), e);
         }
+        return obj;
     }
 
     public <T> T executeDelete(String url, Class<T> boundClass, String... params) {
-        String serviceUrl = null;
+        T obj;
+        String executeUrl = null;
         try {
-            serviceUrl = parseUrlParameters(url, params);
+            final String serviceUrl = parseUrlParameters(url, params);
+            executeUrl = serviceUrl;
             final UUID correlationId = UUID.randomUUID();
-            return webClient.delete().uri(serviceUrl).headers(h -> {
+            obj = webClient.delete().uri(serviceUrl).headers(h -> {
                 h.setBearerAuth(restUtils.getAccessToken());
                 h.set(EducDistributionApiConstants.CORRELATION_ID, correlationId.toString());
             }).retrieve().bodyToMono(boundClass).block();
         } catch(Exception e) {
-            logger.error(DELETE_REST_SERVICE_ERROR, "DELETE", serviceUrl, Arrays.toString(params));
+            logger.error(DELETE_REST_SERVICE_ERROR, "DELETE", executeUrl, Arrays.toString(params));
             throw new ServiceException(getErrorMessage(url, e.getLocalizedMessage()), HttpStatus.SERVICE_UNAVAILABLE.value(), e);
         }
+        return obj;
     }
 
     protected String parseUrlParameters(String url, String... params) {

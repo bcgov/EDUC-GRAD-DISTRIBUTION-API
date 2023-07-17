@@ -21,7 +21,7 @@ public class PsiService {
 		this.restUtils = restUtils;
 	}
 
-	public Psi getPsiDetails(String psiCode, String accessToken) {
+	public Psi getPsiDetails(String psiCode) {
 		return restService.executeGet(
 				educDistributionApiConstants.getPsiByPsiCode(),
 				Psi.class,

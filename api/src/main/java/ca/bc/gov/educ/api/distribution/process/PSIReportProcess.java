@@ -64,7 +64,7 @@ public class PSIReportProcess extends BaseProcess {
             int currentSlipCount = 0;
             DistributionPrintRequest obj = mapDist.get(psiCode);
             psiCode = StringUtils.trim(psiCode);
-            Psi psiDetails = psiService.getPsiDetails(psiCode, restUtils.getAccessToken());
+            Psi psiDetails = psiService.getPsiDetails(psiCode);
             if (psiDetails != null) {
                 logger.debug("*** PSI Details Acquired {}", psiDetails.getPsiName());
                 ReportRequest packSlipReq = reportService.preparePackingSlipDataPSI(psiDetails, processorData.getBatchId());

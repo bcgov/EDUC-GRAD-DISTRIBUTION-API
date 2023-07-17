@@ -18,7 +18,9 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @Data
 @Component
@@ -38,7 +40,6 @@ public class PostingSchoolReportProcess extends BaseProcess {
 		StudentSearchRequest searchRequest = distributionRequest.getStudentSearchRequest();
 		int numberOfPdfs = 0;
 		int counter=0;
-		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("PST"), Locale.CANADA);
 		for (String mincode : mapDist.keySet()) {
 			counter++;
 			DistributionPrintRequest obj = mapDist.get(mincode);
