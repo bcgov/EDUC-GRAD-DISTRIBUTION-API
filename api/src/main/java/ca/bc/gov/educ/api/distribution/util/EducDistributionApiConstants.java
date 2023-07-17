@@ -5,6 +5,8 @@ import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 @Getter
 @Setter
@@ -25,6 +27,8 @@ public class EducDistributionApiConstants {
     //Grad2-1931 - mchintha
     public static final String DATE_FORMAT_YYYYMMDD = "yyyyMMdd";
     public static final String TMP_DIR = "/tmp";
+
+    public static final String BATCH_DIR = TMP_DIR + "/Batch";
     public static final String DEL = "/";
     public static final String FILES_FOLDER_STRUCTURE = "/Batch/PSI/";
     public static final String TRANSMISSION_MODE_FTP = "FTP";
@@ -153,5 +157,17 @@ public class EducDistributionApiConstants {
     private int threadPoolCoreSize = 5;
 
     private int threadPoolMaxSize = 15;
+
+    @Value("${scheduler.clean-tmp-cache-cron}")
+    private String cleanTmpCacheCron;
+
+    @Value("${scheduler.clean-tmp-cache-interval-in-days}")
+    private int cleanTmpCacheIntervalInDays;
+
+    @Value("${scheduler.clean-tmp-cache-base-dir}")
+    private String cleanTmpCacheBaseDir;
+
+    @Value("${scheduler.clean-tmp-cache-ignore}")
+    private List<String> cleanTmpCacheIgnore;
 
 }
