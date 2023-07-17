@@ -5,7 +5,6 @@ import ca.bc.gov.educ.api.distribution.model.dto.School;
 import ca.bc.gov.educ.api.distribution.model.dto.SchoolReports;
 import ca.bc.gov.educ.api.distribution.model.dto.TraxDistrict;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
-import lombok.SneakyThrows;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,6 +19,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.wildfly.common.Assert;
 import reactor.core.publisher.Mono;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Base64;
 import java.util.List;
@@ -439,10 +439,13 @@ public class PostingProcessServiceTest {
         Assert.assertTrue(1 == result);
     }
 
-    @SneakyThrows
     private synchronized byte[] readBinaryFile(String path) {
         ClassLoader classLoader = getClass().getClassLoader();
         InputStream inputStream = classLoader.getResourceAsStream(path);
-        return inputStream.readAllBytes();
+        try {
+            return inputStream.readAllBytes();
+        } catch (IOException e) {
+            return new byte[] {};
+        }
     }
 }

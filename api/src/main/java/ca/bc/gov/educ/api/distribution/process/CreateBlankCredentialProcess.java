@@ -5,7 +5,6 @@ import ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -149,7 +148,6 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 		mergeCertificates(packSlipReq, certificatePrintRequest, request,processorData);
 	}
 
-	@SneakyThrows
 	private void mergeCertificates(ReportRequest packSlipReq, CertificatePrintRequest certificatePrintRequest,PackingSlipRequest request, ProcessorData processorData) {
 		List<BlankCredentialDistribution> bcdList = certificatePrintRequest.getBlankCertificateList();
 		String mincode = request.getMincode();
