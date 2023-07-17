@@ -28,9 +28,6 @@ public class ScheduledTasksConfig {
         this.educDistributionApiConstants = educDistributionApiConstants;
     }
 
-    /**
-     * Removes artifacts from the /tmp/Batch directory that are expired
-     */
     @Scheduled(cron = "${scheduler.clean-tmp-cache-cron}")
     public void cleanTmpCacheFiles() {
         Path startingDir = Paths.get(educDistributionApiConstants.getCleanTmpCacheBaseDir());
@@ -41,6 +38,7 @@ public class ScheduledTasksConfig {
                 logger.error("ScheduledTasksConfig: There was an error removing file cache: {}", e.getLocalizedMessage());
             }
         }
+
     }
 
 
