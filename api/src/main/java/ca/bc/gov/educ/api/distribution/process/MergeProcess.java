@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -171,6 +172,8 @@ public class MergeProcess extends BaseProcess {
 	private void processStudents(ProcessorData processorData, List<StudentCredentialDistribution> scdList, List<Student> studListNonGrad, List<InputStream> locations) {
 		int currentTranscript = 0;
 		int failedToAdd = 0;
+		scdList.sort(Comparator.comparing(StudentCredentialDistribution::getLegalLastName, Comparator.nullsLast(String::compareTo))
+				.thenComparing(StudentCredentialDistribution::getLegalFirstName, Comparator.nullsLast(String::compareTo)));
 		for (StudentCredentialDistribution scd : scdList) {
 			if(scd.getNonGradReasons() != null && !scd.getNonGradReasons().isEmpty()) {
 				Student objStd = prepareStudentObj(scd,studListNonGrad);
@@ -183,7 +186,7 @@ public class MergeProcess extends BaseProcess {
 				logger.info("*** Failed to Add PDFs {} Current student {} in batch {}", failedToAdd, scd.getStudentID(), processorData);
 			} else {
 				currentTranscript++;
-				logger.debug("*** Added PDFs {}/{} Current student {}", currentTranscript, scdList.size(), scd.getStudentID());
+				logger.debug("*** Added PDFs {}/{} Current student {} - {}, {}", currentTranscript, scdList.size(), scd.getStudentID(), scd.getLegalLastName(), scd.getLegalFirstName());
 			}
 		}
 	}
@@ -236,6 +239,8 @@ public class MergeProcess extends BaseProcess {
 			locations.add(reportService.getPackingSlip(packSlipReq,restUtils.getAccessToken()).getInputStream());
 			int currentCertificate = 0;
 			int failedToAdd = 0;
+			scdList.sort(Comparator.comparing(StudentCredentialDistribution::getLegalLastName, Comparator.nullsLast(String::compareTo))
+					.thenComparing(StudentCredentialDistribution::getLegalFirstName, Comparator.nullsLast(String::compareTo)));
 			for (StudentCredentialDistribution scd : scdList) {
 				if(scd.getNonGradReasons() != null && !scd.getNonGradReasons().isEmpty()) {
 					Student objStd = prepareStudentObj(scd,studListNonGrad);
@@ -246,7 +251,7 @@ public class MergeProcess extends BaseProcess {
 				if(certificatePdf != null) {
 					locations.add(certificatePdf.getInputStream());
 					currentCertificate++;
-					logger.debug("*** Added PDFs {}/{} Current student {}",currentCertificate,scdList.size(),scd.getStudentID());
+					logger.debug("*** Added PDFs {}/{} Current student {} - {}, {}",currentCertificate,scdList.size(),scd.getStudentID(), scd.getLegalLastName(), scd.getLegalFirstName());
 				} else {
 					failedToAdd++;
 					logger.info("*** Failed to Add PDFs {} Current student {} papertype {} in batch {}",failedToAdd,scd.getStudentID(),paperType,processorData.getBatchId());
