@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Data;
 
 import java.time.LocalDate;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -31,7 +31,7 @@ public class StudentCredentialDistribution {
 	@JsonSerialize(using = LocalDateSerializer.class)
 	private LocalDate programCompletionDate;
 	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
-	private Date lastUpdateDate;
+	private LocalDateTime lastUpdateDate;
 	private String honoursStanding;
 	private String program;
 	private String studentGrade;
