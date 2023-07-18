@@ -161,11 +161,11 @@ public class MergeProcess extends BaseProcess {
 			List<StudentCredentialDistribution> scdList = transcriptPrintRequest.getTranscriptList();
 			List<InputStream> locations = new ArrayList<>();
 			currentSlipCount++;
-			setExtraDataForPackingSlip(packSlipReq, "YED4", obj.getTotal(), scdList.size(), 1, "Transcript", transcriptPrintRequest.getBatchId());
 			try {
-				locations.add(reportService.getPackingSlip(packSlipReq).getInputStream());
+				int currentTranscript = processTranscripts(processorData,scdList,studListNonGrad,locations);
+				setExtraDataForPackingSlip(packSlipReq, "YED4", obj.getTotal(), currentTranscript, 1, "Transcript", transcriptPrintRequest.getBatchId());
+				locations.add(0, reportService.getPackingSlip(packSlipReq).getInputStream());
 				logger.debug("*** Packing Slip Added");
-				processStudents(processorData,scdList,studListNonGrad,locations);
 				mergeDocumentsPDFs(processorData,mincode,schoolCategoryCode,"/EDGRAD.T.","YED4",locations);
 				numberOfPdfs++;
 				logger.debug("*** Transcript Documents Merged ***");
@@ -176,7 +176,7 @@ public class MergeProcess extends BaseProcess {
 		return Pair.of(currentSlipCount,numberOfPdfs);
 	}
 
-	private void processStudents(ProcessorData processorData, List<StudentCredentialDistribution> scdList, List<Student> studListNonGrad, List<InputStream> locations) {
+	private int processTranscripts(ProcessorData processorData, List<StudentCredentialDistribution> scdList, List<Student> studListNonGrad, List<InputStream> locations) {
 		int currentTranscript = 0;
 		int failedToAdd = 0;
 		scdList.sort(Comparator.comparing(StudentCredentialDistribution::getLegalLastName, Comparator.nullsLast(String::compareTo))
@@ -199,6 +199,7 @@ public class MergeProcess extends BaseProcess {
 				logger.debug("*** Added Transcript PDFs {}/{} Current student {} - {}, {}", currentTranscript, scdList.size(), scd.getStudentID(), scd.getLegalLastName(), scd.getLegalFirstName());
 			}
 		}
+		return currentTranscript;
 	}
 
 	private Student prepareStudentObj(StudentCredentialDistribution scd, List<Student> studListNonGrad) {
