@@ -88,12 +88,16 @@ public class MergeProcess extends BaseProcess {
 		}
 		int numberOfCreatedSchoolReports = 0;
 		int numberOfProcessedSchoolReports = 0;
+		List<String> schoolsForLabelsCodes = List.of(SCHOOL_LABELS_CODE);
+		if(schoolsForLabels.size() == 1) {
+			schoolsForLabelsCodes = List.of(schoolsForLabels.get(0).getMincode());
+		}
 		if(MONTHLYDIST.equalsIgnoreCase(processorData.getActivityCode())) {
 			logger.debug("***** Create and Store Monthly school reports *****");
 			numberOfCreatedSchoolReports += createSchoolLabelsReport(schoolsForLabels, ADDRESS_LABEL_SCHL);
 			logger.debug("***** Number of created Monthly school reports {} *****", numberOfCreatedSchoolReports);
 			logger.debug("***** Distribute Monthly school reports *****");
-			numberOfProcessedSchoolReports += processDistrictSchoolDistribution(batchId, List.of(SCHOOL_LABELS_CODE), ADDRESS_LABEL_SCHL, null, null, processorData.getActivityCode());
+			numberOfProcessedSchoolReports += processDistrictSchoolDistribution(batchId, schoolsForLabelsCodes, ADDRESS_LABEL_SCHL, null, null, processorData.getActivityCode());
 			logger.debug("***** Number of distributed Monthly school reports {} *****", numberOfProcessedSchoolReports);
 		}
 		if (SUPPDIST.equalsIgnoreCase(processorData.getActivityCode())) {
@@ -101,7 +105,7 @@ public class MergeProcess extends BaseProcess {
 			numberOfCreatedSchoolReports += createSchoolLabelsReport(schoolsForLabels, ADDRESS_LABEL_SCHL);
 			logger.debug("***** Number of created Supplemental school reports {} *****", numberOfCreatedSchoolReports);
 			logger.debug("***** Distribute Supplemental school label reports *****");
-			numberOfProcessedSchoolReports += processDistrictSchoolDistribution(batchId, List.of(SCHOOL_LABELS_CODE), ADDRESS_LABEL_SCHL, null, null, processorData.getActivityCode());
+			numberOfProcessedSchoolReports += processDistrictSchoolDistribution(batchId, schoolsForLabelsCodes, ADDRESS_LABEL_SCHL, null, null, processorData.getActivityCode());
 			logger.debug("***** Number of distributed Supplemental school label reports {} *****", numberOfProcessedSchoolReports);
 		}
 		numberOfPdfs += numberOfProcessedSchoolReports;
