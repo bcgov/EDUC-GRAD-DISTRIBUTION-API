@@ -76,10 +76,14 @@ public class PostingDistributionService {
                 forAllSchools = false;
                 createDistrictSchoolYearEndNonGradReport(null, NONGRADDISTREP_SD, null, districtCodes);
             }
+            if(!mincodes.isEmpty()) {
+                forAllSchools = false;
+                createDistrictSchoolYearEndNonGradReport(null, null, DISTREP_YE_SC, mincodes);
+            }
             if(forAllSchools) {
                 createDistrictSchoolYearEndNonGradReport(null, NONGRADDISTREP_SD, null);
             }
-            numberOfPdfs += processDistrictSchoolDistribution(batchId, null, NONGRADDISTREP_SD, null, transmissionMode);
+            numberOfPdfs += processDistrictSchoolDistribution(batchId, null, NONGRADDISTREP_SD, DISTREP_YE_SC, transmissionMode);
         }
         return zipBatchDirectory(batchId, download, numberOfPdfs, TMP_DIR);
     }
@@ -312,7 +316,7 @@ public class PostingDistributionService {
         String districtCode = getDistrictCodeFromMincode(mincode);
         if(StringUtils.isNotBlank(transmissionMode) && TRANSMISSION_MODE_FTP.equalsIgnoreCase(transmissionMode)) return;
         String rootDirectory = StringUtils.containsAnyIgnoreCase(transmissionMode, TRANSMISSION_MODE_PAPER, TRANSMISSION_MODE_FTP) ? TMP_DIR + EducDistributionApiConstants.FILES_FOLDER_STRUCTURE + StringUtils.upperCase(transmissionMode) : TMP_DIR;
-        boolean schoolLevelFolders = "02".equalsIgnoreCase(schoolCategory) || MONTHLYDIST.equalsIgnoreCase(transmissionMode) || SUPPDIST.equalsIgnoreCase(transmissionMode);
+        boolean schoolLevelFolders = StringUtils.containsAnyIgnoreCase(schoolCategory, "02", "03", "09") || MONTHLYDIST.equalsIgnoreCase(transmissionMode) || SUPPDIST.equalsIgnoreCase(transmissionMode);
         try {
             StringBuilder fileLocBuilder = new StringBuilder();
             if (isDistrict) {

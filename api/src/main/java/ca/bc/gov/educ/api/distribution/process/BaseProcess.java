@@ -219,7 +219,7 @@ public abstract class BaseProcess implements DistributionProcess {
         StringBuilder filePathBuilder = new StringBuilder();
         Path path;
         try {
-            Boolean conditionResult = StringUtils.containsAnyIgnoreCase(activityCode, USERDIST, USERDISTOC, USERDISTRC, MONTHLYDIST, SUPPDIST) || "02".equalsIgnoreCase(schoolCategoryCode);
+            Boolean conditionResult = StringUtils.containsAnyIgnoreCase(activityCode, USERDIST, USERDISTOC, USERDISTRC, MONTHLYDIST, SUPPDIST) || StringUtils.containsAnyIgnoreCase(schoolCategoryCode, "02", "03", "09");
             if (Boolean.TRUE.equals(conditionResult)) {
                 directoryPathBuilder.append(rootDirectory).append(EducDistributionApiConstants.DEL).append(processorData.getBatchId()).append(EducDistributionApiConstants.DEL).append(minCode).append(EducDistributionApiConstants.DEL);
             } else {

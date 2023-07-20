@@ -4,6 +4,7 @@ import ca.bc.gov.educ.api.distribution.model.dto.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.internal.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +57,7 @@ public class YearEndMergeProcess extends MergeProcess {
                 schoolCounter++;
 
                 logger.debug("*** School Details Acquired {} category {}", mincode, schoolCategoryCode);
-                if("02".equals(schoolCategoryCode)) {
+                if(StringUtils.containsAnyIgnoreCase(schoolCategoryCode, "02", "03", "09")) {
                     processSchoolsForLabels(schoolsForLabels, mincode, exception);
                     logger.debug("Added Independent School {} for processing", commonSchool.getSchoolName());
                 }
