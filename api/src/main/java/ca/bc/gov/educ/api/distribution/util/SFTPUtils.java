@@ -68,7 +68,7 @@ public class SFTPUtils {
         files.computeIfAbsent(localZipFile, v -> new ArrayList<>()).add(remoteZipFile);
         files.computeIfAbsent(localControlFile, v -> new ArrayList<>()).add(remoteControlFile);
         // GRAD2-2224 - Short term solution to also upload files to dev folder for business retrieval.
-        if(BC_MAIL_LOCATION.toLowerCase().contains("prod")){
+        if(!BC_MAIL_LOCATION.toLowerCase().contains("dev")){
             // also upload to dev
             String dev = "/Inbox/Dev/";
             files.computeIfAbsent(formatPath(localZipFile), v -> new ArrayList<>()).add(formatPath(dev + zipFile));
