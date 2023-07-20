@@ -76,7 +76,7 @@ public class MergeProcess extends BaseProcess {
 				pV = processYedrCertificatePrintRequest(distributionPrintRequest,currentSlipCount,packSlipReq,studListNonGrad,processorData,mincode,schoolCategoryCode,numberOfPdfs);
 				numberOfPdfs = pV.getRight();
 				if(!studListNonGrad.isEmpty()) {
-					createAndSaveNonGradReport(schoolDetails,studListNonGrad,mincode);
+					createAndSaveNonGradReport(schoolDetails,studListNonGrad,mincode,educDistributionApiConstants.getStudentNonGradProjected());
 				}
 				logger.debug("PDFs Merged {}", schoolDetails.getSchoolName());
 				processSchoolsForLabels(schoolsForLabels, mincode, exception);
@@ -305,7 +305,7 @@ public class MergeProcess extends BaseProcess {
 		}
 	}
 
-	protected Integer createAndSaveNonGradReport(CommonSchool schoolDetails, List<Student> studListNonGrad, String mincode) {
+	protected Integer createAndSaveNonGradReport(CommonSchool schoolDetails, List<Student> studListNonGrad, String mincode, String url) {
 		ReportData nongradProjected = new ReportData();
 		School schObj = new School();
 		schObj.setMincode(schoolDetails.getDistNo()+schoolDetails.getSchlNo());
@@ -325,7 +325,7 @@ public class MergeProcess extends BaseProcess {
 		reportParams.setData(nongradProjected);
 
 		byte[] bytesSAR = restService.executePost(
-						educDistributionApiConstants.getStudentNonGrad(),
+						url,
 						byte[].class,
 						reportParams
 				);

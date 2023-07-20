@@ -120,6 +120,9 @@ public class EducDistributionApiConstants {
     @Value("${endpoint.grad-graduation-report-api.update-grad-school-report.url}")
     private String updateSchoolReport;
 
+    @Value("${endpoint.grad-report-api.student_non_grad_projected}")
+    private String studentNonGradProjected;
+
     @Value("${endpoint.grad-report-api.student_non_grad}")
     private String studentNonGrad;
 
@@ -140,9 +143,6 @@ public class EducDistributionApiConstants {
 
     @Value("${endpoint.grad-graduation-api.school_district_supplemental_report.url}")
     private String schoolDistrictSupplementalReport;
-
-    @Value("${endpoint.grad-graduation-api.school_district_student_nongrad_report.url}")
-    private String schoolDistrictStudentNonGradReport;
 
     @Value("${endpoint.grad-graduation-api.school_labels_report.url}")
     private String schoolLabelsReport;

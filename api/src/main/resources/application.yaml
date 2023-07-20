@@ -132,6 +132,7 @@ endpoint:
       url: ${GRAD_REPORT_API}api/v1/reports/certificate
     transcript_report:
       url: ${GRAD_REPORT_API}api/v1/reports/transcriptreport
+    student_non_grad_projected: ${GRAD_REPORT_API}api/v1/reports/studentnongradprojected
     student_non_grad: ${GRAD_REPORT_API}api/v1/reports/studentnongrad
   grad-graduation-api:
     student-report-by-pen:
@@ -146,8 +147,6 @@ endpoint:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/report/schooldistrictmonth?slrt=%s&drt=%s&srt=%s
     school_district_supplemental_report:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/report/schooldistrictsupp?slrt=%s&drt=%s&srt=%s
-    school_district_student_nongrad_report:
-      url: ${GRAD_GRADUATION_API}api/v1/graduate/report/schooldistrictstudentnongrad?slrt=%s&drt=%s&srt=%s
     school_labels_report:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/report/school/labels?reportType=%s
   educ-school-api:
