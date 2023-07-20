@@ -9,6 +9,10 @@ import org.springframework.stereotype.Component;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants.TMP_DIR;
 
@@ -56,64 +60,86 @@ public class SFTPUtils {
     public boolean sftpUploadBCMail(Long batchId, String rootFolder) {
         return sftpUploadBCMail(batchId, rootFolder, null);
     }
-    //Grad2-2052 set common root folder for all the dis runs to pick the folders and send to BC mail. - mchintha
+
+    /**
+     * Method specific for uploading to BCMail
+     * @param batchId the batch id
+     * @param rootFolder the root location of the cached files
+     * @return true if successful
+     */
     public boolean sftpUploadBCMail(Long batchId, String rootFolder, String mincode) {
+        Map<String, List<String>> files = new HashMap<>();
         String mincodePath = StringUtils.isBlank(mincode) ? "" : mincode + ".";
-        String localFile = rootFolder + "/EDGRAD.BATCH."+batchId+mincodePath+".zip";
-        String remoteFile = BC_MAIL_LOCATION+"EDGRAD.BATCH."+batchId+mincodePath+".zip";
-        String localControlFile = rootFolder + "/EDGRAD.BATCH."+batchId+mincodePath+".txt";
-        String remoteControlFile = BC_MAIL_LOCATION+"EDGRAD.BATCH."+batchId+mincodePath+".txt";
-        Session jschSession = null;
-
-        setupBCMailSFTP();
-
-        try {
-            JSch jsch = new JSch();
-            jsch.setKnownHosts(KNOWN_HOST);
-            jschSession = jsch.getSession(BCMAIL_SFTP_USERNAME, BCMAIL_REMOTE_HOST, REMOTE_PORT);
-            jsch.addIdentity(RSA_PRV);
-            jschSession.connect(SESSION_TIMEOUT);
-
-            Channel sftp = jschSession.openChannel("sftp");
-            sftp.connect(CHANNEL_TIMEOUT);
-            ChannelSftp channelSftp = (ChannelSftp) sftp;
-
-            // transfer file from local to remote server
-            channelSftp.put(localFile, remoteFile);
-            channelSftp.put(localControlFile, remoteControlFile);
-            channelSftp.exit();
-            return true;
-        } catch (JSchException | SftpException e) {
-            logger.error("Error {} ",e.getLocalizedMessage());
-            return false;
-        } finally {
-            if (jschSession != null) {
-                jschSession.disconnect();
-            }
+        String zipFile = "/EDGRAD.BATCH." + batchId + mincodePath + ".zip";
+        String controlFile = "/EDGRAD.BATCH." + batchId + mincodePath + ".txt";
+        String localZipFile = rootFolder + zipFile;
+        String remoteZipFile = BC_MAIL_LOCATION + zipFile;
+        String localControlFile = rootFolder + controlFile;
+        String remoteControlFile = BC_MAIL_LOCATION + controlFile;
+        files.computeIfAbsent(localZipFile, v -> new ArrayList<>()).add(remoteZipFile);
+        files.computeIfAbsent(localControlFile, v -> new ArrayList<>()).add(remoteControlFile);
+        // GRAD2-2224 - Short term solution to also upload files to dev folder for business retrieval.
+        if(!BC_MAIL_LOCATION.toLowerCase().contains("dev")){
+            // also upload to dev
+            String dev = "/Inbox/Dev/";
+            files.computeIfAbsent(formatPath(localZipFile), v -> new ArrayList<>()).add(formatPath(dev + zipFile));
+            files.computeIfAbsent(formatPath(localControlFile), v -> new ArrayList<>()).add(formatPath(dev + controlFile));
         }
+        return sftpUpload(files, BCMAIL_SFTP_USERNAME, BCMAIL_REMOTE_HOST, REMOTE_PORT, BCMAIL_PRIVATE_KEY, BCMAIL_PUBLIC_KEY, BCMAIL_KNOWN_HOSTS);
     }
 
-    private boolean setupBCMailSFTP() {
-        writeFile(RSA_PRV, BCMAIL_PRIVATE_KEY);
-        writeFile(RSA_PUB, BCMAIL_PUBLIC_KEY);
-        writeFile(KNOWN_HOST, BCMAIL_KNOWN_HOSTS);
-        return true;
-    }
-
+    /**
+     * Method specific for uploading files to TSW
+     * @param batchId batch id
+     * @param mincode mincode
+     * @param fileName the filename
+     * @return true if successful
+     */
     public boolean sftpUploadTSW(Long batchId,String mincode,String fileName) {
-        String localFile = TMP_DIR + EducDistributionApiConstants.DEL + batchId + EducDistributionApiConstants.DEL + mincode + EducDistributionApiConstants.DEL + fileName+".pdf";
+        Map<String, List<String>> files = new HashMap<>();
+        String localFile = formatPath(EducDistributionApiConstants.TMP_DIR + EducDistributionApiConstants.DEL + batchId + EducDistributionApiConstants.DEL + mincode + EducDistributionApiConstants.DEL + fileName+".pdf");
         String remoteFile = "/$1$dga5037/EDUC/XTD";
         String location1 = remoteFile+"/WEB/"+fileName+".pdf";
         String location2 = remoteFile+"/TSWSFTP/"+fileName+".pdf";
         String location3 = remoteFile+"/WEB/PST/"+fileName+".pdf";
+        files.computeIfAbsent(localFile, v -> new ArrayList<>()).add(location1);
+        files.computeIfAbsent(localFile, v -> new ArrayList<>()).add(location2);
+        files.computeIfAbsent(localFile, v -> new ArrayList<>()).add(location3);
+        return sftpUpload(files, TSW_SFTP_USERNAME, TSW_REMOTE_HOST, REMOTE_PORT, TSW_PRIVATE_KEY, TSW_PUBLIC_KEY, TSW_KNOWN_HOSTS);
+    }
+
+    /**
+     * Method for uploading files to an sftp server
+     * @param files a map of local -> remote file paths. Use of Map<String, List<String>> enables the key (the file to upload)
+     *              to have multiple upload locations (the List<String> represents the upload locations)
+     * @param userName the username to log into the sftp server
+     * @param host remote host
+     * @param port the port to use (usually 22)
+     * @param privateKey the private key of the client
+     * @param publicKey the public key of the host
+     * @param knownHosts known hosts
+     * @return true if successful
+     */
+    public boolean sftpUpload(
+            Map<String, List<String>> files,
+            String userName,
+            String host,
+            int port,
+            String privateKey,
+            String publicKey,
+            String knownHosts) {
+
+        // set up keys, etc.
+        writeFile(RSA_PRV, privateKey);
+        writeFile(RSA_PUB, publicKey);
+        writeFile(KNOWN_HOST, knownHosts);
+
+        // session
         Session jschSession = null;
-
-        setupTSWSFTP();
-
         try {
             JSch jsch = new JSch();
             jsch.setKnownHosts(KNOWN_HOST);
-            jschSession = jsch.getSession(TSW_SFTP_USERNAME, TSW_REMOTE_HOST, REMOTE_PORT);
+            jschSession = jsch.getSession(userName, host, port);
             jsch.addIdentity(RSA_PRV);
             jschSession.connect(SESSION_TIMEOUT);
 
@@ -121,14 +147,23 @@ public class SFTPUtils {
             sftp.connect(CHANNEL_TIMEOUT);
             ChannelSftp channelSftp = (ChannelSftp) sftp;
 
-            // transfer file from local to remote server
-            channelSftp.put(localFile, location1);
-            channelSftp.put(localFile, location2);
-            channelSftp.put(localFile, location3);
+            // transfer file(s) from local to remote server
+            for (Map.Entry<String, List<String>> entry : files.entrySet()) {
+                entry.getValue().forEach(
+                        file -> {
+                            try {
+                                channelSftp.put(entry.getKey(), file);
+                                logger.debug("Transferring file via ftp: {}", entry.getKey());
+                            } catch (SftpException e) {
+                                logger.error("Error during sftp transfer {} ", e.getLocalizedMessage());
+                            }
+                        }
+                );
+            }
             channelSftp.exit();
             return true;
-        } catch (JSchException | SftpException e) {
-            logger.error("Error {} ",e.getLocalizedMessage());
+        } catch (JSchException e) {
+            logger.error("Error during sftp transfer {} ", e.getLocalizedMessage());
             return false;
         } finally {
             if (jschSession != null) {
@@ -137,20 +172,19 @@ public class SFTPUtils {
         }
     }
 
-    private boolean setupTSWSFTP() {
-        writeFile(RSA_PRV, TSW_PRIVATE_KEY);
-        writeFile(RSA_PUB, TSW_PUBLIC_KEY);
-        writeFile(KNOWN_HOST, TSW_KNOWN_HOSTS);
-        return true;
-    }
-
-    public boolean writeFile(String filename, String content) {
+    private boolean writeFile(String filename, String content) {
         try (FileWriter fileWriter = new FileWriter(filename)){
             fileWriter.write(content);
-            logger.debug("Write File Complete! - {} ",filename);
+            logger.debug("Write File Complete! - {} ", filename);
         } catch (IOException e) {
-            logger.error("Write File Failed! - {}",filename);
+            logger.error("SFTP ERROR: Write File Failed! - {}", filename);
+            e.printStackTrace();
         }
         return true;
     }
+
+    private String formatPath(String path){
+        return path.replaceAll("/+", "/");
+    }
+
 }
