@@ -5,12 +5,10 @@ import ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.BodyInserters;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -33,15 +31,16 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 		logger.debug("************* TIME START  ************ {}",startTime);
 		DistributionResponse response = new DistributionResponse();
 		ExceptionMessage exception = new ExceptionMessage();
-		Map<String, DistributionPrintRequest> mapDist = processorData.getMapDistribution();
+		DistributionRequest distributionRequest = processorData.getDistributionRequest();
+		Map<String, DistributionPrintRequest> mapDist = distributionRequest.getMapDist();
+		StudentSearchRequest searchRequest = distributionRequest.getStudentSearchRequest();
 		Long batchId = processorData.getBatchId();
 		int numberOfPdfs = 0;
 		int counter=0;
-		for (Map.Entry<String, DistributionPrintRequest> entry : mapDist.entrySet()) {
+		for (String mincode : mapDist.keySet()) {
 			counter++;
 			int currentSlipCount = 0;
-			String mincode = entry.getKey();
-			DistributionPrintRequest obj = entry.getValue();
+			DistributionPrintRequest obj = mapDist.get(mincode);
 			CommonSchool schoolDetails = getBaseSchoolDetails(obj,mincode,exception);
 			if(schoolDetails != null) {
 				logger.debug("*** School Details Acquired {}", schoolDetails.getSchoolName());
@@ -53,7 +52,7 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 				numberOfPdfs = processYedrCertificate(obj,currentSlipCount,packSlipReq,mincode,processorData,numberOfPdfs);
 
 				logger.debug("PDFs Merged {}", schoolDetails.getSchoolName());
-				logger.debug("School {}/{}",counter,mapDist.size());
+				logger.debug("{} School {}/{}",mincode,counter,mapDist.size());
 				if (counter % 50 == 0) {
 					restUtils.fetchAccessToken(processorData);
 				}
@@ -64,6 +63,11 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 		long diff = (endTime - startTime)/1000;
 		logger.debug("************* TIME Taken  ************ {} secs",diff);
 		response.setMergeProcessResponse("Merge Successful and File Uploaded");
+		response.setNumberOfPdfs(numberOfPdfs);
+		response.setBatchId(processorData.getBatchId());
+		response.setLocalDownload(processorData.getLocalDownload());
+		response.setActivityCode(distributionRequest.getActivityCode());
+		response.setStudentSearchRequest(searchRequest);
 		processorData.setDistributionResponse(response);
 		return processorData;
 	}
@@ -75,9 +79,9 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 			List<InputStream> locations = new ArrayList<>();
 			currentSlipCount++;
 			int totalQuantity = transcriptPrintRequest.getBlankTranscriptList().get(0).getQuantity() * bcdList.size();
-			setExtraDataForPackingSlip(packSlipReq, "YED4", obj.getTotal(), totalQuantity, currentSlipCount, transcriptPrintRequest.getBatchId());
+			setExtraDataForPackingSlip(packSlipReq, "YED4", obj.getTotal(), totalQuantity, currentSlipCount, "Transcript", transcriptPrintRequest.getBatchId());
 			try {
-				locations.add(reportService.getPackingSlip(packSlipReq, restUtils.getAccessToken()).getInputStream());
+				locations.add(reportService.getPackingSlip(packSlipReq).getInputStream());
 				logger.debug("*** Packing Slip Added");
 				int currentTranscript = 0;
 				int failedToAdd = 0;
@@ -89,16 +93,16 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 					ReportRequest reportParams = new ReportRequest();
 					reportParams.setOptions(options);
 					reportParams.setData(data);
-					byte[] bytesSAR = webClient.post().uri(educDistributionApiConstants.getTranscriptReport()).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).body(BodyInserters.fromValue(reportParams)).retrieve().bodyToMono(byte[].class).block();
+					byte[] bytesSAR = restService.executePost(educDistributionApiConstants.getTranscriptReport(), byte[].class, reportParams);
 					if (bytesSAR != null) {
 						for(int i=1;i<=bcd.getQuantity();i++) {
 							locations.add(new ByteArrayInputStream(bytesSAR));
 						}
 						currentTranscript++;
-						logger.debug("*** Added PDFs {}/{} Current Credential {}", currentTranscript, bcdList.size(), bcd.getCredentialTypeCode());
+						logger.debug("*** Added transcript PDFs {}/{} Current Credential {}", currentTranscript, bcdList.size(), bcd.getCredentialTypeCode());
 					} else {
 						failedToAdd++;
-						logger.info("*** Failed to Add PDFs {} Current Credential {} in batch {}", failedToAdd, bcd.getCredentialTypeCode(), processorData.getBatchId());
+						logger.info("*** Failed to Add transcript PDFs {} Current Credential {} in batch {}", failedToAdd, bcd.getCredentialTypeCode(), processorData.getBatchId());
 					}
 				}
 				mergeDocumentsPDFs(processorData,mincode,"02","/EDGRAD.T.","YED4",locations);
@@ -130,7 +134,7 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 		return numberOfPdfs;
 	}
 
-	private int processYed2Certificate(DistributionPrintRequest obj, int currentSlipCount, ReportRequest packSlipReq, String mincode,ProcessorData processorData, int numberOfPdfs) {
+	private int processYed2Certificate(DistributionPrintRequest obj, int currentSlipCount, ReportRequest packSlipReq, String mincode, ProcessorData processorData, int numberOfPdfs) {
 		if (obj.getYed2CertificatePrintRequest() != null) {
 			currentSlipCount++;
 			processCertificatePrintFile(packSlipReq,obj.getYed2CertificatePrintRequest(),mincode,currentSlipCount,obj,processorData, "YED2");
@@ -144,16 +148,15 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 		mergeCertificates(packSlipReq, certificatePrintRequest, request,processorData);
 	}
 
-	@SneakyThrows
-	private void mergeCertificates(ReportRequest packSlipReq, CertificatePrintRequest certificatePrintRequest,PackingSlipRequest request,ProcessorData processorData) {
+	private void mergeCertificates(ReportRequest packSlipReq, CertificatePrintRequest certificatePrintRequest,PackingSlipRequest request, ProcessorData processorData) {
 		List<BlankCredentialDistribution> bcdList = certificatePrintRequest.getBlankCertificateList();
 		String mincode = request.getMincode();
 		String paperType = request.getPaperType();
 		List<InputStream> locations=new ArrayList<>();
 		int totalQuantity = certificatePrintRequest.getBlankCertificateList().get(0).getQuantity() * bcdList.size();
-		setExtraDataForPackingSlip(packSlipReq,paperType,request.getTotal(),totalQuantity,request.getCurrentSlip(),certificatePrintRequest.getBatchId());
+		setExtraDataForPackingSlip(packSlipReq,paperType,request.getTotal(),totalQuantity,request.getCurrentSlip(),"Certificate",certificatePrintRequest.getBatchId());
 		try {
-			locations.add(reportService.getPackingSlip(packSlipReq,restUtils.getAccessToken()).getInputStream());
+			locations.add(reportService.getPackingSlip(packSlipReq).getInputStream());
 			int currentCertificate = 0;
 			int failedToAdd = 0;
 			for (BlankCredentialDistribution bcd : bcdList) {
@@ -164,13 +167,13 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 				ReportRequest reportParams = new ReportRequest();
 				reportParams.setOptions(options);
 				reportParams.setData(data);
-				byte[] bytesSAR = webClient.post().uri(educDistributionApiConstants.getCertificateReport()).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).body(BodyInserters.fromValue(reportParams)).retrieve().bodyToMono(byte[].class).block();
+				byte[] bytesSAR = restService.executePost(educDistributionApiConstants.getCertificateReport(), byte[].class, reportParams);
 				if (bytesSAR != null) {
 					for(int i=1;i<=bcd.getQuantity();i++) {
 						locations.add(new ByteArrayInputStream(bytesSAR));
 					}
 					currentCertificate++;
-					logger.debug("*** Added PDFs {}/{} Current Credential {}", currentCertificate, bcdList.size(), bcd.getCredentialTypeCode());
+					logger.debug("*** Added Certificate PDFs {}/{} Current Credential {}", currentCertificate, bcdList.size(), bcd.getCredentialTypeCode());
 				} else {
 					failedToAdd++;
 					logger.info("*** Failed to Add PDFs {} Current Credential {} in batch {}", failedToAdd, bcd.getCredentialTypeCode(), processorData.getBatchId());

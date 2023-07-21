@@ -11,7 +11,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.zip.ZipEntry;
@@ -24,6 +26,25 @@ public class EducDistributionApiUtils {
 	private static final Logger logger = LoggerFactory.getLogger(EducDistributionApiUtils.class);
 	private static final String ERROR = "ERROR: {}";
 	private static final String PARSE_EXP = "Parse Exception {}";
+
+	public static final String SCHOOL_LABELS_CODE = "000000000";
+	public static final String USERDIST = "USERDIST";
+
+	public static final String USERDISTRC = "USERDIST";
+	public static final String USERDISTOC = "USERDISTOC";
+	public static final String YEARENDDIST = "YEARENDDIST";
+	public static final String MONTHLYDIST = "MONTHLYDIST";
+	public static final String NONGRADDIST = "NONGRADDIST";
+	public static final String SUPPDIST = "SUPPDIST";
+	public static final String DISTREP_YE_SD = "DISTREP_YE_SD";
+	public static final String DISTREP_YE_SC = "DISTREP_YE_SC";
+	public static final String ADDRESS_LABEL_SCHL = "ADDRESS_LABEL_SCHL";
+	public static final String ADDRESS_LABEL_YE = "ADDRESS_LABEL_YE";
+	public static final String ADDRESS_LABEL_PSI = "ADDRESS_LABEL_PSI";
+	public static final String DISTREP_SD = "DISTREP_SD";
+	public static final String DISTREP_SC = "DISTREP_SC";
+	public static final String NONGRADDISTREP_SC = "NONGRADDISTREP_SC";
+	public static final String NONGRADDISTREP_SD = "NONGRADDISTREP_SD";
 
 	private EducDistributionApiUtils() {}
 
@@ -149,6 +170,10 @@ public class EducDistributionApiUtils {
 
 	}
 
+	public static String getDistrictCodeFromMincode(String mincode) {
+		return StringUtils.substring(mincode, 0, 3);
+	}
+
 	public static String parsingDateForCertificate(String sessionDate) {
 		String actualSessionDate = sessionDate + "/01";
 		String sDates = null;
@@ -174,16 +199,20 @@ public class EducDistributionApiUtils {
 		return sDate;
 	}
 
-	public static String parsingNFormating(String inDate) {
-		String actualDate = inDate + "/01";
-		String sDates = null;
-		try {
-			Date temp = EducDistributionApiUtils.parseDate(actualDate, EducDistributionApiConstants.SECONDARY_DATE_FORMAT);
-			sDates = EducDistributionApiUtils.formatDate(temp, EducDistributionApiConstants.DEFAULT_DATE_FORMAT);
-		} catch (ParseException pe) {
-			logger.error(ERROR,pe.getMessage());
-		}
-		return sDates;
+	public static Date asDate(LocalDate localDate) {
+		return Date.from(localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+	}
+
+	public static Date asDate(LocalDateTime localDateTime) {
+		return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+	}
+
+	public static LocalDate asLocalDate(Date date) {
+		return Instant.ofEpochMilli(date.getTime()).atZone(ZoneId.systemDefault()).toLocalDate();
+	}
+
+	public static LocalDateTime asLocalDateTime(Date date) {
+		return Instant.ofEpochMilli(date.getTime()).atZone(ZoneId.systemDefault()).toLocalDateTime();
 	}
 
 	public static String getSimpleDateFormat(Date date) {

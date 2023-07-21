@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.distribution.util;
 
 import com.jcraft.jsch.*;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,6 +13,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants.TMP_DIR;
 
 @Component
 public class SFTPUtils {
@@ -49,7 +52,14 @@ public class SFTPUtils {
     private static final String RSA_PRV = "/.ssh/id_rsa";
 
     private static Logger logger = LoggerFactory.getLogger(SFTPUtils.class);
-    //Grad2-1931 - setting SFTP root folder location where it has to pick zip folders from, to send to BC mail - mchintha
+
+    public boolean sftpUploadBCMail(Long batchId) {
+        return sftpUploadBCMail(batchId, TMP_DIR);
+    }
+
+    public boolean sftpUploadBCMail(Long batchId, String rootFolder) {
+        return sftpUploadBCMail(batchId, rootFolder, null);
+    }
 
     /**
      * Method specific for uploading to BCMail
@@ -57,10 +67,11 @@ public class SFTPUtils {
      * @param rootFolder the root location of the cached files
      * @return true if successful
      */
-    public boolean sftpUploadBCMail(Long batchId, String rootFolder) {
+    public boolean sftpUploadBCMail(Long batchId, String rootFolder, String mincode) {
         Map<String, List<String>> files = new HashMap<>();
-        String zipFile = "/EDGRAD.BATCH." + batchId + ".zip";
-        String controlFile = "/EDGRAD.BATCH." + batchId + ".txt";
+        String mincodePath = StringUtils.isBlank(mincode) ? "" : mincode + ".";
+        String zipFile = "/EDGRAD.BATCH." + batchId + mincodePath + ".zip";
+        String controlFile = "/EDGRAD.BATCH." + batchId + mincodePath + ".txt";
         String localZipFile = rootFolder + zipFile;
         String remoteZipFile = BC_MAIL_LOCATION + zipFile;
         String localControlFile = rootFolder + controlFile;
@@ -77,7 +88,6 @@ public class SFTPUtils {
         return sftpUpload(files, BCMAIL_SFTP_USERNAME, BCMAIL_REMOTE_HOST, REMOTE_PORT, BCMAIL_PRIVATE_KEY, BCMAIL_PUBLIC_KEY, BCMAIL_KNOWN_HOSTS);
     }
 
-
     /**
      * Method specific for uploading files to TSW
      * @param batchId batch id
@@ -85,7 +95,7 @@ public class SFTPUtils {
      * @param fileName the filename
      * @return true if successful
      */
-    public boolean sftpUploadTSW(Long batchId, String mincode, String fileName) {
+    public boolean sftpUploadTSW(Long batchId,String mincode,String fileName) {
         Map<String, List<String>> files = new HashMap<>();
         String localFile = formatPath(EducDistributionApiConstants.TMP_DIR + EducDistributionApiConstants.DEL + batchId + EducDistributionApiConstants.DEL + mincode + EducDistributionApiConstants.DEL + fileName+".pdf");
         String remoteFile = "/$1$dga5037/EDUC/XTD";

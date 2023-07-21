@@ -1,8 +1,9 @@
 package ca.bc.gov.educ.api.distribution.controller;
 
-import ca.bc.gov.educ.api.distribution.model.dto.DistributionPrintRequest;
+import ca.bc.gov.educ.api.distribution.model.dto.DistributionRequest;
 import ca.bc.gov.educ.api.distribution.model.dto.DistributionResponse;
 import ca.bc.gov.educ.api.distribution.service.GradDistributionService;
+import ca.bc.gov.educ.api.distribution.service.PostingDistributionService;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import ca.bc.gov.educ.api.distribution.util.GradValidation;
 import ca.bc.gov.educ.api.distribution.util.PermissionsConstants;
@@ -24,8 +25,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
-
 @CrossOrigin
 @RestController
 @RequestMapping(EducDistributionApiConstants.DISTRIBUTION_API_ROOT_MAPPING)
@@ -41,6 +40,9 @@ public class DistributionController {
     GradDistributionService gradDistributionService;
 
     @Autowired
+    PostingDistributionService postingDistributionService;
+
+    @Autowired
     GradValidation validation;
 
     @Autowired
@@ -52,21 +54,21 @@ public class DistributionController {
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK")})
     public ResponseEntity<DistributionResponse> distributeCredentials(
             @PathVariable String runType, @RequestParam(required = false) Long batchId ,@RequestParam(required = false) String activityCode,
-            @RequestParam(required = false) String transmissionType, @RequestBody Map<String, DistributionPrintRequest> mapDist,
+            @RequestParam(required = false) String transmissionType, @RequestBody DistributionRequest distributionRequest,
             @RequestParam(required = false) String localDownload, @RequestHeader(name="Authorization") String accessToken) {
         if (isAsyncDistribution(runType, activityCode)) {
             // non-blocking IO - launching async process to distribute credentials
-            gradDistributionService.asyncDistributeCredentials(runType,batchId,mapDist,activityCode,transmissionType,localDownload,accessToken);
+            gradDistributionService.asyncDistributeCredentials(runType,batchId,distributionRequest,activityCode,transmissionType,localDownload,accessToken);
 
             // return as successful immediately
             DistributionResponse disRes = new DistributionResponse();
-            disRes.setBatchId(batchId.toString());
+            disRes.setBatchId(batchId);
             disRes.setLocalDownload(localDownload);
             disRes.setMergeProcessResponse("Merge Successful and File Uploaded");
             return response.GET(disRes);
         } else {
             // blocking IO - launching sync process to distribute credentials
-            return response.GET(gradDistributionService.distributeCredentials(runType,batchId,mapDist,activityCode,transmissionType,localDownload,accessToken));
+            return response.GET(gradDistributionService.distributeCredentials(runType,batchId,distributionRequest,activityCode,transmissionType,localDownload,accessToken));
         }
     }
 
@@ -79,6 +81,15 @@ public class DistributionController {
         byte[] resultBinary = gradDistributionService.getDownload(batchId, transmissionMode);
         byte[] encoded = Base64.encodeBase64(resultBinary);
         return handleBinaryResponse(encoded,MediaType.TEXT_PLAIN,batchId);
+    }
+
+    @PostMapping(EducDistributionApiConstants.POST_DISTRIBUTION)
+    @PreAuthorize(PermissionsConstants.GRADUATE_STUDENT)
+    @Operation(summary = "Read Student Reports by Student ID and Report Type", description = "Read Student Reports by Student ID and Report Type", tags = { "Reports" })
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK")})
+    public ResponseEntity<Boolean> postingDistribution(@RequestBody DistributionResponse distributionResponse) {
+        logger.debug("zipBatchDirectory : ");
+        return response.GET(postingDistributionService.postingProcess(distributionResponse));
     }
 
     private ResponseEntity<byte[]> handleBinaryResponse(byte[] resultBinary, MediaType contentType,Long batchId) {

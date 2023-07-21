@@ -32,6 +32,8 @@ public class GraduationStatus implements Serializable {
     private String graduationMessage = "";
     private String programName = "";
 
+    @JsonDeserialize(using = LocalDateDeserializer.class)
+    @JsonSerialize(using = LocalDateSerializer.class)
     public LocalDate getProgramCompletionDate() {
         return programCompletionDate;
     }

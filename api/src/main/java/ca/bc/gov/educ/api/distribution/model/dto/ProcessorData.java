@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Map;
 
 @Data
 @Component
@@ -27,5 +26,5 @@ public class ProcessorData {
 	private List<StudentCredentialDistribution> yed2List;
 	private List<StudentCredentialDistribution> yedrList;
 	private List<StudentCredentialDistribution> yedbList;
-	private Map<String,DistributionPrintRequest> mapDistribution;
+	private DistributionRequest distributionRequest;
 }

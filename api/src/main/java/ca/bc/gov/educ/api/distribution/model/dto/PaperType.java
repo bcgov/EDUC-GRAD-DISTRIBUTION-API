@@ -1,6 +1,8 @@
 package ca.bc.gov.educ.api.distribution.model.dto;
 
-public class PaperType {
+import java.io.Serializable;
+
+public class PaperType implements Serializable {
 
     private String code;
 

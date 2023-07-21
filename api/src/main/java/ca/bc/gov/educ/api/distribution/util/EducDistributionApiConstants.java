@@ -19,6 +19,7 @@ public class EducDistributionApiConstants {
 
     public static final String DISTRIBUTION_RUN = "/run/{runType}";
     public static final String LOCAL_DOWNLOAD = "/download/{batchId}";
+    public static final String POST_DISTRIBUTION = "/zipandupload";
     //Default Date format constants
     public static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd";
     public static final String SECONDARY_DATE_FORMAT = "yyyy/MM/dd";
@@ -98,6 +99,9 @@ public class EducDistributionApiConstants {
     @Value("${endpoint.grad-trax-api.school-by-min-code.url}")
     private String traxSchoolByMincode;
 
+    @Value("${endpoint.grad-trax-api.district-by-dist-code.url}")
+    private String traxDistrictByDistcode;
+
     @Value("${endpoint.grad-report-api.get-school-distribution-report.url}")
     private String schoolDistributionReport;
 
@@ -116,6 +120,9 @@ public class EducDistributionApiConstants {
     @Value("${endpoint.grad-graduation-report-api.update-grad-school-report.url}")
     private String updateSchoolReport;
 
+    @Value("${endpoint.grad-report-api.student_non_grad_projected}")
+    private String studentNonGradProjected;
+
     @Value("${endpoint.grad-report-api.student_non_grad}")
     private String studentNonGrad;
 
@@ -128,14 +135,14 @@ public class EducDistributionApiConstants {
     @Value("${endpoint.grad-graduation-api.school_district_year_end_report.url}")
     private String schoolDistrictYearEndReport;
 
+    @Value("${endpoint.grad-graduation-api.school_district_year_end_nongrad_report.url}")
+    private String schoolDistrictYearEndNonGradReport;
+
     @Value("${endpoint.grad-graduation-api.school_district_month_report.url}")
     private String schoolDistrictMonthReport;
 
     @Value("${endpoint.grad-graduation-api.school_district_supplemental_report.url}")
     private String schoolDistrictSupplementalReport;
-
-    @Value("${endpoint.grad-graduation-api.school_district_student_nongrad_report.url}")
-    private String schoolDistrictStudentNonGradReport;
 
     @Value("${endpoint.grad-graduation-api.school_labels_report.url}")
     private String schoolLabelsReport;

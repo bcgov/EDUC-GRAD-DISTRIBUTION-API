@@ -90,19 +90,12 @@ public class RestUtils {
 		return null;
 	}
 
-	@Retry(name = "rt-notifyDistributionJob", fallbackMethod = "rtNotifyDistributionJobFallBack")
-	public void notifyDistributionJobIsCompleted(Long batchId, String status, String accessToken) {
+	public void notifyDistributionJobIsCompleted(ProcessorData data) {
 		final UUID correlationID = UUID.randomUUID();
-		webClient.get().uri(String.format(constants.getDistributionJobCompleteNotification(), batchId, status))
-				.headers(h -> {
-					h.setBearerAuth(accessToken);
-					h.set(EducDistributionApiConstants.CORRELATION_ID, correlationID.toString());
-				}).retrieve().bodyToMono(Void.class).block();
-	}
-
-	public ResponseObj rtNotifyDistributionJobFallBack(HttpServerErrorException exception){
-		LOGGER.error("{} NOT REACHABLE after many attempts.", constants.getDistributionJobCompleteNotification(), exception);
-		return null;
+		webClient.post().uri(String.format(constants.getDistributionJobCompleteNotification(), data.getBatchId(), data.getDistributionResponse().getJobStatus())).headers(h -> {
+			h.setBearerAuth(data.getAccessToken());
+			h.set(EducDistributionApiConstants.CORRELATION_ID, correlationID.toString());
+		}).body(BodyInserters.fromValue(data.getDistributionResponse())).retrieve().bodyToMono(Void.class).block();
 	}
 
 	public ResponseEntity<Void> FORBIDDEN() {
@@ -214,8 +207,6 @@ public class RestUtils {
 	protected ResponseEntity<ApiResponseModel<Void>> UPDATED() {
 		return new ResponseEntity<>(ApiResponseModel.SUCCESS(null), HttpStatus.OK);
 	}
-
-
 
 	//************   DELETE methods
 	public <T> ResponseEntity<Void> DELETE(int deleteCount) {

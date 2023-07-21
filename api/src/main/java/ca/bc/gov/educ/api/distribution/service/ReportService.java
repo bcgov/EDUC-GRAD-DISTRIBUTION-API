@@ -3,12 +3,14 @@ package ca.bc.gov.educ.api.distribution.service;
 import ca.bc.gov.educ.api.distribution.model.dto.*;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils;
+import ca.bc.gov.educ.api.distribution.util.JsonTransformer;
 import ca.bc.gov.educ.api.distribution.util.RestUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.ByteArrayInputStream;
@@ -20,28 +22,36 @@ import java.util.List;
 @Service
 public class ReportService {
 
+	private static Logger logger = LoggerFactory.getLogger(ReportService.class);
+
     WebClient webClient;
+
+	JsonTransformer jsonTransformer;
 
 	RestUtils restUtils;
 
 	EducDistributionApiConstants educDistributionApiConstants;
 
+	final RestService restService;
+
 	@Autowired
-	public ReportService(WebClient webClient, RestUtils restUtils, EducDistributionApiConstants educDistributionApiConstants) {
+	public ReportService(WebClient webClient, RestUtils restUtils, EducDistributionApiConstants educDistributionApiConstants, RestService restService, JsonTransformer jsonTransformer) {
 		this.webClient = webClient;
 		this.restUtils = restUtils;
 		this.educDistributionApiConstants = educDistributionApiConstants;
+		this.restService = restService;
+		this.jsonTransformer = jsonTransformer;
 	}
 
-	public InputStreamResource getPackingSlip(ReportRequest packingSlipReq, String accessToken) {
-		try
-		{
-			byte[] packingSlip = webClient.post().uri(educDistributionApiConstants.getPackingSlip()).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).body(BodyInserters.fromValue(packingSlipReq)).retrieve().bodyToMono(byte[].class).block();
-			ByteArrayInputStream bis = new ByteArrayInputStream(packingSlip);
-			return new InputStreamResource(bis);
-		} catch (Exception e) {
-			return null;
+	public InputStreamResource getPackingSlip(ReportRequest packingSlipReq) {
+		logger.debug("Getting packing slip for order {}", packingSlipReq.getData().getPackingSlip().getOrderNumber());
+		if(logger.isDebugEnabled()) {
+			String packingSlipJson = jsonTransformer.marshall(packingSlipReq);
+			logger.debug(packingSlipJson);
 		}
+		byte[] packingSlip = restService.executePost(educDistributionApiConstants.getPackingSlip(), byte[].class, packingSlipReq, "");
+		ByteArrayInputStream bis = new ByteArrayInputStream(packingSlip);
+		return new InputStreamResource(bis);
 	}
 
 	public ReportRequest preparePackingSlipData(CommonSchool schoolDetails,Long batchId) {
@@ -128,7 +138,7 @@ public class ReportService {
 			std.setPen(pen);
 			std.setGradProgram(sc.getProgram());
 			GraduationData gradData = new GraduationData();
-			gradData.setGraduationDate(sc.getProgramCompletionDate() != null ? EducDistributionApiUtils.parsingTraxDate(sc.getProgramCompletionDate().toString()):null);
+			gradData.setGraduationDate(sc.getProgramCompletionDate() != null ? EducDistributionApiUtils.asDate(sc.getProgramCompletionDate()) : null);
 			gradData.setHonorsFlag(sc.getHonoursStanding() != null && sc.getHonoursStanding().equalsIgnoreCase("Y"));
 			std.setGraduationData(gradData);
 
