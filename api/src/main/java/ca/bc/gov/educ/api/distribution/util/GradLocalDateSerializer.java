@@ -8,9 +8,9 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
-public class LocalDateSerializer extends StdSerializer<LocalDate> {
+public class GradLocalDateSerializer extends StdSerializer<LocalDate> {
 
-    public LocalDateSerializer() {
+    public GradLocalDateSerializer() {
         super(LocalDate.class);
     }
 

@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.TimeZone;
@@ -27,9 +26,10 @@ public class JsonTransformer implements Transformer {
     @PostConstruct
     public void init() {
         SimpleModule simpleModule = new SimpleModule();
-        simpleModule.addSerializer(LocalDate.class, new LocalDateSerializer());
-        simpleModule.addDeserializer(LocalDate.class, new LocalDateDeserializer());
-        simpleModule.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer());
+        simpleModule.addSerializer(LocalDate.class, new GradLocalDateSerializer());
+        simpleModule.addSerializer(LocalDateTime.class, new GradLocalDateTimeSerializer());
+        simpleModule.addDeserializer(LocalDate.class, new GradLocalDateDeserializer());
+        simpleModule.addDeserializer(LocalDateTime.class, new GradLocalDateTimeDeserializer());
         objectMapper
                 .findAndRegisterModules()
                 .registerModule(simpleModule)
@@ -38,7 +38,6 @@ public class JsonTransformer implements Transformer {
                 .enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING)
                 .enable(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN)
                 .enable(JsonGenerator.Feature.ESCAPE_NON_ASCII)
-                .setDateFormat(new SimpleDateFormat("yyyy-MM-dd h:mm:ss"))
                 .setTimeZone(TimeZone.getDefault())
         //        .enable(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS)
         ;

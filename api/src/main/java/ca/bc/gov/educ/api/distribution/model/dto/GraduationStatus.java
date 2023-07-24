@@ -1,7 +1,7 @@
 package ca.bc.gov.educ.api.distribution.model.dto;
 
-import ca.bc.gov.educ.api.distribution.util.LocalDateDeserializer;
-import ca.bc.gov.educ.api.distribution.util.LocalDateSerializer;
+import ca.bc.gov.educ.api.distribution.util.GradLocalDateDeserializer;
+import ca.bc.gov.educ.api.distribution.util.GradLocalDateSerializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.AllArgsConstructor;
@@ -18,8 +18,8 @@ public class GraduationStatus implements Serializable {
 
     private static final long serialVersionUID = 2L;
 
-    @JsonDeserialize(using = LocalDateDeserializer.class)
-    @JsonSerialize(using = LocalDateSerializer.class)
+    @JsonDeserialize(using = GradLocalDateDeserializer.class)
+    @JsonSerialize(using = GradLocalDateSerializer.class)
     private LocalDate programCompletionDate;
     private String honours = "";
     private String gpa = "";
@@ -32,8 +32,8 @@ public class GraduationStatus implements Serializable {
     private String graduationMessage = "";
     private String programName = "";
 
-    @JsonDeserialize(using = LocalDateDeserializer.class)
-    @JsonSerialize(using = LocalDateSerializer.class)
+    @JsonDeserialize(using = GradLocalDateDeserializer.class)
+    @JsonSerialize(using = GradLocalDateSerializer.class)
     public LocalDate getProgramCompletionDate() {
         return programCompletionDate;
     }

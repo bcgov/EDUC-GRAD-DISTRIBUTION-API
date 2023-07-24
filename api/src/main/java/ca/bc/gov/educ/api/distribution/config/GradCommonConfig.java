@@ -1,8 +1,9 @@
 package ca.bc.gov.educ.api.distribution.config;
 
-import ca.bc.gov.educ.api.distribution.util.LocalDateDeserializer;
-import ca.bc.gov.educ.api.distribution.util.LocalDateSerializer;
-import ca.bc.gov.educ.api.distribution.util.LocalDateTimeDeserializer;
+import ca.bc.gov.educ.api.distribution.util.GradLocalDateDeserializer;
+import ca.bc.gov.educ.api.distribution.util.GradLocalDateSerializer;
+import ca.bc.gov.educ.api.distribution.util.GradLocalDateTimeDeserializer;
+import ca.bc.gov.educ.api.distribution.util.GradLocalDateTimeSerializer;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -34,9 +35,10 @@ public class GradCommonConfig implements WebMvcConfigurer {
 	ObjectMapper jacksonObjectMapper() {
 		ObjectMapper mapper = new ObjectMapper();
 		SimpleModule simpleModule = new SimpleModule();
-		simpleModule.addSerializer(LocalDate.class, new LocalDateSerializer());
-		simpleModule.addDeserializer(LocalDate.class, new LocalDateDeserializer());
-		simpleModule.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer());
+		simpleModule.addSerializer(LocalDate.class, new GradLocalDateSerializer());
+		simpleModule.addSerializer(LocalDateTime.class, new GradLocalDateTimeSerializer());
+		simpleModule.addDeserializer(LocalDate.class, new GradLocalDateDeserializer());
+		simpleModule.addDeserializer(LocalDateTime.class, new GradLocalDateTimeDeserializer());
 		mapper.findAndRegisterModules();
 		mapper.registerModule(simpleModule);
 		mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);

@@ -12,9 +12,9 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
-public class LocalDateDeserializer extends StdDeserializer<LocalDate> {
+public class GradLocalDateDeserializer extends StdDeserializer<LocalDate> {
 
-    public LocalDateDeserializer() {
+    public GradLocalDateDeserializer() {
         super(LocalDate.class);
     }
 
@@ -36,6 +36,11 @@ public class LocalDateDeserializer extends StdDeserializer<LocalDate> {
         } else if(jsonParser.hasToken(JsonToken.VALUE_NUMBER_INT)) {
             long timestamp = jsonParser.getValueAsLong();
             return LocalDate.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault());
+        } else if(StringUtils.isNotBlank(dateAsString) && dateAsString.length() == 10 && dateAsString.contains("-")) {
+            return LocalDate.parse(dateAsString, formatter);
+        } else if(StringUtils.isNotBlank(dateAsString) && dateAsString.length() == 10 && dateAsString.contains("/")) {
+            formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+            return LocalDate.parse(dateAsString, formatter);
         } else if(StringUtils.isNotBlank(dateAsString)) {
             return LocalDate.parse(dateAsString, formatter);
         }

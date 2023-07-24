@@ -12,15 +12,15 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
-public class LocalDateTimeDeserializer extends StdDeserializer<LocalDateTime> {
+public class GradLocalDateTimeDeserializer extends StdDeserializer<LocalDateTime> {
 
-    public LocalDateTimeDeserializer() {
+    public GradLocalDateTimeDeserializer() {
         super(LocalDateTime.class);
     }
 
     @Override
     public LocalDateTime deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
-        DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
         String dateAsString = jsonParser.getValueAsString();
         //Fix date format as programCompletion date YYYY/MM
         if(StringUtils.isNotBlank(dateAsString) && dateAsString.length() < 10 && dateAsString.contains("/")) {
@@ -36,6 +36,17 @@ public class LocalDateTimeDeserializer extends StdDeserializer<LocalDateTime> {
         } else if(jsonParser.hasToken(JsonToken.VALUE_NUMBER_INT)) {
             long timestamp = jsonParser.getValueAsLong();
             return LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault());
+        } else if(StringUtils.isNotBlank(dateAsString) && dateAsString.length() == 10 && dateAsString.contains("-")) {
+            return LocalDateTime.parse(dateAsString, formatter);
+        } else if(StringUtils.isNotBlank(dateAsString) && dateAsString.length() == 10 && dateAsString.contains("/")) {
+            formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+            return LocalDateTime.parse(dateAsString, formatter);
+        } else if(StringUtils.isNotBlank(dateAsString) && dateAsString.length() > 10 && dateAsString.contains("/") && dateAsString.contains(" ")) {
+            formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+            return LocalDateTime.parse(dateAsString, formatter);
+        } else if(StringUtils.isNotBlank(dateAsString) && dateAsString.length() > 10 && dateAsString.contains("-") && dateAsString.contains(" ")) {
+            formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            return LocalDateTime.parse(dateAsString, formatter);
         } else if(StringUtils.isNotBlank(dateAsString)) {
             return LocalDateTime.parse(dateAsString, formatter);
         }
