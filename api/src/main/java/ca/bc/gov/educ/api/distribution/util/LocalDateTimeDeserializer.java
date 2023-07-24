@@ -8,18 +8,18 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.time.Instant;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
-public class LocalDateDeserializer extends StdDeserializer<LocalDate> {
+public class LocalDateTimeDeserializer extends StdDeserializer<LocalDateTime> {
 
-    public LocalDateDeserializer() {
-        super(LocalDate.class);
+    public LocalDateTimeDeserializer() {
+        super(LocalDateTime.class);
     }
 
     @Override
-    public LocalDate deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
+    public LocalDateTime deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
         DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
         String dateAsString = jsonParser.getValueAsString();
         //Fix date format as programCompletion date YYYY/MM
@@ -32,12 +32,12 @@ public class LocalDateDeserializer extends StdDeserializer<LocalDate> {
             if(slashCount > 0) {
                 formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
             }
-            return LocalDate.parse(dateAsString, formatter);
+            return LocalDateTime.parse(dateAsString, formatter);
         } else if(jsonParser.hasToken(JsonToken.VALUE_NUMBER_INT)) {
             long timestamp = jsonParser.getValueAsLong();
-            return LocalDate.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault());
+            return LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault());
         } else if(StringUtils.isNotBlank(dateAsString)) {
-            return LocalDate.parse(dateAsString, formatter);
+            return LocalDateTime.parse(dateAsString, formatter);
         }
         return null;
     }

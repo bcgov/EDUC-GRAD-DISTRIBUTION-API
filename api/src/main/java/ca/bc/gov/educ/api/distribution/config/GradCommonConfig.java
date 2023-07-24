@@ -1,15 +1,22 @@
 package ca.bc.gov.educ.api.distribution.config;
 
+import ca.bc.gov.educ.api.distribution.util.LocalDateDeserializer;
+import ca.bc.gov.educ.api.distribution.util.LocalDateSerializer;
+import ca.bc.gov.educ.api.distribution.util.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Configuration
 @PropertySource("classpath:messages.properties")
@@ -23,11 +30,17 @@ public class GradCommonConfig implements WebMvcConfigurer {
 	}
 
 	@Bean
+	@Primary
 	ObjectMapper jacksonObjectMapper() {
-		return JsonMapper.builder()
-				.findAndAddModules()
-				.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-				.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-				.build();
+		ObjectMapper mapper = new ObjectMapper();
+		SimpleModule simpleModule = new SimpleModule();
+		simpleModule.addSerializer(LocalDate.class, new LocalDateSerializer());
+		simpleModule.addDeserializer(LocalDate.class, new LocalDateDeserializer());
+		simpleModule.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer());
+		mapper.findAndRegisterModules();
+		mapper.registerModule(simpleModule);
+		mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+		mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+		return mapper;
 	}
 }
