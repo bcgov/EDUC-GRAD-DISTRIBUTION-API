@@ -1,23 +1,25 @@
 package ca.bc.gov.educ.api.distribution.util;
 
-import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
-public class LocalDateDeserializer extends StdDeserializer<LocalDate> {
+public class GradLocalDateDeserializer extends StdDeserializer<LocalDate> {
 
-    protected LocalDateDeserializer() {
+    public GradLocalDateDeserializer() {
         super(LocalDate.class);
     }
 
     @Override
-    public LocalDate deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JacksonException {
+    public LocalDate deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
         DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
         String dateAsString = jsonParser.getValueAsString();
         //Fix date format as programCompletion date YYYY/MM
@@ -30,6 +32,14 @@ public class LocalDateDeserializer extends StdDeserializer<LocalDate> {
             if(slashCount > 0) {
                 formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
             }
+            return LocalDate.parse(dateAsString, formatter);
+        } else if(jsonParser.hasToken(JsonToken.VALUE_NUMBER_INT)) {
+            long timestamp = jsonParser.getValueAsLong();
+            return LocalDate.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault());
+        } else if(StringUtils.isNotBlank(dateAsString) && dateAsString.length() == 10 && dateAsString.contains("-")) {
+            return LocalDate.parse(dateAsString, formatter);
+        } else if(StringUtils.isNotBlank(dateAsString) && dateAsString.length() == 10 && dateAsString.contains("/")) {
+            formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
             return LocalDate.parse(dateAsString, formatter);
         } else if(StringUtils.isNotBlank(dateAsString)) {
             return LocalDate.parse(dateAsString, formatter);
