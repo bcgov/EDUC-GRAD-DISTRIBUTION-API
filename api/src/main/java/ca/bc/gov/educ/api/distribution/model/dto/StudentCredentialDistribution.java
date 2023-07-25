@@ -28,4 +28,8 @@ public class StudentCredentialDistribution {
 	private String program;
 	private String studentGrade;
 	private List<GradRequirement> nonGradReasons;
+
+	public LocalDateTime getLastUpdateDate() {
+		return lastUpdateDate == null ? LocalDateTime.now() : lastUpdateDate;
+	}
 }
