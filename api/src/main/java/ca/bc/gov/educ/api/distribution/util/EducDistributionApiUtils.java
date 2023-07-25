@@ -178,7 +178,7 @@ public class EducDistributionApiUtils {
 		String actualSessionDate = sessionDate + "/01";
 		String sDates = null;
 		try {
-			Date temp = parseDate(actualSessionDate, EducDistributionApiConstants.SECONDARY_DATE_FORMAT);
+			Date temp = parseDate(actualSessionDate, EducDistributionApiConstants.SECOND_DEFAULT_DATE_FORMAT);
 			sDates = formatDate(temp, EducDistributionApiConstants.DEFAULT_DATE_FORMAT);
 		} catch (ParseException pe) {
 			logger.error(ERROR,pe.getMessage());
@@ -190,7 +190,7 @@ public class EducDistributionApiUtils {
 		String actualSessionDate = sessionDate + "/01";
 		Date sDate = null;
 		try {
-			Date temp = EducDistributionApiUtils.parseDate(actualSessionDate, EducDistributionApiConstants.SECONDARY_DATE_FORMAT);
+			Date temp = EducDistributionApiUtils.parseDate(actualSessionDate, EducDistributionApiConstants.SECOND_DEFAULT_DATE_FORMAT);
 			String sDates = EducDistributionApiUtils.formatDate(temp, EducDistributionApiConstants.DEFAULT_DATE_FORMAT);
 			sDate = EducDistributionApiUtils.parseDate(sDates, EducDistributionApiConstants.DEFAULT_DATE_FORMAT);
 		} catch (ParseException pe) {
