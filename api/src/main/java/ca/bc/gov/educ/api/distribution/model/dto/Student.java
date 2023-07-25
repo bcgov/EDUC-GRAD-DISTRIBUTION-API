@@ -101,7 +101,6 @@ public class Student implements Serializable {
         this.birthdate = value;
     }
 
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     public LocalDateTime getLastUpdateDate() {
         return lastUpdateDate;
     }

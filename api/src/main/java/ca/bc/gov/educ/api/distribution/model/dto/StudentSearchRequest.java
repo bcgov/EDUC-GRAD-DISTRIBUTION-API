@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
-import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 
 @Data
@@ -24,9 +24,9 @@ public class StudentSearchRequest implements Serializable {
     private List<String> programs;
 
     @JsonFormat(pattern = "yyyy-MM-dd")
-    LocalDate gradDateFrom;
+    Date gradDateFrom;
     @JsonFormat(pattern = "yyyy-MM-dd")
-    LocalDate gradDateTo;
+    Date gradDateTo;
 
     Boolean validateInput;
     String localDownload;
