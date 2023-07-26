@@ -13,17 +13,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.BodyInserters;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.sql.Date;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+
+import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils.*;
 
 @Data
 @Component
@@ -40,16 +43,17 @@ public class MergeProcess extends BaseProcess {
 		logger.debug("************* TIME START  ************ {}",startTime);
 		DistributionResponse response = new DistributionResponse();
 		ExceptionMessage exception = new ExceptionMessage();
-		Map<String,DistributionPrintRequest> mapDist = processorData.getMapDistribution();
+		DistributionRequest distributionRequest = processorData.getDistributionRequest();
+		Map<String, DistributionPrintRequest> mapDist = distributionRequest.getMapDist();
+		StudentSearchRequest searchRequest = distributionRequest.getStudentSearchRequest();
 		Long batchId = processorData.getBatchId();
 		int numberOfPdfs = 0;
-		int counter=0;
+		int counter = 0;
 		List<School> schoolsForLabels = new ArrayList<>();
-		for (Map.Entry<String, DistributionPrintRequest> entry : mapDist.entrySet()) {
+		for (String mincode : mapDist.keySet()) {
 			counter++;
 			int currentSlipCount = 0;
-			String mincode = entry.getKey();
-			DistributionPrintRequest distributionPrintRequest = entry.getValue();
+			DistributionPrintRequest distributionPrintRequest = mapDist.get(mincode);
 			CommonSchool schoolDetails = getBaseSchoolDetails(distributionPrintRequest,mincode,exception);
 			if(schoolDetails != null) {
 				String schoolCategoryCode = schoolDetails.getSchoolCategoryCode();
@@ -74,33 +78,37 @@ public class MergeProcess extends BaseProcess {
 				pV = processYedrCertificatePrintRequest(distributionPrintRequest,currentSlipCount,packSlipReq,studListNonGrad,processorData,mincode,schoolCategoryCode,numberOfPdfs);
 				numberOfPdfs = pV.getRight();
 				if(!studListNonGrad.isEmpty()) {
-					createAndSaveNonGradReport(schoolDetails,studListNonGrad,mincode);
+					createAndSaveNonGradReport(schoolDetails,studListNonGrad,mincode,educDistributionApiConstants.getStudentNonGradProjected());
 				}
 				logger.debug("PDFs Merged {}", schoolDetails.getSchoolName());
-				processSchoolsForLabels(schoolsForLabels, mincode, restUtils.getAccessToken(), exception);
+				processSchoolsForLabels(schoolsForLabels, mincode, exception);
 				if (counter % 50 == 0) {
 					restUtils.fetchAccessToken(processorData);
 				}
-				logger.debug("School {}/{}",counter,mapDist.size());
+				logger.debug("{} School {}/{}",mincode,counter,mapDist.size());
 			}
 		}
 		int numberOfCreatedSchoolReports = 0;
 		int numberOfProcessedSchoolReports = 0;
+		List<String> schoolsForLabelsCodes = List.of(SCHOOL_LABELS_CODE);
+		if(schoolsForLabels.size() == 1) {
+			schoolsForLabelsCodes = List.of(schoolsForLabels.get(0).getMincode());
+		}
 		if(MONTHLYDIST.equalsIgnoreCase(processorData.getActivityCode())) {
 			logger.debug("***** Create and Store Monthly school reports *****");
-			numberOfCreatedSchoolReports += createSchoolLabelsReport(schoolsForLabels, restUtils.getAccessToken(), ADDRESS_LABEL_SCHL);
+			numberOfCreatedSchoolReports += createSchoolLabelsReport(schoolsForLabels, ADDRESS_LABEL_SCHL);
 			logger.debug("***** Number of created Monthly school reports {} *****", numberOfCreatedSchoolReports);
 			logger.debug("***** Distribute Monthly school reports *****");
-			numberOfProcessedSchoolReports += processDistrictSchoolDistribution(processorData, ADDRESS_LABEL_SCHL, null, null);
+			numberOfProcessedSchoolReports += processDistrictSchoolDistribution(batchId, schoolsForLabelsCodes, ADDRESS_LABEL_SCHL, null, null, processorData.getActivityCode());
 			logger.debug("***** Number of distributed Monthly school reports {} *****", numberOfProcessedSchoolReports);
 		}
 		if (SUPPDIST.equalsIgnoreCase(processorData.getActivityCode())) {
 			logger.debug("***** Create and Store Supplemental school reports *****");
-			numberOfCreatedSchoolReports += createSchoolLabelsReport(schoolsForLabels, restUtils.getAccessToken(), ADDRESS_LABEL_SCHL);
+			numberOfCreatedSchoolReports += createSchoolLabelsReport(schoolsForLabels, ADDRESS_LABEL_SCHL);
 			logger.debug("***** Number of created Supplemental school reports {} *****", numberOfCreatedSchoolReports);
-			logger.debug("***** Distribute Supplemental school reports *****");
-			numberOfProcessedSchoolReports += processDistrictSchoolDistribution(processorData, ADDRESS_LABEL_SCHL, null, null);
-			logger.debug("***** Number of distributed Supplemental school reports {} *****", numberOfProcessedSchoolReports);
+			logger.debug("***** Distribute Supplemental school label reports *****");
+			numberOfProcessedSchoolReports += processDistrictSchoolDistribution(batchId, schoolsForLabelsCodes, ADDRESS_LABEL_SCHL, null, null, processorData.getActivityCode());
+			logger.debug("***** Number of distributed Supplemental school label reports {} *****", numberOfProcessedSchoolReports);
 		}
 		numberOfPdfs += numberOfProcessedSchoolReports;
 		postingProcess(batchId,processorData,numberOfPdfs);
@@ -108,11 +116,16 @@ public class MergeProcess extends BaseProcess {
 		long diff = (endTime - startTime)/1000;
 		logger.debug("************* TIME Taken  ************ {} secs",diff);
 		response.setMergeProcessResponse("Merge Successful and File Uploaded");
+		response.setNumberOfPdfs(numberOfPdfs);
+		response.setBatchId(processorData.getBatchId());
+		response.setLocalDownload(processorData.getLocalDownload());
+		response.setActivityCode(distributionRequest.getActivityCode());
+		response.setStudentSearchRequest(searchRequest);
 		processorData.setDistributionResponse(response);
 		return processorData;
 	}
 
-	private Pair<Integer,Integer> processYedrCertificatePrintRequest(DistributionPrintRequest obj, int currentSlipCount, ReportRequest packSlipReq, List<Student> studListNonGrad, ProcessorData processorData, String mincode, String schoolCategoryCode, int numberOfPdfs) {
+	protected Pair<Integer,Integer> processYedrCertificatePrintRequest(DistributionPrintRequest obj, int currentSlipCount, ReportRequest packSlipReq, List<Student> studListNonGrad, ProcessorData processorData, String mincode, String schoolCategoryCode, int numberOfPdfs) {
 		if (obj.getYedrCertificatePrintRequest() != null) {
 			currentSlipCount++;
 			CertificatePrintRequest certificatePrintRequest = obj.getYedrCertificatePrintRequest();
@@ -124,7 +137,7 @@ public class MergeProcess extends BaseProcess {
 		return Pair.of(currentSlipCount,numberOfPdfs);
 	}
 
-	private Pair<Integer,Integer> processYedbCertificatePrintRequest(DistributionPrintRequest obj, int currentSlipCount, ReportRequest packSlipReq, List<Student> studListNonGrad, ProcessorData processorData, String mincode, String schoolCategoryCode, int numberOfPdfs) {
+	protected Pair<Integer,Integer> processYedbCertificatePrintRequest(DistributionPrintRequest obj, int currentSlipCount, ReportRequest packSlipReq, List<Student> studListNonGrad, ProcessorData processorData, String mincode, String schoolCategoryCode, int numberOfPdfs) {
 		if (obj.getYedbCertificatePrintRequest() != null) {
 			currentSlipCount++;
 			CertificatePrintRequest certificatePrintRequest = obj.getYedbCertificatePrintRequest();
@@ -136,7 +149,7 @@ public class MergeProcess extends BaseProcess {
 		return Pair.of(currentSlipCount,numberOfPdfs);
 	}
 
-	private Pair<Integer,Integer> processYed2CertificatePrintRequest(DistributionPrintRequest obj, int currentSlipCount, ReportRequest packSlipReq, List<Student> studListNonGrad, ProcessorData processorData, String mincode, String schoolCategoryCode, int numberOfPdfs) {
+	protected Pair<Integer,Integer> processYed2CertificatePrintRequest(DistributionPrintRequest obj, int currentSlipCount, ReportRequest packSlipReq, List<Student> studListNonGrad, ProcessorData processorData, String mincode, String schoolCategoryCode, int numberOfPdfs) {
 		if (obj.getYed2CertificatePrintRequest() != null) {
 			currentSlipCount++;
 			CertificatePrintRequest certificatePrintRequest = obj.getYed2CertificatePrintRequest();
@@ -154,11 +167,11 @@ public class MergeProcess extends BaseProcess {
 			List<StudentCredentialDistribution> scdList = transcriptPrintRequest.getTranscriptList();
 			List<InputStream> locations = new ArrayList<>();
 			currentSlipCount++;
-			setExtraDataForPackingSlip(packSlipReq, "YED4", obj.getTotal(), scdList.size(), 1, "Transcript", transcriptPrintRequest.getBatchId());
 			try {
-				locations.add(reportService.getPackingSlip(packSlipReq, restUtils.getAccessToken()).getInputStream());
+				int currentTranscript = processTranscripts(processorData,scdList,studListNonGrad,locations);
+				setExtraDataForPackingSlip(packSlipReq, "YED4", obj.getTotal(), currentTranscript, 1, "Transcript", transcriptPrintRequest.getBatchId());
+				locations.add(0, reportService.getPackingSlip(packSlipReq).getInputStream());
 				logger.debug("*** Packing Slip Added");
-				processStudents(processorData,scdList,studListNonGrad,locations);
 				mergeDocumentsPDFs(processorData,mincode,schoolCategoryCode,"/EDGRAD.T.","YED4",locations);
 				numberOfPdfs++;
 				logger.debug("*** Transcript Documents Merged ***");
@@ -169,7 +182,7 @@ public class MergeProcess extends BaseProcess {
 		return Pair.of(currentSlipCount,numberOfPdfs);
 	}
 
-	private void processStudents(ProcessorData processorData, List<StudentCredentialDistribution> scdList, List<Student> studListNonGrad, List<InputStream> locations) {
+	private int processTranscripts(ProcessorData processorData, List<StudentCredentialDistribution> scdList, List<Student> studListNonGrad, List<InputStream> locations) {
 		int currentTranscript = 0;
 		int failedToAdd = 0;
 		scdList.sort(Comparator.comparing(StudentCredentialDistribution::getLegalLastName, Comparator.nullsLast(String::compareTo))
@@ -180,15 +193,19 @@ public class MergeProcess extends BaseProcess {
 				if(objStd != null)
 					studListNonGrad.add(objStd);
 			}
-			int result = addStudentTranscriptToLocations(scd.getStudentID().toString(), locations);
+			int result = 0;
+			if(scd.getStudentID() != null) {
+				result = addStudentTranscriptToLocations(scd.getStudentID().toString(), locations);
+			}
 			if(result == 0) {
 				failedToAdd++;
-				logger.info("*** Failed to Add PDFs {} Current student {} in batch {}", failedToAdd, scd.getStudentID(), processorData);
+				logger.info("*** Failed to Add PDFs {} Current student {} school {} in batch {}", failedToAdd, scd.getStudentID(), scd.getSchoolOfRecord(), processorData.getBatchId());
 			} else {
 				currentTranscript++;
-				logger.debug("*** Added PDFs {}/{} Current student {} - {}, {}", currentTranscript, scdList.size(), scd.getStudentID(), scd.getLegalLastName(), scd.getLegalFirstName());
+				logger.debug("*** Added Transcript PDFs {}/{} Current student {} - {}, {}", currentTranscript, scdList.size(), scd.getStudentID(), scd.getLegalLastName(), scd.getLegalFirstName());
 			}
 		}
+		return currentTranscript;
 	}
 
 	private Student prepareStudentObj(StudentCredentialDistribution scd, List<Student> studListNonGrad) {
@@ -203,7 +220,7 @@ public class MergeProcess extends BaseProcess {
 			std.setPen(pen);
 			std.setGrade(scd.getStudentGrade());
 			std.setGradProgram(scd.getProgram());
-			std.setLastUpdateDate(scd.getLastUpdateDate());
+			std.setLastUpdateDate(Date.from(scd.getLastUpdateDate().atZone(ZoneId.systemDefault()).toInstant()));
 			std.setGraduationData(new GraduationData());
 			std.setNonGradReasons(getNonGradReasons(scd.getNonGradReasons()));
 
@@ -233,10 +250,8 @@ public class MergeProcess extends BaseProcess {
 		List<StudentCredentialDistribution> scdList = certificatePrintRequest.getCertificateList();
 		String mincode = request.getMincode();
 		String paperType = request.getPaperType();
-		List<InputStream> locations=new ArrayList<>();
-		setExtraDataForPackingSlip(packSlipReq,paperType,request.getTotal(),scdList.size(),request.getCurrentSlip(),"Certificate", certificatePrintRequest.getBatchId());
+		List<InputStream> locations = new ArrayList<>();
 		try {
-			locations.add(reportService.getPackingSlip(packSlipReq,restUtils.getAccessToken()).getInputStream());
 			int currentCertificate = 0;
 			int failedToAdd = 0;
 			scdList.sort(Comparator.comparing(StudentCredentialDistribution::getLegalLastName, Comparator.nullsLast(String::compareTo))
@@ -247,32 +262,44 @@ public class MergeProcess extends BaseProcess {
 					if(objStd != null)
 						studListNonGrad.add(objStd);
 				}
-				InputStreamResource certificatePdf = webClient.get().uri(String.format(educDistributionApiConstants.getCertificate(),scd.getStudentID(),scd.getCredentialTypeCode(),scd.getDocumentStatusCode())).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).retrieve().bodyToMono(InputStreamResource.class).block();
+				InputStreamResource certificatePdf = restService.executeGet(
+						educDistributionApiConstants.getCertificate(),
+						InputStreamResource.class,
+						scd.getStudentID().toString(),
+						scd.getCredentialTypeCode(),
+						scd.getDocumentStatusCode()
+				);
 				if(certificatePdf != null) {
 					locations.add(certificatePdf.getInputStream());
 					currentCertificate++;
-					logger.debug("*** Added PDFs {}/{} Current student {} - {}, {}",currentCertificate,scdList.size(),scd.getStudentID(), scd.getLegalLastName(), scd.getLegalFirstName());
+					logger.debug("*** Added Certificate PDFs {}/{} Current student {} - {}, {}",currentCertificate,scdList.size(),scd.getStudentID(), scd.getLegalLastName(), scd.getLegalFirstName());
 				} else {
 					failedToAdd++;
-					logger.info("*** Failed to Add PDFs {} Current student {} papertype {} in batch {}",failedToAdd,scd.getStudentID(),paperType,processorData.getBatchId());
+					logger.info("*** Failed to Add Certificate PDFs {} Current student {} credentials {} document status {} in batch {}",failedToAdd,scd.getStudentID(),scd.getCredentialTypeCode(),scd.getDocumentStatusCode(),processorData.getBatchId());
 				}
 			}
+			setExtraDataForPackingSlip(packSlipReq,paperType,request.getTotal(),currentCertificate,request.getCurrentSlip(),"Certificate", certificatePrintRequest.getBatchId());
+			locations.add(0, reportService.getPackingSlip(packSlipReq).getInputStream());
 			mergeDocumentsPDFs(processorData,mincode,schoolCategoryCode,"/EDGRAD.C.",paperType,locations);
 		} catch (IOException e) {
 			logger.debug(EXCEPTION,e.getLocalizedMessage());
 		}
 	}
 
-	private void createAndSaveDistributionReport(ReportRequest distributionRequest, String mincode, String schoolCategoryCode, ProcessorData processorData) {
+	protected void createAndSaveDistributionReport(ReportRequest distributionRequest, String mincode, String schoolCategoryCode, ProcessorData processorData) {
 		List<InputStream> locations=new ArrayList<>();
 		try {
-			byte[] bytesSAR = webClient.post().uri(educDistributionApiConstants.getSchoolDistributionReport()).headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).body(BodyInserters.fromValue(distributionRequest)).retrieve().bodyToMono(byte[].class).block();
+			byte[] bytesSAR = restService.executePost(
+					educDistributionApiConstants.getSchoolDistributionReport(),
+					byte[].class,
+					distributionRequest
+			);
 			if(bytesSAR != null) {
 				locations.add(new ByteArrayInputStream(bytesSAR));
 				byte[] encoded = Base64.encodeBase64(bytesSAR);
 				String encodedPdf = new String(encoded, StandardCharsets.US_ASCII);
 				if(!processorData.getActivityCode().contains("USERDIST"))
-					saveSchoolDistributionReport(encodedPdf,mincode,"DISTREP_SC");
+					saveSchoolDistributionReport(encodedPdf,mincode,DISTREP_SC);
 			}
 			mergeDocumentsPDFs(processorData,mincode,schoolCategoryCode,"/EDGRAD.R.","324W",locations);
 		} catch (Exception e) {
@@ -280,7 +307,7 @@ public class MergeProcess extends BaseProcess {
 		}
 	}
 
-	protected void createAndSaveNonGradReport(CommonSchool schoolDetails, List<Student> studListNonGrad, String mincode) {
+	protected Integer createAndSaveNonGradReport(CommonSchool schoolDetails, List<Student> studListNonGrad, String mincode, String url) {
 		ReportData nongradProjected = new ReportData();
 		School schObj = new School();
 		schObj.setMincode(schoolDetails.getDistNo()+schoolDetails.getSchlNo());
@@ -299,12 +326,16 @@ public class MergeProcess extends BaseProcess {
 		reportParams.setOptions(options);
 		reportParams.setData(nongradProjected);
 
-		byte[] bytesSAR = webClient.post().uri(educDistributionApiConstants.getStudentNonGrad())
-				.headers(h -> h.setBearerAuth(restUtils.fetchAccessToken())).body(BodyInserters.fromValue(reportParams)).retrieve().bodyToMono(byte[].class).block();
+		byte[] bytesSAR = restService.executePost(
+						url,
+						byte[].class,
+						reportParams
+				);
 		byte[] encoded = Base64.encodeBase64(bytesSAR);
 		assert encoded != null;
 		String encodedPdf = new String(encoded, StandardCharsets.US_ASCII);
 		saveSchoolDistributionReport(encodedPdf,mincode,NONGRADDISTREP_SC);
+		return 1;
 	}
 
 	private void saveSchoolDistributionReport(String encodedPdf, String mincode, String reportType) {
@@ -312,6 +343,6 @@ public class MergeProcess extends BaseProcess {
 		requestObj.setReport(encodedPdf);
 		requestObj.setSchoolOfRecord(mincode);
 		requestObj.setReportTypeCode(reportType);
-		webClient.post().uri(educDistributionApiConstants.getUpdateSchoolReport()).headers(h ->h.setBearerAuth(restUtils.fetchAccessToken())).body(BodyInserters.fromValue(requestObj)).retrieve().bodyToMono(SchoolReports.class).block();
+		restService.executePost(educDistributionApiConstants.getUpdateSchoolReport(), SchoolReports.class, requestObj);
 	}
 }

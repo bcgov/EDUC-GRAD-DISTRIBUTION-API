@@ -2,6 +2,9 @@ package ca.bc.gov.educ.api.distribution.model.dto;
 
 import lombok.Data;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Data
 public class DistributionResponse {
     private String transcriptResponse;
@@ -9,7 +12,14 @@ public class DistributionResponse {
     private String yedrResponse;
     private String yedbResponse;
     private String mergeProcessResponse;
+    private int numberOfPdfs;
+    private String jobStatus;
     //Grad2-1931
-    private String batchId;
+    private Long batchId;
     private String localDownload;
+    private String activityCode;
+    private String transmissionMode;
+    private List<School> schools = new ArrayList<>();
+    private List<School> districts = new ArrayList<>();
+    private StudentSearchRequest studentSearchRequest;
 }

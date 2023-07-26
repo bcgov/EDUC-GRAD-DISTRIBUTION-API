@@ -1,6 +1,6 @@
 package ca.bc.gov.educ.api.distribution.service;
 
-import ca.bc.gov.educ.api.distribution.model.dto.DistributionPrintRequest;
+import ca.bc.gov.educ.api.distribution.model.dto.DistributionRequest;
 import ca.bc.gov.educ.api.distribution.model.dto.DistributionResponse;
 import ca.bc.gov.educ.api.distribution.model.dto.ProcessorData;
 import ca.bc.gov.educ.api.distribution.process.DistributionProcess;
@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Map;
 
 @Service
 public class GradDistributionService {
@@ -35,12 +34,12 @@ public class GradDistributionService {
         this.restUtils = restUtils;
     }
 
-    public DistributionResponse distributeCredentials(String runType, Long batchId, Map<String, DistributionPrintRequest> mapDist, String activityCode, String transmissionMode,String localDownload, String accessToken) {
-        ProcessorData data = ProcessorData.builder().batchId(batchId).accessToken(accessToken).distributionResponse(null).mapDistribution(mapDist).activityCode(activityCode).transmissionMode(transmissionMode).localDownload(localDownload).build();
-        DistributionResponse disRes = new DistributionResponse();
-        disRes.setMergeProcessResponse(processDistribution(runType,data).getMergeProcessResponse());
+    public DistributionResponse distributeCredentials(String runType, Long batchId, DistributionRequest distributionRequest, String activityCode, String transmissionMode,String localDownload, String accessToken) {
+        ProcessorData data = ProcessorData.builder().batchId(batchId).accessToken(accessToken).distributionResponse(null).distributionRequest(distributionRequest).activityCode(activityCode).transmissionMode(transmissionMode).localDownload(localDownload).build();
+        DistributionResponse disRes = processDistribution(runType,data);
+        disRes.setMergeProcessResponse(disRes.getMergeProcessResponse());
         //Grad2-1931 setting the batchId and enabling local download for Users - mchintha
-        disRes.setBatchId(data.getBatchId().toString());
+        disRes.setBatchId(data.getBatchId());
         disRes.setLocalDownload(data.getLocalDownload());
         return disRes;
     }
@@ -54,8 +53,8 @@ public class GradDistributionService {
     }
 
     @Async("asyncExecutor")
-    public void asyncDistributeCredentials(String runType, Long batchId, Map<String, DistributionPrintRequest> mapDist, String activityCode, String transmissionMode,String localDownload, String accessToken) {
-        ProcessorData data = ProcessorData.builder().batchId(batchId).accessToken(accessToken).distributionResponse(null).mapDistribution(mapDist).activityCode(activityCode).transmissionMode(transmissionMode).localDownload(localDownload).build();
+    public void asyncDistributeCredentials(String runType, Long batchId, DistributionRequest distributionRequest, String activityCode, String transmissionMode, String localDownload, String accessToken) {
+        ProcessorData data = ProcessorData.builder().batchId(batchId).accessToken(accessToken).distributionResponse(new DistributionResponse()).distributionRequest(distributionRequest).activityCode(activityCode).transmissionMode(transmissionMode).localDownload(localDownload).build();
         asyncProcessDistribution(runType, data);
     }
 
@@ -77,7 +76,9 @@ public class GradDistributionService {
             status = "error";
         }
         restUtils.fetchAccessToken(data);
-        restUtils.notifyDistributionJobIsCompleted(data.getBatchId(), status, data.getAccessToken());
+        DistributionResponse response = data.getDistributionResponse();
+        response.setJobStatus(status);
+        restUtils.notifyDistributionJobIsCompleted(data);
         logger.info("Async distribution job is completed and notify it's status back to grad-batch-api: batchId [{}]", data.getBatchId());
     }
 

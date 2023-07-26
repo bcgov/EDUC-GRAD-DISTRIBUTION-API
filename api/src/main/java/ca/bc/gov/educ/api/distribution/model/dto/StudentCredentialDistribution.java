@@ -1,14 +1,9 @@
 package ca.bc.gov.educ.api.distribution.model.dto;
 
-import ca.bc.gov.educ.api.distribution.util.LocalDateDeserializer;
-import ca.bc.gov.educ.api.distribution.util.LocalDateSerializer;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Data;
 
 import java.time.LocalDate;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,13 +22,14 @@ public class StudentCredentialDistribution {
 	private String legalMiddleNames;
 	private String legalLastName;
 	private String studentCitizenship;
-	@JsonDeserialize(using = LocalDateDeserializer.class)
-	@JsonSerialize(using = LocalDateSerializer.class)
 	private LocalDate programCompletionDate;
-	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
-	private Date lastUpdateDate;
+	private LocalDateTime lastUpdateDate;
 	private String honoursStanding;
 	private String program;
 	private String studentGrade;
 	private List<GradRequirement> nonGradReasons;
+
+	public LocalDateTime getLastUpdateDate() {
+		return lastUpdateDate == null ? LocalDateTime.now() : lastUpdateDate;
+	}
 }

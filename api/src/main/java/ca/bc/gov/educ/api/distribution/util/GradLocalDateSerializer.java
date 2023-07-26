@@ -8,15 +8,15 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
-public class LocalDateSerializer extends StdSerializer<LocalDate> {
+public class GradLocalDateSerializer extends StdSerializer<LocalDate> {
 
-    protected LocalDateSerializer() {
+    public GradLocalDateSerializer() {
         super(LocalDate.class);
     }
 
     @Override
     public void serialize(LocalDate localDate, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
         if(localDate != null) {
             jsonGenerator.writeString(localDate.format(formatter));
         }
