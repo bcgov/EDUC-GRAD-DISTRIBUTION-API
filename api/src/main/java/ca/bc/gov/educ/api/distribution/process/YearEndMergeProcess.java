@@ -89,6 +89,7 @@ public class YearEndMergeProcess extends MergeProcess {
                     numberOfProcessedSchoolReports += processDistrictSchoolDistribution(processorData.getBatchId(), mincodes, null, null, NONGRADDISTREP_SC, null);
                     logger.debug("***** Number of distributed Student NonGrad School Reports {} *****", numberOfProcessedSchoolReports);
                 }
+
                 if(distributionPrintRequest.getSchoolDistributionRequest() != null && !NONGRADDIST.equalsIgnoreCase(processorData.getActivityCode())) {
                     logger.debug("***** Create {} School Report *****", mincode);
                     ReportRequest schoolDistributionReportRequest = reportService.prepareSchoolDistributionReportData(distributionPrintRequest.getSchoolDistributionRequest(), processorData.getBatchId(), commonSchool);
@@ -96,6 +97,7 @@ public class YearEndMergeProcess extends MergeProcess {
                     logger.debug("***** {} School Report Created*****", mincode);
                     numberOfPdfs++;
                 }
+
                 logger.debug("PDFs Merged {}", commonSchool.getSchoolName());
             }
         }
