@@ -80,15 +80,24 @@ public class YearEndMergeProcess extends MergeProcess {
                 numberOfPdfs = pV.getRight();
 
                 if (!studListNonGrad.isEmpty() && NONGRADDIST.equalsIgnoreCase(processorData.getActivityCode())) {
-                    logger.debug("***** Create Student NonGrad School Reports *****");
+                    logger.debug("***** Create Student NonGrad {} School Reports *****", mincode);
                     numberOfCreatedSchoolReports += createAndSaveNonGradReport(commonSchool, studListNonGrad, mincode, educDistributionApiConstants.getStudentNonGrad());
                     logger.debug("***** Number of Student NonGrad School Reports Created {} *****", numberOfCreatedSchoolReports);
-                    logger.debug("***** Distribute Student NonGrad School Reports *****");
+                    logger.debug("***** Distribute Student NonGrad {} School Reports *****", mincode);
                     List<String> mincodes = new ArrayList<>();
                     mincodes.add(mincode);
                     numberOfProcessedSchoolReports += processDistrictSchoolDistribution(processorData.getBatchId(), mincodes, null, null, NONGRADDISTREP_SC, null);
                     logger.debug("***** Number of distributed Student NonGrad School Reports {} *****", numberOfProcessedSchoolReports);
                 }
+
+                if(distributionPrintRequest.getSchoolDistributionRequest() != null && !NONGRADDIST.equalsIgnoreCase(processorData.getActivityCode())) {
+                    logger.debug("***** Create {} School Report *****", mincode);
+                    ReportRequest schoolDistributionReportRequest = reportService.prepareSchoolDistributionReportData(distributionPrintRequest.getSchoolDistributionRequest(), processorData.getBatchId(), commonSchool);
+                    createAndSaveDistributionReport(schoolDistributionReportRequest,mincode,schoolCategoryCode,processorData);
+                    logger.debug("***** {} School Report Created*****", mincode);
+                    numberOfPdfs++;
+                }
+
                 logger.debug("PDFs Merged {}", commonSchool.getSchoolName());
             }
         }
