@@ -100,6 +100,10 @@ public abstract class BaseProcess implements DistributionProcess {
         return TMP_DIR;
     }
 
+    protected int createDistrictSchoolYearEndReport(String schooLabelReportType, String districtReportType, String schoolReportType, List<String> mincodes) {
+        return postingDistributionService.createDistrictSchoolYearEndReport(schooLabelReportType, districtReportType, schoolReportType, mincodes);
+    }
+
     public int processSchoolLabelsDistribution(Long batchId, String schooLabelReportType, String transmissionMode) {
         return postingDistributionService.processSchoolLabelsDistribution(batchId, schooLabelReportType, transmissionMode);
     }

@@ -62,14 +62,7 @@ public class PostingDistributionService {
                 forAllSchools = false;
                 createDistrictSchoolYearEndReport(null, DISTREP_YE_SD, null, districtCodes);
             }
-            if(!mincodes.isEmpty()) {
-                forAllSchools = false;
-                createDistrictSchoolYearEndReport(null, null, DISTREP_YE_SC, mincodes);
-            }
-            if(forAllSchools) {
-                createDistrictSchoolYearEndReport(null, DISTREP_YE_SD, DISTREP_YE_SC);
-            }
-            numberOfPdfs += processDistrictSchoolDistribution(batchId, null, DISTREP_YE_SD, DISTREP_YE_SC, transmissionMode);
+            numberOfPdfs += processDistrictSchoolDistribution(batchId, null, DISTREP_YE_SD, null, transmissionMode);
         }
         if(NONGRADDIST.equalsIgnoreCase(activityCode)) {
             if(!districtCodes.isEmpty()) {
@@ -291,7 +284,7 @@ public class PostingDistributionService {
             try {
                 byte[] gradReportPdf = restService.executeGet(educDistributionApiConstants.getSchoolReport(), byte[].class, report.getSchoolOfRecord(), report.getReportTypeCode());
                 if (gradReportPdf != null) {
-                    logger.debug("*** Added School Report PDFs Current Report Type {} for school {} category {}", report.getReportTypeCode(), report.getSchoolOfRecord(), report.getSchoolCategory());
+                    logger.debug("*** Added School Report PDFs Report Type {} for school {} category {}", report.getReportTypeCode(), report.getSchoolOfRecord(), report.getSchoolCategory());
                     uploadSchoolReportDocuments(
                             batchId,
                             reportType,
@@ -301,7 +294,7 @@ public class PostingDistributionService {
                             gradReportPdf);
                     numberOfPdfs++;
                 } else {
-                    logger.debug("*** Failed to Add School Report PDFs Current Report Type {} for school {} category {} in batch {}", report.getReportTypeCode(), report.getSchoolOfRecord(), report.getSchoolCategory(), batchId);
+                    logger.debug("*** Failed to Add School Report PDFs Report Type {} for school {} category {} in batch {}", report.getReportTypeCode(), report.getSchoolOfRecord(), report.getSchoolCategory(), batchId);
                 }
             } catch (Exception e) {
                 logger.error(e.getLocalizedMessage());
