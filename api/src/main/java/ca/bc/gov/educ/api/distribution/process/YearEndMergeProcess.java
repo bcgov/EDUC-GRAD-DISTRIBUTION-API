@@ -85,17 +85,23 @@ public class YearEndMergeProcess extends MergeProcess {
                     mincodes.add(mincode);
                     numberOfProcessedSchoolReports += processDistrictSchoolDistribution(processorData.getBatchId(), mincodes, null, null, NONGRADDISTREP_SC, null);
                     logger.debug("***** Number of distributed Student NonGrad School Reports {} *****", numberOfProcessedSchoolReports);
-                }
-
-                if(!schoolReportIncluded && distributionPrintRequest.getSchoolDistributionRequest() != null && !NONGRADDIST.equalsIgnoreCase(processorData.getActivityCode())) {
-                    logger.debug("***** Create {} School Report *****", mincode);
-                    ReportRequest schoolDistributionReportRequest = reportService.prepareSchoolDistributionReportData(distributionPrintRequest.getSchoolDistributionRequest(), processorData.getBatchId(), commonSchool);
-                    createAndSaveDistributionReport(schoolDistributionReportRequest,mincode,schoolCategoryCode,processorData);
-                    logger.debug("***** {} School Report Created*****", mincode);
                     numberOfPdfs++;
                 }
 
-                logger.debug("PDFs Merged {}", commonSchool.getSchoolName());
+                if(!schoolReportIncluded && !NONGRADDIST.equalsIgnoreCase(processorData.getActivityCode())) {
+                    logger.debug("***** Create {} School Report *****", mincode);
+                    List<String> mincodes = new ArrayList<>();
+                    mincodes.add(mincode);
+                    numberOfCreatedSchoolReports += createDistrictSchoolYearEndReport(null, null, DISTREP_YE_SC, mincodes);
+                    logger.debug("***** Number of School Reports Created {} *****", numberOfCreatedSchoolReports);
+                    logger.debug("***** Distribute {} School Reports *****", mincode);
+                    numberOfProcessedSchoolReports += processDistrictSchoolDistribution(processorData.getBatchId(), mincodes, null, null, DISTREP_YE_SC, null);
+                    logger.debug("***** {} School Report Created*****", mincode);
+                    logger.debug("***** Number of distributed School Reports {} *****", numberOfProcessedSchoolReports);
+                    numberOfPdfs++;
+                }
+
+                logger.debug("PDFs Merged for School {}", commonSchool.getSchoolName());
             }
         }
         response.setTranscriptResponse(numberOfPdfs + " transcripts have been processed in batch " + processorData.getBatchId());

@@ -272,10 +272,10 @@ public class MergeProcess extends BaseProcess {
 				if(certificatePdf != null) {
 					locations.add(certificatePdf.getInputStream());
 					currentCertificate++;
-					logger.debug("*** Added Certificate PDFs {}/{} Current student {} - {}, {}",currentCertificate,scdList.size(),scd.getStudentID(), scd.getLegalLastName(), scd.getLegalFirstName());
+					logger.debug("*** Added {} Certificate PDFs {}/{} Current student {} - {}, {}", scd.getCredentialTypeCode(), currentCertificate, scdList.size(), scd.getStudentID(), scd.getLegalLastName(), scd.getLegalFirstName());
 				} else {
 					failedToAdd++;
-					logger.info("*** Failed to Add Certificate PDFs {} Current student {} credentials {} document status {} in batch {}",failedToAdd,scd.getStudentID(),scd.getCredentialTypeCode(),scd.getDocumentStatusCode(),processorData.getBatchId());
+					logger.info("*** Failed to Add {} Certificate PDFs {} Current student {} credentials {} document status {} in batch {}", scd.getCredentialTypeCode(), failedToAdd, scd.getStudentID(), scd.getCredentialTypeCode(), scd.getDocumentStatusCode(), processorData.getBatchId());
 				}
 			}
 			setExtraDataForPackingSlip(packSlipReq,paperType,request.getTotal(),currentCertificate,request.getCurrentSlip(),"Certificate", certificatePrintRequest.getBatchId());
