@@ -42,14 +42,10 @@ public class YearEndMergeProcess extends MergeProcess {
         List<School> schoolsForLabels = new ArrayList<>();
         List<School> districtsForLabels = new ArrayList<>();
         for (String mincode : mapDist.keySet()) {
+            boolean schoolReportIncluded = false;
             CommonSchool commonSchool = getBaseSchoolDetails(null, mincode, exception);
             if (commonSchool != null) {
                 String schoolCategoryCode = commonSchool.getSchoolCategoryCode();
-                if(searchRequest != null && searchRequest.getSchoolCategoryCodes() != null && !searchRequest.getSchoolCategoryCodes().isEmpty() && !searchRequest.getSchoolCategoryCodes().contains(schoolCategoryCode)) {
-                    logger.debug("Skip School {}/{} category code doesn't match filter \"{}\"", commonSchool.getSchoolName(), commonSchool.getSchoolCategoryCode(), String.join(",", searchRequest.getSchoolCategoryCodes()));
-                    continue;
-                }
-
                 String distcode = getDistrictCodeFromMincode(mincode);
                 processDistrictsForLabels(districtsForLabels, distcode, exception);
 
@@ -59,6 +55,7 @@ public class YearEndMergeProcess extends MergeProcess {
                 logger.debug("*** School Details Acquired {} category {}", mincode, schoolCategoryCode);
                 if(StringUtils.containsAnyIgnoreCase(schoolCategoryCode, "02", "03", "09")) {
                     processSchoolsForLabels(schoolsForLabels, mincode, exception);
+                    schoolReportIncluded = true;
                     logger.debug("Added Independent School {} for processing", commonSchool.getSchoolName());
                 }
                 logger.debug("{} School {}/{}", mincode, schoolCounter, mapDist.size());
@@ -90,7 +87,7 @@ public class YearEndMergeProcess extends MergeProcess {
                     logger.debug("***** Number of distributed Student NonGrad School Reports {} *****", numberOfProcessedSchoolReports);
                 }
 
-                if(distributionPrintRequest.getSchoolDistributionRequest() != null && !NONGRADDIST.equalsIgnoreCase(processorData.getActivityCode())) {
+                if(!schoolReportIncluded && distributionPrintRequest.getSchoolDistributionRequest() != null && !NONGRADDIST.equalsIgnoreCase(processorData.getActivityCode())) {
                     logger.debug("***** Create {} School Report *****", mincode);
                     ReportRequest schoolDistributionReportRequest = reportService.prepareSchoolDistributionReportData(distributionPrintRequest.getSchoolDistributionRequest(), processorData.getBatchId(), commonSchool);
                     createAndSaveDistributionReport(schoolDistributionReportRequest,mincode,schoolCategoryCode,processorData);
