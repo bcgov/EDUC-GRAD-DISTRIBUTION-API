@@ -57,20 +57,6 @@ public class PostingDistributionService {
         boolean forAllSchools = true;
         List<String> districtCodes = extractDistrictCodes(distributionResponse);
         List<String> mincodes = extractSchoolCodes(distributionResponse);
-        if(YEARENDDIST.equalsIgnoreCase(activityCode)) {
-            if(!districtCodes.isEmpty()) {
-                forAllSchools = false;
-                createDistrictSchoolYearEndReport(null, DISTREP_YE_SD, null, districtCodes);
-            }
-            if(!mincodes.isEmpty()) {
-                forAllSchools = false;
-                createDistrictSchoolYearEndReport(null, null, DISTREP_YE_SC, mincodes);
-            }
-            if(forAllSchools) {
-                createDistrictSchoolYearEndReport(null, DISTREP_YE_SD, DISTREP_YE_SC);
-            }
-            numberOfPdfs += processDistrictSchoolDistribution(batchId, null, DISTREP_YE_SD, DISTREP_YE_SC, transmissionMode);
-        }
         if(NONGRADDIST.equalsIgnoreCase(activityCode)) {
             if(!districtCodes.isEmpty()) {
                 forAllSchools = false;
@@ -261,7 +247,7 @@ public class PostingDistributionService {
     }
 
     @Generated
-    protected int processDistrictSchoolDistribution(Long batchId, String schooLabelReportType, String districtReportType, String schoolReportType, String transmissionMode) {
+    public int processDistrictSchoolDistribution(Long batchId, String schooLabelReportType, String districtReportType, String schoolReportType, String transmissionMode) {
         int numberOfPdfs = 0;
         if (StringUtils.isNotBlank(schooLabelReportType)) {
             numberOfPdfs += processSchoolLabelsDistribution(batchId, schooLabelReportType, transmissionMode);
