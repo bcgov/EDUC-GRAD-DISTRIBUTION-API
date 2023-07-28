@@ -62,7 +62,14 @@ public class PostingDistributionService {
                 forAllSchools = false;
                 createDistrictSchoolYearEndReport(null, DISTREP_YE_SD, null, districtCodes);
             }
-            numberOfPdfs += processDistrictSchoolDistribution(batchId, null, DISTREP_YE_SD, null, transmissionMode);
+            if(!mincodes.isEmpty()) {
+                forAllSchools = false;
+                createDistrictSchoolYearEndReport(null, null, DISTREP_YE_SC, mincodes);
+            }
+            if(forAllSchools) {
+                createDistrictSchoolYearEndReport(null, DISTREP_YE_SD, DISTREP_YE_SC);
+            }
+            numberOfPdfs += processDistrictSchoolDistribution(batchId, null, DISTREP_YE_SD, DISTREP_YE_SC, transmissionMode);
         }
         if(NONGRADDIST.equalsIgnoreCase(activityCode)) {
             if(!districtCodes.isEmpty()) {
