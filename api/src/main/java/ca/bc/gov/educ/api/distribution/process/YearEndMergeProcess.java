@@ -92,12 +92,10 @@ public class YearEndMergeProcess extends MergeProcess {
                     mincodes.add(mincode);
                     numberOfCreatedSchoolReports += createDistrictSchoolYearEndReport(null, null, DISTREP_YE_SC, mincodes);
                     logger.debug("***** Number of School Reports Created {} *****", numberOfCreatedSchoolReports);
-                    /**
                     logger.debug("***** Distribute {} School Reports *****", mincode);
                     numberOfProcessedSchoolReports += processDistrictSchoolDistribution(processorData.getBatchId(), mincodes, null, null, DISTREP_YE_SC, null);
                     logger.debug("***** {} School Report Created*****", mincode);
                     logger.debug("***** Number of distributed School Reports {} *****", numberOfProcessedSchoolReports);
-                     **/
                     numberOfPdfs++;
                 }
 
