@@ -42,7 +42,6 @@ public class YearEndMergeProcess extends MergeProcess {
         List<School> schoolsForLabels = new ArrayList<>();
         List<School> districtsForLabels = new ArrayList<>();
         for (String mincode : mapDist.keySet()) {
-            boolean schoolReportIncluded = false;
             CommonSchool commonSchool = getBaseSchoolDetails(null, mincode, exception);
             if (commonSchool != null) {
                 String schoolCategoryCode = commonSchool.getSchoolCategoryCode();
@@ -55,7 +54,6 @@ public class YearEndMergeProcess extends MergeProcess {
                 logger.debug("*** School Details Acquired {} category {}", mincode, schoolCategoryCode);
                 if(StringUtils.containsAnyIgnoreCase(schoolCategoryCode, "02", "03", "09")) {
                     processSchoolsForLabels(schoolsForLabels, mincode, exception);
-                    schoolReportIncluded = true;
                     logger.debug("Added Independent School {} for processing", commonSchool.getSchoolName());
                 }
                 logger.debug("{} School {}/{}", mincode, schoolCounter, mapDist.size());
@@ -88,18 +86,16 @@ public class YearEndMergeProcess extends MergeProcess {
                     numberOfPdfs++;
                 }
 
-                if(!schoolReportIncluded && !NONGRADDIST.equalsIgnoreCase(processorData.getActivityCode())) {
+                if(!NONGRADDIST.equalsIgnoreCase(processorData.getActivityCode())) {
                     logger.debug("***** Create {} School Report *****", mincode);
                     List<String> mincodes = new ArrayList<>();
                     mincodes.add(mincode);
                     numberOfCreatedSchoolReports += createDistrictSchoolYearEndReport(null, null, DISTREP_YE_SC, mincodes);
                     logger.debug("***** Number of School Reports Created {} *****", numberOfCreatedSchoolReports);
-                    /**
                     logger.debug("***** Distribute {} School Reports *****", mincode);
                     numberOfProcessedSchoolReports += processDistrictSchoolDistribution(processorData.getBatchId(), mincodes, null, null, DISTREP_YE_SC, null);
                     logger.debug("***** {} School Report Created*****", mincode);
                     logger.debug("***** Number of distributed School Reports {} *****", numberOfProcessedSchoolReports);
-                     **/
                     numberOfPdfs++;
                 }
 
@@ -119,6 +115,14 @@ public class YearEndMergeProcess extends MergeProcess {
             List<String> mincodes = districtsForLabels.stream().map(School::getMincode).toList();
             numberOfProcessedSchoolReports += processDistrictSchoolDistribution(batchId, mincodes, ADDRESS_LABEL_YE, null, null, null);
             logger.debug("***** Number of distributed District Label reports {} *****", numberOfProcessedSchoolReports);
+
+            if(!NONGRADDIST.equalsIgnoreCase(processorData.getActivityCode())) {
+                logger.debug("***** Create and Store District Reports *****");
+                numberOfCreatedSchoolLabelReports += createDistrictSchoolYearEndReport(null, DISTREP_YE_SD, null, mincodes);
+                logger.debug("***** Number of created District Reports {} *****", numberOfCreatedSchoolLabelReports);
+                logger.debug("***** Distribute District Reports *****");
+                processDistrictSchoolDistribution(batchId, mincodes, null, DISTREP_YE_SD, null, null);
+            }
         }
 
         if(!schoolsForLabels.isEmpty()) {
