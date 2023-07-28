@@ -247,7 +247,7 @@ public class PostingDistributionService {
     }
 
     @Generated
-    public int processDistrictSchoolDistribution(Long batchId, String schooLabelReportType, String districtReportType, String schoolReportType, String transmissionMode) {
+    protected int processDistrictSchoolDistribution(Long batchId, String schooLabelReportType, String districtReportType, String schoolReportType, String transmissionMode) {
         int numberOfPdfs = 0;
         if (StringUtils.isNotBlank(schooLabelReportType)) {
             numberOfPdfs += processSchoolLabelsDistribution(batchId, schooLabelReportType, transmissionMode);
