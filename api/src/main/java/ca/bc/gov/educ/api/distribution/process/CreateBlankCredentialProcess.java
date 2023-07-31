@@ -173,10 +173,10 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 						locations.add(new ByteArrayInputStream(bytesSAR));
 					}
 					currentCertificate++;
-					logger.debug("*** Added Certificate PDFs {}/{} Current Credential {}", currentCertificate, bcdList.size(), bcd.getCredentialTypeCode());
+					logger.debug("*** Added {} Certificate PDFs {}/{} Current Credential {}", bcd.getCredentialTypeCode(), currentCertificate, bcdList.size(), bcd.getCredentialTypeCode());
 				} else {
 					failedToAdd++;
-					logger.info("*** Failed to Add PDFs {} Current Credential {} in batch {}", failedToAdd, bcd.getCredentialTypeCode(), processorData.getBatchId());
+					logger.info("*** Failed to Add {} Certificate PDFs {} Current Credential {} in batch {}", bcd.getCredentialTypeCode(),failedToAdd, bcd.getCredentialTypeCode(), processorData.getBatchId());
 				}
 			}
 			mergeDocumentsPDFs(processorData,mincode,"02","/EDGRAD.C.",paperType,locations);
