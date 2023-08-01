@@ -62,11 +62,7 @@ public class PostingDistributionService {
                 forAllSchools = false;
                 createDistrictSchoolYearEndNonGradReport(null, NONGRADDISTREP_SD, null, districtCodes);
             }
-// GRAD2-2264: removed the redundant logic here - NONGRADDISTREP_SC is already processed in YearEndMergeProcess
-//            if(!mincodes.isEmpty()) {
-//                forAllSchools = false;
-//                createDistrictSchoolYearEndNonGradReport(null, null, NONGRADDISTREP_SC, mincodes);
-//            }
+            // GRAD2-2264: removed the redundant logic of NONGRADDISTREP_SC, which is already processed in YearEndMergeProcess
             if(forAllSchools) {
                 createDistrictSchoolYearEndNonGradReport(null, NONGRADDISTREP_SD, null);
             }
