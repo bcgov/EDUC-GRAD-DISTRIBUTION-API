@@ -192,7 +192,7 @@ public class DistributionServiceTest {
         assertNotNull(res);
         res = testdistributeSchoolReport("MERSUPP", "DISTRUN_SUPP", "SUPPDIST");
         assertNotNull(res);
-        res = testdistributeSchoolReport("MERYER", "DISTRUN_YE", "NONGRADDIST");
+        res = testdistributeSchoolReport("MERYER", "DISTRUN_YE", "NONGRADYERUN");
         assertNotNull(res);
     }
 

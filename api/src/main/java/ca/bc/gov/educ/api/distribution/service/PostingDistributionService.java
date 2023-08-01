@@ -57,21 +57,23 @@ public class PostingDistributionService {
         boolean forAllSchools = true;
         List<String> districtCodes = extractDistrictCodes(distributionResponse);
         List<String> mincodes = extractSchoolCodes(distributionResponse);
-        if(NONGRADDIST.equalsIgnoreCase(activityCode)) {
+        if(NONGRADYERUN.equalsIgnoreCase(activityCode)) {
             if(!districtCodes.isEmpty()) {
                 forAllSchools = false;
                 createDistrictSchoolYearEndNonGradReport(null, NONGRADDISTREP_SD, null, districtCodes);
             }
-            if(!mincodes.isEmpty()) {
-                forAllSchools = false;
-                createDistrictSchoolYearEndNonGradReport(null, null, DISTREP_YE_SC, mincodes);
-            }
+// GRAD2-2264: removed the redundant logic here - NONGRADDISTREP_SC is already processed in YearEndMergeProcess
+//            if(!mincodes.isEmpty()) {
+//                forAllSchools = false;
+//                createDistrictSchoolYearEndNonGradReport(null, null, NONGRADDISTREP_SC, mincodes);
+//            }
             if(forAllSchools) {
                 createDistrictSchoolYearEndNonGradReport(null, NONGRADDISTREP_SD, null);
             }
-            numberOfPdfs += processDistrictSchoolDistribution(batchId, null, NONGRADDISTREP_SD, DISTREP_YE_SC, transmissionMode);
+            numberOfPdfs += processDistrictSchoolDistribution(batchId, null, NONGRADDISTREP_SD, null, transmissionMode);
+            return zipBatchDirectory(batchId, download, numberOfPdfs, TMP_DIR);
         }
-        return zipBatchDirectory(batchId, download, numberOfPdfs, TMP_DIR);
+        return true;
     }
 
     public boolean zipBatchDirectory(Long batchId, String download, int numberOfPdfs, String pathToZip) {
