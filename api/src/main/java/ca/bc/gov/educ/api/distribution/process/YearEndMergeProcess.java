@@ -74,7 +74,7 @@ public class YearEndMergeProcess extends MergeProcess {
                 pV = processYedrCertificatePrintRequest(distributionPrintRequest,currentSlipCount,packSlipReq,studListNonGrad,processorData,mincode,schoolCategoryCode,numberOfPdfs);
                 numberOfPdfs = pV.getRight();
 
-                if (!studListNonGrad.isEmpty() && NONGRADDIST.equalsIgnoreCase(processorData.getActivityCode())) {
+                if (!studListNonGrad.isEmpty() && NONGRADYERUN.equalsIgnoreCase(processorData.getActivityCode())) {
                     logger.debug("***** Create Student NonGrad {} School Reports *****", mincode);
                     numberOfCreatedSchoolReports += createAndSaveNonGradReport(commonSchool, studListNonGrad, mincode, educDistributionApiConstants.getStudentNonGrad());
                     logger.debug("***** Number of Student NonGrad School Reports Created {} *****", numberOfCreatedSchoolReports);
@@ -86,7 +86,7 @@ public class YearEndMergeProcess extends MergeProcess {
                     numberOfPdfs++;
                 }
 
-                if(!NONGRADDIST.equalsIgnoreCase(processorData.getActivityCode())) {
+                if(!NONGRADYERUN.equalsIgnoreCase(processorData.getActivityCode())) {
                     logger.debug("***** Create {} School Report *****", mincode);
                     List<String> mincodes = new ArrayList<>();
                     mincodes.add(mincode);
@@ -116,7 +116,7 @@ public class YearEndMergeProcess extends MergeProcess {
             numberOfProcessedSchoolReports += processDistrictSchoolDistribution(batchId, mincodes, ADDRESS_LABEL_YE, null, null, null);
             logger.debug("***** Number of distributed District Label reports {} *****", numberOfProcessedSchoolReports);
 
-            if(!NONGRADDIST.equalsIgnoreCase(processorData.getActivityCode())) {
+            if(!NONGRADYERUN.equalsIgnoreCase(processorData.getActivityCode())) {
                 logger.debug("***** Create and Store District Reports *****");
                 numberOfCreatedSchoolLabelReports += createDistrictSchoolYearEndReport(null, DISTREP_YE_SD, null, mincodes);
                 logger.debug("***** Number of created District Reports {} *****", numberOfCreatedSchoolLabelReports);

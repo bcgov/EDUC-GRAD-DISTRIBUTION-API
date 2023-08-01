@@ -110,6 +110,6 @@ public class DistributionController {
     }
 
     private boolean isAsyncDistribution(String runType, String activityCode) {
-        return ( "MER".equals(runType) && ("MONTHLYDIST".equals(activityCode) || "NONGRADDIST".equals(activityCode)) ) || "MERYER".equals(runType) || "MERSUPP".equals(runType);
+        return ( "MER".equals(runType) && ("MONTHLYDIST".equals(activityCode) || "NONGRADYERUN".equals(activityCode)) ) || "MERYER".equals(runType) || "MERSUPP".equals(runType);
     }
 }
