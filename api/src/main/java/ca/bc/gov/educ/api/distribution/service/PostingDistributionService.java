@@ -56,7 +56,6 @@ public class PostingDistributionService {
         int numberOfPdfs = distributionResponse.getNumberOfPdfs();
         boolean forAllSchools = true;
         List<String> districtCodes = extractDistrictCodes(distributionResponse);
-        List<String> mincodes = extractSchoolCodes(distributionResponse);
         if(NONGRADYERUN.equalsIgnoreCase(activityCode)) {
             if(!districtCodes.isEmpty()) {
                 forAllSchools = false;
