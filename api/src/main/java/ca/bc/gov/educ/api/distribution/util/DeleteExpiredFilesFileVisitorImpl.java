@@ -27,6 +27,7 @@ public class DeleteExpiredFilesFileVisitorImpl implements FileVisitor<Path> {
      * @param fileExpiry - file expiry
      */
     public DeleteExpiredFilesFileVisitorImpl(List<String> skipList, LocalDateTime fileExpiry){
+
         this.skipList = skipList;
         this.fileExpiry = fileExpiry;
     }
