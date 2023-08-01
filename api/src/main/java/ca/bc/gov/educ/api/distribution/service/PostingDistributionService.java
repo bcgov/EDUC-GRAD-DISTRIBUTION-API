@@ -67,9 +67,8 @@ public class PostingDistributionService {
                 createDistrictSchoolYearEndNonGradReport(null, NONGRADDISTREP_SD, null);
             }
             numberOfPdfs += processDistrictSchoolDistribution(batchId, null, NONGRADDISTREP_SD, null, transmissionMode);
-            return zipBatchDirectory(batchId, download, numberOfPdfs, TMP_DIR);
         }
-        return true;
+        return zipBatchDirectory(batchId, download, numberOfPdfs, TMP_DIR);
     }
 
     public boolean zipBatchDirectory(Long batchId, String download, int numberOfPdfs, String pathToZip) {
