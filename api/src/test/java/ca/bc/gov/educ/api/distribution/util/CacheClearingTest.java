@@ -1,17 +1,20 @@
 package ca.bc.gov.educ.api.distribution.util;
 
+import ca.bc.gov.educ.api.distribution.config.EducDistributionApiConfig;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.FileTime;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -47,13 +50,18 @@ public class CacheClearingTest {
 
     @Test
     public void testFileFilter() throws IOException {
-
+        EducDistributionApiConfig config = new EducDistributionApiConfig();
+        FileVisitor<Path> fileVisitor = config.createCleanTmpCacheFilesFileVisitor("(^hsperf.*|^undertow.+|^\\.nfs.+|^\\.java.+|^\\.nfs.+|Batch|FTP|PAPER)", 1);
+        Path startingDir = Paths.get(this.tmpDir);
+        if(Files.exists(startingDir)){
+            Files.walkFileTree(startingDir, fileVisitor);
+        }
         Assert.assertTrue(true);
     }
 
     private void createTmpCacheFiles() throws IOException {
         // create an expiry time of one day for testing
-        FileTime expiry = FileTime.from(LocalDateTime.now().minusDays(1).toInstant(ZoneOffset.UTC));
+        FileTime expiry = FileTime.from(LocalDateTime.now().minusDays(2).toInstant(ZoneOffset.UTC));
 
         // create directory structure
         //

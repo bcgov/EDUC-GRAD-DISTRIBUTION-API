@@ -53,7 +53,7 @@ public class EducDistributionApiConfig {
     }
 
     @Bean("TmpCacheFileVisitor")
-    public FileVisitor<Path> createCleanTmpCacheFilesFileVisitor(@Value("${scheduler.clean-tmp-cache-ignore}") String[] ignore, @Value("${scheduler.clean-tmp-cache-interval-in-days}") int days) {
-        return new DeleteExpiredFilesFileVisitorImpl(Arrays.asList(ignore), LocalDateTime.now().minusDays(days));
+    public FileVisitor<Path> createCleanTmpCacheFilesFileVisitor(@Value("(^hsperf.*|^undertow.+|^\\.nfs.+|^\\.java.+|^\\.nfs.+|Batch|FTP|PAPER)") String filter, @Value("${scheduler.clean-tmp-cache-interval-in-days}") int days) {
+        return new DeleteExpiredFilesFileVisitorImpl(filter, LocalDateTime.now().minusDays(days));
     }
 }

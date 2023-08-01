@@ -5,10 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileVisitResult;
-import java.nio.file.FileVisitor;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -18,17 +15,12 @@ import java.util.List;
 public class DeleteExpiredFilesFileVisitorImpl implements FileVisitor<Path> {
 
     private static final Logger logger = LoggerFactory.getLogger(DeleteExpiredFilesFileVisitorImpl.class);
-    private final List<String> skipList;
+    private final PathMatcher pathMatcher;
     private final LocalDateTime fileExpiry;
 
-    /**
-     * Constructor
-     * @param skipList - a list of filenames or directories NOT to delete
-     * @param fileExpiry - file expiry
-     */
-    public DeleteExpiredFilesFileVisitorImpl(List<String> skipList, LocalDateTime fileExpiry){
+    public DeleteExpiredFilesFileVisitorImpl(String filter, LocalDateTime fileExpiry){
 
-        this.skipList = skipList;
+        this.pathMatcher = FileSystems.getDefault().getPathMatcher("glob:" + filter);
         this.fileExpiry = fileExpiry;
     }
     @Override
@@ -65,7 +57,7 @@ public class DeleteExpiredFilesFileVisitorImpl implements FileVisitor<Path> {
      * @return whether or not to delete
      */
     private boolean fileOrDirectoryIsExpired(Path file){
-        if(!skipList.contains(file.getFileName().toString().toLowerCase())){
+        if(!pathMatcher.matches(file)){
             File theFile = file.toFile();
             LocalDateTime lastModified = LocalDateTime.ofInstant(Instant.ofEpochMilli(theFile.lastModified()), ZoneId.systemDefault());
             return lastModified.isBefore(fileExpiry);
