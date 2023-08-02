@@ -334,8 +334,4 @@ public class PostingDistributionService {
         return distributionResponse.getDistricts().stream().map(School::getMincode).toList();
     }
 
-    private List<String> extractSchoolCodes(DistributionResponse distributionResponse) {
-        return distributionResponse.getSchools().stream().map(School::getMincode).toList();
-    }
-
 }
