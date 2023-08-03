@@ -19,7 +19,6 @@ public class DeleteExpiredFilesFileVisitorImpl implements FileVisitor<Path> {
     private final LocalDateTime fileExpiry;
 
     public DeleteExpiredFilesFileVisitorImpl(String filter, LocalDateTime fileExpiry){
-
         this.pathMatcher = FileSystems.getDefault().getPathMatcher("glob:" + filter);
         this.fileExpiry = fileExpiry;
     }
@@ -57,7 +56,7 @@ public class DeleteExpiredFilesFileVisitorImpl implements FileVisitor<Path> {
      * @return whether or not to delete
      */
     private boolean fileOrDirectoryIsExpired(Path file){
-        if(!pathMatcher.matches(file)){
+        if(!pathMatcher.matches(file.getFileName())){
             File theFile = file.toFile();
             LocalDateTime lastModified = LocalDateTime.ofInstant(Instant.ofEpochMilli(theFile.lastModified()), ZoneId.systemDefault());
             return lastModified.isBefore(fileExpiry);

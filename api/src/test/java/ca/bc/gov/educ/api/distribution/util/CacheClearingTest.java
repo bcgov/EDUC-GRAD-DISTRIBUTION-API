@@ -7,10 +7,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileVisitor;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.nio.file.attribute.FileTime;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -40,7 +37,7 @@ public class CacheClearingTest {
 
     private String tmpDir;
     private final String FILE_SEP = File.separator;
-    private Map<String, Path> files = new HashMap<>();
+    private Map<FILES, Path> files = new HashMap<>();
 
     @Before
     public void createCache() throws IOException {
@@ -49,9 +46,22 @@ public class CacheClearingTest {
     }
 
     @Test
+    public void testPathFileFilter() {
+        String filter = "{hsperf*,undertow*,.nfs*,.java*,.nfs*,Batch,FTP,PAPER}";
+        PathMatcher pathMatcher = FileSystems.getDefault().getPathMatcher("glob:" + filter);
+        Path hsperf = this.files.get(FILES.HSPERF);
+        System.out.println(hsperf.toString());
+        System.out.println(hsperf.getFileName());
+        for(Map.Entry<FILES, Path> entry : this.files.entrySet()){
+            System.out.println(entry.getValue().getFileName() + ((pathMatcher.matches(entry.getValue().getFileName())) ? " Matches! " : " Does not match."));
+        }
+        Assert.assertTrue(pathMatcher.matches(hsperf.getFileName()));
+    }
+
+    @Test
     public void testFileFilter() throws IOException {
         EducDistributionApiConfig config = new EducDistributionApiConfig();
-        FileVisitor<Path> fileVisitor = config.createCleanTmpCacheFilesFileVisitor("(^hsperf.*|^undertow.+|^\\.nfs.+|^\\.java.+|^\\.nfs.+|Batch|FTP|PAPER)", 1);
+        FileVisitor<Path> fileVisitor = config.createCleanTmpCacheFilesFileVisitor("{hsperf*,undertow*,.nfs*,.java*,.nfs*,Batch,FTP,PAPER}", 1);
         Path startingDir = Paths.get(this.tmpDir);
         if(Files.exists(startingDir)){
             Files.walkFileTree(startingDir, fileVisitor);
@@ -80,54 +90,54 @@ public class CacheClearingTest {
         //      | EDGRAD.BATCH.18874.zip              (PAPER_ZIP      expired, should be deleted)
         //
         // add files and update expiry times on some
-        files.put(String.valueOf(FILES.HSPERF), Paths.get(tmpDir + FILE_SEP + "hsperfdata_101279000"));
-        files.put(String.valueOf(FILES.UNDERT), Paths.get(tmpDir + FILE_SEP + "undertow-docbase.8080.11764866489534620758"));
-        files.put(String.valueOf(FILES.NFS), Paths.get(tmpDir + FILE_SEP + ".nfs000000002abc01e400010418"));
-        files.put(String.valueOf(FILES.JAV), Paths.get(tmpDir + FILE_SEP + ".java_pid1"));
+        files.put(FILES.HSPERF, Paths.get(tmpDir + FILE_SEP + "hsperfdata_101279000"));
+        files.put(FILES.UNDERT, Paths.get(tmpDir + FILE_SEP + "undertow-docbase.8080.11764866489534620758"));
+        files.put(FILES.NFS, Paths.get(tmpDir + FILE_SEP + ".nfs000000002abc01e400010418"));
+        files.put(FILES.JAV, Paths.get(tmpDir + FILE_SEP + ".java_pid1"));
 
-        Files.createFile(files.get(String.valueOf(FILES.HSPERF)));
-        Files.createFile(files.get(String.valueOf(FILES.UNDERT)));
-        Files.createFile(files.get(String.valueOf(FILES.NFS)));
-        Files.createFile(files.get(String.valueOf(FILES.JAV)));
+        Files.createFile(files.get(FILES.HSPERF));
+        Files.createFile(files.get(FILES.UNDERT));
+        Files.createFile(files.get(FILES.NFS));
+        Files.createFile(files.get(FILES.JAV));
 
-        Files.setLastModifiedTime(files.get(String.valueOf(FILES.HSPERF)), expiry);
-        Files.setLastModifiedTime(files.get(String.valueOf(FILES.UNDERT)), expiry);
-        Files.setLastModifiedTime(files.get(String.valueOf(FILES.NFS)), expiry);
-        Files.setLastModifiedTime(files.get(String.valueOf(FILES.JAV)), expiry);
+        Files.setLastModifiedTime(files.get(FILES.HSPERF), expiry);
+        Files.setLastModifiedTime(files.get(FILES.UNDERT), expiry);
+        Files.setLastModifiedTime(files.get(FILES.NFS), expiry);
+        Files.setLastModifiedTime(files.get(FILES.JAV), expiry);
 
-        files.put(String.valueOf(FILES.BATCH_DIR), Paths.get(tmpDir + FILE_SEP  + "Batch"));
-        files.put(String.valueOf(FILES.FTP_DIR), Paths.get(files.get("BATCH_DIR") + FILE_SEP + "FTP"));
-        files.put(String.valueOf(FILES.PAPER_DIR), Paths.get(files.get("BATCH_DIR") + FILE_SEP + "PAPER"));
-        Files.createDirectory(files.get(String.valueOf(FILES.BATCH_DIR)));
-        Files.createDirectory(files.get(String.valueOf(FILES.FTP_DIR)));
-        Files.createDirectory(files.get(String.valueOf(FILES.PAPER_DIR)));
+        files.put(FILES.BATCH_DIR, Paths.get(tmpDir + FILE_SEP  + "Batch"));
+        files.put(FILES.FTP_DIR, Paths.get(files.get(FILES.BATCH_DIR) + FILE_SEP + "FTP"));
+        files.put(FILES.PAPER_DIR, Paths.get(files.get(FILES.BATCH_DIR) + FILE_SEP + "PAPER"));
+        Files.createDirectory(files.get(FILES.BATCH_DIR));
+        Files.createDirectory(files.get(FILES.FTP_DIR));
+        Files.createDirectory(files.get(FILES.PAPER_DIR));
 
-        files.put(String.valueOf(FILES.FTP_SUB), Path.of(files.get(String.valueOf(FILES.FTP_DIR)) + FILE_SEP + "18873"));
-        Files.createDirectory(files.get(String.valueOf(FILES.FTP_SUB)));
-
-
-        files.put(String.valueOf(FILES.FTP_SUB_FILE), Path.of(files.get(String.valueOf(FILES.FTP_SUB)) + FILE_SEP + "FileA.pdf"));
-        Files.createFile(files.get(String.valueOf(FILES.FTP_SUB_FILE)));
+        files.put(FILES.FTP_SUB, Path.of(files.get(FILES.FTP_DIR) + FILE_SEP + "18873"));
+        Files.createDirectory(files.get(FILES.FTP_SUB));
 
 
-        files.put(String.valueOf(FILES.FTP_ZIP), Path.of(files.get(String.valueOf(FILES.FTP_DIR)) + FILE_SEP + "EDGRAD.BATCH.18873.zip"));
-        Files.createFile(files.get(String.valueOf(FILES.FTP_ZIP)));
+        files.put(FILES.FTP_SUB_FILE, Path.of(files.get(FILES.FTP_SUB) + FILE_SEP + "FileA.pdf"));
+        Files.createFile(files.get(FILES.FTP_SUB_FILE));
 
-        files.put(String.valueOf(FILES.PAPER_SUB), Path.of(files.get(String.valueOf(FILES.PAPER_DIR)) + FILE_SEP + "18874"));
-        Files.createDirectory(files.get(String.valueOf(FILES.PAPER_SUB)));
 
-        files.put(String.valueOf(FILES.PAPER_SUB_FILE), Path.of(files.get(String.valueOf(FILES.PAPER_SUB)) + FILE_SEP + "FileB.pdf"));
-        Files.createFile(files.get(String.valueOf(FILES.PAPER_SUB_FILE)));
+        files.put(FILES.FTP_ZIP, Path.of(files.get(FILES.FTP_DIR) + FILE_SEP + "EDGRAD.BATCH.18873.zip"));
+        Files.createFile(files.get(FILES.FTP_ZIP));
 
-        files.put(String.valueOf(FILES.PAPER_ZIP), Path.of(files.get(String.valueOf(FILES.PAPER_DIR)) + FILE_SEP + "EDGRAD.BATCH.18874.zip"));
-        Files.createFile(files.get(String.valueOf(FILES.PAPER_ZIP)));
+        files.put(FILES.PAPER_SUB, Path.of(files.get(FILES.PAPER_DIR) + FILE_SEP + "18874"));
+        Files.createDirectory(files.get(FILES.PAPER_SUB));
 
-        Files.setLastModifiedTime(files.get(String.valueOf(FILES.FTP_SUB_FILE)), expiry);
-        Files.setLastModifiedTime(files.get(String.valueOf(FILES.FTP_SUB)), expiry);
-        Files.setLastModifiedTime(files.get(String.valueOf(FILES.FTP_DIR)), expiry);
-        Files.setLastModifiedTime(files.get(String.valueOf(FILES.PAPER_ZIP)), expiry);
-        Files.setLastModifiedTime(files.get(String.valueOf(FILES.PAPER_DIR)), expiry);
-        Files.setLastModifiedTime(files.get(String.valueOf(FILES.BATCH_DIR)), expiry);
+        files.put(FILES.PAPER_SUB_FILE, Path.of(files.get(FILES.PAPER_SUB) + FILE_SEP + "FileB.pdf"));
+        Files.createFile(files.get(FILES.PAPER_SUB_FILE));
+
+        files.put(FILES.PAPER_ZIP, Path.of(files.get(FILES.PAPER_DIR) + FILE_SEP + "EDGRAD.BATCH.18874.zip"));
+        Files.createFile(files.get(FILES.PAPER_ZIP));
+
+        Files.setLastModifiedTime(files.get(FILES.FTP_SUB_FILE), expiry);
+        Files.setLastModifiedTime(files.get(FILES.FTP_SUB), expiry);
+        Files.setLastModifiedTime(files.get(FILES.FTP_DIR), expiry);
+        Files.setLastModifiedTime(files.get(FILES.PAPER_ZIP), expiry);
+        Files.setLastModifiedTime(files.get(FILES.PAPER_DIR), expiry);
+        Files.setLastModifiedTime(files.get(FILES.BATCH_DIR), expiry);
     }
 
 }
