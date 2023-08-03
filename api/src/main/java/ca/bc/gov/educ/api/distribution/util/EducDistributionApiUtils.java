@@ -34,7 +34,7 @@ public class EducDistributionApiUtils {
 	public static final String USERDISTOC = "USERDISTOC";
 	public static final String YEARENDDIST = "YEARENDDIST";
 	public static final String MONTHLYDIST = "MONTHLYDIST";
-	public static final String NONGRADDIST = "NONGRADDIST";
+	public static final String NONGRADYERUN = "NONGRADYERUN";
 	public static final String SUPPDIST = "SUPPDIST";
 	public static final String DISTREP_YE_SD = "DISTREP_YE_SD";
 	public static final String DISTREP_YE_SC = "DISTREP_YE_SC";

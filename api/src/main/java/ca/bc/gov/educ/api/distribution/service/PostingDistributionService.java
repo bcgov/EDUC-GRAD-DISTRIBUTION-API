@@ -54,22 +54,11 @@ public class PostingDistributionService {
         String download = distributionResponse.getLocalDownload();
         String transmissionMode = distributionResponse.getTransmissionMode();
         int numberOfPdfs = distributionResponse.getNumberOfPdfs();
-        boolean forAllSchools = true;
         List<String> districtCodes = extractDistrictCodes(distributionResponse);
-        List<String> mincodes = extractSchoolCodes(distributionResponse);
-        if(NONGRADDIST.equalsIgnoreCase(activityCode)) {
-            if(!districtCodes.isEmpty()) {
-                forAllSchools = false;
-                createDistrictSchoolYearEndNonGradReport(null, NONGRADDISTREP_SD, null, districtCodes);
-            }
-            if(!mincodes.isEmpty()) {
-                forAllSchools = false;
-                createDistrictSchoolYearEndNonGradReport(null, null, DISTREP_YE_SC, mincodes);
-            }
-            if(forAllSchools) {
-                createDistrictSchoolYearEndNonGradReport(null, NONGRADDISTREP_SD, null);
-            }
-            numberOfPdfs += processDistrictSchoolDistribution(batchId, null, NONGRADDISTREP_SD, DISTREP_YE_SC, transmissionMode);
+        if(NONGRADYERUN.equalsIgnoreCase(activityCode) && !districtCodes.isEmpty()) {
+            createDistrictSchoolYearEndNonGradReport(null, NONGRADDISTREP_SD, null, districtCodes);
+            numberOfPdfs += processDistrictSchoolDistribution(batchId, null, NONGRADDISTREP_SD, null, transmissionMode);
+            // GRAD2-2264: removed the redundant logic of NONGRADDISTREP_SC because schools are already processed in YearEndMergeProcess
         }
         return zipBatchDirectory(batchId, download, numberOfPdfs, TMP_DIR);
     }
@@ -343,10 +332,6 @@ public class PostingDistributionService {
 
     private List<String> extractDistrictCodes(DistributionResponse distributionResponse) {
         return distributionResponse.getDistricts().stream().map(School::getMincode).toList();
-    }
-
-    private List<String> extractSchoolCodes(DistributionResponse distributionResponse) {
-        return distributionResponse.getSchools().stream().map(School::getMincode).toList();
     }
 
 }
