@@ -1,6 +1,8 @@
 package ca.bc.gov.educ.api.distribution.util;
 
 import ca.bc.gov.educ.api.distribution.config.EducDistributionApiConfig;
+import org.apache.commons.io.FileUtils;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -11,11 +13,8 @@ import java.nio.file.*;
 import java.nio.file.attribute.FileTime;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-
-import static org.assertj.core.api.FactoryBasedNavigableListAssert.assertThat;
 
 public class CacheClearingTest {
 
@@ -37,7 +36,7 @@ public class CacheClearingTest {
 
     private String tmpDir;
     private final String FILE_SEP = File.separator;
-    private Map<FILES, Path> files = new HashMap<>();
+    private final Map<FILES, Path> files = new HashMap<>();
 
     @Before
     public void createCache() throws IOException {
@@ -51,27 +50,20 @@ public class CacheClearingTest {
         }
     }
 
-/*    @Test
-    public void testPathFileFilter() {
-        String filter = "{hsperf*,undertow*,.nfs*,.java*,.nfs*,Batch,FTP,PAPER}";
-        PathMatcher pathMatcher = FileSystems.getDefault().getPathMatcher("glob:" + filter);
-        Path hsperf = this.files.get(FILES.HSPERF);
-        System.out.println(hsperf.toString());
-        System.out.println(hsperf.getFileName());
-        for(Map.Entry<FILES, Path> entry : this.files.entrySet()){
-            System.out.println(entry.getValue().getFileName() + ((pathMatcher.matches(entry.getValue().getFileName())) ? " Matches! " : " Does not match."));
-        }
-        Assert.assertTrue(pathMatcher.matches(hsperf.getFileName()));
-    }*/
+    @After
+    public void removeCache() throws IOException {
+        Path tmp = Paths.get(tmpDir);
+        FileUtils.deleteDirectory(tmp.toFile());
+    }
+
 
     @Test
-    public void testFilesAreExpiredButShouldNotBeDeleted() throws IOException {
+    public void testFilesAreExpiredButShouldNotBeDeleted() {
         for(Map.Entry<FILES, Path> entry : this.files.entrySet()){
             FILES f = entry.getKey();
             if(f != FILES.FTP_SUB &&
                 f != FILES.FTP_SUB_FILE &&
                 f != FILES.FTP_ZIP &&
-                f != FILES.PAPER_SUB &&
                 f != FILES.PAPER_SUB &&
                 f != FILES.PAPER_SUB_FILE &&
                 f != FILES.PAPER_ZIP){
@@ -81,13 +73,24 @@ public class CacheClearingTest {
     }
 
     @Test
-    public void testFilesAreExpiredButShouldBeDeleted() throws IOException {
-        Assert.assertTrue(true);
+    public void testFilesAreExpiredAndShouldBeDeleted() {
+        for(Map.Entry<FILES, Path> entry : this.files.entrySet()){
+            FILES f = entry.getKey();
+            if(f == FILES.FTP_SUB_FILE ||
+                f == FILES.PAPER_ZIP){
+                Assert.assertFalse(Files.exists(entry.getValue()));
+            }
+        }
     }
 
     @Test
-    public void testFilesAreNotDeletedThatShouldNotBeDeleted() throws IOException {
-        Assert.assertTrue(true);
+    public void testFilesAreNotExpiredThatShouldNotBeDeleted() {
+        for(Map.Entry<FILES, Path> entry : this.files.entrySet()){
+            FILES f = entry.getKey();
+            if(f == FILES.FTP_ZIP || f == FILES.PAPER_SUB || f == FILES.PAPER_SUB_FILE){
+                Assert.assertTrue(Files.exists(entry.getValue()));
+            }
+        }
     }
 
     private void createTmpCacheFiles() throws IOException {

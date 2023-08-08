@@ -11,7 +11,6 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.List;
 
 public class DeleteExpiredFilesFileVisitorImpl implements FileVisitor<Path> {
 
@@ -31,7 +30,7 @@ public class DeleteExpiredFilesFileVisitorImpl implements FileVisitor<Path> {
     @Override
     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
         if(fileOrDirectoryIsExpired(file)){
-            logger.info("Deleting: {}", file.getFileName());
+            logger.debug("Deleting: {}", file.getFileName());
             Files.delete(file);
         }
         return FileVisitResult.CONTINUE;
@@ -45,7 +44,7 @@ public class DeleteExpiredFilesFileVisitorImpl implements FileVisitor<Path> {
     @Override
     public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
         if(fileOrDirectoryIsExpired(dir)){
-            logger.info("Deleting: {}", dir.getFileName());
+            logger.debug("Deleting: {}", dir.getFileName());
             FileUtils.deleteDirectory(dir.toFile());
         }
         return FileVisitResult.CONTINUE;
