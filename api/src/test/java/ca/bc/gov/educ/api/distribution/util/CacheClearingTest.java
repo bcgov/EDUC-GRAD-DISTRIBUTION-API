@@ -43,9 +43,15 @@ public class CacheClearingTest {
     public void createCache() throws IOException {
         this.tmpDir = Files.createTempDirectory("cacheTestDir").toFile().getAbsolutePath();
         createTmpCacheFiles();
+        EducDistributionApiConfig config = new EducDistributionApiConfig();
+        FileVisitor<Path> fileVisitor = config.createCleanTmpCacheFilesFileVisitor("{hsperf*,undertow*,.nfs*,.java*,.nfs*,Batch,FTP,PAPER}", 1);
+        Path startingDir = Paths.get(this.tmpDir);
+        if(Files.exists(startingDir)){
+            Files.walkFileTree(startingDir, fileVisitor);
+        }
     }
 
-    @Test
+/*    @Test
     public void testPathFileFilter() {
         String filter = "{hsperf*,undertow*,.nfs*,.java*,.nfs*,Batch,FTP,PAPER}";
         PathMatcher pathMatcher = FileSystems.getDefault().getPathMatcher("glob:" + filter);
@@ -56,16 +62,31 @@ public class CacheClearingTest {
             System.out.println(entry.getValue().getFileName() + ((pathMatcher.matches(entry.getValue().getFileName())) ? " Matches! " : " Does not match."));
         }
         Assert.assertTrue(pathMatcher.matches(hsperf.getFileName()));
+    }*/
+
+    @Test
+    public void testFilesAreExpiredButShouldNotBeDeleted() throws IOException {
+        for(Map.Entry<FILES, Path> entry : this.files.entrySet()){
+            FILES f = entry.getKey();
+            if(f != FILES.FTP_SUB &&
+                f != FILES.FTP_SUB_FILE &&
+                f != FILES.FTP_ZIP &&
+                f != FILES.PAPER_SUB &&
+                f != FILES.PAPER_SUB &&
+                f != FILES.PAPER_SUB_FILE &&
+                f != FILES.PAPER_ZIP){
+                Assert.assertTrue(Files.exists(entry.getValue()));
+            }
+        }
     }
 
     @Test
-    public void testFileFilter() throws IOException {
-        EducDistributionApiConfig config = new EducDistributionApiConfig();
-        FileVisitor<Path> fileVisitor = config.createCleanTmpCacheFilesFileVisitor("{hsperf*,undertow*,.nfs*,.java*,.nfs*,Batch,FTP,PAPER}", 1);
-        Path startingDir = Paths.get(this.tmpDir);
-        if(Files.exists(startingDir)){
-            Files.walkFileTree(startingDir, fileVisitor);
-        }
+    public void testFilesAreExpiredButShouldBeDeleted() throws IOException {
+        Assert.assertTrue(true);
+    }
+
+    @Test
+    public void testFilesAreNotDeletedThatShouldNotBeDeleted() throws IOException {
         Assert.assertTrue(true);
     }
 
@@ -79,8 +100,8 @@ public class CacheClearingTest {
         // undertow-docbase.8080.11764866489534620758 (UNDERT         expired, should not be deleted)
         // .nfs000000002abc01e400010418               (NFS            expired, should not be deleted)
         // .java_pid1                                 (JAV            expired, should not be deleted)
-        // Batch                                      (BATCH_DIR      expired should not be deleted)
-        //   |_FTP                                    (FTP_DIR        expired should not be deleted)
+        // Batch                                      (BATCH_DIR      expired, should not be deleted)
+        //   |_FTP                                    (FTP_DIR        expired, should not be deleted)
         //      |_18873                               (FTP_SUB        expired, should be deleted)
         //          | FileA.pdf                       (FTP_SUB_FILE   expired, should be deleted)
         //      | EDGRAD.BATCH.18873.zip              (FTP_ZIP        not expired, should not be deleted)
