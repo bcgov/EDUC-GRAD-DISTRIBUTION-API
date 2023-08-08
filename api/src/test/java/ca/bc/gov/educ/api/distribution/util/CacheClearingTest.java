@@ -45,7 +45,7 @@ public class CacheClearingTest {
         EducDistributionApiConfig config = new EducDistributionApiConfig();
         FileVisitor<Path> fileVisitor = config.createCleanTmpCacheFilesFileVisitor("{hsperf*,undertow*,.nfs*,.java*,.nfs*,Batch,FTP,PAPER}", 1);
         Path startingDir = Paths.get(this.tmpDir);
-        if(Files.exists(startingDir)){
+        if (Files.exists(startingDir)) {
             Files.walkFileTree(startingDir, fileVisitor);
         }
     }
@@ -59,14 +59,14 @@ public class CacheClearingTest {
 
     @Test
     public void testFilesAreExpiredButShouldNotBeDeleted() {
-        for(Map.Entry<FILES, Path> entry : this.files.entrySet()){
+        for (Map.Entry<FILES, Path> entry : this.files.entrySet()) {
             FILES f = entry.getKey();
-            if(f != FILES.FTP_SUB &&
-                f != FILES.FTP_SUB_FILE &&
-                f != FILES.FTP_ZIP &&
-                f != FILES.PAPER_SUB &&
-                f != FILES.PAPER_SUB_FILE &&
-                f != FILES.PAPER_ZIP){
+            if (f != FILES.FTP_SUB &&
+                    f != FILES.FTP_SUB_FILE &&
+                    f != FILES.FTP_ZIP &&
+                    f != FILES.PAPER_SUB &&
+                    f != FILES.PAPER_SUB_FILE &&
+                    f != FILES.PAPER_ZIP) {
                 Assert.assertTrue(Files.exists(entry.getValue()));
             }
         }
@@ -74,10 +74,10 @@ public class CacheClearingTest {
 
     @Test
     public void testFilesAreExpiredAndShouldBeDeleted() {
-        for(Map.Entry<FILES, Path> entry : this.files.entrySet()){
+        for (Map.Entry<FILES, Path> entry : this.files.entrySet()) {
             FILES f = entry.getKey();
-            if(f == FILES.FTP_SUB_FILE ||
-                f == FILES.PAPER_ZIP){
+            if (f == FILES.FTP_SUB_FILE ||
+                    f == FILES.PAPER_ZIP) {
                 Assert.assertFalse(Files.exists(entry.getValue()));
             }
         }
@@ -85,9 +85,9 @@ public class CacheClearingTest {
 
     @Test
     public void testFilesAreNotExpiredThatShouldNotBeDeleted() {
-        for(Map.Entry<FILES, Path> entry : this.files.entrySet()){
+        for (Map.Entry<FILES, Path> entry : this.files.entrySet()) {
             FILES f = entry.getKey();
-            if(f == FILES.FTP_ZIP || f == FILES.PAPER_SUB || f == FILES.PAPER_SUB_FILE){
+            if (f == FILES.FTP_ZIP || f == FILES.PAPER_SUB || f == FILES.PAPER_SUB_FILE) {
                 Assert.assertTrue(Files.exists(entry.getValue()));
             }
         }
@@ -129,7 +129,7 @@ public class CacheClearingTest {
         Files.setLastModifiedTime(files.get(FILES.NFS), expiry);
         Files.setLastModifiedTime(files.get(FILES.JAV), expiry);
 
-        files.put(FILES.BATCH_DIR, Paths.get(tmpDir + FILE_SEP  + "Batch"));
+        files.put(FILES.BATCH_DIR, Paths.get(tmpDir + FILE_SEP + "Batch"));
         files.put(FILES.FTP_DIR, Paths.get(files.get(FILES.BATCH_DIR) + FILE_SEP + "FTP"));
         files.put(FILES.PAPER_DIR, Paths.get(files.get(FILES.BATCH_DIR) + FILE_SEP + "PAPER"));
         Files.createDirectory(files.get(FILES.BATCH_DIR));
