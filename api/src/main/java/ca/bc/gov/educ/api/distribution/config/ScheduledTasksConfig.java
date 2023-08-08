@@ -1,45 +1,48 @@
 package ca.bc.gov.educ.api.distribution.config;
 
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
-import ca.bc.gov.educ.api.distribution.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.Scheduled;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Arrays;
-import java.util.List;
+import java.io.IOException;
+import java.nio.file.FileVisitor;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @Configuration
 public class ScheduledTasksConfig {
 
     private static final Logger logger = LoggerFactory.getLogger(ScheduledTasksConfig.class);
 
-    FileFilter fileFilter;
+    EducDistributionApiConstants educDistributionApiConstants;
+    FileVisitor<Path> fileVisitor;
 
     @Autowired
-    public ScheduledTasksConfig(FileFilter fileFilter) {
-        this.fileFilter = fileFilter;
+    public ScheduledTasksConfig(@Qualifier("TmpCacheFileVisitor") FileVisitor<Path> fileVisitor, EducDistributionApiConstants educDistributionApiConstants) {
+        this.fileVisitor = fileVisitor;
+        this.educDistributionApiConstants = educDistributionApiConstants;
     }
 
+    /**
+     * Removes artifacts from the /tmp directory that are expired
+     */
     @Scheduled(cron = "${scheduler.clean-tmp-cache-cron}")
     public void cleanTmpCacheFiles() {
-        File dir = new File(EducDistributionApiConstants.TMP_DIR);
-        List<File> files = Arrays.asList(dir.listFiles(this.fileFilter));
-        LocalDateTime fileExpiry = LocalDateTime.now().minusHours(3);
-        files.forEach(file -> {
-            LocalDateTime lastModified = LocalDateTime.ofInstant(Instant.ofEpochMilli(file.lastModified()), ZoneId.systemDefault());
-            if(lastModified.isBefore(fileExpiry)){
-                logger.debug("Removing file or directory: {}", file.getName());
-                IOUtils.removeFileOrDirectory(file);
+        logger.debug("Running clean cache...");
+        Path startingDir = Paths.get(educDistributionApiConstants.TMP_DIR);
+        if(Files.exists(startingDir)){
+            try {
+                Files.walkFileTree(startingDir, fileVisitor);
+            } catch (IOException e) {
+                logger.error("ScheduledTasksConfig: There was an error removing file cache: {}", e.getLocalizedMessage());
             }
-        });
+        }
     }
+
 
 }

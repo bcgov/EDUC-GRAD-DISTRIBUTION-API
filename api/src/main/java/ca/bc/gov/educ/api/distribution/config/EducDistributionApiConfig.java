@@ -1,6 +1,8 @@
 package ca.bc.gov.educ.api.distribution.config;
 
+import ca.bc.gov.educ.api.distribution.util.DeleteExpiredFilesFileVisitorImpl;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,7 +13,8 @@ import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
 
-import java.io.FileFilter;
+import java.nio.file.*;
+import java.time.LocalDateTime;
 
 @Configuration
 @IntegrationComponentScan
@@ -39,16 +42,8 @@ public class EducDistributionApiConfig {
         return builder.build();
     }
 
-
-    @Bean
-    public FileFilter createFileFilter(){
-        return pathname -> {
-            String name = pathname.getName();
-            return !name.startsWith(".") &&
-                    !name.contains("undertow") &&
-                    !name.contains("hsperfdata");
-        };
+    @Bean("TmpCacheFileVisitor")
+    public FileVisitor<Path> createCleanTmpCacheFilesFileVisitor(@Value("${scheduler.clean-tmp-cache-filter}") String filter, @Value("${scheduler.clean-tmp-cache-interval-in-days}") int days) {
+        return new DeleteExpiredFilesFileVisitorImpl(filter, LocalDateTime.now().minusDays(days));
     }
-
-    
 }
