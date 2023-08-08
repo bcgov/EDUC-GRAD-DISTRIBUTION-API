@@ -1,5 +1,6 @@
 package ca.bc.gov.educ.api.distribution.util;
 
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +46,7 @@ public class DeleteExpiredFilesFileVisitorImpl implements FileVisitor<Path> {
     public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
         if(fileOrDirectoryIsExpired(dir)){
             logger.info("Deleting: {}", dir.getFileName());
-            Files.delete(dir);
+            FileUtils.deleteDirectory(dir.toFile());
         }
         return FileVisitResult.CONTINUE;
     }
