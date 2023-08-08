@@ -29,11 +29,12 @@ public class ScheduledTasksConfig {
     }
 
     /**
-     * Removes artifacts from the /tmp/Batch directory that are expired
+     * Removes artifacts from the /tmp directory that are expired
      */
     @Scheduled(cron = "${scheduler.clean-tmp-cache-cron}")
     public void cleanTmpCacheFiles() {
-        Path startingDir = Paths.get(educDistributionApiConstants.getCleanTmpCacheBaseDir());
+        logger.debug("Running clean cache...");
+        Path startingDir = Paths.get(educDistributionApiConstants.TMP_DIR);
         if(Files.exists(startingDir)){
             try {
                 Files.walkFileTree(startingDir, fileVisitor);

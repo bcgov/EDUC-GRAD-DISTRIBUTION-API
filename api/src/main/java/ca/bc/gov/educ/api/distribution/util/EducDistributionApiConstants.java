@@ -5,8 +5,6 @@ import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-
 @Component
 @Getter
 @Setter
@@ -173,10 +171,7 @@ public class EducDistributionApiConstants {
     @Value("${scheduler.clean-tmp-cache-interval-in-days}")
     private int cleanTmpCacheIntervalInDays;
 
-    @Value("${scheduler.clean-tmp-cache-base-dir}")
-    private String cleanTmpCacheBaseDir;
-
-    @Value("${scheduler.clean-tmp-cache-ignore}")
-    private String[] cleanTmpCacheIgnore;
+    @Value("${scheduler.clean-tmp-cache-filter}")
+    private String cleanTmpCacheFilter;
 
 }

@@ -170,12 +170,10 @@ splunk:
     enabled: ${ENABLE_SPLUNK_LOG_HELPER}
 
 scheduler:
+  # how often to check for expired files
   clean-tmp-cache-cron: ${CLEAN_TMP_CACHE_CRON}
-  clean-tmp-cache-interval-in-days: 5
-  clean-tmp-cache-base-dir: /tmp/Batch
-  clean-tmp-cache-ignore:
-    - batch
-    - psi
-    - ftp
-    - paper
+  # the age in days of files that are considered 'expired'
+  clean-tmp-cache-interval-in-days: ${CLEAN_TMP_CACHE_INTERVAL}
+  # a glob filter to ignore certain files or directories
+  clean-tmp-cache-filter: ${CLEAN_TEMP_CACHE_FILTER}
 
