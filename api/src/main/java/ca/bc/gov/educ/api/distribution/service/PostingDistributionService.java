@@ -30,6 +30,7 @@ import java.util.zip.ZipOutputStream;
 
 import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants.*;
 import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils.*;
+import static java.nio.file.Files.createDirectories;
 
 @Service
 public class PostingDistributionService {
@@ -55,7 +56,7 @@ public class PostingDistributionService {
         String transmissionMode = distributionResponse.getTransmissionMode();
         int numberOfPdfs = distributionResponse.getNumberOfPdfs();
         List<String> districtCodes = extractDistrictCodes(distributionResponse);
-        if(NONGRADYERUN.equalsIgnoreCase(activityCode) && !districtCodes.isEmpty()) {
+        if (NONGRADYERUN.equalsIgnoreCase(activityCode) && !districtCodes.isEmpty()) {
             createDistrictSchoolYearEndNonGradReport(null, NONGRADDISTREP_SD, null, districtCodes);
             numberOfPdfs += processDistrictSchoolDistribution(batchId, null, NONGRADDISTREP_SD, null, transmissionMode);
             // GRAD2-2264: removed the redundant logic of NONGRADDISTREP_SC because schools are already processed in YearEndMergeProcess
@@ -74,7 +75,10 @@ public class PostingDistributionService {
 
     private void createZipFile(Long batchId, String pathToZip) {
         StringBuilder sourceFileBuilder = new StringBuilder().append(pathToZip).append(DEL).append(batchId);
-        try (FileOutputStream fos = new FileOutputStream(pathToZip + "/EDGRAD.BATCH." + batchId + ".zip")) {
+        Path path = Paths.get(sourceFileBuilder.toString());
+        try {
+            if (!Files.exists(path)) { createDirectories(path); }
+            FileOutputStream fos = new FileOutputStream(pathToZip + "/EDGRAD.BATCH." + batchId + ".zip");
             ZipOutputStream zipOut = new ZipOutputStream(fos);
             File fileToZip = new File(sourceFileBuilder.toString());
             EducDistributionApiUtils.zipFile(fileToZip, fileToZip.getName(), zipOut);
@@ -96,7 +100,7 @@ public class PostingDistributionService {
     }
 
     public Integer createDistrictSchoolSuppReport(String schooLabelReportType, String districtReportType, String schoolReportType) {
-        return restService.executeGet(educDistributionApiConstants.getSchoolDistrictSupplementalReport(), Integer.class, schooLabelReportType, districtReportType, schoolReportType );
+        return restService.executeGet(educDistributionApiConstants.getSchoolDistrictSupplementalReport(), Integer.class, schooLabelReportType, districtReportType, schoolReportType);
     }
 
     public Integer createDistrictSchoolMonthReport(String schooLabelReportType, String districtReportType, String schoolReportType) {
@@ -108,23 +112,23 @@ public class PostingDistributionService {
         Integer reportCount = 0;
         String url = String.format(educDistributionApiConstants.getSchoolLabelsReport(), schooLabelReportType);
         List<School> processSchools = new ArrayList<>();
-        if(StringUtils.equalsIgnoreCase(ADDRESS_LABEL_SCHL, schooLabelReportType)) {
-           for(School s: schools) {
-                if(s.getMincode().length() > 3) {
+        if (StringUtils.equalsIgnoreCase(ADDRESS_LABEL_SCHL, schooLabelReportType)) {
+            for (School s : schools) {
+                if (s.getMincode().length() > 3) {
                     processSchools.add(s);
                 }
             }
         }
-        if(StringUtils.equalsIgnoreCase(ADDRESS_LABEL_YE, schooLabelReportType)) {
-            for(School s: schools) {
-                if(s.getMincode().length() == 3) {
+        if (StringUtils.equalsIgnoreCase(ADDRESS_LABEL_YE, schooLabelReportType)) {
+            for (School s : schools) {
+                if (s.getMincode().length() == 3) {
                     processSchools.add(s);
                 }
             }
         }
-        if(StringUtils.equalsIgnoreCase(ADDRESS_LABEL_PSI, schooLabelReportType)) {
-            for(School s: schools) {
-                if(s.getMincode().length() <= 3) {
+        if (StringUtils.equalsIgnoreCase(ADDRESS_LABEL_PSI, schooLabelReportType)) {
+            for (School s : schools) {
+                if (s.getMincode().length() <= 3) {
                     processSchools.add(s);
                 }
             }
@@ -289,7 +293,8 @@ public class PostingDistributionService {
     protected void uploadSchoolReportDocuments(Long batchId, String reportType, String mincode, String schoolCategory, String transmissionMode, byte[] gradReportPdf) {
         boolean isDistrict = ADDRESS_LABEL_YE.equalsIgnoreCase(reportType) || DISTREP_YE_SD.equalsIgnoreCase(reportType) || NONGRADDISTREP_SD.equalsIgnoreCase(reportType);
         String districtCode = getDistrictCodeFromMincode(mincode);
-        if(StringUtils.isNotBlank(transmissionMode) && TRANSMISSION_MODE_FTP.equalsIgnoreCase(transmissionMode)) return;
+        if (StringUtils.isNotBlank(transmissionMode) && TRANSMISSION_MODE_FTP.equalsIgnoreCase(transmissionMode))
+            return;
         String rootDirectory = StringUtils.containsAnyIgnoreCase(transmissionMode, TRANSMISSION_MODE_PAPER, TRANSMISSION_MODE_FTP) ? TMP_DIR + EducDistributionApiConstants.FILES_FOLDER_STRUCTURE + StringUtils.upperCase(transmissionMode) : TMP_DIR;
         boolean schoolLevelFolders = StringUtils.containsAnyIgnoreCase(schoolCategory, "02", "03", "09") || MONTHLYDIST.equalsIgnoreCase(transmissionMode) || SUPPDIST.equalsIgnoreCase(transmissionMode);
         try {
@@ -304,7 +309,7 @@ public class PostingDistributionService {
                 fileLocBuilder.append(rootDirectory).append(DEL).append(batchId).append(DEL).append(districtCode).append(DEL).append(mincode);
             }
             Path path = Paths.get(fileLocBuilder.toString());
-            Files.createDirectories(path);
+            createDirectories(path);
             StringBuilder fileNameBuilder = new StringBuilder();
             if (isDistrict) {
                 fileNameBuilder.append(rootDirectory).append(DEL).append(batchId).append(DEL).append(districtCode);
