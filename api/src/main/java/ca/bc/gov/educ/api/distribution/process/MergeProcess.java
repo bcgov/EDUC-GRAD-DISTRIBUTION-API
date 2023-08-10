@@ -18,9 +18,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.sql.Date;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -220,7 +218,7 @@ public class MergeProcess extends BaseProcess {
 			std.setPen(pen);
 			std.setGrade(scd.getStudentGrade());
 			std.setGradProgram(scd.getProgram());
-			std.setLastUpdateDate(Date.from(scd.getLastUpdateDate().atZone(ZoneId.systemDefault()).toInstant()));
+			std.setLastUpdateDate(scd.getLastUpdateDate());
 			std.setGraduationData(new GraduationData());
 			std.setNonGradReasons(getNonGradReasons(scd.getNonGradReasons()));
 
