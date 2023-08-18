@@ -55,8 +55,9 @@ public class PostingDistributionService {
         String transmissionMode = distributionResponse.getTransmissionMode();
         int numberOfPdfs = distributionResponse.getNumberOfPdfs();
         List<String> districtCodes = extractDistrictCodes(distributionResponse);
-        if(NONGRADYERUN.equalsIgnoreCase(activityCode) && !districtCodes.isEmpty()) {
-            createDistrictSchoolYearEndNonGradReport(null, NONGRADDISTREP_SD, null, districtCodes);
+        if (NONGRADYERUN.equalsIgnoreCase(activityCode) && !districtCodes.isEmpty()) {
+            createDistrictSchoolYearEndNonGradReport(null, NONGRADDISTREP_SD, null,
+                distributionResponse.getDistrictSchools().isEmpty()? districtCodes : distributionResponse.getDistrictSchools());
             numberOfPdfs += processDistrictSchoolDistribution(batchId, null, NONGRADDISTREP_SD, null, transmissionMode);
             // GRAD2-2264: removed the redundant logic of NONGRADDISTREP_SC because schools are already processed in YearEndMergeProcess
         }
