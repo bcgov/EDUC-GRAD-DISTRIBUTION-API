@@ -145,6 +145,7 @@ public class YearEndMergeProcess extends MergeProcess {
         response.getSchools().addAll(schoolsForLabels);
         response.getDistricts().addAll(districtsForLabels);
         response.setStudentSearchRequest(searchRequest);
+        response.getDistrictSchools().addAll(mapDist.keySet());
         processorData.setDistributionResponse(response);
         return processorData;
     }
