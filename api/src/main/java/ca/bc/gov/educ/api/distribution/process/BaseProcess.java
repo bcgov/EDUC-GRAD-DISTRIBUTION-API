@@ -4,6 +4,7 @@ import ca.bc.gov.educ.api.distribution.model.dto.*;
 import ca.bc.gov.educ.api.distribution.service.*;
 import ca.bc.gov.educ.api.distribution.util.*;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pdfbox.io.MemoryUsageSetting;
 import org.apache.pdfbox.multipdf.PDFMergerUtility;
@@ -168,7 +169,7 @@ public abstract class BaseProcess implements DistributionProcess {
         schools.add(school);
     }
 
-    protected void processSchoolsForLabels(List<School> schools, String mincode, ExceptionMessage exception) {
+    protected void processSchoolsForLabels(String recipient, List<School> schools, String mincode, ExceptionMessage exception) {
         School existSchool = schools.stream().filter(s -> mincode.equalsIgnoreCase(s.getMincode())).findAny().orElse(null);
         if (existSchool != null) return;
         TraxSchool traxSchool = schoolService.getTraxSchool(mincode, exception);
@@ -176,7 +177,7 @@ public abstract class BaseProcess implements DistributionProcess {
             School school = new School();
             school.setMincode(traxSchool.getMinCode());
             school.setName(traxSchool.getSchoolName());
-            school.setTypeBanner("PRINCIPAL");
+            school.setTypeBanner(ObjectUtils.defaultIfNull(StringUtils.trimToNull(recipient), "PRINCIPAL"));
             Address address = new Address();
             address.setStreetLine1(traxSchool.getAddress1());
             address.setStreetLine2(traxSchool.getAddress2());
@@ -189,7 +190,7 @@ public abstract class BaseProcess implements DistributionProcess {
         }
     }
 
-    protected void processDistrictsForLabels(List<School> schools, String distcode, ExceptionMessage exception) {
+    protected void processDistrictsForLabels(String recipient, List<School> schools, String distcode, ExceptionMessage exception) {
         School existSchool = schools.stream().filter(s -> distcode.equalsIgnoreCase(s.getMincode())).findAny().orElse(null);
         if (existSchool != null) {
             logger.debug("District {} already exists in the district labels", existSchool.getMincode());
@@ -201,7 +202,7 @@ public abstract class BaseProcess implements DistributionProcess {
             School school = new School();
             school.setMincode(traxDistrict.getDistrictNumber());
             school.setName(traxDistrict.getSuperIntendent());
-            school.setTypeBanner("SUPERINTENDENT");
+            school.setTypeBanner(ObjectUtils.defaultIfNull(StringUtils.trimToNull(recipient), "SUPERINTENDENT"));
             Address address = new Address();
             address.setStreetLine1(traxDistrict.getAddress1());
             address.setStreetLine2(traxDistrict.getAddress2());

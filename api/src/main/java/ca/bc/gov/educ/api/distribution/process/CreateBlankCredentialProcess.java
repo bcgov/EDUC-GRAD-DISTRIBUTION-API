@@ -45,7 +45,7 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 			if(schoolDetails != null) {
 				logger.debug("*** School Details Acquired {}", schoolDetails.getSchoolName());
 
-				ReportRequest packSlipReq = reportService.preparePackingSlipData(schoolDetails, processorData.getBatchId());
+				ReportRequest packSlipReq = reportService.preparePackingSlipData(searchRequest.getUser(), schoolDetails, processorData.getBatchId());
 				numberOfPdfs = processYed4Transcript(obj,currentSlipCount,packSlipReq,mincode,processorData,numberOfPdfs);
 				numberOfPdfs = processYed2Certificate(obj,currentSlipCount,packSlipReq,mincode,processorData,numberOfPdfs);
 				numberOfPdfs = processYedbCertificate(obj,currentSlipCount,packSlipReq,mincode,processorData,numberOfPdfs);

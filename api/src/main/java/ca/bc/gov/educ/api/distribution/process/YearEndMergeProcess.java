@@ -50,19 +50,19 @@ public class YearEndMergeProcess extends MergeProcess {
 
                 logger.debug("*** School Details Acquired {} category {}", mincode, schoolCategoryCode);
                 if(StringUtils.containsAnyIgnoreCase(schoolCategoryCode, "02", "03", "09")) {
-                    processSchoolsForLabels(schoolsForLabels, mincode, exception);
+                    processSchoolsForLabels(searchRequest.getUser(), schoolsForLabels, mincode, exception);
                     logger.debug("Added Independent School {} for processing", commonSchool.getSchoolName());
                 } else {
                     // GRAD2-2269: no district for 02,03,09 school category
                     String distcode = getDistrictCodeFromMincode(mincode);
-                    processDistrictsForLabels(districtsForLabels, distcode, exception);
+                    processDistrictsForLabels(searchRequest.getUser(), districtsForLabels, distcode, exception);
                 }
                 logger.debug("{} School {}/{}", mincode, schoolCounter, mapDist.size());
                 List<Student> studListNonGrad = new ArrayList<>();
 
                 DistributionPrintRequest distributionPrintRequest = mapDist.get(mincode);
 
-                ReportRequest packSlipReq = reportService.preparePackingSlipData(getBaseSchoolDetails(distributionPrintRequest, mincode, exception), processorData.getBatchId());
+                ReportRequest packSlipReq = reportService.preparePackingSlipData(searchRequest.getUser(), getBaseSchoolDetails(distributionPrintRequest, mincode, exception), processorData.getBatchId());
                 Pair<Integer, Integer> pV = processTranscriptPrintRequest(distributionPrintRequest, currentSlipCount, packSlipReq, studListNonGrad, processorData, mincode, schoolCategoryCode, numberOfPdfs);
                 currentSlipCount = pV.getLeft();
                 numberOfPdfs = pV.getRight();
@@ -145,6 +145,7 @@ public class YearEndMergeProcess extends MergeProcess {
         response.getSchools().addAll(schoolsForLabels);
         response.getDistricts().addAll(districtsForLabels);
         response.setStudentSearchRequest(searchRequest);
+        response.getDistrictSchools().addAll(mapDist.keySet());
         processorData.setDistributionResponse(response);
         return processorData;
     }
