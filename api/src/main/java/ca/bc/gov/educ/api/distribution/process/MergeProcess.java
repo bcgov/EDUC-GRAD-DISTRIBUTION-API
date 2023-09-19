@@ -59,7 +59,7 @@ public class MergeProcess extends BaseProcess {
 				String schoolCategoryCode = schoolDetails.getSchoolCategoryCode();
 				logger.debug("*** School Details Acquired {} category {}", mincode, schoolCategoryCode);
 				List<Student> studListNonGrad = new ArrayList<>();
-				ReportRequest packSlipReq = reportService.preparePackingSlipData(schoolDetails, processorData.getBatchId());
+				ReportRequest packSlipReq = reportService.preparePackingSlipData(searchRequest.getUser(), schoolDetails, processorData.getBatchId());
 
 				if(distributionPrintRequest.getSchoolDistributionRequest() != null && MONTHLYDIST.equalsIgnoreCase(processorData.getActivityCode())) {
 					ReportRequest schoolDistributionReportRequest = reportService.prepareSchoolDistributionReportData(distributionPrintRequest.getSchoolDistributionRequest(), processorData.getBatchId(),schoolDetails);
@@ -81,7 +81,7 @@ public class MergeProcess extends BaseProcess {
 					createAndSaveNonGradReport(schoolDetails,studListNonGrad,mincode,educDistributionApiConstants.getStudentNonGradProjected());
 				}
 				logger.debug("PDFs Merged {}", schoolDetails.getSchoolName());
-				processSchoolsForLabels(schoolsForLabels, mincode, exception);
+				processSchoolsForLabels(searchRequest.getUser(), schoolsForLabels, mincode, exception);
 				if (counter % 50 == 0) {
 					restUtils.fetchAccessToken(processorData);
 				}

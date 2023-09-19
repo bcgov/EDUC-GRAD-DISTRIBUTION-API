@@ -5,6 +5,7 @@ import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils;
 import ca.bc.gov.educ.api.distribution.util.JsonTransformer;
 import ca.bc.gov.educ.api.distribution.util.RestUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +55,7 @@ public class ReportService {
 		return new InputStreamResource(bis);
 	}
 
-	public ReportRequest preparePackingSlipData(CommonSchool schoolDetails,Long batchId) {
+	public ReportRequest preparePackingSlipData(String recipient, CommonSchool schoolDetails, Long batchId) {
 		School schObj = new School();
 		Address addr = new Address();
 		addr.setStreetLine1(schoolDetails.getScAddressLine1());
@@ -68,7 +69,7 @@ public class ReportService {
 		schObj.setName(schoolDetails.getSchoolName());
 		schObj.setSchlno(schoolDetails.getSchlNo());
 		schObj.setMincode(schoolDetails.getDistNo()+schoolDetails.getSchlNo());
-		return  createObj(batchId,schObj);
+		return  createReportRequest(batchId,schObj,recipient);
 	}
 
 	public ReportRequest preparePackingSlipDataPSI(Psi psiDetails,Long batchId) {
@@ -85,10 +86,10 @@ public class ReportService {
 		schObj.setName(psiDetails.getPsiName());
 		schObj.setSchlno(psiDetails.getPsiCode());
 		schObj.setMincode(schObj.getDistno()+schObj.getSchlno());
-		return createObj(batchId,schObj);
+		return createReportRequest(batchId,schObj, "ADMINISTRATION");
 	}
 
-	private ReportRequest createObj(Long batchId,School schObj) {
+	private ReportRequest createReportRequest(Long batchId, School schObj, String recipient) {
 		ReportRequest req = new ReportRequest();
 		ReportOptions options = new ReportOptions();
 		options.setReportFile("Packing Slip");
@@ -99,7 +100,7 @@ public class ReportService {
 
 		ReportData data = new ReportData();
 		PackingSlip pSlip = new PackingSlip();
-		pSlip.setRecipient("ADMINISTRATION");
+		pSlip.setRecipient(ObjectUtils.defaultIfNull(StringUtils.trimToNull(recipient), "ADMINISTRATION"));
 		pSlip.setOrderNumber(batchId);
 		pSlip.setOrderDate(EducDistributionApiUtils.formatIssueDateForReportJasper(EducDistributionApiUtils.getSimpleDateFormat(new Date())));
 		pSlip.setOrderedBy("SILVER");

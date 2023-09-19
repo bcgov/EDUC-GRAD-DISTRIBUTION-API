@@ -52,7 +52,7 @@ public class SchoolService {
 		fakeSchoolObj.setScAddressLine2("PO BOX 9886 STN PROV GOVT");
 		fakeSchoolObj.setScCity("VICTORIA");
 		fakeSchoolObj.setScProvinceCode("BC");
-		fakeSchoolObj.setScPostalCode("V8W9T6");
+		fakeSchoolObj.setScPostalCode("V8W 9T6");
 		fakeSchoolObj.setScCountryCode("CN");
 		return fakeSchoolObj;
 	}
