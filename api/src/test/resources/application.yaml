@@ -174,5 +174,3 @@ splunk:
 
 scheduler:
   clean-tmp-cache-cron: 0 0 */4 * * *
-  clean-tmp-cache-interval-in-days: 1
-  clean-tmp-cache-filter: '{hsperf*,undertow*,.nfs*,.java*,.nfs*,Batch,FTP,PAPER}'
