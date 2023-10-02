@@ -44,8 +44,9 @@ public class SchoolService {
 	public CommonSchool getDefaultSchoolDetailsForPackingSlip(StudentSearchRequest searchRequest, String properName) {
 		CommonSchool commonSchool = new CommonSchool();
 		Address address = (searchRequest == null || searchRequest.getAddress() == null) ? null : searchRequest.getAddress();
+		String userName = searchRequest == null ? null : searchRequest.getUser();
 		commonSchool.setSchlNo(String.format("%09d" , 0));
-		commonSchool.setSchoolName(ObjectUtils.defaultIfNull(properName, ObjectUtils.defaultIfNull(searchRequest.getUser(), "")));
+		commonSchool.setSchoolName(ObjectUtils.defaultIfNull(properName, ObjectUtils.defaultIfNull(userName, "")));
 		commonSchool.setDistNo(String.format("%03d" , 0));
 		commonSchool.setScAddressLine1(address == null ? "4TH FLOOR 620 SUPERIOR" : address.getStreetLine1());
 		commonSchool.setScAddressLine2(address == null ? "PO BOX 9886 STN PROV GOVT" : address.getStreetLine2());

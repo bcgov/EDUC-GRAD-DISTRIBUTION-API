@@ -57,7 +57,7 @@ public class ReportService {
 
 	public ReportRequest preparePackingSlipData(StudentSearchRequest searchRequest, CommonSchool schoolDetails, Long batchId) {
 		School schObj = new School();
-		boolean useSchoolAddress = searchRequest == null || searchRequest.getAddress() == null;
+		boolean useSchoolAddress = (searchRequest == null || searchRequest.getAddress() == null);
 		Address addr = useSchoolAddress ? new Address() : searchRequest.getAddress();
 		if(useSchoolAddress) {
 			addr.setStreetLine1(schoolDetails.getScAddressLine1());
@@ -72,7 +72,8 @@ public class ReportService {
 		schObj.setName(schoolDetails.getSchoolName());
 		schObj.setSchlno(schoolDetails.getSchlNo());
 		schObj.setMincode(schoolDetails.getDistNo()+schoolDetails.getSchlNo());
-		return  createReportRequest(batchId,schObj, searchRequest.getUser());
+		String userName = searchRequest == null ? "" : searchRequest.getUser();
+		return  createReportRequest(batchId,schObj, userName);
 	}
 
 	public ReportRequest preparePackingSlipDataPSI(Psi psiDetails,Long batchId) {
