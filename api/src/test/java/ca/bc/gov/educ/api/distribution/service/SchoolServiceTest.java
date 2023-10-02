@@ -65,6 +65,32 @@ public class SchoolServiceTest {
     }
 
     @Test
+    public void testGetDefaultSchoolDetails() {
+        String mincode = "123456";
+        CommonSchool commonSchool = new CommonSchool();
+        commonSchool.setSchlNo(mincode);
+        commonSchool.setSchoolName("Test School");
+        commonSchool.setScCity("VANCOUVER");
+
+        StudentSearchRequest searchRequest = new StudentSearchRequest();
+        searchRequest.setUser("Test User");
+        Address address = new Address();
+        address.setCity("VANCOUVER");
+        searchRequest.setAddress(address);
+
+        var response = this.schoolService.getDefaultSchoolDetailsForPackingSlip(searchRequest, "properName");
+        Assert.assertNotNull(response);
+        Assert.assertEquals("VANCOUVER", response.getScCity());
+
+        searchRequest.setUser(null);
+        searchRequest.setAddress(null);
+
+        response = this.schoolService.getDefaultSchoolDetailsForPackingSlip(searchRequest, "properName");
+        Assert.assertNotNull(response);
+        Assert.assertEquals("VICTORIA", response.getScCity());
+    }
+
+    @Test
     public void testGetCommonSchoolDetails_Exception() {
         String mincode = "123456";
         CommonSchool commonSchool = new CommonSchool();
