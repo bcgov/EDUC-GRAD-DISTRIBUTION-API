@@ -1,9 +1,6 @@
 package ca.bc.gov.educ.api.distribution.service;
 
-import ca.bc.gov.educ.api.distribution.model.dto.CommonSchool;
-import ca.bc.gov.educ.api.distribution.model.dto.ExceptionMessage;
-import ca.bc.gov.educ.api.distribution.model.dto.TraxDistrict;
-import ca.bc.gov.educ.api.distribution.model.dto.TraxSchool;
+import ca.bc.gov.educ.api.distribution.model.dto.*;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import org.junit.Assert;
 import org.junit.Test;
@@ -91,7 +88,7 @@ public class SchoolServiceTest {
     @Test
     public void testGetCommonSchoolDetailsForPackingSlip() {
         String properName = "properName";
-        var response = this.schoolService.getCommonSchoolDetailsForPackingSlip(properName);
+        var response = this.schoolService.getDefaultSchoolDetailsForPackingSlip(new StudentSearchRequest(), properName);
         Assert.assertNotNull(response);
     }
 

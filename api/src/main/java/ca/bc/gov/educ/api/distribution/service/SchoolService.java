@@ -1,11 +1,9 @@
 package ca.bc.gov.educ.api.distribution.service;
 
-import ca.bc.gov.educ.api.distribution.model.dto.CommonSchool;
-import ca.bc.gov.educ.api.distribution.model.dto.ExceptionMessage;
-import ca.bc.gov.educ.api.distribution.model.dto.TraxDistrict;
-import ca.bc.gov.educ.api.distribution.model.dto.TraxSchool;
+import ca.bc.gov.educ.api.distribution.model.dto.*;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import ca.bc.gov.educ.api.distribution.util.RestUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,18 +41,19 @@ public class SchoolService {
 		return commonSchool;
 	}
 
-	public CommonSchool getCommonSchoolDetailsForPackingSlip(String properName) {
-		CommonSchool fakeSchoolObj = new CommonSchool();
-		fakeSchoolObj.setSchlNo(String.format("%09d" , 0));
-		fakeSchoolObj.setSchoolName(properName);
-		fakeSchoolObj.setDistNo(String.format("%03d" , 0));
-		fakeSchoolObj.setScAddressLine1("4TH FLOOR 620 SUPERIOR");
-		fakeSchoolObj.setScAddressLine2("PO BOX 9886 STN PROV GOVT");
-		fakeSchoolObj.setScCity("VICTORIA");
-		fakeSchoolObj.setScProvinceCode("BC");
-		fakeSchoolObj.setScPostalCode("V8W 9T6");
-		fakeSchoolObj.setScCountryCode("CN");
-		return fakeSchoolObj;
+	public CommonSchool getDefaultSchoolDetailsForPackingSlip(StudentSearchRequest searchRequest, String properName) {
+		CommonSchool commonSchool = new CommonSchool();
+		Address address = (searchRequest == null || searchRequest.getAddress() == null) ? null : searchRequest.getAddress();
+		commonSchool.setSchlNo(String.format("%09d" , 0));
+		commonSchool.setSchoolName(ObjectUtils.defaultIfNull(properName, ObjectUtils.defaultIfNull(searchRequest.getUser(), "")));
+		commonSchool.setDistNo(String.format("%03d" , 0));
+		commonSchool.setScAddressLine1(address == null ? "4TH FLOOR 620 SUPERIOR" : address.getStreetLine1());
+		commonSchool.setScAddressLine2(address == null ? "PO BOX 9886 STN PROV GOVT" : address.getStreetLine2());
+		commonSchool.setScCity(address == null ? "VICTORIA" : address.getCity());
+		commonSchool.setScProvinceCode(address == null ? "BC" : address.getRegion());
+		commonSchool.setScPostalCode(address == null ? "V8W 9T6" : address.getCode());
+		commonSchool.setScCountryCode(address == null ? "CN" : address.getCountry());
+		return commonSchool;
 	}
 
 	public TraxSchool getTraxSchool(String minCode, ExceptionMessage exception) {

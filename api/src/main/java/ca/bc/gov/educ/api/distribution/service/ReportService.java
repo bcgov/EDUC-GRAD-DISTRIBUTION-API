@@ -55,21 +55,24 @@ public class ReportService {
 		return new InputStreamResource(bis);
 	}
 
-	public ReportRequest preparePackingSlipData(String recipient, CommonSchool schoolDetails, Long batchId) {
+	public ReportRequest preparePackingSlipData(StudentSearchRequest searchRequest, CommonSchool schoolDetails, Long batchId) {
 		School schObj = new School();
-		Address addr = new Address();
-		addr.setStreetLine1(schoolDetails.getScAddressLine1());
-		addr.setStreetLine2(schoolDetails.getScAddressLine2());
-		addr.setCity(schoolDetails.getScCity());
-		addr.setCode(schoolDetails.getScPostalCode());
-		addr.setCountry(schoolDetails.getScCountryCode());
-		addr.setRegion(schoolDetails.getScProvinceCode());
+		boolean useSchoolAddress = searchRequest == null || searchRequest.getAddress() == null;
+		Address addr = useSchoolAddress ? new Address() : searchRequest.getAddress();
+		if(useSchoolAddress) {
+			addr.setStreetLine1(schoolDetails.getScAddressLine1());
+			addr.setStreetLine2(schoolDetails.getScAddressLine2());
+			addr.setCity(schoolDetails.getScCity());
+			addr.setCode(schoolDetails.getScPostalCode());
+			addr.setCountry(schoolDetails.getScCountryCode());
+			addr.setRegion(schoolDetails.getScProvinceCode());
+		}
 		schObj.setAddress(addr);
 		schObj.setDistno(schoolDetails.getDistNo());
 		schObj.setName(schoolDetails.getSchoolName());
 		schObj.setSchlno(schoolDetails.getSchlNo());
 		schObj.setMincode(schoolDetails.getDistNo()+schoolDetails.getSchlNo());
-		return  createReportRequest(batchId,schObj,recipient);
+		return  createReportRequest(batchId,schObj, searchRequest.getUser());
 	}
 
 	public ReportRequest preparePackingSlipDataPSI(Psi psiDetails,Long batchId) {
