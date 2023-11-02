@@ -640,6 +640,7 @@ public class DistributionServiceTest {
         when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
         when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(byte[].class)).thenReturn(Mono.just(bytesSAR));
 
         Mockito.doReturn(getMockResponseObject()).when(this.restUtils).getTokenResponseObject();
