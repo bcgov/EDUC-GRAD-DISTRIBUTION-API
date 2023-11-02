@@ -182,7 +182,7 @@ public class MergeProcess extends BaseProcess {
 		return Pair.of(currentSlipCount,numberOfPdfs);
 	}
 
-	private int processTranscripts(ProcessorData processorData, List<StudentCredentialDistribution> scdList, List<Student> studListNonGrad, List<InputStream> locations) {
+	private int  processTranscripts(ProcessorData processorData, List<StudentCredentialDistribution> scdList, List<Student> studListNonGrad, List<InputStream> locations) {
 		int currentTranscript = 0;
 		int failedToAdd = 0;
 		scdList.sort(Comparator.comparing(StudentCredentialDistribution::getLegalLastName, Comparator.nullsLast(String::compareTo))
