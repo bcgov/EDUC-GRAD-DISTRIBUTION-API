@@ -66,10 +66,6 @@ public class RestService {
                     .onStatus(HttpStatusCode::is5xxServerError,
                             clientResponse -> Mono.error(new ServiceException(getErrorMessage(serviceUrl, ERROR_500), clientResponse.statusCode().value())))
                     .onStatus(
-                            HttpStatus.BAD_REQUEST::equals,
-                            response -> response.bodyToMono(String.class).thenReturn(new ServiceException("BAD_REQUEST", response.statusCode().value()))
-                    )
-                    .onStatus(
                             HttpStatus.NO_CONTENT::equals,
                             response -> response.bodyToMono(String.class).thenReturn(new ServiceException("NO_CONTENT", response.statusCode().value()))
                     )
@@ -83,7 +79,7 @@ public class RestService {
                             }))
                     .block();
         } catch(ServiceException e) {
-            if(HttpStatus.BAD_REQUEST.value() == e.getStatusCode() || HttpStatus.NO_CONTENT.value() == e.getStatusCode()) {
+            if(HttpStatus.NO_CONTENT.value() == e.getStatusCode()) {
                 logger.warn(REST_SERVICE_WARN, "GET", executeUrl, Arrays.toString(params), "", e.getStatusCode());
                 return null;
             }
@@ -112,10 +108,6 @@ public class RestService {
                     .onStatus(HttpStatusCode::is5xxServerError,
                             clientResponse -> Mono.error(new ServiceException(getErrorMessage(serviceUrl, ERROR_500), clientResponse.statusCode().value())))
                     .onStatus(
-                            HttpStatus.BAD_REQUEST::equals,
-                            response -> response.bodyToMono(String.class).thenReturn(new ServiceException("BAD_REQUEST", response.statusCode().value()))
-                    )
-                    .onStatus(
                             HttpStatus.NO_CONTENT::equals,
                             response -> response.bodyToMono(String.class).thenReturn(new ServiceException("NO_CONTENT", response.statusCode().value()))
                     )
@@ -129,7 +121,7 @@ public class RestService {
                             }))
                     .block();
         } catch(ServiceException e) {
-            if(HttpStatus.BAD_REQUEST.value() == e.getStatusCode() || HttpStatus.NO_CONTENT.value() == e.getStatusCode()) {
+            if(HttpStatus.NO_CONTENT.value() == e.getStatusCode()) {
                 logger.warn(REST_SERVICE_WARN, "GET", executeUrl, Arrays.toString(params), "", e.getStatusCode());
                 return null;
             }
@@ -157,10 +149,6 @@ public class RestService {
                     .onStatus(HttpStatusCode::is5xxServerError,
                             clientResponse -> Mono.error(new ServiceException(getErrorMessage(url, ERROR_500), clientResponse.statusCode().value())))
                     .onStatus(
-                            HttpStatus.BAD_REQUEST::equals,
-                            clientResponse -> clientResponse.bodyToMono(String.class).thenReturn(new ServiceException("BAD_REQUEST", clientResponse.statusCode().value()))
-                    )
-                    .onStatus(
                             HttpStatus.NO_CONTENT::equals,
                             clientResponse -> clientResponse.bodyToMono(String.class).thenReturn(new ServiceException("NO_CONTENT", clientResponse.statusCode().value()))
                     )
@@ -172,7 +160,7 @@ public class RestService {
                             }))
                     .block();
         } catch(ServiceException e) {
-            if(HttpStatus.BAD_REQUEST.value() == e.getStatusCode() || HttpStatus.NO_CONTENT.value() == e.getStatusCode()) {
+            if(HttpStatus.NO_CONTENT.value() == e.getStatusCode()) {
                 logger.warn(REST_SERVICE_WARN, "POST", executeUrl, Arrays.toString(params), jsonTransformer.marshall(requestBody), e.getStatusCode());
                 return null;
             }
