@@ -39,11 +39,11 @@ public class CreateReprintProcess extends BaseProcess {
 			counter++;
 			int currentSlipCount = 0;
 			DistributionPrintRequest obj = mapDist.get(mincode);
-			CommonSchool schoolDetails = getBaseSchoolDetails(obj,mincode,exception);
+			CommonSchool schoolDetails = getBaseSchoolDetails(obj, searchRequest, mincode,exception);
 			if(schoolDetails != null) {
 				logger.debug("*** School Details Acquired {}", schoolDetails.getSchoolName());
 
-				ReportRequest packSlipReq = reportService.preparePackingSlipData(searchRequest.getUser(), schoolDetails, processorData.getBatchId());
+				ReportRequest packSlipReq = reportService.preparePackingSlipData(searchRequest, schoolDetails, processorData.getBatchId());
 
 				if(obj.getSchoolDistributionRequest() != null) {
 					ReportRequest schoolDistributionReportRequest = reportService.prepareSchoolDistributionReportData(obj.getSchoolDistributionRequest(), processorData.getBatchId(),schoolDetails);

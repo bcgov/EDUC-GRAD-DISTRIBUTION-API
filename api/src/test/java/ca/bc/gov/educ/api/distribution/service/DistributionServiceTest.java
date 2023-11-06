@@ -775,7 +775,9 @@ public class DistributionServiceTest {
         printRequest.setSchoolDistributionRequest(sdReq);
         mapDist.put(mincode, printRequest);
 
-        mockTraxSchool(mincode);
+        if (!schoolNull) {
+            mockTraxSchool(mincode);
+        }
 
         byte[] bytesSAR = "Any String you want".getBytes();
         when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
@@ -1062,7 +1064,7 @@ public class DistributionServiceTest {
         if (properName == null)
             Mockito.doReturn(schObj).when(schoolService).getCommonSchoolDetails(mincode, exception);
         else
-            Mockito.doReturn(schObj).when(schoolService).getCommonSchoolDetailsForPackingSlip(properName);
+            Mockito.doReturn(schObj).when(schoolService).getDefaultSchoolDetailsForPackingSlip(null, properName);
 
         ProcessorData data = new ProcessorData();
         data.setAccessToken(MOCK_TOKEN);
