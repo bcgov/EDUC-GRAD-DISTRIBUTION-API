@@ -31,6 +31,8 @@ public class RestService {
     private static final String REST_SERVICE_WARN = "Rest service call {} method of {} with params {} and payload: {} returns unexpected result {}";
     private static final String ERROR_500 = "5xx error.";
 
+    private static final String NO_CONTENT = "NO_CONTENT";
+
     private static final String RETRY_MESSAGE = "Service failed to process after max retries.";
 
     private static final String DELETE_REST_SERVICE_ERROR = GET_REST_SERVICE_ERROR;
@@ -67,7 +69,7 @@ public class RestService {
                             clientResponse -> Mono.error(new ServiceException(getErrorMessage(serviceUrl, ERROR_500), clientResponse.statusCode().value())))
                     .onStatus(
                             HttpStatus.NO_CONTENT::equals,
-                            response -> response.bodyToMono(String.class).thenReturn(new ServiceException("NO_CONTENT", response.statusCode().value()))
+                            response -> response.bodyToMono(String.class).thenReturn(new ServiceException(NO_CONTENT, response.statusCode().value()))
                     )
                     .bodyToMono(boundClass)
                     // only does retry if initial error was 5xx as service may be temporarily down
@@ -109,7 +111,7 @@ public class RestService {
                             clientResponse -> Mono.error(new ServiceException(getErrorMessage(serviceUrl, ERROR_500), clientResponse.statusCode().value())))
                     .onStatus(
                             HttpStatus.NO_CONTENT::equals,
-                            response -> response.bodyToMono(String.class).thenReturn(new ServiceException("NO_CONTENT", response.statusCode().value()))
+                            response -> response.bodyToMono(String.class).thenReturn(new ServiceException(NO_CONTENT, response.statusCode().value()))
                     )
                     .bodyToMono(typeReference)
                     // only does retry if initial error was 5xx as service may be temporarily down
@@ -150,7 +152,7 @@ public class RestService {
                             clientResponse -> Mono.error(new ServiceException(getErrorMessage(url, ERROR_500), clientResponse.statusCode().value())))
                     .onStatus(
                             HttpStatus.NO_CONTENT::equals,
-                            clientResponse -> clientResponse.bodyToMono(String.class).thenReturn(new ServiceException("NO_CONTENT", clientResponse.statusCode().value()))
+                            clientResponse -> clientResponse.bodyToMono(String.class).thenReturn(new ServiceException(NO_CONTENT, clientResponse.statusCode().value()))
                     )
                     .bodyToMono(boundClass)
                     .retryWhen(reactor.util.retry.Retry.backoff(3, Duration.ofSeconds(2))
