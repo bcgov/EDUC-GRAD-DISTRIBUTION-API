@@ -54,14 +54,14 @@ public class MergeProcess extends BaseProcess {
 			counter++;
 			int currentSlipCount = 0;
 			DistributionPrintRequest distributionPrintRequest = mapDist.get(mincode);
-			CommonSchool schoolDetails = getBaseSchoolDetails(distributionPrintRequest,mincode,exception);
+			CommonSchool schoolDetails = getBaseSchoolDetails(distributionPrintRequest, searchRequest, mincode,exception);
 			if(schoolDetails != null) {
 				String schoolCategoryCode = schoolDetails.getSchoolCategoryCode();
 				logger.debug("*** School Details Acquired {} category {}", mincode, schoolCategoryCode);
 				List<Student> studListNonGrad = new ArrayList<>();
-				ReportRequest packSlipReq = reportService.preparePackingSlipData(searchRequest.getUser(), schoolDetails, processorData.getBatchId());
+				ReportRequest packSlipReq = reportService.preparePackingSlipData(searchRequest, schoolDetails, processorData.getBatchId());
 
-				if(distributionPrintRequest.getSchoolDistributionRequest() != null && MONTHLYDIST.equalsIgnoreCase(processorData.getActivityCode())) {
+				if(distributionPrintRequest.getSchoolDistributionRequest() != null && StringUtils.equalsAnyIgnoreCase(processorData.getActivityCode(), MONTHLYDIST, SUPPDIST)) {
 					ReportRequest schoolDistributionReportRequest = reportService.prepareSchoolDistributionReportData(distributionPrintRequest.getSchoolDistributionRequest(), processorData.getBatchId(),schoolDetails);
 					createAndSaveDistributionReport(schoolDistributionReportRequest,mincode,schoolCategoryCode,processorData);
 					numberOfPdfs++;

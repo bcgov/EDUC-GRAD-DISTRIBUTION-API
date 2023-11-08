@@ -40,16 +40,16 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 		for (String mincode : mapDist.keySet()) {
 			counter++;
 			int currentSlipCount = 0;
-			DistributionPrintRequest obj = mapDist.get(mincode);
-			CommonSchool schoolDetails = getBaseSchoolDetails(obj,mincode,exception);
+			DistributionPrintRequest distributionPrintRequest = mapDist.get(mincode);
+			CommonSchool schoolDetails = getBaseSchoolDetails(distributionPrintRequest, searchRequest, mincode,exception);
 			if(schoolDetails != null) {
 				logger.debug("*** School Details Acquired {}", schoolDetails.getSchoolName());
 
-				ReportRequest packSlipReq = reportService.preparePackingSlipData(searchRequest.getUser(), schoolDetails, processorData.getBatchId());
-				numberOfPdfs = processYed4Transcript(obj,currentSlipCount,packSlipReq,mincode,processorData,numberOfPdfs);
-				numberOfPdfs = processYed2Certificate(obj,currentSlipCount,packSlipReq,mincode,processorData,numberOfPdfs);
-				numberOfPdfs = processYedbCertificate(obj,currentSlipCount,packSlipReq,mincode,processorData,numberOfPdfs);
-				numberOfPdfs = processYedrCertificate(obj,currentSlipCount,packSlipReq,mincode,processorData,numberOfPdfs);
+				ReportRequest packSlipReq = reportService.preparePackingSlipData(searchRequest, schoolDetails, processorData.getBatchId());
+				numberOfPdfs = processYed4Transcript(distributionPrintRequest,currentSlipCount,packSlipReq,mincode,processorData,numberOfPdfs);
+				numberOfPdfs = processYed2Certificate(distributionPrintRequest,currentSlipCount,packSlipReq,mincode,processorData,numberOfPdfs);
+				numberOfPdfs = processYedbCertificate(distributionPrintRequest,currentSlipCount,packSlipReq,mincode,processorData,numberOfPdfs);
+				numberOfPdfs = processYedrCertificate(distributionPrintRequest,currentSlipCount,packSlipReq,mincode,processorData,numberOfPdfs);
 
 				logger.debug("PDFs Merged {}", schoolDetails.getSchoolName());
 				logger.debug("{} School {}/{}",mincode,counter,mapDist.size());
