@@ -6,7 +6,7 @@
 
     <groupId>ca.bc.gov.educ</groupId>
     <artifactId>educ-grad-distribution-api</artifactId>
-    <version>1.8.51</version>
+    <version>1.8.52</version>
     <name>educ-grad-distribution-api</name>
     <description>Ministry of Education GRAD DISTRIBUTION API</description>
 
