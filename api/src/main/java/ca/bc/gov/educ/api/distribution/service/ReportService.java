@@ -15,10 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.ByteArrayInputStream;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedHashSet;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class ReportService {
@@ -55,21 +52,25 @@ public class ReportService {
 		return new InputStreamResource(bis);
 	}
 
-	public ReportRequest preparePackingSlipData(String recipient, CommonSchool schoolDetails, Long batchId) {
+	public ReportRequest preparePackingSlipData(StudentSearchRequest searchRequest, CommonSchool schoolDetails, Long batchId) {
 		School schObj = new School();
-		Address addr = new Address();
-		addr.setStreetLine1(schoolDetails.getScAddressLine1());
-		addr.setStreetLine2(schoolDetails.getScAddressLine2());
-		addr.setCity(schoolDetails.getScCity());
-		addr.setCode(schoolDetails.getScPostalCode());
-		addr.setCountry(schoolDetails.getScCountryCode());
-		addr.setRegion(schoolDetails.getScProvinceCode());
+		boolean useSchoolAddress = (searchRequest == null || searchRequest.getAddress() == null);
+		Address addr = useSchoolAddress ? new Address() : searchRequest.getAddress();
+		if(useSchoolAddress) {
+			addr.setStreetLine1(schoolDetails.getScAddressLine1());
+			addr.setStreetLine2(schoolDetails.getScAddressLine2());
+			addr.setCity(schoolDetails.getScCity());
+			addr.setCode(schoolDetails.getScPostalCode());
+			addr.setCountry(schoolDetails.getScCountryCode());
+			addr.setRegion(schoolDetails.getScProvinceCode());
+		}
 		schObj.setAddress(addr);
 		schObj.setDistno(schoolDetails.getDistNo());
 		schObj.setName(schoolDetails.getSchoolName());
 		schObj.setSchlno(schoolDetails.getSchlNo());
 		schObj.setMincode(schoolDetails.getDistNo()+schoolDetails.getSchlNo());
-		return  createReportRequest(batchId,schObj,recipient);
+		String userName = searchRequest == null ? "" : searchRequest.getUser();
+		return  createReportRequest(batchId,schObj, userName);
 	}
 
 	public ReportRequest preparePackingSlipDataPSI(Psi psiDetails,Long batchId) {
@@ -123,40 +124,52 @@ public class ReportService {
 		ReportData data = new ReportData();
 
 		List<StudentCredentialDistribution> schoolReportList = schoolDistributionRequest.getStudentList();
-		List<Student> stdList = new ArrayList<>();
-		School schObj = new School();
-		schObj.setMincode(schoolDetails.getDistNo()+schoolDetails.getSchlNo());
-		schObj.setName(schoolDetails.getSchoolName());
+		Map<Pen, Student> students = new HashMap<>();
+		School school = new School();
+		school.setMincode(schoolDetails.getDistNo()+schoolDetails.getSchlNo());
+		school.setName(schoolDetails.getSchoolName());
 		for(StudentCredentialDistribution sc:schoolReportList) {
-			Student std = new Student();
-			std.setFirstName(sc.getLegalFirstName());
-			std.setLastName(sc.getLegalLastName());
-			std.setMiddleName(sc.getLegalMiddleNames());
-			std.setCitizenship(sc.getStudentCitizenship());
+
 			Pen pen = new Pen();
 			pen.setPen(sc.getPen());
 			pen.setEntityID("" + sc.getStudentID());
-			std.setPen(pen);
-			std.setGradProgram(sc.getProgram());
-			GraduationData gradData = new GraduationData();
-			gradData.setGraduationDate(sc.getProgramCompletionDate() != null ? EducDistributionApiUtils.asDate(sc.getProgramCompletionDate()) : null);
-			gradData.setHonorsFlag(sc.getHonoursStanding() != null && sc.getHonoursStanding().equalsIgnoreCase("Y"));
-			std.setGraduationData(gradData);
+			Student student = students.get(pen);
 
-			std.setGraduationStatus(GraduationStatus.builder()
-					.programCompletionDate(sc.getProgramCompletionDate())
-					.honours(sc.getHonoursStanding())
-					.programName(sc.getProgram())
-					.studentGrade(sc.getStudentGrade())
-					.schoolOfRecord(sc.getSchoolOfRecord())
-					.build());
+			if (student == null) {
 
-			stdList.add(std);
+				student = new Student();
+
+				student.setFirstName(sc.getLegalFirstName());
+				student.setLastName(sc.getLegalLastName());
+				student.setMiddleName(sc.getLegalMiddleNames());
+				student.setCitizenship(sc.getStudentCitizenship());
+
+				student.setPen(pen);
+				student.setGradProgram(sc.getProgram());
+				GraduationData gradData = new GraduationData();
+				gradData.setGraduationDate(sc.getProgramCompletionDate() != null ? EducDistributionApiUtils.asDate(sc.getProgramCompletionDate()) : null);
+				gradData.setHonorsFlag(sc.getHonoursStanding() != null && sc.getHonoursStanding().equalsIgnoreCase("Y"));
+				student.setGraduationData(gradData);
+
+				student.setGraduationStatus(GraduationStatus.builder()
+						.programCompletionDate(sc.getProgramCompletionDate())
+						.honours(sc.getHonoursStanding())
+						.programName(sc.getProgram())
+						.studentGrade(sc.getStudentGrade())
+						.schoolOfRecord(sc.getSchoolOfRecord())
+						.build());
+
+				students.put(pen, student);
+			}
+			//Add student certificate into the list of student certificate credentials
+			if(!"YED4".equalsIgnoreCase(sc.getPaperType())) {
+				student.getGraduationStatus().setCertificates(sc.getCredentialTypeCode());
+			}
 		}
 		//No dups for school report
-		List<Student> uniqueStudentList = new ArrayList<>(new LinkedHashSet<>(stdList));
-		schObj.setStudents(uniqueStudentList);
-		data.setSchool(schObj);
+		List<Student> uniqueStudentList = new ArrayList<>(students.values());
+		school.setStudents(uniqueStudentList);
+		data.setSchool(school);
 		data.setOrgCode(StringUtils.startsWith(data.getSchool().getMincode(), "098") ? "YU" : "BC");
 		data.setReportNumber(data.getOrgCode()+"-"+batchId);
 		req.setData(data);
@@ -165,7 +178,7 @@ public class ReportService {
 		options.setConvertTo("pdf");
 		options.setCacheReport(false);
 		options.setOverwrite(false);
-		options.setReportFile(String.format("%s School distribution.%s", schObj.getMincode(), options.getConvertTo()));
+		options.setReportFile(String.format("%s School distribution.%s", school.getMincode(), options.getConvertTo()));
 		options.setReportName("SchoolDistribution");
 
 		req.setOptions(options);

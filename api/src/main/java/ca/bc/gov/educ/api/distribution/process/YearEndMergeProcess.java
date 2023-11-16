@@ -42,7 +42,8 @@ public class YearEndMergeProcess extends MergeProcess {
         List<School> schoolsForLabels = new ArrayList<>();
         List<School> districtsForLabels = new ArrayList<>();
         for (String mincode : mapDist.keySet()) {
-            CommonSchool commonSchool = getBaseSchoolDetails(null, mincode, exception);
+            DistributionPrintRequest distributionPrintRequest = mapDist.get(mincode);
+            CommonSchool commonSchool = getBaseSchoolDetails(distributionPrintRequest, searchRequest, mincode, exception);
             if (commonSchool != null) {
                 int currentSlipCount = 0;
                 schoolCounter++;
@@ -60,9 +61,7 @@ public class YearEndMergeProcess extends MergeProcess {
                 logger.debug("{} School {}/{}", mincode, schoolCounter, mapDist.size());
                 List<Student> studListNonGrad = new ArrayList<>();
 
-                DistributionPrintRequest distributionPrintRequest = mapDist.get(mincode);
-
-                ReportRequest packSlipReq = reportService.preparePackingSlipData(searchRequest.getUser(), getBaseSchoolDetails(distributionPrintRequest, mincode, exception), processorData.getBatchId());
+                ReportRequest packSlipReq = reportService.preparePackingSlipData(searchRequest, getBaseSchoolDetails(distributionPrintRequest, searchRequest, mincode, exception), processorData.getBatchId());
                 Pair<Integer, Integer> pV = processTranscriptPrintRequest(distributionPrintRequest, currentSlipCount, packSlipReq, studListNonGrad, processorData, mincode, schoolCategoryCode, numberOfPdfs);
                 currentSlipCount = pV.getLeft();
                 numberOfPdfs = pV.getRight();
