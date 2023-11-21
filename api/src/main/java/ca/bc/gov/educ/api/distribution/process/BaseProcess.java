@@ -29,6 +29,7 @@ public abstract class BaseProcess implements DistributionProcess {
 
     private static final Logger logger = LoggerFactory.getLogger(BaseProcess.class);
     protected static final String EXCEPTION = "Error {} ";
+    protected static final String MINISTRY_CODE = String.format("%09d" , 0);
 
     @Autowired
     GradValidation validation;
@@ -58,8 +59,9 @@ public abstract class BaseProcess implements DistributionProcess {
     PsiService psiService;
 
     protected CommonSchool getBaseSchoolDetails(DistributionPrintRequest distributionPrintRequest, StudentSearchRequest searchRequest, String mincode, ExceptionMessage exception) {
-        if (distributionPrintRequest != null && distributionPrintRequest.getProperName() != null)
-            return schoolService.getDefaultSchoolDetailsForPackingSlip(searchRequest, distributionPrintRequest.getProperName());
+        String properName = StringUtils.defaultIfBlank(distributionPrintRequest.getProperName(), searchRequest.getUser());
+        if (MINISTRY_CODE.equalsIgnoreCase(mincode) || StringUtils.isNotBlank(properName))
+            return schoolService.getDefaultSchoolDetailsForPackingSlip(searchRequest, properName);
         else
             return schoolService.getCommonSchoolDetails(mincode, exception);
     }
