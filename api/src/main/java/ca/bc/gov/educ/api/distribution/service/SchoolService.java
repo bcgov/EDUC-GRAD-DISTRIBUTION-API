@@ -45,7 +45,7 @@ public class SchoolService {
 		CommonSchool commonSchool = new CommonSchool();
 		Address address = (searchRequest == null || searchRequest.getAddress() == null) ? null : searchRequest.getAddress();
 		String userName = searchRequest == null ? null : searchRequest.getUser();
-		commonSchool.setSchlNo(String.format("%09d" , 0));
+		commonSchool.setSchlNo(String.format("%05d" , 0));
 		commonSchool.setSchoolName(ObjectUtils.defaultIfNull(properName, ObjectUtils.defaultIfNull(userName, "")));
 		commonSchool.setDistNo(String.format("%03d" , 0));
 		commonSchool.setScAddressLine1(address == null ? "4TH FLOOR 620 SUPERIOR" : address.getStreetLine1());
@@ -55,6 +55,21 @@ public class SchoolService {
 		commonSchool.setScPostalCode(address == null ? "V8W 9T6" : address.getCode());
 		commonSchool.setScCountryCode(address == null ? "CN" : address.getCountry());
 		return commonSchool;
+	}
+
+	public TraxDistrict getUserDefinedTraxDistrict(StudentSearchRequest searchRequest) {
+		TraxDistrict traxDistrict = new TraxDistrict();
+		Address address = (searchRequest == null || searchRequest.getAddress() == null) ? null : searchRequest.getAddress();
+		String userName = searchRequest == null ? null : searchRequest.getUser();
+		traxDistrict.setDistrictNumber("MoE");
+		traxDistrict.setDistrictName(userName);
+		traxDistrict.setAddress1(address == null ? "4TH FLOOR 620 SUPERIOR" : address.getStreetLine1());
+		traxDistrict.setAddress2(address == null ? "PO BOX 9886 STN PROV GOVT" : address.getStreetLine2());
+		traxDistrict.setCity(address == null ? "VICTORIA" : address.getCity());
+		traxDistrict.setProvCode(address == null ? "BC" : address.getRegion());
+		traxDistrict.setPostal(address == null ? "V8W 9T6" : address.getCode());
+		traxDistrict.setCountryCode(address == null ? "CN" : address.getCountry());
+		return traxDistrict;
 	}
 
 	public TraxSchool getTraxSchool(String minCode, ExceptionMessage exception) {

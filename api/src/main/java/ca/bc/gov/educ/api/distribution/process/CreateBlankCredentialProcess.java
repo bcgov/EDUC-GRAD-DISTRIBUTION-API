@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils.MINISTRY_LABEL;
+
 @Data
 @Component
 @NoArgsConstructor
@@ -35,21 +37,32 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 		Map<String, DistributionPrintRequest> mapDist = distributionRequest.getMapDist();
 		StudentSearchRequest searchRequest = distributionRequest.getStudentSearchRequest();
 		Long batchId = processorData.getBatchId();
+		List<School> districtsForLabels = new ArrayList<>();
 		int numberOfPdfs = 0;
 		int counter=0;
+		int numberOfCreatedMinistryLabelReports = 0;
+		int numberOfProcessedMinistryReports = 0;
 		for (String mincode : mapDist.keySet()) {
 			counter++;
 			int currentSlipCount = 0;
 			DistributionPrintRequest distributionPrintRequest = mapDist.get(mincode);
-			CommonSchool schoolDetails = getBaseSchoolDetails(distributionPrintRequest, searchRequest, mincode,exception);
+			CommonSchool schoolDetails = getBaseSchoolDetails(distributionPrintRequest, searchRequest, mincode, exception);
 			if(schoolDetails != null) {
 				logger.debug("*** School Details Acquired {}", schoolDetails.getSchoolName());
 
+				boolean requestedByMinistry = schoolDetails.isRequestedByMinistry();
+				if(requestedByMinistry) {
+					schoolDetails.setSchoolCategoryCode(MINISTRY_CATEGORY_CODE);
+					schoolDetails.setSchlNo(schoolDetails.getMincode());
+					schoolDetails.setDistNo(MINISTRY_CODE);
+					processDistrictsForLabels(searchRequest, districtsForLabels, MINISTRY_CODE, exception);
+				}
+
 				ReportRequest packSlipReq = reportService.preparePackingSlipData(searchRequest, schoolDetails, processorData.getBatchId());
-				numberOfPdfs = processYed4Transcript(distributionPrintRequest,currentSlipCount,packSlipReq,mincode,processorData,numberOfPdfs);
-				numberOfPdfs = processYed2Certificate(distributionPrintRequest,currentSlipCount,packSlipReq,mincode,processorData,numberOfPdfs);
-				numberOfPdfs = processYedbCertificate(distributionPrintRequest,currentSlipCount,packSlipReq,mincode,processorData,numberOfPdfs);
-				numberOfPdfs = processYedrCertificate(distributionPrintRequest,currentSlipCount,packSlipReq,mincode,processorData,numberOfPdfs);
+				numberOfPdfs = processYed4Transcript(distributionPrintRequest,currentSlipCount,packSlipReq,schoolDetails,processorData,numberOfPdfs);
+				numberOfPdfs = processYed2Certificate(distributionPrintRequest,currentSlipCount,packSlipReq,schoolDetails,processorData,numberOfPdfs);
+				numberOfPdfs = processYedbCertificate(distributionPrintRequest,currentSlipCount,packSlipReq,schoolDetails,processorData,numberOfPdfs);
+				numberOfPdfs = processYedrCertificate(distributionPrintRequest,currentSlipCount,packSlipReq,schoolDetails,processorData,numberOfPdfs);
 
 				logger.debug("PDFs Merged {}", schoolDetails.getSchoolName());
 				logger.debug("{} School {}/{}",mincode,counter,mapDist.size());
@@ -57,6 +70,20 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 					restUtils.fetchAccessToken(processorData);
 				}
 			}
+		}
+		if(!districtsForLabels.isEmpty()) {
+			logger.debug("***** Create and Store ministry labels reports *****");
+			for (School sch : districtsForLabels) {
+				List<School> districts = new ArrayList<>();
+				districts.add(sch);
+				numberOfCreatedMinistryLabelReports += createSchoolLabelsReport(districts, MINISTRY_LABEL);
+			}
+			logger.debug("***** Number of created district labels reports {} *****", numberOfCreatedMinistryLabelReports);
+			logger.debug("***** Distribute District Label reports *****");
+			List<String> mincodes = districtsForLabels.stream().map(School::getMincode).toList();
+			numberOfProcessedMinistryReports += processDistrictSchoolDistribution(batchId, mincodes, MINISTRY_LABEL, null, null, null);
+			logger.debug("***** Number of distributed District Label reports {} *****", numberOfProcessedMinistryReports);
+
 		}
 		postingProcess(batchId,processorData,numberOfPdfs);
 		long endTime = System.currentTimeMillis();
@@ -72,8 +99,9 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 		return processorData;
 	}
 
-	private int processYed4Transcript(DistributionPrintRequest obj, int currentSlipCount, ReportRequest packSlipReq, String mincode,ProcessorData processorData, int numberOfPdfs) {
+	private int processYed4Transcript(DistributionPrintRequest obj, int currentSlipCount, ReportRequest packSlipReq, CommonSchool schoolDetails, ProcessorData processorData, int numberOfPdfs) {
 		if (obj.getTranscriptPrintRequest() != null) {
+			String mincode = schoolDetails.getMincode();
 			TranscriptPrintRequest transcriptPrintRequest = obj.getTranscriptPrintRequest();
 			List<BlankCredentialDistribution> bcdList = transcriptPrintRequest.getBlankTranscriptList();
 			List<InputStream> locations = new ArrayList<>();
@@ -105,7 +133,7 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 						logger.info("*** Failed to Add transcript PDFs {} Current Credential {} in batch {}", failedToAdd, bcd.getCredentialTypeCode(), processorData.getBatchId());
 					}
 				}
-				mergeDocumentsPDFs(processorData,mincode,"02","/EDGRAD.T.","YED4",locations);
+				mergeDocumentsPDFs(processorData,mincode,schoolDetails.getSchoolCategoryCode(),"/EDGRAD.T.","YED4",locations);
 				numberOfPdfs++;
 				logger.debug("*** Transcript Documents Merged");
 			} catch (IOException e) {
@@ -114,41 +142,41 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 		}
 		return numberOfPdfs;
 	}
-	private int processYedrCertificate(DistributionPrintRequest obj, int currentSlipCount, ReportRequest packSlipReq, String mincode,ProcessorData processorData, int numberOfPdfs) {
-		if (obj.getYedrCertificatePrintRequest() != null) {
+	private int processYedrCertificate(DistributionPrintRequest distributionPrintRequest, int currentSlipCount, ReportRequest packSlipReq, CommonSchool schoolDetails, ProcessorData processorData, int numberOfPdfs) {
+		if (distributionPrintRequest.getYedrCertificatePrintRequest() != null) {
 			currentSlipCount++;
-			processCertificatePrintFile(packSlipReq,obj.getYedrCertificatePrintRequest(),mincode,currentSlipCount,obj,processorData,"YEDR");
+			processCertificatePrintFile(packSlipReq,distributionPrintRequest.getYedrCertificatePrintRequest(),schoolDetails,currentSlipCount,distributionPrintRequest,processorData,"YEDR");
 			numberOfPdfs++;
 			logger.debug("*** YEDR Documents Merged");
 		}
 		return numberOfPdfs;
 	}
 
-	private int processYedbCertificate(DistributionPrintRequest obj, int currentSlipCount, ReportRequest packSlipReq, String mincode,ProcessorData processorData, int numberOfPdfs) {
-		if (obj.getYedbCertificatePrintRequest() != null) {
+	private int processYedbCertificate(DistributionPrintRequest distributionPrintRequest, int currentSlipCount, ReportRequest packSlipReq, CommonSchool schoolDetails, ProcessorData processorData, int numberOfPdfs) {
+		if (distributionPrintRequest.getYedbCertificatePrintRequest() != null) {
 			currentSlipCount++;
-			processCertificatePrintFile(packSlipReq,obj.getYedbCertificatePrintRequest(),mincode,currentSlipCount,obj,processorData, "YEDB");
+			processCertificatePrintFile(packSlipReq, distributionPrintRequest.getYedbCertificatePrintRequest(), schoolDetails, currentSlipCount, distributionPrintRequest, processorData, "YEDB");
 			numberOfPdfs++;
 			logger.debug("*** YEDB Documents Merged");
 		}
 		return numberOfPdfs;
 	}
 
-	private int processYed2Certificate(DistributionPrintRequest obj, int currentSlipCount, ReportRequest packSlipReq, String mincode, ProcessorData processorData, int numberOfPdfs) {
-		if (obj.getYed2CertificatePrintRequest() != null) {
+	private int processYed2Certificate(DistributionPrintRequest distributionPrintRequest, int currentSlipCount, ReportRequest packSlipReq, CommonSchool schoolDetails, ProcessorData processorData, int numberOfPdfs) {
+		if (distributionPrintRequest.getYed2CertificatePrintRequest() != null) {
 			currentSlipCount++;
-			processCertificatePrintFile(packSlipReq,obj.getYed2CertificatePrintRequest(),mincode,currentSlipCount,obj,processorData, "YED2");
+			processCertificatePrintFile(packSlipReq, distributionPrintRequest.getYed2CertificatePrintRequest(), schoolDetails, currentSlipCount, distributionPrintRequest, processorData, "YED2");
 			numberOfPdfs++;
 			logger.debug("*** YED2 Documents Merged");
 		}
 		return numberOfPdfs;
 	}
-	private void processCertificatePrintFile(ReportRequest packSlipReq, CertificatePrintRequest certificatePrintRequest, String mincode, int currentSlipCount, DistributionPrintRequest obj, ProcessorData processorData,String paperType) {
-		PackingSlipRequest request = PackingSlipRequest.builder().mincode(mincode).currentSlip(currentSlipCount).total(obj.getTotal()).paperType(paperType).build();
-		mergeCertificates(packSlipReq, certificatePrintRequest, request,processorData);
+	private void processCertificatePrintFile(ReportRequest packSlipReq, CertificatePrintRequest certificatePrintRequest, CommonSchool schoolDetails, int currentSlipCount, DistributionPrintRequest obj, ProcessorData processorData,String paperType) {
+		PackingSlipRequest request = PackingSlipRequest.builder().mincode(schoolDetails.getMincode()).currentSlip(currentSlipCount).total(obj.getTotal()).paperType(paperType).build();
+		mergeCertificates(packSlipReq, certificatePrintRequest, request, processorData, schoolDetails);
 	}
 
-	private void mergeCertificates(ReportRequest packSlipReq, CertificatePrintRequest certificatePrintRequest,PackingSlipRequest request, ProcessorData processorData) {
+	private void mergeCertificates(ReportRequest packSlipReq, CertificatePrintRequest certificatePrintRequest, PackingSlipRequest request, ProcessorData processorData, CommonSchool schoolDetails) {
 		List<BlankCredentialDistribution> bcdList = certificatePrintRequest.getBlankCertificateList();
 		String mincode = request.getMincode();
 		String paperType = request.getPaperType();
@@ -179,7 +207,7 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 					logger.info("*** Failed to Add {} Certificate PDFs {} Current Credential {} in batch {}", bcd.getCredentialTypeCode(),failedToAdd, bcd.getCredentialTypeCode(), processorData.getBatchId());
 				}
 			}
-			mergeDocumentsPDFs(processorData,mincode,"02","/EDGRAD.C.",paperType,locations);
+			mergeDocumentsPDFs(processorData,mincode,schoolDetails.getSchoolCategoryCode(),"/EDGRAD.C.",paperType,locations);
 		} catch (IOException e) {
 			logger.debug(EXCEPTION,e.getMessage());
 		}

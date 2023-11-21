@@ -38,6 +38,7 @@ public class EducDistributionApiUtils {
 	public static final String SUPPDIST = "SUPPDIST";
 	public static final String DISTREP_YE_SD = "DISTREP_YE_SD";
 	public static final String DISTREP_YE_SC = "DISTREP_YE_SC";
+	public static final String MINISTRY_LABEL = "ADDRESS_LABEL";
 	public static final String ADDRESS_LABEL_SCHL = "ADDRESS_LABEL_SCHL";
 	public static final String ADDRESS_LABEL_YE = "ADDRESS_LABEL_YE";
 	public static final String ADDRESS_LABEL_PSI = "ADDRESS_LABEL_PSI";

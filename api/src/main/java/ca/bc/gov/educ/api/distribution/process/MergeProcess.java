@@ -81,7 +81,7 @@ public class MergeProcess extends BaseProcess {
 					createAndSaveNonGradReport(schoolDetails,studListNonGrad,mincode,educDistributionApiConstants.getStudentNonGradProjected());
 				}
 				logger.debug("PDFs Merged {}", schoolDetails.getSchoolName());
-				processSchoolsForLabels(searchRequest.getUser(), schoolsForLabels, mincode, exception);
+				processSchoolsForLabels(searchRequest, schoolsForLabels, mincode, exception);
 				if (counter % 50 == 0) {
 					restUtils.fetchAccessToken(processorData);
 				}

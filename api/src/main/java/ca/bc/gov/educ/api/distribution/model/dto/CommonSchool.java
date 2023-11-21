@@ -1,10 +1,10 @@
 package ca.bc.gov.educ.api.distribution.model.dto;
 
-import lombok.Data;
-import org.springframework.stereotype.Component;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.Data;
+import org.springframework.stereotype.Component;
 
 @Data
 @Component
@@ -266,4 +266,14 @@ public class CommonSchool {
 
     @Size(max = 1)
     private String nlcIntegratedServicesFlag;
+
+    @JsonIgnore
+    private boolean requestedByMinistry;
+
+    @JsonIgnore
+    public String getMincode() {
+        return getDistNo() + getSchlNo();
+    }
+
+
 }

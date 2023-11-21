@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.zip.ZipOutputStream;
 
+import static ca.bc.gov.educ.api.distribution.process.BaseProcess.MINISTRY_CODE;
 import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants.*;
 import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils.*;
 import static java.nio.file.Files.createDirectories;
@@ -120,7 +121,7 @@ public class PostingDistributionService {
                 }
             }
         }
-        if (StringUtils.equalsIgnoreCase(ADDRESS_LABEL_YE, schooLabelReportType)) {
+        if (StringUtils.equalsAnyIgnoreCase(schooLabelReportType, ADDRESS_LABEL_YE, MINISTRY_LABEL)) {
             for (School s : schools) {
                 if (s.getMincode().length() == 3) {
                     processSchools.add(s);
@@ -292,10 +293,9 @@ public class PostingDistributionService {
 
     @Generated
     protected void uploadSchoolReportDocuments(Long batchId, String reportType, String mincode, String schoolCategory, String transmissionMode, byte[] gradReportPdf) {
-        boolean isDistrict = ADDRESS_LABEL_YE.equalsIgnoreCase(reportType) || DISTREP_YE_SD.equalsIgnoreCase(reportType) || NONGRADDISTREP_SD.equalsIgnoreCase(reportType);
+        boolean isDistrict = MINISTRY_LABEL.equalsIgnoreCase(reportType) || ADDRESS_LABEL_YE.equalsIgnoreCase(reportType) || DISTREP_YE_SD.equalsIgnoreCase(reportType) || NONGRADDISTREP_SD.equalsIgnoreCase(reportType);
         String districtCode = getDistrictCodeFromMincode(mincode);
-        if (StringUtils.isNotBlank(transmissionMode) && TRANSMISSION_MODE_FTP.equalsIgnoreCase(transmissionMode))
-            return;
+        if (StringUtils.isNotBlank(transmissionMode) && TRANSMISSION_MODE_FTP.equalsIgnoreCase(transmissionMode)) return;
         String rootDirectory = StringUtils.containsAnyIgnoreCase(transmissionMode, TRANSMISSION_MODE_PAPER, TRANSMISSION_MODE_FTP) ? TMP_DIR + EducDistributionApiConstants.FILES_FOLDER_STRUCTURE + StringUtils.upperCase(transmissionMode) : TMP_DIR;
         boolean schoolLevelFolders = StringUtils.containsAnyIgnoreCase(schoolCategory, "02", "03", "09") || MONTHLYDIST.equalsIgnoreCase(transmissionMode) || SUPPDIST.equalsIgnoreCase(transmissionMode);
         try {
@@ -307,7 +307,7 @@ public class PostingDistributionService {
             } else if (schoolLevelFolders) {
                 fileLocBuilder.append(rootDirectory).append(DEL).append(batchId).append(DEL).append(mincode);
             } else {
-                fileLocBuilder.append(rootDirectory).append(DEL).append(batchId).append(DEL).append(districtCode).append(DEL).append(mincode);
+                fileLocBuilder.append(rootDirectory).append(DEL).append(batchId).append(DEL).append(districtCode).append(DEL).append(StringUtils.replace(mincode, MINISTRY_CODE, ""));
             }
             Path path = Paths.get(fileLocBuilder.toString());
             createDirectories(path);
@@ -319,9 +319,9 @@ public class PostingDistributionService {
             } else if (schoolLevelFolders) {
                 fileNameBuilder.append(rootDirectory).append(DEL).append(batchId).append(DEL).append(mincode);
             } else {
-                fileNameBuilder.append(rootDirectory).append(DEL).append(batchId).append(DEL).append(districtCode).append(DEL).append(mincode);
+                fileNameBuilder.append(rootDirectory).append(DEL).append(batchId).append(DEL).append(districtCode).append(DEL).append(StringUtils.replace(mincode, MINISTRY_CODE, ""));
             }
-            if (SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode) || ADDRESS_LABEL_YE.equalsIgnoreCase(reportType) || ADDRESS_LABEL_SCHL.equalsIgnoreCase(reportType) || ADDRESS_LABEL_PSI.equalsIgnoreCase(reportType)) {
+            if (SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode) || MINISTRY_LABEL.equalsIgnoreCase(reportType) || ADDRESS_LABEL_YE.equalsIgnoreCase(reportType) || ADDRESS_LABEL_SCHL.equalsIgnoreCase(reportType) || ADDRESS_LABEL_PSI.equalsIgnoreCase(reportType)) {
                 fileNameBuilder.append("/EDGRAD.L.").append("3L14.");
             } else {
                 fileNameBuilder.append("/EDGRAD.R.").append("324W.");

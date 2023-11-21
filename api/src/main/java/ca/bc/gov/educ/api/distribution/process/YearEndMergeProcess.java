@@ -51,12 +51,12 @@ public class YearEndMergeProcess extends MergeProcess {
 
                 logger.debug("*** School Details Acquired {} category {}", mincode, schoolCategoryCode);
                 if(StringUtils.containsAnyIgnoreCase(schoolCategoryCode, "02", "03", "09")) {
-                    processSchoolsForLabels(searchRequest.getUser(), schoolsForLabels, mincode, exception);
+                    processSchoolsForLabels(searchRequest, schoolsForLabels, mincode, exception);
                     logger.debug("Added Independent School {} for processing", commonSchool.getSchoolName());
                 } else {
                     // GRAD2-2269: no district for 02,03,09 school category
                     String distcode = getDistrictCodeFromMincode(mincode);
-                    processDistrictsForLabels(searchRequest.getUser(), districtsForLabels, distcode, exception);
+                    processDistrictsForLabels(searchRequest, districtsForLabels, distcode, exception);
                 }
                 logger.debug("{} School {}/{}", mincode, schoolCounter, mapDist.size());
                 List<Student> studListNonGrad = new ArrayList<>();

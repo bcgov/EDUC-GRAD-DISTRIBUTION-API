@@ -29,7 +29,8 @@ public abstract class BaseProcess implements DistributionProcess {
 
     private static final Logger logger = LoggerFactory.getLogger(BaseProcess.class);
     protected static final String EXCEPTION = "Error {} ";
-    protected static final String MINISTRY_CODE = String.format("%09d" , 0);
+    public static final String MINISTRY_CODE = "MoE";
+    protected static final String MINISTRY_CATEGORY_CODE = "00";
 
     @Autowired
     GradValidation validation;
@@ -59,23 +60,21 @@ public abstract class BaseProcess implements DistributionProcess {
     PsiService psiService;
 
     protected CommonSchool getBaseSchoolDetails(DistributionPrintRequest distributionPrintRequest, StudentSearchRequest searchRequest, String mincode, ExceptionMessage exception) {
-        String properName = StringUtils.defaultIfBlank(distributionPrintRequest.getProperName(), searchRequest.getUser());
-        if (MINISTRY_CODE.equalsIgnoreCase(mincode) || StringUtils.isNotBlank(properName))
-            return schoolService.getDefaultSchoolDetailsForPackingSlip(searchRequest, properName);
-        else
-            return schoolService.getCommonSchoolDetails(mincode, exception);
+        CommonSchool commonSchool;
+        boolean requestByMinistry = StringUtils.isNotBlank(searchRequest.getUser()) && searchRequest.getAddress() != null;
+        if (distributionPrintRequest != null && StringUtils.isNotBlank(distributionPrintRequest.getProperName())) {
+            commonSchool = schoolService.getDefaultSchoolDetailsForPackingSlip(searchRequest, distributionPrintRequest.getProperName());
+        } else {
+            commonSchool = schoolService.getCommonSchoolDetails(mincode, exception);
+        }
+        commonSchool.setRequestedByMinistry(requestByMinistry);
+        return commonSchool;
     }
 
     protected void setExtraDataForPackingSlip(ReportRequest packSlipReq, String paperType, int total, int quantity, int currentSlip, String orderType, Long batchId) {
         packSlipReq.getData().getPackingSlip().setTotal(total);
         packSlipReq.getData().getPackingSlip().setCurrent(currentSlip);
         packSlipReq.getData().getPackingSlip().setQuantity(quantity);
-        packSlipReq.getData().getPackingSlip().getOrderType().getPackingSlipType().getPaperType().setCode(paperType);
-        packSlipReq.getData().getPackingSlip().getOrderType().setName(orderType);
-        packSlipReq.getData().getPackingSlip().setOrderNumber(batchId);
-    }
-
-    protected void setExtraDataForPackingSlip(ReportRequest packSlipReq, String paperType, String orderType, Long batchId) {
         packSlipReq.getData().getPackingSlip().getOrderType().getPackingSlipType().getPaperType().setCode(paperType);
         packSlipReq.getData().getPackingSlip().getOrderType().setName(orderType);
         packSlipReq.getData().getPackingSlip().setOrderNumber(batchId);
@@ -124,7 +123,7 @@ public abstract class BaseProcess implements DistributionProcess {
             bufferDirectory = IOUtils.createTempDirectory(TMP_DIR, "buffer");
             PDFMergerUtility pdfMergerUtility = new PDFMergerUtility();
             //Naming the file with extension
-            filePathBuilder.append(fileName).append(paperType).append(".").append(EducDistributionApiUtils.getFileNameSchoolReports(mincode)).append(".pdf");
+            filePathBuilder.append(fileName).append(paperType).append(".").append(EducDistributionApiUtils.getFileNameSchoolReports(StringUtils.replace(mincode, MINISTRY_CODE, ""))).append(".pdf");
             pdfMergerUtility.setDestinationFileName(filePathBuilder.toString());
             pdfMergerUtility.addSources(locations);
             MemoryUsageSetting memoryUsageSetting = MemoryUsageSetting.setupMixed(50000000)
@@ -171,7 +170,8 @@ public abstract class BaseProcess implements DistributionProcess {
         schools.add(school);
     }
 
-    protected void processSchoolsForLabels(String recipient, List<School> schools, String mincode, ExceptionMessage exception) {
+    protected void processSchoolsForLabels(StudentSearchRequest searchRequest, List<School> schools, String mincode, ExceptionMessage exception) {
+        String recipient = searchRequest.getUser();
         School existSchool = schools.stream().filter(s -> mincode.equalsIgnoreCase(s.getMincode())).findAny().orElse(null);
         if (existSchool != null) return;
         TraxSchool traxSchool = schoolService.getTraxSchool(mincode, exception);
@@ -192,14 +192,20 @@ public abstract class BaseProcess implements DistributionProcess {
         }
     }
 
-    protected void processDistrictsForLabels(String recipient, List<School> schools, String distcode, ExceptionMessage exception) {
+    protected void processDistrictsForLabels(StudentSearchRequest searchRequest, List<School> schools, String distcode, ExceptionMessage exception) {
+        String recipient = searchRequest.getUser();
         School existSchool = schools.stream().filter(s -> distcode.equalsIgnoreCase(s.getMincode())).findAny().orElse(null);
         if (existSchool != null) {
             logger.debug("District {} already exists in the district labels", existSchool.getMincode());
             return;
         }
         logger.debug("Acquiring new district {} from TRAX API", distcode);
-        TraxDistrict traxDistrict = schoolService.getTraxDistrict(distcode, exception);
+        TraxDistrict traxDistrict;
+        if(MINISTRY_CODE.equalsIgnoreCase(distcode)) {
+            traxDistrict = schoolService.getUserDefinedTraxDistrict(searchRequest);
+        } else {
+            traxDistrict = schoolService.getTraxDistrict(distcode, exception);
+        }
         if (traxDistrict != null) {
             School school = new School();
             school.setMincode(traxDistrict.getDistrictNumber());
@@ -214,11 +220,10 @@ public abstract class BaseProcess implements DistributionProcess {
             address.setCode(traxDistrict.getPostal());
             school.setAddress(address);
             schools.add(school);
-            logger.debug("District {} has been added to the district labels", school.getMincode());
         }
+        logger.debug("District {} has been added to the district labels", distcode);
     }
 
-    //Grad2-1931 : Creates folder structure in temp directory for all the batch runs - mchintha/
     public StringBuilder createFolderStructureInTempDirectory(String rootDirectory, ProcessorData processorData, String minCode, String schoolCategoryCode) {
         String districtCode = StringUtils.substring(minCode, 0, 3);
         String activityCode = processorData.getActivityCode();
@@ -226,19 +231,19 @@ public abstract class BaseProcess implements DistributionProcess {
         StringBuilder filePathBuilder = new StringBuilder();
         Path path;
         try {
-            Boolean conditionResult = StringUtils.containsAnyIgnoreCase(activityCode, USERDIST, USERDISTOC, USERDISTRC, MONTHLYDIST, SUPPDIST) || StringUtils.containsAnyIgnoreCase(schoolCategoryCode, "02", "03", "09");
-            if (Boolean.TRUE.equals(conditionResult)) {
+            Boolean schoolLevelFolders = StringUtils.containsAnyIgnoreCase(activityCode, USERDIST, USERDISTOC, USERDISTRC, MONTHLYDIST, SUPPDIST) || StringUtils.containsAnyIgnoreCase(schoolCategoryCode, "02", "03", "09");
+            if (Boolean.TRUE.equals(schoolLevelFolders)) {
                 directoryPathBuilder.append(rootDirectory).append(EducDistributionApiConstants.DEL).append(processorData.getBatchId()).append(EducDistributionApiConstants.DEL).append(minCode).append(EducDistributionApiConstants.DEL);
             } else {
-                directoryPathBuilder.append(rootDirectory).append(EducDistributionApiConstants.DEL).append(processorData.getBatchId()).append(EducDistributionApiConstants.DEL).append(districtCode).append(EducDistributionApiConstants.DEL).append(minCode);
+                directoryPathBuilder.append(rootDirectory).append(EducDistributionApiConstants.DEL).append(processorData.getBatchId()).append(EducDistributionApiConstants.DEL).append(districtCode).append(EducDistributionApiConstants.DEL).append(StringUtils.replace(minCode, MINISTRY_CODE, ""));
             }
             path = Paths.get(directoryPathBuilder.toString());
             Files.createDirectories(path);
 
-            if (Boolean.TRUE.equals(conditionResult)) {
+            if (Boolean.TRUE.equals(schoolLevelFolders)) {
                 filePathBuilder.append(rootDirectory).append(EducDistributionApiConstants.DEL).append(processorData.getBatchId()).append(EducDistributionApiConstants.DEL).append(minCode);
             } else {
-                filePathBuilder.append(rootDirectory).append(EducDistributionApiConstants.DEL).append(processorData.getBatchId()).append(EducDistributionApiConstants.DEL).append(districtCode).append(EducDistributionApiConstants.DEL).append(minCode);
+                filePathBuilder.append(rootDirectory).append(EducDistributionApiConstants.DEL).append(processorData.getBatchId()).append(EducDistributionApiConstants.DEL).append(districtCode).append(EducDistributionApiConstants.DEL).append(StringUtils.replace(minCode, MINISTRY_CODE, ""));
             }
 
         } catch (Exception e) {

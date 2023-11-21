@@ -68,7 +68,7 @@ public class ReportService {
 		schObj.setDistno(schoolDetails.getDistNo());
 		schObj.setName(schoolDetails.getSchoolName());
 		schObj.setSchlno(schoolDetails.getSchlNo());
-		schObj.setMincode(schoolDetails.getDistNo()+schoolDetails.getSchlNo());
+		schObj.setMincode(schoolDetails.getMincode());
 		String userName = searchRequest == null ? "" : searchRequest.getUser();
 		return  createReportRequest(batchId,schObj, userName);
 	}
@@ -126,7 +126,7 @@ public class ReportService {
 		List<StudentCredentialDistribution> schoolReportList = schoolDistributionRequest.getStudentList();
 		Map<Pen, Student> students = new HashMap<>();
 		School school = new School();
-		school.setMincode(schoolDetails.getDistNo()+schoolDetails.getSchlNo());
+		school.setMincode(schoolDetails.getMincode());
 		school.setName(schoolDetails.getSchoolName());
 		for(StudentCredentialDistribution sc:schoolReportList) {
 
