@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import static ca.bc.gov.educ.api.distribution.process.BaseProcess.MINISTRY_CODE;
+
 @Service
 public class SchoolService {
 
@@ -47,7 +49,7 @@ public class SchoolService {
 		String userName = searchRequest == null ? null : searchRequest.getUser();
 		commonSchool.setSchlNo(String.format("%05d" , 0));
 		commonSchool.setSchoolName(ObjectUtils.defaultIfNull(properName, ObjectUtils.defaultIfNull(userName, "")));
-		commonSchool.setDistNo(String.format("%03d" , 0));
+		commonSchool.setDistNo(MINISTRY_CODE);
 		commonSchool.setScAddressLine1(address == null ? "4TH FLOOR 620 SUPERIOR" : address.getStreetLine1());
 		commonSchool.setScAddressLine2(address == null ? "PO BOX 9886 STN PROV GOVT" : address.getStreetLine2());
 		commonSchool.setScCity(address == null ? "VICTORIA" : address.getCity());

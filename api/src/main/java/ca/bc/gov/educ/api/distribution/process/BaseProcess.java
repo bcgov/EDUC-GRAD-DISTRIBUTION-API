@@ -61,13 +61,14 @@ public abstract class BaseProcess implements DistributionProcess {
 
     protected CommonSchool getBaseSchoolDetails(DistributionPrintRequest distributionPrintRequest, StudentSearchRequest searchRequest, String mincode, ExceptionMessage exception) {
         CommonSchool commonSchool;
-        boolean requestByMinistry = StringUtils.isNotBlank(searchRequest.getUser()) && searchRequest.getAddress() != null;
-        if (distributionPrintRequest != null && StringUtils.isNotBlank(distributionPrintRequest.getProperName())) {
+        boolean requestByMinistry = StringUtils.isNotBlank(searchRequest.getUser()) || searchRequest.getAddress() != null;
+        if (distributionPrintRequest != null && (MINISTRY_CODE.equalsIgnoreCase(mincode) || StringUtils.isNotBlank(distributionPrintRequest.getProperName()))) {
             commonSchool = schoolService.getDefaultSchoolDetailsForPackingSlip(searchRequest, distributionPrintRequest.getProperName());
+            commonSchool.setRequestedByMinistry(!requestByMinistry);
         } else {
             commonSchool = schoolService.getCommonSchoolDetails(mincode, exception);
+            commonSchool.setRequestedByMinistry(requestByMinistry);
         }
-        commonSchool.setRequestedByMinistry(requestByMinistry);
         return commonSchool;
     }
 
