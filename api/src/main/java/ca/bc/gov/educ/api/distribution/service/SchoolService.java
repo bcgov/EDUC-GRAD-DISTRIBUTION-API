@@ -48,7 +48,7 @@ public class SchoolService {
 		Address address = (searchRequest == null || searchRequest.getAddress() == null) ? null : searchRequest.getAddress();
 		String userName = searchRequest == null ? null : searchRequest.getUser();
 		commonSchool.setSchlNo(String.format("%05d" , 0));
-		commonSchool.setSchoolName(ObjectUtils.defaultIfNull(properName, ObjectUtils.defaultIfNull(userName, "")));
+		commonSchool.setSchoolName(ObjectUtils.defaultIfNull(properName, ObjectUtils.defaultIfNull(userName, "Ministry of Education")));
 		commonSchool.setDistNo(MINISTRY_CODE);
 		commonSchool.setScAddressLine1(address == null ? "4TH FLOOR 620 SUPERIOR" : address.getStreetLine1());
 		commonSchool.setScAddressLine2(address == null ? "PO BOX 9886 STN PROV GOVT" : address.getStreetLine2());
@@ -64,7 +64,7 @@ public class SchoolService {
 		Address address = (searchRequest == null || searchRequest.getAddress() == null) ? null : searchRequest.getAddress();
 		String userName = searchRequest == null ? null : searchRequest.getUser();
 		traxDistrict.setDistrictNumber("MoE");
-		traxDistrict.setDistrictName(userName);
+		traxDistrict.setDistrictName("Ministry of Education");
 		traxDistrict.setAddress1(address == null ? "4TH FLOOR 620 SUPERIOR" : address.getStreetLine1());
 		traxDistrict.setAddress2(address == null ? "PO BOX 9886 STN PROV GOVT" : address.getStreetLine2());
 		traxDistrict.setCity(address == null ? "VICTORIA" : address.getCity());

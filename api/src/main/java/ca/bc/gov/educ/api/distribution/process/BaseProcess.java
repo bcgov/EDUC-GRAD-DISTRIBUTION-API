@@ -210,7 +210,7 @@ public abstract class BaseProcess implements DistributionProcess {
         if (traxDistrict != null) {
             School school = new School();
             school.setMincode(traxDistrict.getDistrictNumber());
-            school.setName(traxDistrict.getSuperIntendent());
+            school.setName(StringUtils.isBlank(traxDistrict.getSuperIntendent()) ? traxDistrict.getDistrictName() : traxDistrict.getSuperIntendent());
             school.setTypeBanner(ObjectUtils.defaultIfNull(StringUtils.trimToNull(recipient), "SUPERINTENDENT"));
             Address address = new Address();
             address.setStreetLine1(traxDistrict.getAddress1());
