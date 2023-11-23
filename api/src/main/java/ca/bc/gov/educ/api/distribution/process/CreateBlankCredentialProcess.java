@@ -94,7 +94,7 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 					reportParams.setOptions(options);
 					reportParams.setData(data);
 					byte[] bytesSAR = restService.executePost(educDistributionApiConstants.getTranscriptReport(), byte[].class, reportParams);
-					if (bytesSAR != null) {
+					if (bytesSAR != null && bytesSAR.length > 0) {
 						for(int i=1;i<=bcd.getQuantity();i++) {
 							locations.add(new ByteArrayInputStream(bytesSAR));
 						}
