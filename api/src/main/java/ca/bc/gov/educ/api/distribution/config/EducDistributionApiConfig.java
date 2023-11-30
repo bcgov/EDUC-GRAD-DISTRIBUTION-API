@@ -30,7 +30,7 @@ public class EducDistributionApiConfig {
         return WebClient.builder().exchangeStrategies(ExchangeStrategies.builder()
                 .codecs(configurer -> configurer
                         .defaultCodecs()
-                        .maxInMemorySize(20 * 1024 * 1024))
+                        .maxInMemorySize(300 * 1024 * 1024))
                 .build()).build();
     }
 
