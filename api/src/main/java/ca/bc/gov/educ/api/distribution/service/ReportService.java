@@ -69,6 +69,10 @@ public class ReportService {
 		schObj.setName(schoolDetails.getSchoolName());
 		schObj.setSchlno(schoolDetails.getSchlNo());
 		schObj.setMincode(schoolDetails.getDistNo()+schoolDetails.getSchlNo());
+		schObj.setSignatureCode(schoolDetails.getDistNo());
+		schObj.setSchoolCategoryCode(schoolDetails.getSchoolCategoryCode());
+		schObj.setTypeIndicator("");
+		schObj.setTypeBanner("");
 		String userName = searchRequest == null ? "" : searchRequest.getUser();
 		return  createReportRequest(batchId,schObj, userName);
 	}
