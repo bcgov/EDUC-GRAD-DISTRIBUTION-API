@@ -70,6 +70,7 @@ public class ReportService {
 		schObj.setSchlno(schoolDetails.getSchlNo());
 		schObj.setMincode(schoolDetails.getDistNo()+schoolDetails.getSchlNo());
 		schObj.setSignatureCode(schoolDetails.getDistNo());
+		schObj.setSchoolCategoryCode(schoolDetails.getSchoolCategoryCode());
 		schObj.setTypeIndicator("");
 		schObj.setTypeBanner("");
 		String userName = searchRequest == null ? "" : searchRequest.getUser();
