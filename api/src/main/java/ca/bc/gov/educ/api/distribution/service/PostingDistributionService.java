@@ -9,6 +9,7 @@ import ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils;
 import ca.bc.gov.educ.api.distribution.util.Generated;
 import ca.bc.gov.educ.api.distribution.util.SFTPUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,11 +102,11 @@ public class PostingDistributionService {
     }
 
     public Integer createDistrictSchoolSuppReport(String schooLabelReportType, String districtReportType, String schoolReportType) {
-        return restService.executeGet(educDistributionApiConstants.getSchoolDistrictSupplementalReport(), Integer.class, schooLabelReportType, districtReportType, schoolReportType);
+        return NumberUtils.toInt(restService.executeGet(educDistributionApiConstants.getSchoolDistrictSupplementalReport(), String.class, schooLabelReportType, districtReportType, schoolReportType));
     }
 
     public Integer createDistrictSchoolMonthReport(String schooLabelReportType, String districtReportType, String schoolReportType) {
-        return restService.executeGet(educDistributionApiConstants.getSchoolDistrictMonthReport(), Integer.class, schooLabelReportType, districtReportType, schoolReportType);
+        return NumberUtils.toInt(restService.executeGet(educDistributionApiConstants.getSchoolDistrictMonthReport(), String.class, schooLabelReportType, districtReportType, schoolReportType));
     }
 
     public Integer createSchoolLabelsReport(List<School> schools, String schooLabelReportType) {
@@ -134,29 +135,29 @@ public class PostingDistributionService {
                 }
             }
         }
-        reportCount += restService.executePost(url, Integer.class, processSchools);
+        reportCount += NumberUtils.toInt(restService.executePost(url, String.class, processSchools));
         logger.debug("***** Number of created School Label Reports {} *****", reportCount);
         return reportCount;
     }
 
     public Integer createDistrictLabelsReport(List<TraxDistrict> schools, String districtLabelReportType) {
-        return restService.executePost(educDistributionApiConstants.getSchoolLabelsReport(), Integer.class, schools, districtLabelReportType);
+        return NumberUtils.toInt(restService.executePost(educDistributionApiConstants.getSchoolLabelsReport(), String.class, schools, districtLabelReportType));
     }
 
     public Integer createDistrictSchoolYearEndReport(String schooLabelReportType, String districtReportType, String schoolReportType) {
-        return restService.executeGet(educDistributionApiConstants.getSchoolDistrictYearEndReport(), Integer.class, schooLabelReportType, districtReportType, schoolReportType);
+        return NumberUtils.toInt(restService.executeGet(educDistributionApiConstants.getSchoolDistrictYearEndReport(), String.class, schooLabelReportType, districtReportType, schoolReportType));
     }
 
     public Integer createDistrictSchoolYearEndNonGradReport(String schooLabelReportType, String districtReportType, String schoolReportType) {
-        return restService.executeGet(educDistributionApiConstants.getSchoolDistrictYearEndNonGradReport(), Integer.class, schooLabelReportType, districtReportType, schoolReportType);
+        return NumberUtils.toInt(restService.executeGet(educDistributionApiConstants.getSchoolDistrictYearEndNonGradReport(), String.class, schooLabelReportType, districtReportType, schoolReportType));
     }
 
     public Integer createDistrictSchoolYearEndReport(String schooLabelReportType, String districtReportType, String schoolReportType, List<String> schools) {
-        return restService.executePost(educDistributionApiConstants.getSchoolDistrictYearEndReport(), Integer.class, schools, schooLabelReportType, districtReportType, schoolReportType);
+        return NumberUtils.toInt(restService.executePost(educDistributionApiConstants.getSchoolDistrictYearEndReport(), String.class, schools, schooLabelReportType, districtReportType, schoolReportType));
     }
 
     public Integer createDistrictSchoolYearEndNonGradReport(String schooLabelReportType, String districtReportType, String schoolReportType, List<String> schools) {
-        return restService.executePost(educDistributionApiConstants.getSchoolDistrictYearEndNonGradReport(), Integer.class, schools, schooLabelReportType, districtReportType, schoolReportType);
+        return NumberUtils.toInt(restService.executePost(educDistributionApiConstants.getSchoolDistrictYearEndNonGradReport(), String.class, schools, schooLabelReportType, districtReportType, schoolReportType));
     }
 
     public int processSchoolLabelsDistribution(Long batchId, String schooLabelReportType, String transmissionMode) {

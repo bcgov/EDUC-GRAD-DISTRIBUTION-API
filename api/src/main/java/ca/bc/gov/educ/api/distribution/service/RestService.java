@@ -28,7 +28,10 @@ public class RestService {
 
     private static final String GET_REST_SERVICE_ERROR = "Unable to call rest service {} method of {} with params {}";
     private static final String POST_REST_SERVICE_ERROR = "Unable to call rest service {} method of {} with params {} and payload: {}";
+    private static final String REST_SERVICE_WARN = "Rest service call {} method of {} with params {} and payload: {} returns unexpected result {}";
     private static final String ERROR_500 = "5xx error.";
+
+    private static final String NO_CONTENT = "NO_CONTENT";
 
     private static final String RETRY_MESSAGE = "Service failed to process after max retries.";
 
@@ -64,6 +67,10 @@ public class RestService {
                     .retrieve()
                     .onStatus(HttpStatusCode::is5xxServerError,
                             clientResponse -> Mono.error(new ServiceException(getErrorMessage(serviceUrl, ERROR_500), clientResponse.statusCode().value())))
+                    .onStatus(
+                            HttpStatus.NO_CONTENT::equals,
+                            response -> response.bodyToMono(String.class).thenReturn(new ServiceException(NO_CONTENT, response.statusCode().value()))
+                    )
                     .bodyToMono(boundClass)
                     // only does retry if initial error was 5xx as service may be temporarily down
                     // 4xx errors will always happen if 404, 401, 403, etc. so does not retry
@@ -73,7 +80,11 @@ public class RestService {
                                 throw new ServiceException(getErrorMessage(serviceUrl, RETRY_MESSAGE), HttpStatus.SERVICE_UNAVAILABLE.value());
                             }))
                     .block();
-        } catch(Exception e) {
+        } catch(ServiceException e) {
+            if(HttpStatus.NO_CONTENT.value() == e.getStatusCode()) {
+                logger.warn(REST_SERVICE_WARN, "GET", executeUrl, Arrays.toString(params), "", e.getStatusCode());
+                return null;
+            }
             logger.error(GET_REST_SERVICE_ERROR, "GET", executeUrl, Arrays.toString(params));
             throw new ServiceException(getErrorMessage(url, e.getLocalizedMessage()), HttpStatus.SERVICE_UNAVAILABLE.value(), e);
         }
@@ -98,6 +109,10 @@ public class RestService {
                     // if 5xx errors, throw Service error
                     .onStatus(HttpStatusCode::is5xxServerError,
                             clientResponse -> Mono.error(new ServiceException(getErrorMessage(serviceUrl, ERROR_500), clientResponse.statusCode().value())))
+                    .onStatus(
+                            HttpStatus.NO_CONTENT::equals,
+                            response -> response.bodyToMono(String.class).thenReturn(new ServiceException(NO_CONTENT, response.statusCode().value()))
+                    )
                     .bodyToMono(typeReference)
                     // only does retry if initial error was 5xx as service may be temporarily down
                     // 4xx errors will always happen if 404, 401, 403, etc. so does not retry
@@ -107,7 +122,11 @@ public class RestService {
                                 throw new ServiceException(getErrorMessage(serviceUrl, RETRY_MESSAGE), HttpStatus.SERVICE_UNAVAILABLE.value());
                             }))
                     .block();
-        } catch(Exception e) {
+        } catch(ServiceException e) {
+            if(HttpStatus.NO_CONTENT.value() == e.getStatusCode()) {
+                logger.warn(REST_SERVICE_WARN, "GET", executeUrl, Arrays.toString(params), "", e.getStatusCode());
+                return null;
+            }
             logger.error(GET_REST_SERVICE_ERROR, "GET", executeUrl, Arrays.toString(params));
             throw new ServiceException(getErrorMessage(url, e.getLocalizedMessage()), HttpStatus.SERVICE_UNAVAILABLE.value(), e);
         }
@@ -131,6 +150,10 @@ public class RestService {
                     .retrieve()
                     .onStatus(HttpStatusCode::is5xxServerError,
                             clientResponse -> Mono.error(new ServiceException(getErrorMessage(url, ERROR_500), clientResponse.statusCode().value())))
+                    .onStatus(
+                            HttpStatus.NO_CONTENT::equals,
+                            clientResponse -> clientResponse.bodyToMono(String.class).thenReturn(new ServiceException(NO_CONTENT, clientResponse.statusCode().value()))
+                    )
                     .bodyToMono(boundClass)
                     .retryWhen(reactor.util.retry.Retry.backoff(3, Duration.ofSeconds(2))
                             .filter(ServiceException.class::isInstance)
@@ -138,7 +161,11 @@ public class RestService {
                                 throw new ServiceException(getErrorMessage(url, RETRY_MESSAGE), HttpStatus.SERVICE_UNAVAILABLE.value());
                             }))
                     .block();
-        } catch(Exception e) {
+        } catch(ServiceException e) {
+            if(HttpStatus.NO_CONTENT.value() == e.getStatusCode()) {
+                logger.warn(REST_SERVICE_WARN, "POST", executeUrl, Arrays.toString(params), jsonTransformer.marshall(requestBody), e.getStatusCode());
+                return null;
+            }
             logger.error(POST_REST_SERVICE_ERROR, "POST", executeUrl, Arrays.toString(params), jsonTransformer.marshall(requestBody));
             throw new ServiceException(getErrorMessage(url, e.getLocalizedMessage()), HttpStatus.SERVICE_UNAVAILABLE.value(), e);
         }

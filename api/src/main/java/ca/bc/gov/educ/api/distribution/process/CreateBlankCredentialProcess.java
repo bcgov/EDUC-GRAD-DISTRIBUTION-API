@@ -87,6 +87,7 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 				int failedToAdd = 0;
 				for (BlankCredentialDistribution bcd : bcdList) {
 					ReportData data = prepareBlankTranscriptData(bcd,mincode);
+					data.setSchool(packSlipReq.getData().getPackingSlip().getSchool());
 					ReportOptions options = new ReportOptions();
 					options.setReportFile("Transcript");
 					options.setReportName("Transcript.pdf");
@@ -94,7 +95,7 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 					reportParams.setOptions(options);
 					reportParams.setData(data);
 					byte[] bytesSAR = restService.executePost(educDistributionApiConstants.getTranscriptReport(), byte[].class, reportParams);
-					if (bytesSAR != null) {
+					if (bytesSAR != null && bytesSAR.length > 0) {
 						for(int i=1;i<=bcd.getQuantity();i++) {
 							locations.add(new ByteArrayInputStream(bytesSAR));
 						}
@@ -161,6 +162,7 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 			int failedToAdd = 0;
 			for (BlankCredentialDistribution bcd : bcdList) {
 				ReportData data = prepareBlankCertData(bcd);
+				data.setSchool(packSlipReq.getData().getPackingSlip().getSchool());
 				ReportOptions options = new ReportOptions();
 				options.setReportFile("certificate");
 				options.setReportName("Certificate.pdf");

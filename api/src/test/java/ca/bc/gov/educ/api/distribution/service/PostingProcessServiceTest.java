@@ -67,21 +67,21 @@ public class PostingProcessServiceTest {
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(1));
+        when(this.responseMock.bodyToMono(String.class)).thenReturn(Mono.just("1"));
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
         when(this.requestHeadersUriMock.uri(String.format(educDistributionApiConstants.getSchoolDistrictYearEndReport(), "", "", DISTREP_YE_SC))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(1));
+        when(this.responseMock.bodyToMono(String.class)).thenReturn(Mono.just("1"));
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
         when(this.requestHeadersUriMock.uri(String.format(educDistributionApiConstants.getSchoolDistrictYearEndReport(), "", NONGRADDISTREP_SD, ""))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(1));
+        when(this.responseMock.bodyToMono(String.class)).thenReturn(Mono.just("1"));
 
         SchoolReports distrepYeSd = new SchoolReports();
         String distrepYeSdMincode = RandomStringUtils.randomNumeric(3);
@@ -202,7 +202,7 @@ public class PostingProcessServiceTest {
         when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
         when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(1));
+        when(this.responseMock.bodyToMono(String.class)).thenReturn(Mono.just("1"));
 
         when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
         when(this.requestBodyUriMock.uri(String.format(educDistributionApiConstants.getSchoolDistrictYearEndNonGradReport(), "", distrepYeNgSd.getReportTypeCode(), ""))).thenReturn(this.requestBodyUriMock);
@@ -210,7 +210,7 @@ public class PostingProcessServiceTest {
         when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
         when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(1));
+        when(this.responseMock.bodyToMono(String.class)).thenReturn(Mono.just("1"));
 
         when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
         when(this.requestBodyUriMock.uri(String.format(educDistributionApiConstants.getSchoolDistrictYearEndReport(), "", "", distrepYeSc.getReportTypeCode()))).thenReturn(this.requestBodyUriMock);
@@ -218,7 +218,7 @@ public class PostingProcessServiceTest {
         when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
         when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(1));
+        when(this.responseMock.bodyToMono(String.class)).thenReturn(Mono.just("1"));
 
         byte[] bytesPdf = readBinaryFile("data/sample.pdf");
 
@@ -256,7 +256,7 @@ public class PostingProcessServiceTest {
         when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
         when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(1));
+        when(this.responseMock.bodyToMono(String.class)).thenReturn(Mono.just("1"));
 
         var result = this.postingDistributionService.postingProcess(response);
         Assert.assertTrue(result);
@@ -285,7 +285,7 @@ public class PostingProcessServiceTest {
         when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(1));
+        when(this.responseMock.bodyToMono(String.class)).thenReturn(Mono.just("1"));
 
         var result = this.postingDistributionService.createSchoolLabelsReport(List.of(district), DISTREP_YE_SD);
         Assert.assertTrue(1 == result);
@@ -297,7 +297,7 @@ public class PostingProcessServiceTest {
         when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(1));
+        when(this.responseMock.bodyToMono(String.class)).thenReturn(Mono.just("1"));
 
         result = this.postingDistributionService.createSchoolLabelsReport(List.of(school), DISTREP_YE_SC);
         Assert.assertTrue(1 == result);
@@ -309,7 +309,7 @@ public class PostingProcessServiceTest {
         when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(1));
+        when(this.responseMock.bodyToMono(String.class)).thenReturn(Mono.just("1"));
 
         result = this.postingDistributionService.createSchoolLabelsReport(List.of(school), ADDRESS_LABEL_SCHL);
         Assert.assertTrue(1 == result);
@@ -321,7 +321,7 @@ public class PostingProcessServiceTest {
         when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(1));
+        when(this.responseMock.bodyToMono(String.class)).thenReturn(Mono.just("1"));
 
         result = this.postingDistributionService.createSchoolLabelsReport(List.of(district), ADDRESS_LABEL_YE);
         Assert.assertTrue(1 == result);
@@ -340,7 +340,7 @@ public class PostingProcessServiceTest {
         when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(1));
+        when(this.responseMock.bodyToMono(String.class)).thenReturn(Mono.just("1"));
 
         var result = this.postingDistributionService.createDistrictLabelsReport(List.of(district), ADDRESS_LABEL_YE);
         Assert.assertTrue(1 == result);
@@ -357,7 +357,7 @@ public class PostingProcessServiceTest {
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(1));
+        when(this.responseMock.bodyToMono(String.class)).thenReturn(Mono.just("1"));
 
         var result = this.postingDistributionService.createDistrictSchoolMonthReport(ADDRESS_LABEL_SCHL, DISTREP_SD, DISTREP_SC);
         Assert.assertTrue(1 == result);
@@ -374,7 +374,7 @@ public class PostingProcessServiceTest {
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(1));
+        when(this.responseMock.bodyToMono(String.class)).thenReturn(Mono.just("1"));
 
         var result = this.postingDistributionService.createDistrictSchoolSuppReport(ADDRESS_LABEL_SCHL, DISTREP_SD, DISTREP_SC);
         Assert.assertTrue(1 == result);
@@ -391,7 +391,7 @@ public class PostingProcessServiceTest {
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(1));
+        when(this.responseMock.bodyToMono(String.class)).thenReturn(Mono.just("1"));
 
         var result = this.postingDistributionService.createDistrictSchoolYearEndReport(ADDRESS_LABEL_YE, DISTREP_YE_SD, DISTREP_YE_SC);
         Assert.assertTrue(1 == result);
@@ -408,7 +408,7 @@ public class PostingProcessServiceTest {
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(1));
+        when(this.responseMock.bodyToMono(String.class)).thenReturn(Mono.just("1"));
 
         var result = this.postingDistributionService.createDistrictSchoolYearEndNonGradReport(ADDRESS_LABEL_YE, DISTREP_YE_SD, DISTREP_YE_SC);
         Assert.assertTrue(1 == result);
@@ -428,7 +428,7 @@ public class PostingProcessServiceTest {
         when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(1));
+        when(this.responseMock.bodyToMono(String.class)).thenReturn(Mono.just("1"));
 
         var result = this.postingDistributionService.createDistrictSchoolYearEndReport(ADDRESS_LABEL_YE, DISTREP_YE_SD, DISTREP_YE_SC, List.of(school.getMincode()));
         Assert.assertTrue(1 == result);
@@ -448,7 +448,7 @@ public class PostingProcessServiceTest {
         when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(1));
+        when(this.responseMock.bodyToMono(String.class)).thenReturn(Mono.just("1"));
 
         var result = this.postingDistributionService.createDistrictSchoolYearEndNonGradReport(ADDRESS_LABEL_YE, DISTREP_YE_SD, DISTREP_YE_SC, List.of(school.getMincode()));
         Assert.assertTrue(1 == result);
