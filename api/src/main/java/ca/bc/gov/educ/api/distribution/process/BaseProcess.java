@@ -58,7 +58,7 @@ public abstract class BaseProcess implements DistributionProcess {
     PsiService psiService;
 
     protected CommonSchool getBaseSchoolDetails(DistributionPrintRequest distributionPrintRequest, StudentSearchRequest searchRequest, String mincode, ExceptionMessage exception) {
-        if (distributionPrintRequest != null && distributionPrintRequest.getProperName() != null)
+        if (distributionPrintRequest != null && StringUtils.isNotBlank(distributionPrintRequest.getProperName()))
             return schoolService.getDefaultSchoolDetailsForPackingSlip(searchRequest, distributionPrintRequest.getProperName());
         else
             return schoolService.getCommonSchoolDetails(mincode, exception);
