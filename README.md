@@ -13,6 +13,6 @@
 [![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=bcgov_EDUC-GRAD-DISTRIBUTION-API&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=bcgov_EDUC-GRAD-DISTRIBUTION-API) &nbsp;
 [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=bcgov_EDUC-GRAD-DISTRIBUTION-API&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=bcgov_EDUC-GRAD-DISTRIBUTION-API) &nbsp;
 
-# EDUC-GRAD-DISTRIBUTION-API &nbsp; ![GitHub repo size](https://img.shields.io/github/repo-size/bcgov/EDUC-GRAD-DISTRIBUTION-API)
+# EDUC-GRAD-DISTRIBUTION-API &nbsp; ![GitHub repo size](https://img.shields.io/github/repo-size/bcgov/EDUC-GRAD-DISTRIBUTION-API) ![GitHub Tag](https://img.shields.io/github/v/tag/bcgov/EDUC-GRAD-DISTRIBUTION-API)
 Api to Handle Distribution of the Credential and Transcripts
 
