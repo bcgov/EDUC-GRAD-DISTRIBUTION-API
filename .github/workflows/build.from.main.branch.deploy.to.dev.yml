@@ -78,7 +78,7 @@ jobs:
           -p TAG_NAME=${{ env.TAG }} -p HOST_ROUTE=${{ env.REPO_NAME }}-${{ env.OPENSHIFT_NAMESPACE }}.${{ env.APP_DOMAIN }} \
           -p MIN_REPLICAS=${{ env.MIN_REPLICAS }} -p MAX_REPLICAS=${{ env.MAX_REPLICAS }} -p MIN_CPU=${{ env.MIN_CPU }} \
           -p MAX_CPU=${{ env.MAX_CPU }} -p MIN_MEM=${{ env.MIN_MEM }} -p MAX_MEM=${{ env.MAX_MEM }} \
-          -p STORAGE_LIMIT=${{ env.STORAGE_LIMIT }} \ | oc apply -f -
+          -p STORAGE_LIMIT=${{ env.STORAGE_LIMIT }} | oc apply -f -
 
           # UPDATE Configmaps
           curl -s https://raw.githubusercontent.com/bcgov/${{ env.REPO_NAME }}/${{ github.event.inputs.choice }}/tools/config/update-configmap.sh \
