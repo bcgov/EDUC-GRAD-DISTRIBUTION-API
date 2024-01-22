@@ -68,7 +68,7 @@ jobs:
           
           # run build
           # apply build config
-          oc process -f https://raw.githubusercontent.com/bcgov/EDUC-GRAD-DISTRIBUTION-API/grad-release/tools/openshift/api.bc.yaml -p REPO_NAME=${{ env.REPO_NAME }} -p BRANCH_NAME=${{ env.BRANCH_NAME }} | oc apply -f -
+          oc process -f https://raw.githubusercontent.com/bcgov/EDUC-GRAD-DISTRIBUTION-API/grad-release/tools/openshift/api.bc.yaml -p REPO_NAME=${{ env.REPO_NAME }} -p BRANCH_NAME=${{ env.BRANCH }} | oc apply -f -
   
           # run build --follow shows log, --wait throws non-zero if fail
           oc start-build ${{ env.REPO_NAME }}-bc --follow --wait
