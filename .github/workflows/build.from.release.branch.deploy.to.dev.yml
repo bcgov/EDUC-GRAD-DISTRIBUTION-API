@@ -83,9 +83,9 @@ jobs:
           oc start-build ${{ env.REPO_NAME }}-bc --follow --wait
           
           # Process and apply deployment template
-          oc process -f tools/openshift/api.dc.yaml -p IS_NAMESPACE=${{ env.OPENSHIFT_NAMESPACE }} -p REPO_NAME=${{ env.REPO_NAME }} 
-          -p TAG_NAME=${{ env.TAG }} -p HOST_ROUTE=${{ env.REPO_NAME }}-${{ env.OPENSHIFT_NAMESPACE }}.${{ env.APP_DOMAIN }} 
-          -p MIN_REPLICAS=${{ env.MIN_REPLICAS }} -p MAX_REPLICAS=${{ env.MAX_REPLICAS }} -p MIN_CPU=${{ env.MIN_CPU }} 
+          oc process -f tools/openshift/api.dc.yaml -p IS_NAMESPACE=${{ env.OPENSHIFT_NAMESPACE }} -p REPO_NAME=${{ env.REPO_NAME }} \
+          -p TAG_NAME=${{ env.TAG }} -p HOST_ROUTE=${{ env.REPO_NAME }}-${{ env.OPENSHIFT_NAMESPACE }}.${{ env.APP_DOMAIN }} \
+          -p MIN_REPLICAS=${{ env.MIN_REPLICAS }} -p MAX_REPLICAS=${{ env.MAX_REPLICAS }} -p MIN_CPU=${{ env.MIN_CPU }} \
           -p MAX_CPU=${{ env.MAX_CPU }} -p MIN_MEM=${{ env.MIN_MEM }} -p MAX_MEM=${{ env.MAX_MEM }} \
           -p STORAGE_LIMIT=${{ env.STORAGE_LIMIT }} \ | oc apply -f -
 
