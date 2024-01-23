@@ -222,7 +222,7 @@ public class MergeProcess extends BaseProcess {
 			std.setGradProgram(scd.getProgram());
 			std.setLastUpdateDate(Date.from(scd.getLastUpdateDate().atZone(ZoneId.systemDefault()).toInstant()));
 			std.setGraduationData(new GraduationData());
-			std.setNonGradReasons(getNonGradReasons(scd.getNonGradReasons()));
+			std.setNonGradReasons(getNonGradReasons(scd.getProgram(), scd.getNonGradReasons()));
 
 			Student scObj = studListNonGrad.stream().filter(pr -> pr.getPen().getPen().compareTo(std.getPen().getPen()) == 0)
 					.findAny()
@@ -233,7 +233,8 @@ public class MergeProcess extends BaseProcess {
 		return null;
 	}
 
-	private List<NonGradReason> getNonGradReasons(List<GradRequirement> nonGradReasons) {
+	private List<NonGradReason> getNonGradReasons(String gradProgramCode, List<GradRequirement> nonGradReasons) {
+		nonGradReasons.removeIf(a -> "506".equalsIgnoreCase(a.getRule()) && (StringUtils.isNotBlank(gradProgramCode) && gradProgramCode.contains("1950")));
 		List<NonGradReason> nList = new ArrayList<>();
 		if (nonGradReasons != null) {
 			for (GradRequirement gR : nonGradReasons) {
