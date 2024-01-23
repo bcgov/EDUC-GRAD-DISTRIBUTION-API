@@ -234,9 +234,9 @@ public class MergeProcess extends BaseProcess {
 	}
 
 	private List<NonGradReason> getNonGradReasons(String gradProgramCode, List<GradRequirement> nonGradReasons) {
-		nonGradReasons.removeIf(a -> "506".equalsIgnoreCase(a.getRule()) && (StringUtils.isNotBlank(gradProgramCode) && gradProgramCode.contains("1950")));
 		List<NonGradReason> nList = new ArrayList<>();
 		if (nonGradReasons != null) {
+			nonGradReasons.removeIf(a -> "506".equalsIgnoreCase(a.getRule()) && (StringUtils.isNotBlank(gradProgramCode) && gradProgramCode.contains("1950")));
 			for (GradRequirement gR : nonGradReasons) {
 				NonGradReason obj = new NonGradReason();
 				obj.setCode(gR.getRule());
