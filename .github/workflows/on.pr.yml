@@ -1,4 +1,4 @@
-name: API CI
+name: API Build
 
 on:
   pull_request:
@@ -55,6 +55,6 @@ jobs:
           -Dsonar.login=${{ secrets.SONAR_TOKEN }}
           -Dsonar.host.url=https://sonarcloud.io
           -Dsonar.organization=bcgov-sonarcloud
-          -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
+          -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
