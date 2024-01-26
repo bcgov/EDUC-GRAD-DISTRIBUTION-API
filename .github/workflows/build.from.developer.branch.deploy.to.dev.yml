@@ -107,6 +107,18 @@ jobs:
           ${{ secrets.SPLUNK_TOKEN }} \
           ${{ vars.APP_LOG_LEVEL }} \
           ${{ vars.BCMAIL_LOCATION }}
+          
+          # Override Configmaps
+          curl -s https://raw.githubusercontent.com/bcgov/${{ env.REPO_NAME }}/${{ github.event.inputs.choice }}/tools/config/override-configmap-dev.sh \
+          | bash /dev/stdin \
+          dev \
+          ${{ env.REPO_NAME }} \
+          ${{ env.GRAD_NAMESPACE }} \
+          ${{ env.COMMON_NAMESPACE }} \
+          ${{ env.BUSINESS_NAMESPACE }} \
+          ${{ secrets.SPLUNK_TOKEN }} \
+          ${{ vars.APP_LOG_LEVEL }} \
+          ${{ vars.BCMAIL_LOCATION }}
 
           # Start rollout (if necessary) and follow it
           oc rollout latest dc/${{ env.SPRING_BOOT_IMAGE_NAME }} 2> /dev/null \
