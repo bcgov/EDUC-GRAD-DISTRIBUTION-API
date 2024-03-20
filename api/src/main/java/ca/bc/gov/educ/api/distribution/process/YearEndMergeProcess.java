@@ -43,7 +43,6 @@ public class YearEndMergeProcess extends MergeProcess {
         List<School> districtsForLabels = new ArrayList<>();
         for (String mincode : mapDist.keySet()) {
             DistributionPrintRequest distributionPrintRequest = mapDist.get(mincode);
-            distributionPrintRequest.setTranscriptPrintRequest(null);
             CommonSchool commonSchool = getBaseSchoolDetails(distributionPrintRequest, searchRequest, mincode, exception);
             if (commonSchool != null) {
                 int currentSlipCount = 0;
