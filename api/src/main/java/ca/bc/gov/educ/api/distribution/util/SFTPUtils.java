@@ -29,18 +29,6 @@ public class SFTPUtils {
     @Value("${sftp.bcmail.known-hosts}")
     private String BCMAIL_KNOWN_HOSTS;
 
-    @Value("${sftp.tsw.host}")
-    private String TSW_REMOTE_HOST;
-    @Value("${sftp.tsw.username}")
-    private String TSW_SFTP_USERNAME;
-    @Value("${sftp.tsw.priv-key}")
-    private String TSW_PRIVATE_KEY;
-    @Value("${sftp.tsw.pub-key}")
-    private String TSW_PUBLIC_KEY;
-    @Value("${sftp.tsw.known-hosts}")
-    private String TSW_KNOWN_HOSTS;
-
-
     @Value("${sftp.bcmail.location}")
     private String BC_MAIL_LOCATION;
 
@@ -89,27 +77,7 @@ public class SFTPUtils {
     }
 
     /**
-     * Method specific for uploading files to TSW
-     * @param batchId batch id
-     * @param mincode mincode
-     * @param fileName the filename
-     * @return true if successful
-     */
-    public boolean sftpUploadTSW(Long batchId,String mincode,String fileName) {
-        Map<String, List<String>> files = new HashMap<>();
-        String localFile = formatPath(EducDistributionApiConstants.TMP_DIR + EducDistributionApiConstants.DEL + batchId + EducDistributionApiConstants.DEL + mincode + EducDistributionApiConstants.DEL + fileName+".pdf");
-        String remoteFile = "/$1$dga5037/EDUC/XTD";
-        String location1 = remoteFile+"/WEB/"+fileName+".pdf";
-        String location2 = remoteFile+"/TSWSFTP/"+fileName+".pdf";
-        String location3 = remoteFile+"/WEB/PST/"+fileName+".pdf";
-        files.computeIfAbsent(localFile, v -> new ArrayList<>()).add(location1);
-        files.computeIfAbsent(localFile, v -> new ArrayList<>()).add(location2);
-        files.computeIfAbsent(localFile, v -> new ArrayList<>()).add(location3);
-        return sftpUpload(files, TSW_SFTP_USERNAME, TSW_REMOTE_HOST, REMOTE_PORT, TSW_PRIVATE_KEY, TSW_PUBLIC_KEY, TSW_KNOWN_HOSTS);
-    }
-
-    /**
-     * Method for uploading files to an sftp server
+     * Method for uploading files to a sftp server
      * @param files a map of local -> remote file paths. Use of Map<String, List<String>> enables the key (the file to upload)
      *              to have multiple upload locations (the List<String> represents the upload locations)
      * @param userName the username to log into the sftp server

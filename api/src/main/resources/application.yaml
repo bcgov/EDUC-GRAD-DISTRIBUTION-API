@@ -89,12 +89,12 @@ sftp:
     pub-key: ${BCMAIL_SSH_PUBLIC_KEY}
     known-hosts: ${BCMAIL_KNOWN_HOSTS_ENTRY}
     location: ${BCMAIL_LOCATION}
-  tsw:
-    host: ${TSW_SFTP_HOST}
-    username: ${TSW_SFTP_USER}
-    priv-key: ${grad_vms_id_rsa}
-    pub-key: ${grad_vms_id_rsa.pub}
-    known-hosts: ${TSW_KNOWN_HOSTS_ENTRY}
+#  tsw:
+#    host: ${TSW_SFTP_HOST}
+#    username: ${TSW_SFTP_USER}
+#    priv-key: ${grad_vms_id_rsa}
+#    pub-key: ${grad_vms_id_rsa.pub}
+#    known-hosts: ${TSW_KNOWN_HOSTS_ENTRY}
 
 endpoint:
   keycloak:
