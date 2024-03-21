@@ -105,7 +105,7 @@ public class PostingSchoolReportProcess extends BaseProcess {
 			objs.setDestinationFileName(pBuilder.toString());
 			objs.addSources(locations);
 			objs.mergeDocuments(MemoryUsageSetting.setupMainMemoryOnly());
-			sftpUtils.sftpUploadTSW(processorData.getBatchId(),mincode,fileName);
+//			sftpUtils.sftpUploadTSW(processorData.getBatchId(),mincode,fileName);
 		}catch (Exception e) {
 			logger.debug(EXCEPTION,e.getLocalizedMessage());
 		}
