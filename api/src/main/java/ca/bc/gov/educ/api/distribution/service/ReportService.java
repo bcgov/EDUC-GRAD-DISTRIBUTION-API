@@ -32,12 +32,15 @@ public class ReportService {
 
 	final RestService restService;
 
+	final SchoolService schoolService;
+
 	@Autowired
-	public ReportService(WebClient webClient, RestUtils restUtils, EducDistributionApiConstants educDistributionApiConstants, RestService restService, JsonTransformer jsonTransformer) {
+	public ReportService(WebClient webClient, RestUtils restUtils, EducDistributionApiConstants educDistributionApiConstants, RestService restService, SchoolService schoolService, JsonTransformer jsonTransformer) {
 		this.webClient = webClient;
 		this.restUtils = restUtils;
 		this.educDistributionApiConstants = educDistributionApiConstants;
 		this.restService = restService;
+		this.schoolService = schoolService;
 		this.jsonTransformer = jsonTransformer;
 	}
 
@@ -57,12 +60,22 @@ public class ReportService {
 		boolean useSchoolAddress = (searchRequest == null || searchRequest.getAddress() == null);
 		Address addr = useSchoolAddress ? new Address() : searchRequest.getAddress();
 		if(useSchoolAddress) {
-			addr.setStreetLine1(schoolDetails.getScAddressLine1());
-			addr.setStreetLine2(schoolDetails.getScAddressLine2());
-			addr.setCity(schoolDetails.getScCity());
-			addr.setCode(schoolDetails.getScPostalCode());
-			addr.setCountry(schoolDetails.getScCountryCode());
-			addr.setRegion(schoolDetails.getScProvinceCode());
+			TraxSchool traxSchool = schoolService.getTraxSchool(schoolDetails.getDistNo()+schoolDetails.getSchlNo(), new ExceptionMessage());
+			if(traxSchool != null) {
+				addr.setStreetLine1(traxSchool.getAddress1());
+				addr.setStreetLine2(traxSchool.getAddress2());
+				addr.setCity(traxSchool.getCity());
+				addr.setCode(traxSchool.getPostal());
+				addr.setCountry(traxSchool.getCountryName());
+				addr.setRegion(traxSchool.getProvinceName());
+			} else {
+				addr.setStreetLine1(schoolDetails.getScAddressLine1());
+				addr.setStreetLine2(schoolDetails.getScAddressLine2());
+				addr.setCity(schoolDetails.getScCity());
+				addr.setCode(schoolDetails.getScPostalCode());
+				addr.setCountry(schoolDetails.getScCountryCode());
+				addr.setRegion(schoolDetails.getScProvinceCode());
+			}
 		}
 		schObj.setAddress(addr);
 		schObj.setDistno(schoolDetails.getDistNo());
