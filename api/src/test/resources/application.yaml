@@ -91,13 +91,7 @@ sftp:
     pub-key: 676
     known-hosts: 45fsdss
     location: /Index/Dev
-  tsw:
-    host: 454@tsw.aril.com
-    username: tswmail
-    priv-key: 565
-    pub-key: 888
-    known-hosts: 5644ddww
-  
+
 #Endpoints
 endpoint:
   keycloak:
