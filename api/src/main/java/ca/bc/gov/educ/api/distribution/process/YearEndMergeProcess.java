@@ -63,7 +63,7 @@ public class YearEndMergeProcess extends MergeProcess {
                 logger.debug("{} School {}/{}", mincode, schoolCounter, mapDist.size());
                 List<Student> studListNonGrad = new ArrayList<>();
 
-                ReportRequest packSlipReq = reportService.preparePackingSlipData(searchRequest, getBaseSchoolDetails(distributionPrintRequest, searchRequest, mincode, exception), processorData.getBatchId());
+                ReportRequest packSlipReq = reportService.preparePackingSlipData(searchRequest, commonSchool, processorData.getBatchId());
                 Pair<Integer, Integer> pV = processTranscriptPrintRequest(distributionPrintRequest, currentSlipCount, packSlipReq, studListNonGrad, processorData, mincode, schoolCategoryCode, numberOfPdfs);
                 currentSlipCount = pV.getLeft();
                 numberOfPdfs = pV.getRight();
