@@ -41,12 +41,14 @@ public class YearEndMergeProcess extends MergeProcess {
         int numberOfCreatedSchoolLabelReports = 0;
         List<School> schoolsForLabels = new ArrayList<>();
         List<School> districtsForLabels = new ArrayList<>();
+        List<String> processedSchools = new ArrayList<>();
         for (String mincode : mapDist.keySet()) {
             DistributionPrintRequest distributionPrintRequest = mapDist.get(mincode);
             CommonSchool commonSchool = getBaseSchoolDetails(distributionPrintRequest, searchRequest, mincode, exception);
             if (commonSchool != null) {
                 int currentSlipCount = 0;
                 schoolCounter++;
+                processedSchools.add(mincode);
                 String schoolCategoryCode = commonSchool.getSchoolCategoryCode();
 
                 logger.debug("*** School Details Acquired {} category {}", mincode, schoolCategoryCode);
@@ -61,7 +63,7 @@ public class YearEndMergeProcess extends MergeProcess {
                 logger.debug("{} School {}/{}", mincode, schoolCounter, mapDist.size());
                 List<Student> studListNonGrad = new ArrayList<>();
 
-                ReportRequest packSlipReq = reportService.preparePackingSlipData(searchRequest, getBaseSchoolDetails(distributionPrintRequest, searchRequest, mincode, exception), processorData.getBatchId());
+                ReportRequest packSlipReq = reportService.preparePackingSlipData(searchRequest, commonSchool, processorData.getBatchId());
                 Pair<Integer, Integer> pV = processTranscriptPrintRequest(distributionPrintRequest, currentSlipCount, packSlipReq, studListNonGrad, processorData, mincode, schoolCategoryCode, numberOfPdfs);
                 currentSlipCount = pV.getLeft();
                 numberOfPdfs = pV.getRight();
@@ -144,7 +146,7 @@ public class YearEndMergeProcess extends MergeProcess {
         response.getSchools().addAll(schoolsForLabels);
         response.getDistricts().addAll(districtsForLabels);
         response.setStudentSearchRequest(searchRequest);
-        response.getDistrictSchools().addAll(mapDist.keySet());
+        response.getDistrictSchools().addAll(processedSchools);
         processorData.setDistributionResponse(response);
         return processorData;
     }
