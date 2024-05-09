@@ -92,7 +92,7 @@ public class EducDistributionApiConstants {
     @Value("${endpoint.keycloak.getToken}")
     private String tokenUrl;
 
-    @Value("${endpoint.educ-school-api.school-by-min-code.url}")
+    @Value("${endpoint.grad-trax-api.commonschool-by-mincode.url}")
     private String commonSchoolByMincode;
 
     @Value("${endpoint.grad-trax-api.psi-by-psi-code.url}")
