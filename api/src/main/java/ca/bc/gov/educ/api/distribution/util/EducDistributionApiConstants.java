@@ -56,6 +56,8 @@ public class EducDistributionApiConstants {
     public static final String ASSESSMENT_LTE = "LTE10";
     public static final String ASSESSMENT_LTP = "LTP10";
 
+    public static final String TRAX_API_STATUS = "TRAX-API IS DOWN";
+
     @Value("${endpoint.grad-graduation-report-api.get-transcript-list.url}")
     private String transcriptDistributionList;
 

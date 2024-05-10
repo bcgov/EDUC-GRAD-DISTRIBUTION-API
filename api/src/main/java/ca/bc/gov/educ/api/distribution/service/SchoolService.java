@@ -35,7 +35,7 @@ public class SchoolService {
 					mincode
 			);
 		} catch (Exception e) {
-			exception.setExceptionName("TRAX-API IS DOWN");
+			exception.setExceptionName(educDistributionApiConstants.TRAX_API_STATUS);
 			exception.setExceptionDetails(e.getLocalizedMessage());
 		}
 		return commonSchool;
