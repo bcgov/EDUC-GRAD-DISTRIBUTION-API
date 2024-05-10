@@ -56,6 +56,8 @@ public class EducDistributionApiConstants {
     public static final String ASSESSMENT_LTE = "LTE10";
     public static final String ASSESSMENT_LTP = "LTP10";
 
+    public static final String TRAX_API_STATUS = "TRAX-API IS DOWN";
+
     @Value("${endpoint.grad-graduation-report-api.get-transcript-list.url}")
     private String transcriptDistributionList;
 
@@ -92,7 +94,7 @@ public class EducDistributionApiConstants {
     @Value("${endpoint.keycloak.getToken}")
     private String tokenUrl;
 
-    @Value("${endpoint.educ-school-api.school-by-min-code.url}")
+    @Value("${endpoint.grad-trax-api.commonschool-by-mincode.url}")
     private String commonSchoolByMincode;
 
     @Value("${endpoint.grad-trax-api.psi-by-psi-code.url}")
