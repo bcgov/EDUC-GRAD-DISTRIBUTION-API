@@ -5,15 +5,12 @@ import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import ca.bc.gov.educ.api.distribution.util.RestUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class SchoolService {
 
-	private static Logger logger = LoggerFactory.getLogger(SchoolService.class);
 	RestUtils restUtils;
     RestService restService;
 	EducDistributionApiConstants educDistributionApiConstants;
