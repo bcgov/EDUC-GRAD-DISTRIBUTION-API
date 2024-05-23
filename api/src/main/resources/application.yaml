@@ -143,9 +143,8 @@ endpoint:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/report/schooldistrictsupp?slrt=%s&drt=%s&srt=%s
     school_labels_report:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/report/school/labels?reportType=%s
-  educ-school-api:
-    school-by-min-code:
-      url: ${EDUC_SCHOOL_API}api/v1/schools/%s
+
+
   grad-trax-api:
     psi-by-psi-code:
       url: ${GRAD_TRAX_API}api/v1/trax/psi/%s
@@ -153,6 +152,8 @@ endpoint:
       url: ${GRAD_TRAX_API}api/v1/trax/school/%s
     district-by-dist-code:
       url: ${GRAD_TRAX_API}api/v1/trax/district/%s
+    commonschool-by-mincode:
+      url: ${GRAD_TRAX_API}api/v1/trax/school/common/%s
   grad-batch-graduation-api:
     distribution:
       notify-completion:

@@ -108,7 +108,7 @@ public class SchoolServiceTest {
 
         var response = this.schoolService.getCommonSchoolDetails("234567", exceptionMessage);
         Assert.assertNull(response);
-        Assert.assertEquals("SCHOOL-API IS DOWN", exceptionMessage.getExceptionName());
+        Assert.assertEquals(EducDistributionApiConstants.TRAX_API_STATUS, exceptionMessage.getExceptionName());
     }
 
     @Test
