@@ -77,7 +77,7 @@ public class MergeProcess extends BaseProcess {
 				numberOfPdfs = pV.getRight();
 				pV = processYedrCertificatePrintRequest(distributionPrintRequest,currentSlipCount,packSlipReq,studListNonGrad,processorData,mincode,schoolCategoryCode,numberOfPdfs);
 				numberOfPdfs = pV.getRight();
-				if(!studListNonGrad.isEmpty()) {
+				if(!studListNonGrad.isEmpty() && StringUtils.equalsAnyIgnoreCase(processorData.getActivityCode(), MONTHLYDIST, SUPPDIST)) {
 					createAndSaveNonGradReport(schoolDetails,studListNonGrad,mincode,educDistributionApiConstants.getStudentNonGradProjected());
 				}
 				logger.debug("PDFs Merged {}", schoolDetails.getSchoolName());
