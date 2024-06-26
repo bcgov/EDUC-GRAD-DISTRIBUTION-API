@@ -11,6 +11,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjusters;
 
 import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants.SECOND_DEFAULT_DATE_FORMAT;
 
@@ -34,7 +35,7 @@ public class GradLocalDateDeserializer extends StdDeserializer<LocalDate> {
             if(slashCount > 0) {
                 formatter = DateTimeFormatter.ofPattern(SECOND_DEFAULT_DATE_FORMAT);
             }
-            return LocalDate.parse(dateAsString, formatter);
+            return LocalDate.parse(dateAsString, formatter).with(TemporalAdjusters.lastDayOfMonth());
         } else if(jsonParser.hasToken(JsonToken.VALUE_NUMBER_INT)) {
             long timestamp = jsonParser.getValueAsLong();
             return LocalDate.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault());
