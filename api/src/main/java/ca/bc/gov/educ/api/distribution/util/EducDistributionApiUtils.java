@@ -15,7 +15,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -179,7 +178,7 @@ public class EducDistributionApiUtils {
 		String actualSessionDate = sessionDate + "/01";
 		String sDates = null;
 		try {
-			Date temp = toLastDayOfMonth(parseDate(actualSessionDate, EducDistributionApiConstants.SECOND_DEFAULT_DATE_FORMAT));
+			Date temp = parseDate(actualSessionDate, EducDistributionApiConstants.SECOND_DEFAULT_DATE_FORMAT);
 			sDates = formatDate(temp, EducDistributionApiConstants.DEFAULT_DATE_FORMAT);
 		} catch (ParseException pe) {
 			logger.error(ERROR,pe.getMessage());
@@ -191,7 +190,7 @@ public class EducDistributionApiUtils {
 		String actualSessionDate = sessionDate + "/01";
 		Date sDate = null;
 		try {
-			Date temp = toLastDayOfMonth(EducDistributionApiUtils.parseDate(actualSessionDate, EducDistributionApiConstants.SECOND_DEFAULT_DATE_FORMAT));
+			Date temp = EducDistributionApiUtils.parseDate(actualSessionDate, EducDistributionApiConstants.SECOND_DEFAULT_DATE_FORMAT);
 			String sDates = EducDistributionApiUtils.formatDate(temp, EducDistributionApiConstants.DEFAULT_DATE_FORMAT);
 			sDate = EducDistributionApiUtils.parseDate(sDates, EducDistributionApiConstants.DEFAULT_DATE_FORMAT);
 		} catch (ParseException pe) {
@@ -252,16 +251,6 @@ public class EducDistributionApiUtils {
 		} catch (Exception e) {
 			logger.error("Write Exception {}",e.getLocalizedMessage());
 		}
-	}
-
-	static Date toLastDayOfMonth(Date date) {
-		if(date != null) {
-			Calendar cal = Calendar.getInstance();
-			cal.setTime(date);
-			cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
-			return cal.getTime();
-		}
-		return null;
 	}
 
 	/**
