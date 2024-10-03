@@ -51,6 +51,15 @@ logging:
         boot:
           autoconfigure:
             logging: INFO
+    jdk:
+      management:
+        agent: ERROR
+    sun:
+      management:
+        jmxremote: ERROR
+      rmi:
+        transport:
+          tcp: ERROR
 
 #API Documentation
 springdoc:
