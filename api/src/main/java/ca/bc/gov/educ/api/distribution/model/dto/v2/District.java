@@ -1,11 +1,11 @@
-package ca.bc.gov.educ.api.distribution.model.dto;
+package ca.bc.gov.educ.api.distribution.model.dto.v2;
 
 import lombok.Data;
 
 import java.io.Serializable;
 
 @Data
-public class TraxDistrict implements Serializable {
+public class District implements Serializable {
 
     private static final long serialVersionUID = 2L;
 

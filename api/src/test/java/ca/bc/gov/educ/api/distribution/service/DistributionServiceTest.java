@@ -74,7 +74,7 @@ public class DistributionServiceTest {
     private Mono<ReportData> inputResponseReport;
 
     @Mock
-    private Mono<CommonSchool> inputResponseSchool;
+    private Mono<ca.bc.gov.educ.api.distribution.model.dto.v2.School> inputResponseSchool;
 
     @Mock
     private Mono<Psi> inputResponsePsi;
@@ -256,11 +256,12 @@ public class DistributionServiceTest {
         String accessToken = MOCK_TOKEN;
         String mincode = "123123133";
 
-        CommonSchool schObj = new CommonSchool();
-        schObj.setSchlNo(mincode.substring(2, mincode.length() - 1));
-        schObj.setDistNo(mincode.substring(0, 2));
-        schObj.setPhysAddressLine1("sadadad");
-        schObj.setPhysAddressLine2("adad");
+        ca.bc.gov.educ.api.distribution.model.dto.v2.School schObj = new ca.bc.gov.educ.api.distribution.model.dto.v2.School();
+        schObj.setMinCode(mincode);
+        schObj.setSchlNo(mincode.substring(2,mincode.length()-1));
+        schObj.setDistNo(mincode.substring(0,2));
+        schObj.setAddress1("sadadad");
+        schObj.setAddress2("adad");
 
         SchoolReportDistribution obj = new SchoolReportDistribution();
         obj.setId(UUID.randomUUID());
@@ -283,7 +284,7 @@ public class DistributionServiceTest {
         printRequest.setSchoolReportPostRequest(tPReq);
         mapDist.put(mincode, printRequest);
 
-        mockTraxSchool(mincode);
+        mockSchoolObject(mincode);
 
         byte[] bytesSAR = "Any String you want".getBytes();
 
@@ -325,13 +326,6 @@ public class DistributionServiceTest {
         when(this.retryBackoffSpecMock.onRetryExhaustedThrow(any())).thenReturn(retryBackoffSpecMock);
         when(this.inputResponse.retryWhen(any(reactor.util.retry.Retry.class))).thenReturn(inputResponse);
         when(this.inputResponse.block()).thenReturn(inSRPack);
-
-        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(String.format(constants.getCommonSchoolByMincode(), mincode))).thenReturn(this.requestHeadersMock);
-        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
-        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(CommonSchool.class)).thenReturn(inputResponseSchool);
-        when(this.inputResponseSchool.block()).thenReturn(schObj);
 
         SchoolReports schoolLabelsReports = new SchoolReports();
         schoolLabelsReports.setSchoolOfRecord("000000000");
@@ -571,7 +565,7 @@ public class DistributionServiceTest {
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(Psi.class)).thenReturn(Mono.just(psi));
 
-        Mockito.when(schoolService.getCommonSchoolDetails(mincode, exception)).thenReturn(schObj);
+        Mockito.when(schoolService.getSchool(mincode, exception)).thenReturn(schObj);
 
         DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).build();
         return gradDistributionService.distributeCredentials(runType, batchId, distributionRequest, activityCode, transmissionMode.toUpperCase(), "Y", accessToken);
@@ -591,14 +585,14 @@ public class DistributionServiceTest {
         String transmissionMode = "paper";
         String mincode = "123123133";
 
-        CommonSchool schObj = null;
-        if (!schoolNull) {
-            schObj = new CommonSchool();
-            schObj.setSchlNo(mincode.substring(2, mincode.length() - 1));
-            schObj.setDistNo(mincode.substring(0, 2));
-            schObj.setPhysAddressLine1("sadadad");
-            schObj.setPhysAddressLine2("adad");
-        }
+//        School schObj = null;
+//        if (!schoolNull) {
+//            schObj = new School();
+//            schObj.setSchlNo(mincode.substring(2, mincode.length() - 1));
+//            schObj.setDistNo(mincode.substring(0, 2));
+//            schObj.setPhysAddressLine1("sadadad");
+//            schObj.setPhysAddressLine2("adad");
+//        }
 
 
         List<BlankCredentialDistribution> bcdList = new ArrayList<>();
@@ -619,7 +613,7 @@ public class DistributionServiceTest {
         printRequest.setTranscriptPrintRequest(tPReq);
         mapDist.put(mincode, printRequest);
 
-        mockTraxSchool(mincode);
+        mockSchoolObject(mincode);
 
         byte[] bytesSAR = "Any String you want".getBytes();
 
@@ -645,13 +639,6 @@ public class DistributionServiceTest {
 
         Mockito.doReturn(getMockResponseObject()).when(this.restUtils).getTokenResponseObject();
 
-        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(String.format(constants.getCommonSchoolByMincode(), mincode))).thenReturn(this.requestHeadersMock);
-        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
-        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(CommonSchool.class)).thenReturn(inputResponseSchool);
-        when(this.inputResponseSchool.block()).thenReturn(schObj);
-
         DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).build();
         return gradDistributionService.distributeCredentials(runType, batchId, distributionRequest, null, transmissionMode, localDownload, accessToken);
     }
@@ -664,11 +651,11 @@ public class DistributionServiceTest {
         String accessToken = MOCK_TOKEN;
         String mincode = "123123133";
 
-        CommonSchool schObj = new CommonSchool();
+        ca.bc.gov.educ.api.distribution.model.dto.v2.School schObj = new ca.bc.gov.educ.api.distribution.model.dto.v2.School();
         schObj.setSchlNo(mincode.substring(2, mincode.length() - 1));
         schObj.setDistNo(mincode.substring(0, 2));
-        schObj.setPhysAddressLine1("sadadad");
-        schObj.setPhysAddressLine2("adad");
+        schObj.setAddress1("sadadad");
+        schObj.setAddress2("adad");
 
         List<BlankCredentialDistribution> bcdList = new ArrayList<>();
         BlankCredentialDistribution bcd = new BlankCredentialDistribution();
@@ -693,7 +680,7 @@ public class DistributionServiceTest {
             printRequest.setYedrCertificatePrintRequest(cReq);
         mapDist.put(mincode, printRequest);
 
-        mockTraxSchool(mincode);
+        mockSchoolObject(mincode);
 
         byte[] bytesSAR = "Any String you want".getBytes();
 
@@ -718,7 +705,7 @@ public class DistributionServiceTest {
 
         mockTokenResponseObject();
 
-        Mockito.when(schoolService.getCommonSchoolDetails(mincode, exception)).thenReturn(schObj);
+        Mockito.when(schoolService.getSchool(mincode, exception)).thenReturn(schObj);
         DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).build();
         return gradDistributionService.distributeCredentials(runType, batchId, distributionRequest, null, transmissionMode, "Y", accessToken);
     }
@@ -730,13 +717,13 @@ public class DistributionServiceTest {
         String transmissionMode = "ftp";
         String mincode = "123123133";
 
-        CommonSchool schObj = null;
+        ca.bc.gov.educ.api.distribution.model.dto.v2.School schObj = null;
         if (!schoolNull) {
-            schObj = new CommonSchool();
+            schObj = new ca.bc.gov.educ.api.distribution.model.dto.v2.School();
             schObj.setSchlNo(mincode.substring(2, mincode.length() - 1));
             schObj.setDistNo(mincode.substring(0, 2));
-            schObj.setPhysAddressLine1("sadadad");
-            schObj.setPhysAddressLine2("adad");
+            schObj.setAddress1("sadadad");
+            schObj.setAddress2("adad");
         }
 
         List<StudentCredentialDistribution> scdList = new ArrayList<>();
@@ -777,7 +764,7 @@ public class DistributionServiceTest {
         mapDist.put(mincode, printRequest);
 
         if (!schoolNull) {
-            mockTraxSchool(mincode);
+            mockSchoolObject(mincode);
         }
 
         byte[] bytesSAR = "Any String you want".getBytes();
@@ -858,11 +845,11 @@ public class DistributionServiceTest {
         })).thenReturn(Mono.just(List.of(studentTranscripts)));
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(String.format(constants.getCommonSchoolByMincode(), mincode))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolByMincode(), mincode))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(CommonSchool.class)).thenReturn(inputResponseSchool);
+        when(this.responseMock.bodyToMono(ca.bc.gov.educ.api.distribution.model.dto.v2.School.class)).thenReturn(inputResponseSchool);
         when(this.inputResponseSchool.block()).thenReturn(schObj);
 
         mockTokenResponseObject();
@@ -900,11 +887,12 @@ public class DistributionServiceTest {
         String accessToken = MOCK_TOKEN;
         String mincode = "123123133";
 
-        CommonSchool schObj = new CommonSchool();
+        ca.bc.gov.educ.api.distribution.model.dto.v2.School schObj = new ca.bc.gov.educ.api.distribution.model.dto.v2.School();
+        schObj.setMinCode(mincode);
         schObj.setSchlNo(mincode.substring(2, mincode.length() - 1));
         schObj.setDistNo(mincode.substring(0, 2));
-        schObj.setPhysAddressLine1("sadadad");
-        schObj.setPhysAddressLine2("adad");
+        schObj.setAddress1("sadadad");
+        schObj.setAddress2("adad");
 
         List<StudentCredentialDistribution> scdList = new ArrayList<>();
         StudentCredentialDistribution scd = new StudentCredentialDistribution();
@@ -971,7 +959,7 @@ public class DistributionServiceTest {
             printRequest.setYedrCertificatePrintRequest(cReq);
         mapDist.put(mincode, printRequest);
 
-        mockTraxSchool(mincode);
+        mockSchoolObject(mincode);
 
         byte[] bytesSAR = "Any String you want".getBytes();
         when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
@@ -1063,7 +1051,7 @@ public class DistributionServiceTest {
         mockTokenResponseObject();
 
         if (properName == null)
-            Mockito.doReturn(schObj).when(schoolService).getCommonSchoolDetails(mincode, exception);
+            Mockito.doReturn(schObj).when(schoolService).getSchool(mincode, exception);
         else
             Mockito.doReturn(schObj).when(schoolService).getDefaultSchoolDetailsForPackingSlip(null, properName);
 
@@ -1099,13 +1087,14 @@ public class DistributionServiceTest {
         String transmissionMode = "ftp";
         String mincode = "123123133";
 
-        CommonSchool schObj = null;
+        ca.bc.gov.educ.api.distribution.model.dto.v2.School schObj = null;
         if (!schoolNull) {
-            schObj = new CommonSchool();
+            schObj = new ca.bc.gov.educ.api.distribution.model.dto.v2.School();
+            schObj.setMinCode(mincode);
             schObj.setSchlNo(mincode.substring(2, mincode.length() - 1));
             schObj.setDistNo(mincode.substring(0, 2));
-            schObj.setPhysAddressLine1("sadadad");
-            schObj.setPhysAddressLine2("adad");
+            schObj.setAddress1("sadadad");
+            schObj.setAddress2("adad");
         }
 
         List<StudentCredentialDistribution> scdList = new ArrayList<>();
@@ -1168,7 +1157,7 @@ public class DistributionServiceTest {
             printRequest.setYedrCertificatePrintRequest(cReq);
         mapDist.put(mincode, printRequest);
 
-        mockTraxSchool(mincode);
+        mockSchoolObject(mincode);
 
         byte[] bytesSAR = "Any String you want".getBytes();
         when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
@@ -1230,11 +1219,11 @@ public class DistributionServiceTest {
         when(this.inputResponseReport.block()).thenReturn(data);
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(String.format(constants.getCommonSchoolByMincode(), mincode))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolByMincode(), mincode))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(CommonSchool.class)).thenReturn(inputResponseSchool);
+        when(this.responseMock.bodyToMono(ca.bc.gov.educ.api.distribution.model.dto.v2.School.class)).thenReturn(inputResponseSchool);
         when(this.inputResponseSchool.block()).thenReturn(schObj);
 
         mockTokenResponseObject();
@@ -1325,7 +1314,7 @@ public class DistributionServiceTest {
         student.setGraduationData(gradData);
         student.setGraduationStatus(gradStatus);
         data.setStudent(student);
-        data.setSchool(new School());
+        data.setSchool(new ca.bc.gov.educ.api.distribution.model.dto.School());
         Transcript transcript = new Transcript();
         data.setTranscript(transcript);
         TranscriptResult result1 = new TranscriptResult();
@@ -1528,15 +1517,20 @@ public class DistributionServiceTest {
         return gradDistributionService.distributeCredentials(runType, batchId, distributionRequest, activityCode, transmissionMode.toUpperCase(), localDownload, accessToken);
     }
 
-    protected synchronized void mockTraxSchool(String mincode) {
-        TraxSchool traxSchool = new TraxSchool();
-        traxSchool.setMinCode(mincode);
+    protected synchronized void mockSchoolObject(String mincode) {
+        ca.bc.gov.educ.api.distribution.model.dto.v2.School schObj = new ca.bc.gov.educ.api.distribution.model.dto.v2.School();
+        schObj.setMinCode(mincode);
+        schObj.setSchlNo(mincode.substring(2,mincode.length()-1));
+        schObj.setDistNo(mincode.substring(0,2));
+        schObj.setAddress1("sadadad");
+        schObj.setAddress2("adad");
+
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(String.format(constants.getTraxSchoolByMincode(), traxSchool.getMinCode()))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolByMincode(), schObj.getMinCode()))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(TraxSchool.class)).thenReturn(Mono.just(traxSchool));
+        when(this.responseMock.bodyToMono(ca.bc.gov.educ.api.distribution.model.dto.v2.School.class)).thenReturn(Mono.just(schObj));
     }
 
     private void mockTokenResponseObject() {

@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.distribution.process;
 
 import ca.bc.gov.educ.api.distribution.model.dto.*;
+import ca.bc.gov.educ.api.distribution.model.dto.v2.School;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -41,7 +42,7 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 			counter++;
 			int currentSlipCount = 0;
 			DistributionPrintRequest distributionPrintRequest = mapDist.get(mincode);
-			CommonSchool schoolDetails = getBaseSchoolDetails(distributionPrintRequest, searchRequest, mincode,exception);
+			School schoolDetails = getBaseSchoolDetails(distributionPrintRequest, searchRequest, mincode,exception);
 			if(schoolDetails != null) {
 				logger.debug("*** School Details Acquired {}", schoolDetails.getSchoolName());
 

@@ -94,17 +94,14 @@ public class EducDistributionApiConstants {
     @Value("${endpoint.keycloak.getToken}")
     private String tokenUrl;
 
-    @Value("${endpoint.grad-trax-api.commonschool-by-mincode.url}")
-    private String commonSchoolByMincode;
-
     @Value("${endpoint.grad-trax-api.psi-by-psi-code.url}")
     private String psiByPsiCode;
 
     @Value("${endpoint.grad-trax-api.school-by-min-code.url}")
-    private String traxSchoolByMincode;
+    private String schoolByMincode;
 
     @Value("${endpoint.grad-trax-api.district-by-dist-code.url}")
-    private String traxDistrictByDistcode;
+    private String districtByDistcode;
 
     @Value("${endpoint.grad-report-api.get-school-distribution-report.url}")
     private String schoolDistributionReport;

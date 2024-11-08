@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.distribution.process;
 
 import ca.bc.gov.educ.api.distribution.model.dto.*;
+import ca.bc.gov.educ.api.distribution.model.dto.v2.District;
 import ca.bc.gov.educ.api.distribution.service.*;
 import ca.bc.gov.educ.api.distribution.util.*;
 import org.apache.commons.codec.binary.Base64;
@@ -57,11 +58,11 @@ public abstract class BaseProcess implements DistributionProcess {
     @Autowired
     PsiService psiService;
 
-    protected CommonSchool getBaseSchoolDetails(DistributionPrintRequest distributionPrintRequest, StudentSearchRequest searchRequest, String mincode, ExceptionMessage exception) {
+    protected ca.bc.gov.educ.api.distribution.model.dto.v2.School getBaseSchoolDetails(DistributionPrintRequest distributionPrintRequest, StudentSearchRequest searchRequest, String mincode, ExceptionMessage exception) {
         if (distributionPrintRequest != null && (StringUtils.isNotBlank(distributionPrintRequest.getProperName()) || SCHOOL_LABELS_CODE.equals(mincode)))
             return schoolService.getDefaultSchoolDetailsForPackingSlip(searchRequest, distributionPrintRequest.getProperName());
         else
-            return schoolService.getCommonSchoolDetails(mincode, exception);
+            return schoolService.getSchool(mincode, exception);
     }
 
     protected void setExtraDataForPackingSlip(ReportRequest packSlipReq, String paperType, int total, int quantity, int currentSlip, String orderType, Long batchId) {
@@ -91,7 +92,7 @@ public abstract class BaseProcess implements DistributionProcess {
         postingDistributionService.zipBatchDirectory(batchId, download, numberOfPdfs, pathToZip);
     }
 
-    protected Integer createSchoolLabelsReport(List<School> schools, String schooLabelReportType) {
+    protected Integer createSchoolLabelsReport(List<ca.bc.gov.educ.api.distribution.model.dto.School> schools, String schooLabelReportType) {
         return postingDistributionService.createSchoolLabelsReport(schools, schooLabelReportType);
     }
 
@@ -152,8 +153,8 @@ public abstract class BaseProcess implements DistributionProcess {
         return numberOfPdfs;
     }
 
-    protected void processSchoolsForLabels(List<School> schools, Psi psi) {
-        School school = new School();
+    protected void processSchoolsForLabels(List<ca.bc.gov.educ.api.distribution.model.dto.School> schools, Psi psi) {
+        ca.bc.gov.educ.api.distribution.model.dto.School school = new ca.bc.gov.educ.api.distribution.model.dto.School();
         school.setMincode(psi.getPsiCode());
         school.setName(psi.getPsiName());
         school.setTypeBanner(psi.getAttentionName());
@@ -169,12 +170,12 @@ public abstract class BaseProcess implements DistributionProcess {
         schools.add(school);
     }
 
-    protected void processSchoolsForLabels(String recipient, List<School> schools, String mincode, ExceptionMessage exception) {
-        School existSchool = schools.stream().filter(s -> mincode.equalsIgnoreCase(s.getMincode())).findAny().orElse(null);
+    protected void processSchoolsForLabels(String recipient, List<ca.bc.gov.educ.api.distribution.model.dto.School> schools, String mincode, ExceptionMessage exception) {
+        ca.bc.gov.educ.api.distribution.model.dto.School existSchool = schools.stream().filter(s -> mincode.equalsIgnoreCase(s.getMincode())).findAny().orElse(null);
         if (existSchool != null) return;
-        TraxSchool traxSchool = schoolService.getTraxSchool(mincode, exception);
+        ca.bc.gov.educ.api.distribution.model.dto.v2.School traxSchool = schoolService.getSchool(mincode, exception);
         if (traxSchool != null) {
-            School school = new School();
+            ca.bc.gov.educ.api.distribution.model.dto.School school = new ca.bc.gov.educ.api.distribution.model.dto.School();
             school.setMincode(traxSchool.getMinCode());
             school.setName(traxSchool.getSchoolName());
             school.setTypeBanner(ObjectUtils.defaultIfNull(StringUtils.trimToNull(recipient), "PRINCIPAL"));
@@ -190,26 +191,26 @@ public abstract class BaseProcess implements DistributionProcess {
         }
     }
 
-    protected void processDistrictsForLabels(String recipient, List<School> schools, String distcode, ExceptionMessage exception) {
-        School existSchool = schools.stream().filter(s -> distcode.equalsIgnoreCase(s.getMincode())).findAny().orElse(null);
+    protected void processDistrictsForLabels(String recipient, List<ca.bc.gov.educ.api.distribution.model.dto.School> schools, String distcode, ExceptionMessage exception) {
+        ca.bc.gov.educ.api.distribution.model.dto.School existSchool = schools.stream().filter(s -> distcode.equalsIgnoreCase(s.getMincode())).findAny().orElse(null);
         if (existSchool != null) {
             logger.debug("District {} already exists in the district labels", existSchool.getMincode());
             return;
         }
         logger.debug("Acquiring new district {} from TRAX API", distcode);
-        TraxDistrict traxDistrict = schoolService.getTraxDistrict(distcode, exception);
-        if (traxDistrict != null) {
-            School school = new School();
-            school.setMincode(traxDistrict.getDistrictNumber());
-            school.setName(traxDistrict.getSuperIntendent());
+        District district = schoolService.getDistrict(distcode, exception);
+        if (district != null) {
+            ca.bc.gov.educ.api.distribution.model.dto.School school = new ca.bc.gov.educ.api.distribution.model.dto.School();
+            school.setMincode(district.getDistrictNumber());
+            school.setName(district.getSuperIntendent());
             school.setTypeBanner(ObjectUtils.defaultIfNull(StringUtils.trimToNull(recipient), "SUPERINTENDENT"));
             Address address = new Address();
-            address.setStreetLine1(traxDistrict.getAddress1());
-            address.setStreetLine2(traxDistrict.getAddress2());
-            address.setCity(traxDistrict.getCity());
-            address.setRegion(traxDistrict.getProvCode());
-            address.setCountry(traxDistrict.getCountryCode());
-            address.setCode(traxDistrict.getPostal());
+            address.setStreetLine1(district.getAddress1());
+            address.setStreetLine2(district.getAddress2());
+            address.setCity(district.getCity());
+            address.setRegion(district.getProvCode());
+            address.setCountry(district.getCountryCode());
+            address.setCode(district.getPostal());
             school.setAddress(address);
             schools.add(school);
             logger.debug("District {} has been added to the district labels", school.getMincode());

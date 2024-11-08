@@ -1,6 +1,8 @@
 package ca.bc.gov.educ.api.distribution.service;
 
 import ca.bc.gov.educ.api.distribution.model.dto.*;
+import ca.bc.gov.educ.api.distribution.model.dto.v2.District;
+import ca.bc.gov.educ.api.distribution.model.dto.v2.School;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import ca.bc.gov.educ.api.distribution.util.RestUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -22,45 +24,30 @@ public class SchoolService {
 		this.educDistributionApiConstants = educDistributionApiConstants;
 	}
 
-	public CommonSchool getCommonSchoolDetails(String mincode, ExceptionMessage exception) {
-		CommonSchool commonSchool = null;
-		try
-		{
-			commonSchool = restService.executeGet(
-					educDistributionApiConstants.getCommonSchoolByMincode(),
-					CommonSchool.class,
-					mincode
-			);
-		} catch (Exception e) {
-			exception.setExceptionName(EducDistributionApiConstants.TRAX_API_STATUS);
-			exception.setExceptionDetails(e.getLocalizedMessage());
-		}
-		return commonSchool;
-	}
-
-	public CommonSchool getDefaultSchoolDetailsForPackingSlip(StudentSearchRequest searchRequest, String properName) {
-		CommonSchool commonSchool = new CommonSchool();
+	public ca.bc.gov.educ.api.distribution.model.dto.v2.School getDefaultSchoolDetailsForPackingSlip(StudentSearchRequest searchRequest, String properName) {
+		School commonSchool = new ca.bc.gov.educ.api.distribution.model.dto.v2.School();
 		Address address = (searchRequest == null || searchRequest.getAddress() == null) ? null : searchRequest.getAddress();
 		String userName = searchRequest == null ? null : searchRequest.getUser();
 		commonSchool.setSchlNo(String.format("%09d" , 0));
+		commonSchool.setMinCode(String.format("%09d" , 0));
 		commonSchool.setSchoolName(ObjectUtils.defaultIfNull(properName, ObjectUtils.defaultIfNull(userName, "")));
 		commonSchool.setDistNo(String.format("%03d" , 0));
-		commonSchool.setScAddressLine1(address == null ? "4TH FLOOR 620 SUPERIOR" : address.getStreetLine1());
-		commonSchool.setScAddressLine2(address == null ? "PO BOX 9886 STN PROV GOVT" : address.getStreetLine2());
-		commonSchool.setScCity(address == null ? "VICTORIA" : address.getCity());
-		commonSchool.setScProvinceCode(address == null ? "BC" : address.getRegion());
-		commonSchool.setScPostalCode(address == null ? "V8W 9T6" : address.getCode());
-		commonSchool.setScCountryCode(address == null ? "CN" : address.getCountry());
+		commonSchool.setAddress1(address == null ? "4TH FLOOR 620 SUPERIOR" : address.getStreetLine1());
+		commonSchool.setAddress2(address == null ? "PO BOX 9886 STN PROV GOVT" : address.getStreetLine2());
+		commonSchool.setCity(address == null ? "VICTORIA" : address.getCity());
+		commonSchool.setProvCode(address == null ? "BC" : address.getRegion());
+		commonSchool.setPostal(address == null ? "V8W 9T6" : address.getCode());
+		commonSchool.setCountryCode(address == null ? "CN" : address.getCountry());
 		return commonSchool;
 	}
 
-	public TraxSchool getTraxSchool(String minCode, ExceptionMessage exception) {
-		TraxSchool traxSchool = null;
+	public ca.bc.gov.educ.api.distribution.model.dto.v2.School getSchool(String minCode, ExceptionMessage exception) {
+		ca.bc.gov.educ.api.distribution.model.dto.v2.School school = null;
 		if(!StringUtils.isBlank(minCode)) {
 			try {
-				traxSchool = restService.executeGet(
-								educDistributionApiConstants.getTraxSchoolByMincode(),
-								TraxSchool.class,
+				school = restService.executeGet(
+								educDistributionApiConstants.getSchoolByMincode(),
+								ca.bc.gov.educ.api.distribution.model.dto.v2.School.class,
 								minCode
 						);
 			} catch (Exception e) {
@@ -68,16 +55,16 @@ public class SchoolService {
 				exception.setExceptionDetails(e.getLocalizedMessage());
 			}
 		}
-		return traxSchool;
+		return school;
 	}
 
-	public TraxDistrict getTraxDistrict(String distCode, ExceptionMessage exception) {
-		TraxDistrict traxDistrict = null;
+	public District getDistrict(String distCode, ExceptionMessage exception) {
+		District district = null;
 		if(!StringUtils.isBlank(distCode)) {
 			try {
-				traxDistrict = restService.executeGet(
-								educDistributionApiConstants.getTraxDistrictByDistcode(),
-								TraxDistrict.class,
+				district = restService.executeGet(
+								educDistributionApiConstants.getDistrictByDistcode(),
+								District.class,
 								distCode
 						);
 			} catch (Exception e) {
@@ -85,6 +72,6 @@ public class SchoolService {
 				exception.setExceptionDetails(e.getLocalizedMessage());
 			}
 		}
-		return traxDistrict;
+		return district;
 	}
 }

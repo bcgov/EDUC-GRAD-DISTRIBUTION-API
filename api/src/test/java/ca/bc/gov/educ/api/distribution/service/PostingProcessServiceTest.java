@@ -3,7 +3,7 @@ package ca.bc.gov.educ.api.distribution.service;
 import ca.bc.gov.educ.api.distribution.model.dto.DistributionResponse;
 import ca.bc.gov.educ.api.distribution.model.dto.School;
 import ca.bc.gov.educ.api.distribution.model.dto.SchoolReports;
-import ca.bc.gov.educ.api.distribution.model.dto.TraxDistrict;
+import ca.bc.gov.educ.api.distribution.model.dto.v2.District;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Test;
@@ -329,7 +329,7 @@ public class PostingProcessServiceTest {
 
     @Test
     public void testCreateDistrictLabelsReport() {
-        TraxDistrict district = new TraxDistrict();
+        District district = new District();
         district.setDistrictNumber(RandomStringUtils.randomNumeric(3));
         district.setDistrictName(RandomStringUtils.randomAlphabetic(15));
 
@@ -348,7 +348,7 @@ public class PostingProcessServiceTest {
 
     @Test
     public void testCreateDistrictSchoolMonthReport() {
-        TraxDistrict district = new TraxDistrict();
+        District district = new District();
         district.setDistrictNumber(RandomStringUtils.randomNumeric(3));
         district.setDistrictName(RandomStringUtils.randomAlphabetic(15));
 
@@ -365,7 +365,7 @@ public class PostingProcessServiceTest {
 
     @Test
     public void testCreateDistrictSchoolSuppReport() {
-        TraxDistrict district = new TraxDistrict();
+        District district = new District();
         district.setDistrictNumber(RandomStringUtils.randomNumeric(3));
         district.setDistrictName(RandomStringUtils.randomAlphabetic(15));
 
@@ -382,7 +382,7 @@ public class PostingProcessServiceTest {
 
     @Test
     public void testCreateDistrictSchoolYearEndReport() {
-        TraxDistrict district = new TraxDistrict();
+        District district = new District();
         district.setDistrictNumber(RandomStringUtils.randomNumeric(3));
         district.setDistrictName(RandomStringUtils.randomAlphabetic(15));
 
@@ -399,7 +399,7 @@ public class PostingProcessServiceTest {
 
     @Test
     public void testCreateDistrictSchoolYearEndNonGradReport() {
-        TraxDistrict district = new TraxDistrict();
+        District district = new District();
         district.setDistrictNumber(RandomStringUtils.randomNumeric(3));
         district.setDistrictName(RandomStringUtils.randomAlphabetic(15));
 

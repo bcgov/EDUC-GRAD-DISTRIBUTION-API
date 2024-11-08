@@ -1,8 +1,8 @@
 package ca.bc.gov.educ.api.distribution.service;
 
 import ca.bc.gov.educ.api.distribution.model.dto.Address;
-import ca.bc.gov.educ.api.distribution.model.dto.CommonSchool;
 import ca.bc.gov.educ.api.distribution.model.dto.StudentSearchRequest;
+import ca.bc.gov.educ.api.distribution.model.dto.v2.School;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,7 +20,8 @@ public class ReportServiceTest {
     @Test
     public void testPreparePackingSlipData() {
         String mincode = "123456";
-        CommonSchool commonSchool = new CommonSchool();
+        School commonSchool = new School();
+        commonSchool.setMinCode(mincode);
         commonSchool.setSchlNo(mincode);
         commonSchool.setSchoolName("Test School");
 
