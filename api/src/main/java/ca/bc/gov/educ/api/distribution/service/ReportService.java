@@ -55,26 +55,26 @@ public class ReportService {
 		return new InputStreamResource(bis);
 	}
 
-	public ReportRequest preparePackingSlipData(StudentSearchRequest searchRequest, CommonSchool schoolDetails, Long batchId) {
-		School schObj = new School();
+	public ReportRequest preparePackingSlipData(StudentSearchRequest searchRequest, ca.bc.gov.educ.api.distribution.model.dto.v2.School schoolDetails, Long batchId) {
+		ca.bc.gov.educ.api.distribution.model.dto.School schObj = new ca.bc.gov.educ.api.distribution.model.dto.School();
 		boolean useSchoolAddress = (searchRequest == null || searchRequest.getAddress() == null);
 		Address addr = useSchoolAddress ? new Address() : searchRequest.getAddress();
 		if(useSchoolAddress) {
-			TraxSchool traxSchool = schoolService.getTraxSchool(schoolDetails.getDistNo()+schoolDetails.getSchlNo(), new ExceptionMessage());
-			if(traxSchool != null) {
-				addr.setStreetLine1(traxSchool.getAddress1());
-				addr.setStreetLine2(traxSchool.getAddress2());
-				addr.setCity(traxSchool.getCity());
-				addr.setCode(traxSchool.getPostal());
-				addr.setCountry(traxSchool.getCountryName());
-				addr.setRegion(traxSchool.getProvinceName());
+			ca.bc.gov.educ.api.distribution.model.dto.v2.School school = schoolService.getSchool(schoolDetails.getDistNo()+schoolDetails.getSchlNo(), new ExceptionMessage());
+			if(school != null) {
+				addr.setStreetLine1(school.getAddress1());
+				addr.setStreetLine2(school.getAddress2());
+				addr.setCity(school.getCity());
+				addr.setCode(school.getPostal());
+				addr.setCountry(school.getCountryCode());
+				addr.setRegion(school.getProvCode());
 			} else {
-				addr.setStreetLine1(schoolDetails.getScAddressLine1());
-				addr.setStreetLine2(schoolDetails.getScAddressLine2());
-				addr.setCity(schoolDetails.getScCity());
-				addr.setCode(schoolDetails.getScPostalCode());
-				addr.setCountry(schoolDetails.getScCountryCode());
-				addr.setRegion(schoolDetails.getScProvinceCode());
+				addr.setStreetLine1(schoolDetails.getAddress1());
+				addr.setStreetLine2(schoolDetails.getAddress2());
+				addr.setCity(schoolDetails.getCity());
+				addr.setCode(schoolDetails.getPostal());
+				addr.setCountry(schoolDetails.getCountryCode());
+				addr.setRegion(schoolDetails.getProvCode());
 			}
 		}
 		schObj.setAddress(addr);
@@ -83,7 +83,7 @@ public class ReportService {
 		schObj.setSchlno(schoolDetails.getSchlNo());
 		schObj.setMincode(schoolDetails.getDistNo()+schoolDetails.getSchlNo());
 		schObj.setSignatureCode(schoolDetails.getDistNo());
-		schObj.setSchoolCategoryCode(schoolDetails.getSchoolCategoryCode());
+		schObj.setSchoolCategoryCode(schoolDetails.getSchoolCategoryLegacyCode());
 		schObj.setTypeIndicator("");
 		schObj.setTypeBanner("");
 		String userName = searchRequest == null ? "" : searchRequest.getUser();
@@ -91,7 +91,7 @@ public class ReportService {
 	}
 
 	public ReportRequest preparePackingSlipDataPSI(Psi psiDetails,Long batchId) {
-		School schObj = new School();
+		ca.bc.gov.educ.api.distribution.model.dto.School schObj = new ca.bc.gov.educ.api.distribution.model.dto.School();
 		Address addr = new Address();
 		addr.setStreetLine1(psiDetails.getAddress1());
 		addr.setStreetLine2(psiDetails.getAddress2());
@@ -107,7 +107,7 @@ public class ReportService {
 		return createReportRequest(batchId,schObj, "ADMINISTRATION");
 	}
 
-	private ReportRequest createReportRequest(Long batchId, School schObj, String recipient) {
+	private ReportRequest createReportRequest(Long batchId, ca.bc.gov.educ.api.distribution.model.dto.School schObj, String recipient) {
 		ReportRequest req = new ReportRequest();
 		ReportOptions options = new ReportOptions();
 		options.setReportFile("Packing Slip");
@@ -136,13 +136,13 @@ public class ReportService {
 		return req;
 	}
 
-    public ReportRequest prepareSchoolDistributionReportData(SchoolDistributionRequest schoolDistributionRequest, Long batchId,CommonSchool schoolDetails) {
+    public ReportRequest prepareSchoolDistributionReportData(SchoolDistributionRequest schoolDistributionRequest, Long batchId, ca.bc.gov.educ.api.distribution.model.dto.v2.School schoolDetails) {
 		ReportRequest req = new ReportRequest();
 		ReportData data = new ReportData();
 
 		List<StudentCredentialDistribution> schoolReportList = schoolDistributionRequest.getStudentList();
 		Map<Pen, Student> students = new HashMap<>();
-		School school = new School();
+		ca.bc.gov.educ.api.distribution.model.dto.School school = new ca.bc.gov.educ.api.distribution.model.dto.School();
 		school.setMincode(schoolDetails.getDistNo()+schoolDetails.getSchlNo());
 		school.setName(schoolDetails.getSchoolName());
 		for(StudentCredentialDistribution sc:schoolReportList) {

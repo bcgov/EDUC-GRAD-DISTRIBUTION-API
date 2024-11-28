@@ -49,14 +49,14 @@ public class MergeProcess extends BaseProcess {
 		Long batchId = processorData.getBatchId();
 		int numberOfPdfs = 0;
 		int counter = 0;
-		List<School> schoolsForLabels = new ArrayList<>();
+		List<ca.bc.gov.educ.api.distribution.model.dto.School> schoolsForLabels = new ArrayList<>();
 		for (String mincode : mapDist.keySet()) {
 			counter++;
 			int currentSlipCount = 0;
 			DistributionPrintRequest distributionPrintRequest = mapDist.get(mincode);
-			CommonSchool schoolDetails = getBaseSchoolDetails(distributionPrintRequest, searchRequest, mincode,exception);
+			ca.bc.gov.educ.api.distribution.model.dto.v2.School schoolDetails = getBaseSchoolDetails(distributionPrintRequest, searchRequest, mincode,exception);
 			if(schoolDetails != null) {
-				String schoolCategoryCode = schoolDetails.getSchoolCategoryCode();
+				String schoolCategoryCode = schoolDetails.getSchoolCategoryLegacyCode();
 				logger.debug("*** School Details Acquired {} category {}", mincode, schoolCategoryCode);
 				List<Student> studListNonGrad = new ArrayList<>();
 				ReportRequest packSlipReq = reportService.preparePackingSlipData(searchRequest, schoolDetails, processorData.getBatchId());
@@ -308,10 +308,10 @@ public class MergeProcess extends BaseProcess {
 		}
 	}
 
-	protected Integer createAndSaveNonGradReport(CommonSchool schoolDetails, List<Student> studListNonGrad, String mincode, String url) {
+	protected Integer createAndSaveNonGradReport(ca.bc.gov.educ.api.distribution.model.dto.v2.School schoolDetails, List<Student> studListNonGrad, String mincode, String url) {
 		ReportData nongradProjected = new ReportData();
-		School schObj = new School();
-		schObj.setMincode(schoolDetails.getDistNo()+schoolDetails.getSchlNo());
+		ca.bc.gov.educ.api.distribution.model.dto.School schObj = new ca.bc.gov.educ.api.distribution.model.dto.School();
+		schObj.setMincode(schoolDetails.getMinCode());
 		schObj.setName(schoolDetails.getSchoolName());
 		schObj.setStudents(studListNonGrad);
 		nongradProjected.setSchool(schObj);

@@ -3,7 +3,7 @@ package ca.bc.gov.educ.api.distribution.service;
 import ca.bc.gov.educ.api.distribution.model.dto.DistributionResponse;
 import ca.bc.gov.educ.api.distribution.model.dto.School;
 import ca.bc.gov.educ.api.distribution.model.dto.SchoolReports;
-import ca.bc.gov.educ.api.distribution.model.dto.TraxDistrict;
+import ca.bc.gov.educ.api.distribution.model.dto.v2.District;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils;
 import ca.bc.gov.educ.api.distribution.util.Generated;
@@ -140,7 +140,7 @@ public class PostingDistributionService {
         return reportCount;
     }
 
-    public Integer createDistrictLabelsReport(List<TraxDistrict> schools, String districtLabelReportType) {
+    public Integer createDistrictLabelsReport(List<District> schools, String districtLabelReportType) {
         return NumberUtils.toInt(restService.executePost(educDistributionApiConstants.getSchoolLabelsReport(), String.class, schools, districtLabelReportType));
     }
 
@@ -338,7 +338,7 @@ public class PostingDistributionService {
     }
 
     private List<String> extractDistrictCodes(DistributionResponse distributionResponse) {
-        return distributionResponse.getDistricts().stream().map(School::getMincode).toList();
+        return distributionResponse.getDistricts().stream().map(ca.bc.gov.educ.api.distribution.model.dto.School::getMincode).toList();
     }
 
 }

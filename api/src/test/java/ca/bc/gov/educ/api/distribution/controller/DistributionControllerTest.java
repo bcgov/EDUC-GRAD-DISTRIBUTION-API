@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.distribution.controller;
 
 import ca.bc.gov.educ.api.distribution.model.dto.*;
+import ca.bc.gov.educ.api.distribution.model.dto.v2.School;
 import ca.bc.gov.educ.api.distribution.service.GradDistributionService;
 import ca.bc.gov.educ.api.distribution.service.PostingDistributionService;
 import ca.bc.gov.educ.api.distribution.util.GradValidation;
@@ -52,11 +53,12 @@ class DistributionControllerTest {
 		String accessToken = "123";
 		String mincode = "123123133";
 
-		CommonSchool schObj = new CommonSchool();
+		ca.bc.gov.educ.api.distribution.model.dto.v2.School schObj = new ca.bc.gov.educ.api.distribution.model.dto.v2.School();
+		schObj.setMinCode(mincode);
 		schObj.setSchlNo(mincode.substring(2,mincode.length()-1));
 		schObj.setDistNo(mincode.substring(0,2));
-		schObj.setPhysAddressLine1("sadadad");
-		schObj.setPhysAddressLine2("adad");
+		schObj.setAddress1("sadadad");
+		schObj.setAddress2("adad");
 
 		List<StudentCredentialDistribution> scdList = new ArrayList<>();
 		StudentCredentialDistribution scd = new StudentCredentialDistribution();
@@ -115,11 +117,12 @@ class DistributionControllerTest {
 		String accessToken = "123";
 		String mincode = "123123133";
 
-		CommonSchool schObj = new CommonSchool();
+		ca.bc.gov.educ.api.distribution.model.dto.v2.School schObj = new School();
+		schObj.setMinCode(mincode);
 		schObj.setSchlNo(mincode.substring(2,mincode.length()-1));
 		schObj.setDistNo(mincode.substring(0,2));
-		schObj.setPhysAddressLine1("sadadad");
-		schObj.setPhysAddressLine2("adad");
+		schObj.setAddress1("sadadad");
+		schObj.setAddress2("adad");
 
 		List<StudentCredentialDistribution> scdList = new ArrayList<>();
 		StudentCredentialDistribution scd = new StudentCredentialDistribution();

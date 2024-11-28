@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.distribution.process;
 
 import ca.bc.gov.educ.api.distribution.model.dto.*;
+import ca.bc.gov.educ.api.distribution.model.dto.v2.School;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -39,7 +40,7 @@ public class CreateReprintProcess extends BaseProcess {
 			counter++;
 			int currentSlipCount = 0;
 			DistributionPrintRequest obj = mapDist.get(mincode);
-			CommonSchool schoolDetails = getBaseSchoolDetails(obj, searchRequest, mincode,exception);
+			School schoolDetails = getBaseSchoolDetails(obj, searchRequest, mincode,exception);
 			if(schoolDetails != null) {
 				logger.debug("*** School Details Acquired {}", schoolDetails.getSchoolName());
 
