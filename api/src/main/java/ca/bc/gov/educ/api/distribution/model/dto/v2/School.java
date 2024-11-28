@@ -22,44 +22,16 @@ public class School {
 	private String postal;
 	private String openFlag;
 	private String schoolCategoryCode;
-	private String schoolCategoryCodeInstitute;
+	private String schoolCategoryLegacyCode;
 
 	@JsonIgnore
 	private String schlNo;
 	@JsonIgnore
 	private String distNo;
-    
-	public String getSchoolName() {
-		return  schoolName != null ? schoolName.trim(): null;
-	}
-	
-	public String getDistrictName() {
-		return districtName != null ? districtName.trim(): null;
-	}
-	
-	public String getAddress1() {
-		return address1 != null ? address1.trim(): null;
-	}
-
-	public String getAddress2() {
-		return address2 != null ? address2.trim(): null;
-	}
-
-	public String getCity() {
-		return city != null ? city.trim(): null;
-	}
-	
-	public String getPostal() {
-		return postal != null ? postal.trim(): null;
-	}
-	
-	public String getOpenFlag() {
-		return openFlag != null ? openFlag.trim(): null;
-	}
 
 	@Override
 	public String toString() {
-		return "School [minCode=" + minCode + ", schoolId=" + schoolId + ", schoolCategoryCode=" + schoolCategoryCode + ", schoolCategoryCodeInstitute=" + schoolCategoryCodeInstitute
+		return "School [minCode=" + minCode + ", schoolId=" + schoolId + ", schoolCategoryCode=" + schoolCategoryCode + ", schoolCategoryLegacyCode=" + schoolCategoryLegacyCode
 				+ ", schoolName=" + schoolName + ", districtName=" + districtName + ", transcriptEligibility=" + transcriptEligibility + ", certificateEligibility=" + certificateEligibility
 				+ ", address1=" + address1 + ", address2=" + address2 + ", city=" + city + ", provCode=" + provCode + ", countryCode=" + countryCode + ", postal=" + postal + ", openFlag=" + openFlag
 				+ "]";

@@ -49,7 +49,7 @@ public class YearEndMergeProcess extends MergeProcess {
                 int currentSlipCount = 0;
                 schoolCounter++;
                 processedSchools.add(mincode);
-                String schoolCategoryCode = schoolDetails.getSchoolCategoryCode();
+                String schoolCategoryCode = schoolDetails.getSchoolCategoryLegacyCode();
 
                 logger.debug("*** School Details Acquired {} category {}", mincode, schoolCategoryCode);
                 if(StringUtils.containsAnyIgnoreCase(schoolCategoryCode, "02", "03", "09")) {

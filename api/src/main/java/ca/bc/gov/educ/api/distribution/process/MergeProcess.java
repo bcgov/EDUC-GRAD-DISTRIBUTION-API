@@ -56,7 +56,7 @@ public class MergeProcess extends BaseProcess {
 			DistributionPrintRequest distributionPrintRequest = mapDist.get(mincode);
 			ca.bc.gov.educ.api.distribution.model.dto.v2.School schoolDetails = getBaseSchoolDetails(distributionPrintRequest, searchRequest, mincode,exception);
 			if(schoolDetails != null) {
-				String schoolCategoryCode = schoolDetails.getSchoolCategoryCode();
+				String schoolCategoryCode = schoolDetails.getSchoolCategoryLegacyCode();
 				logger.debug("*** School Details Acquired {} category {}", mincode, schoolCategoryCode);
 				List<Student> studListNonGrad = new ArrayList<>();
 				ReportRequest packSlipReq = reportService.preparePackingSlipData(searchRequest, schoolDetails, processorData.getBatchId());
