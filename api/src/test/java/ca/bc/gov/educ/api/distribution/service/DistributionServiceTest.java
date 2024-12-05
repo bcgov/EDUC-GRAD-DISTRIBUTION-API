@@ -208,7 +208,7 @@ public class DistributionServiceTest {
 
     @Test
     public void testDistributeCredentialsBlankSchoolNUll() {
-        DistributionResponse res = testDistributeCredentials_transcript_blank("BCPR", false, "Y");
+        DistributionResponse res = testDistributeCredentials_transcript_blank("BCPR", "Y");
         assertNotNull(res);
         res = testDistributeCredentials_certificate_blank("BCPR", "YED2");
         assertNotNull(res);
@@ -220,7 +220,7 @@ public class DistributionServiceTest {
 
     @Test
     public void testDistributeCredentialsBlank() {
-        DistributionResponse res = testDistributeCredentials_transcript_blank("BCPR", true, "Y");
+        DistributionResponse res = testDistributeCredentials_transcript_blank("BCPR", "Y");
         assertNotNull(res);
         res = testDistributeCredentials_certificate_blank("BCPR", "YED2");
         assertNotNull(res);
@@ -576,22 +576,12 @@ public class DistributionServiceTest {
         return obj;
     }
 
-    private synchronized DistributionResponse testDistributeCredentials_transcript_blank(String runType, boolean schoolNull, String localDownload) {
+    private synchronized DistributionResponse testDistributeCredentials_transcript_blank(String runType, String localDownload) {
         Long batchId = 9029L;
         Map<String, DistributionPrintRequest> mapDist = new HashMap<>();
         String accessToken = MOCK_TOKEN;
         String transmissionMode = "paper";
         String mincode = "123123133";
-
-//        School schObj = null;
-//        if (!schoolNull) {
-//            schObj = new School();
-//            schObj.setSchlNo(mincode.substring(2, mincode.length() - 1));
-//            schObj.setDistNo(mincode.substring(0, 2));
-//            schObj.setPhysAddressLine1("sadadad");
-//            schObj.setPhysAddressLine2("adad");
-//        }
-
 
         List<BlankCredentialDistribution> bcdList = new ArrayList<>();
         BlankCredentialDistribution bcd = new BlankCredentialDistribution();
