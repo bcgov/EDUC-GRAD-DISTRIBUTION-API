@@ -24,10 +24,12 @@ public class School {
 	private String schoolCategoryCode;
 	private String schoolCategoryLegacyCode;
 
-	@JsonIgnore
-	private String schlNo;
-	@JsonIgnore
-	private String distNo;
+	public String getDistrictNumber() {
+		if (minCode != null && minCode.length() > 3) {
+			return minCode.substring(0, 3);
+		}
+		return "";
+	}
 
 	@Override
 	public String toString() {

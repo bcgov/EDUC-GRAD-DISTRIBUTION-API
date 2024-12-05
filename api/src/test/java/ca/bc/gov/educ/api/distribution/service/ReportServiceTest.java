@@ -22,7 +22,6 @@ public class ReportServiceTest {
         String mincode = "123456";
         School commonSchool = new School();
         commonSchool.setMinCode(mincode);
-        commonSchool.setSchlNo(mincode);
         commonSchool.setSchoolName("Test School");
 
         StudentSearchRequest searchRequest = new StudentSearchRequest();

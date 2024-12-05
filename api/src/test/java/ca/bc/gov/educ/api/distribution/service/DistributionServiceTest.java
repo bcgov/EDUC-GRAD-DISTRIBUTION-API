@@ -91,142 +91,142 @@ public class DistributionServiceTest {
     Path path;
 
     @Test
-    public void testdistributeCredentialsTranscriptMonthly() {
-        DistributionResponse res = testdistributeCredentials_transcript("MER", "MONTHLYDIST", false, "Y", true);
+    public void testDistributeCredentialsTranscriptMonthly() {
+        DistributionResponse res = testDistributeCredentials_transcript("MER", "MONTHLYDIST", false, "Y", true);
         assertNotNull(res);
     }
 
     @Test
-    public void testdistributeCredentialsYed2Monthly() {
-        DistributionResponse res = testdistributeCredentials_certificate("MER", "MONTHLYDIST", "YED2", null, true, true);
+    public void testDistributeCredentialsYed2Monthly() {
+        DistributionResponse res = testDistributeCredentials_certificate("MER", "MONTHLYDIST", "YED2", null, true, true);
         assertNotNull(res);
     }
 
     @Test
-    public void testdistributeCredentialsYedbMonthly() {
-        DistributionResponse res = testdistributeCredentials_certificate("MER", "MONTHLYDIST", "YEDB", null, false, true);
+    public void testDistributeCredentialsYedbMonthly() {
+        DistributionResponse res = testDistributeCredentials_certificate("MER", "MONTHLYDIST", "YEDB", null, false, true);
         assertNotNull(res);
     }
 
     @Test
-    public void testdistributeCredentialsYedrMonthly() {
-        DistributionResponse res = testdistributeCredentials_certificate("MER", "MONTHLYDIST", "YEDR", null, false, true);
+    public void testDistributeCredentialsYedrMonthly() {
+        DistributionResponse res = testDistributeCredentials_certificate("MER", "MONTHLYDIST", "YEDR", null, false, true);
         assertNotNull(res);
     }
 
     @Test
-    public void testdistributeCredentialsUserRequest() {
-        DistributionResponse res = testdistributeCredentials_transcript("MER", "USERDIST", false, "Y", false);
+    public void testDistributeCredentialsUserRequest() {
+        DistributionResponse res = testDistributeCredentials_transcript("MER", "USERDIST", false, "Y", false);
         assertNotNull(res);
-        res = testdistributeCredentials_certificate("MER", "USERDIST", "YED2", null, true, false);
+        res = testDistributeCredentials_certificate("MER", "USERDIST", "YED2", null, true, false);
         assertNotNull(res);
-        res = testdistributeCredentials_certificate("MER", "USERDIST", "YEDB", null, false, false);
+        res = testDistributeCredentials_certificate("MER", "USERDIST", "YEDB", null, false, false);
         assertNotNull(res);
-        res = testdistributeCredentials_certificate("MER", "USERDIST", "YEDR", null, false, false);
-        assertNotNull(res);
-    }
-
-    @Test
-    public void testdistributeCredentialsMonthlyLocalDownload() {
-        DistributionResponse res = testdistributeCredentials_transcript("MER", "USERDIST", false, "Y", false);
-        assertNotNull(res);
-        res = testdistributeCredentials_certificate("MER", "USERDIST", "YED2", null, false, false);
-        assertNotNull(res);
-        res = testdistributeCredentials_certificate("MER", "USERDIST", "YEDB", null, false, false);
-        assertNotNull(res);
-        res = testdistributeCredentials_certificate("MER", "USERDIST", "YEDR", null, false, false);
+        res = testDistributeCredentials_certificate("MER", "USERDIST", "YEDR", null, false, false);
         assertNotNull(res);
     }
 
     @Test
-    public void testdistributeCredentialsMonthly_schoolNull() {
-        DistributionResponse res = testdistributeCredentials_transcript("MER", "USERDIST", true, "Y", false);
+    public void testDistributeCredentialsMonthlyLocalDownload() {
+        DistributionResponse res = testDistributeCredentials_transcript("MER", "USERDIST", false, "Y", false);
         assertNotNull(res);
-        res = testdistributeCredentials_certificate("MER", "USERDIST", "YED2", null, false, false);
+        res = testDistributeCredentials_certificate("MER", "USERDIST", "YED2", null, false, false);
         assertNotNull(res);
-        res = testdistributeCredentials_certificate("MER", "USERDIST", "YEDB", null, false, false);
+        res = testDistributeCredentials_certificate("MER", "USERDIST", "YEDB", null, false, false);
         assertNotNull(res);
-        res = testdistributeCredentials_certificate("MER", "USERDIST", "YEDR", null, false, false);
-        assertNotNull(res);
-    }
-
-    @Test
-    public void testdistributeCredentialsUserReq() {
-        DistributionResponse res = testdistributeCredentials_certificate("MER", "USERDISTRC", "YED2", "John Doe", false, false);
-        assertNotNull(res);
-        res = testdistributeCredentials_certificate("MER", "USERDISTRC", "YEDB", "John Doe", false, false);
-        assertNotNull(res);
-        res = testdistributeCredentials_certificate("MER", "USERDISTRC", "YEDR", "John Doe", false, false);
+        res = testDistributeCredentials_certificate("MER", "USERDIST", "YEDR", null, false, false);
         assertNotNull(res);
     }
 
     @Test
-    public void testdistributeCredentialsTranscriptYearly() {
-        DistributionResponse res = testdistributeCredentials_transcript("MERYER", "DISTRUN_YE", false, "Y", true);
+    public void testDistributeCredentialsMonthly_schoolNull() {
+        DistributionResponse res = testDistributeCredentials_transcript("MER", "USERDIST", true, "Y", false);
+        assertNotNull(res);
+        res = testDistributeCredentials_certificate("MER", "USERDIST", "YED2", null, false, false);
+        assertNotNull(res);
+        res = testDistributeCredentials_certificate("MER", "USERDIST", "YEDB", null, false, false);
+        assertNotNull(res);
+        res = testDistributeCredentials_certificate("MER", "USERDIST", "YEDR", null, false, false);
         assertNotNull(res);
     }
 
     @Test
-    public void testdistributeCredentialsYed2Yearly() {
-        DistributionResponse res = testdistributeCredentials_certificate("MERYER", "DISTRUN_YE", "YED2", null, false, true);
+    public void testDistributeCredentialsUserReq() {
+        DistributionResponse res = testDistributeCredentials_certificate("MER", "USERDISTRC", "YED2", "John Doe", false, false);
+        assertNotNull(res);
+        res = testDistributeCredentials_certificate("MER", "USERDISTRC", "YEDB", "John Doe", false, false);
+        assertNotNull(res);
+        res = testDistributeCredentials_certificate("MER", "USERDISTRC", "YEDR", "John Doe", false, false);
         assertNotNull(res);
     }
 
     @Test
-    public void testdistributeCredentialsYedbYearly() {
-        DistributionResponse res = testdistributeCredentials_certificate("MERYER", "DISTRUN_YE", "YEDB", null, false, true);
+    public void testDistributeCredentialsTranscriptYearly() {
+        DistributionResponse res = testDistributeCredentials_transcript("MERYER", "DISTRUN_YE", false, "Y", true);
         assertNotNull(res);
     }
 
     @Test
-    public void testdistributeCredentialsYedrYearly() {
-        DistributionResponse res = testdistributeCredentials_certificate("MERYER", "DISTRUN_YE", "YEDR", null, false, true);
+    public void testDistributeCredentialsYed2Yearly() {
+        DistributionResponse res = testDistributeCredentials_certificate("MERYER", "DISTRUN_YE", "YED2", null, false, true);
         assertNotNull(res);
     }
 
     @Test
-    public void testdistributeSchoolReports() {
-        DistributionResponse res = testdistributeSchoolReport("MERYER", "DISTRUN_YE", "YEARENDDIST");
-        assertNotNull(res);
-        res = testdistributeSchoolReport("MER", "DISTRUN", "MONTHLYDIST");
-        assertNotNull(res);
-        res = testdistributeSchoolReport("MERSUPP", "DISTRUN_SUPP", "SUPPDIST");
-        assertNotNull(res);
-        res = testdistributeSchoolReport("MERYER", "DISTRUN_YE", "NONGRADYERUN");
+    public void testDistributeCredentialsYedbYearly() {
+        DistributionResponse res = testDistributeCredentials_certificate("MERYER", "DISTRUN_YE", "YEDB", null, false, true);
         assertNotNull(res);
     }
 
     @Test
-    public void testdistributeCredentialsCertReprint() {
-        DistributionResponse res = testdistributeCredentials_certificate_reprint("RPR", "USERDIST", "YED2", true);
-        assertNotNull(res);
-        res = testdistributeCredentials_certificate_reprint("RPR", "USERDIST", "YEDB", false);
-        assertNotNull(res);
-        res = testdistributeCredentials_certificate_reprint("RPR", "USERDIST", "YEDR", false);
+    public void testDistributeCredentialsYedrYearly() {
+        DistributionResponse res = testDistributeCredentials_certificate("MERYER", "DISTRUN_YE", "YEDR", null, false, true);
         assertNotNull(res);
     }
 
     @Test
-    public void testdistributeCredentialsBlankSchoolNUll() {
-        DistributionResponse res = testdistributeCredentials_transcript_blank("BCPR", false, "Y");
+    public void testDistributeSchoolReports() {
+        DistributionResponse res = testDistributeSchoolReport("MERYER", "DISTRUN_YE", "YEARENDDIST");
         assertNotNull(res);
-        res = testdistributeCredentials_certificate_blank("BCPR", "YED2");
+        res = testDistributeSchoolReport("MER", "DISTRUN", "MONTHLYDIST");
         assertNotNull(res);
-        res = testdistributeCredentials_certificate_blank("BCPR", "YEDB");
+        res = testDistributeSchoolReport("MERSUPP", "DISTRUN_SUPP", "SUPPDIST");
         assertNotNull(res);
-        res = testdistributeCredentials_certificate_blank("BCPR", "YEDR");
+        res = testDistributeSchoolReport("MERYER", "DISTRUN_YE", "NONGRADYERUN");
         assertNotNull(res);
     }
 
     @Test
-    public void testdistributeCredentialsBlank() {
-        DistributionResponse res = testdistributeCredentials_transcript_blank("BCPR", true, "Y");
+    public void testDistributeCredentialsCertReprint() {
+        DistributionResponse res = testDistributeCredentials_certificate_reprint("RPR", "USERDIST", "YED2", true);
         assertNotNull(res);
-        res = testdistributeCredentials_certificate_blank("BCPR", "YED2");
+        res = testDistributeCredentials_certificate_reprint("RPR", "USERDIST", "YEDB", false);
         assertNotNull(res);
-        res = testdistributeCredentials_certificate_blank("BCPR", "YEDB");
+        res = testDistributeCredentials_certificate_reprint("RPR", "USERDIST", "YEDR", false);
         assertNotNull(res);
-        res = testdistributeCredentials_certificate_blank("BCPR", "YEDR");
+    }
+
+    @Test
+    public void testDistributeCredentialsBlankSchoolNUll() {
+        DistributionResponse res = testDistributeCredentials_transcript_blank("BCPR", false, "Y");
+        assertNotNull(res);
+        res = testDistributeCredentials_certificate_blank("BCPR", "YED2");
+        assertNotNull(res);
+        res = testDistributeCredentials_certificate_blank("BCPR", "YEDB");
+        assertNotNull(res);
+        res = testDistributeCredentials_certificate_blank("BCPR", "YEDR");
+        assertNotNull(res);
+    }
+
+    @Test
+    public void testDistributeCredentialsBlank() {
+        DistributionResponse res = testDistributeCredentials_transcript_blank("BCPR", true, "Y");
+        assertNotNull(res);
+        res = testDistributeCredentials_certificate_blank("BCPR", "YED2");
+        assertNotNull(res);
+        res = testDistributeCredentials_certificate_blank("BCPR", "YEDB");
+        assertNotNull(res);
+        res = testDistributeCredentials_certificate_blank("BCPR", "YEDR");
         assertNotNull(res);
     }
 
@@ -239,16 +239,16 @@ public class DistributionServiceTest {
     }
 
     @Test
-    public void testdistributeSchoolReport() {
-        DistributionResponse res = testdistributeSchoolReport("PSR", "DISTREP_SC", null);
+    public void testDistributeSchoolReport() {
+        DistributionResponse res = testDistributeSchoolReport("PSR", "DISTREP_SC", null);
         assertNotNull(res);
-        res = testdistributeSchoolReport("PSR", "NONGRADDISTREP_SC", null);
+        res = testDistributeSchoolReport("PSR", "NONGRADDISTREP_SC", null);
         assertNotNull(res);
-        res = testdistributeSchoolReport("PSR", "NONGRADPRJ", null);
+        res = testDistributeSchoolReport("PSR", "NONGRADPRJ", null);
         assertNotNull(res);
     }
 
-    private synchronized DistributionResponse testdistributeSchoolReport(String runType, String reportType, String activityCode) {
+    private synchronized DistributionResponse testDistributeSchoolReport(String runType, String reportType, String activityCode) {
         Long batchId = 9029L;
         Map<String, DistributionPrintRequest> mapDist = new HashMap<>();
         String localDownload = "Y";
@@ -258,8 +258,6 @@ public class DistributionServiceTest {
 
         ca.bc.gov.educ.api.distribution.model.dto.v2.School schObj = new ca.bc.gov.educ.api.distribution.model.dto.v2.School();
         schObj.setMinCode(mincode);
-        schObj.setSchlNo(mincode.substring(2,mincode.length()-1));
-        schObj.setDistNo(mincode.substring(0,2));
         schObj.setAddress1("sadadad");
         schObj.setAddress2("adad");
 
@@ -578,7 +576,7 @@ public class DistributionServiceTest {
         return obj;
     }
 
-    private synchronized DistributionResponse testdistributeCredentials_transcript_blank(String runType, boolean schoolNull, String localDownload) {
+    private synchronized DistributionResponse testDistributeCredentials_transcript_blank(String runType, boolean schoolNull, String localDownload) {
         Long batchId = 9029L;
         Map<String, DistributionPrintRequest> mapDist = new HashMap<>();
         String accessToken = MOCK_TOKEN;
@@ -643,7 +641,7 @@ public class DistributionServiceTest {
         return gradDistributionService.distributeCredentials(runType, batchId, distributionRequest, null, transmissionMode, localDownload, accessToken);
     }
 
-    private synchronized DistributionResponse testdistributeCredentials_certificate_blank(String runType, String paperType) {
+    private synchronized DistributionResponse testDistributeCredentials_certificate_blank(String runType, String paperType) {
         Long batchId = 9029L;
         Map<String, DistributionPrintRequest> mapDist = new HashMap<>();
         String localDownload = "Y";
@@ -652,8 +650,7 @@ public class DistributionServiceTest {
         String mincode = "123123133";
 
         ca.bc.gov.educ.api.distribution.model.dto.v2.School schObj = new ca.bc.gov.educ.api.distribution.model.dto.v2.School();
-        schObj.setSchlNo(mincode.substring(2, mincode.length() - 1));
-        schObj.setDistNo(mincode.substring(0, 2));
+        schObj.setMinCode(mincode);
         schObj.setAddress1("sadadad");
         schObj.setAddress2("adad");
 
@@ -710,7 +707,7 @@ public class DistributionServiceTest {
         return gradDistributionService.distributeCredentials(runType, batchId, distributionRequest, null, transmissionMode, "Y", accessToken);
     }
 
-    private synchronized DistributionResponse testdistributeCredentials_transcript(String runType, String activityCode, boolean schoolNull, String localDownload, boolean isAsyncProcess) {
+    private synchronized DistributionResponse testDistributeCredentials_transcript(String runType, String activityCode, boolean schoolNull, String localDownload, boolean isAsyncProcess) {
         Long batchId = 9029L;
         Map<String, DistributionPrintRequest> mapDist = new HashMap<>();
         String accessToken = MOCK_TOKEN;
@@ -720,8 +717,7 @@ public class DistributionServiceTest {
         ca.bc.gov.educ.api.distribution.model.dto.v2.School schObj = null;
         if (!schoolNull) {
             schObj = new ca.bc.gov.educ.api.distribution.model.dto.v2.School();
-            schObj.setSchlNo(mincode.substring(2, mincode.length() - 1));
-            schObj.setDistNo(mincode.substring(0, 2));
+            schObj.setMinCode(mincode);
             schObj.setAddress1("sadadad");
             schObj.setAddress2("adad");
         }
@@ -879,7 +875,7 @@ public class DistributionServiceTest {
     }
 
 
-    private synchronized DistributionResponse testdistributeCredentials_certificate(String runType, String activityCode, String paperType, String properName, boolean noSchoolDis, boolean isAsyncProcess) {
+    private synchronized DistributionResponse testDistributeCredentials_certificate(String runType, String activityCode, String paperType, String properName, boolean noSchoolDis, boolean isAsyncProcess) {
         Long batchId = 9029L;
         Map<String, DistributionPrintRequest> mapDist = new HashMap<>();
         String localDownload = "Y";
@@ -889,8 +885,6 @@ public class DistributionServiceTest {
 
         ca.bc.gov.educ.api.distribution.model.dto.v2.School schObj = new ca.bc.gov.educ.api.distribution.model.dto.v2.School();
         schObj.setMinCode(mincode);
-        schObj.setSchlNo(mincode.substring(2, mincode.length() - 1));
-        schObj.setDistNo(mincode.substring(0, 2));
         schObj.setAddress1("sadadad");
         schObj.setAddress2("adad");
 
@@ -1079,7 +1073,7 @@ public class DistributionServiceTest {
         }
     }
 
-    private synchronized DistributionResponse testdistributeCredentials_certificate_reprint(String runType, String activityCode, String paperType, boolean schoolNull) {
+    private synchronized DistributionResponse testDistributeCredentials_certificate_reprint(String runType, String activityCode, String paperType, boolean schoolNull) {
         Long batchId = 9029L;
         Map<String, DistributionPrintRequest> mapDist = new HashMap<>();
         String localDownload = "Y";
@@ -1091,8 +1085,6 @@ public class DistributionServiceTest {
         if (!schoolNull) {
             schObj = new ca.bc.gov.educ.api.distribution.model.dto.v2.School();
             schObj.setMinCode(mincode);
-            schObj.setSchlNo(mincode.substring(2, mincode.length() - 1));
-            schObj.setDistNo(mincode.substring(0, 2));
             schObj.setAddress1("sadadad");
             schObj.setAddress2("adad");
         }
@@ -1233,15 +1225,15 @@ public class DistributionServiceTest {
     }
 
     @Test
-    public synchronized void testdistributeCredentialsPSI() {
-        DistributionResponse res = testpsidistributeCredential("PSPR", "Y", "ftp");
+    public synchronized void testDistributeCredentialsPSI() {
+        DistributionResponse res = testpsiDistributeCredential("PSPR", "Y", "ftp");
         assertNotNull(res);
-        res = testpsidistributeCredential("PSPR", "Y", "paper");
+        res = testpsiDistributeCredential("PSPR", "Y", "paper");
         assertNotNull(res);
     }
 
     // testcase for PSIRUNs for both ftp and paper.
-    private synchronized DistributionResponse testpsidistributeCredential(String runType, String localDownload, String transmissionMode) {
+    private synchronized DistributionResponse testpsiDistributeCredential(String runType, String localDownload, String transmissionMode) {
         String activityCode = null;
         Long batchId = 9029L;
         Map<String, DistributionPrintRequest> mapDist = new HashMap<>();
@@ -1520,8 +1512,6 @@ public class DistributionServiceTest {
     protected synchronized void mockSchoolObject(String mincode) {
         ca.bc.gov.educ.api.distribution.model.dto.v2.School schObj = new ca.bc.gov.educ.api.distribution.model.dto.v2.School();
         schObj.setMinCode(mincode);
-        schObj.setSchlNo(mincode.substring(2,mincode.length()-1));
-        schObj.setDistNo(mincode.substring(0,2));
         schObj.setAddress1("sadadad");
         schObj.setAddress2("adad");
 

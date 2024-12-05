@@ -60,7 +60,7 @@ public class ReportService {
 		boolean useSchoolAddress = (searchRequest == null || searchRequest.getAddress() == null);
 		Address addr = useSchoolAddress ? new Address() : searchRequest.getAddress();
 		if(useSchoolAddress) {
-			ca.bc.gov.educ.api.distribution.model.dto.v2.School school = schoolService.getSchool(schoolDetails.getDistNo()+schoolDetails.getSchlNo(), new ExceptionMessage());
+			ca.bc.gov.educ.api.distribution.model.dto.v2.School school = schoolService.getSchool(schoolDetails.getMinCode(), new ExceptionMessage());
 			if(school != null) {
 				addr.setStreetLine1(school.getAddress1());
 				addr.setStreetLine2(school.getAddress2());
@@ -78,11 +78,11 @@ public class ReportService {
 			}
 		}
 		schObj.setAddress(addr);
-		schObj.setDistno(schoolDetails.getDistNo());
+		schObj.setDistno(schoolDetails.getDistrictNumber());
 		schObj.setName(schoolDetails.getSchoolName());
-		schObj.setSchlno(schoolDetails.getSchlNo());
-		schObj.setMincode(schoolDetails.getDistNo()+schoolDetails.getSchlNo());
-		schObj.setSignatureCode(schoolDetails.getDistNo());
+		schObj.setSchlno(schoolDetails.getMinCode());
+		schObj.setMincode(schoolDetails.getMinCode());
+		schObj.setSignatureCode(schoolDetails.getDistrictNumber());
 		schObj.setSchoolCategoryCode(schoolDetails.getSchoolCategoryLegacyCode());
 		schObj.setTypeIndicator("");
 		schObj.setTypeBanner("");
@@ -143,7 +143,7 @@ public class ReportService {
 		List<StudentCredentialDistribution> schoolReportList = schoolDistributionRequest.getStudentList();
 		Map<Pen, Student> students = new HashMap<>();
 		ca.bc.gov.educ.api.distribution.model.dto.School school = new ca.bc.gov.educ.api.distribution.model.dto.School();
-		school.setMincode(schoolDetails.getDistNo()+schoolDetails.getSchlNo());
+		school.setMincode(schoolDetails.getMinCode());
 		school.setName(schoolDetails.getSchoolName());
 		for(StudentCredentialDistribution sc:schoolReportList) {
 

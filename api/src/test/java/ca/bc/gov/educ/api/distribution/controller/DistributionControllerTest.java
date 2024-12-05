@@ -55,8 +55,6 @@ class DistributionControllerTest {
 
 		ca.bc.gov.educ.api.distribution.model.dto.v2.School schObj = new ca.bc.gov.educ.api.distribution.model.dto.v2.School();
 		schObj.setMinCode(mincode);
-		schObj.setSchlNo(mincode.substring(2,mincode.length()-1));
-		schObj.setDistNo(mincode.substring(0,2));
 		schObj.setAddress1("sadadad");
 		schObj.setAddress2("adad");
 
@@ -119,8 +117,6 @@ class DistributionControllerTest {
 
 		ca.bc.gov.educ.api.distribution.model.dto.v2.School schObj = new School();
 		schObj.setMinCode(mincode);
-		schObj.setSchlNo(mincode.substring(2,mincode.length()-1));
-		schObj.setDistNo(mincode.substring(0,2));
 		schObj.setAddress1("sadadad");
 		schObj.setAddress2("adad");
 
