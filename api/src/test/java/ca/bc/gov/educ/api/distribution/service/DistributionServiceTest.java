@@ -208,7 +208,7 @@ public class DistributionServiceTest {
 
     @Test
     public void testDistributeCredentialsBlankSchoolNUll() {
-        DistributionResponse res = testDistributeCredentials_transcript_blank("BCPR", "Y");
+        DistributionResponse res = testDistributeCredentials_transcript_blank("BCPR", true, "Y");
         assertNotNull(res);
         res = testDistributeCredentials_certificate_blank("BCPR", "YED2");
         assertNotNull(res);
@@ -220,7 +220,7 @@ public class DistributionServiceTest {
 
     @Test
     public void testDistributeCredentialsBlank() {
-        DistributionResponse res = testDistributeCredentials_transcript_blank("BCPR", "Y");
+        DistributionResponse res = testDistributeCredentials_transcript_blank("BCPR", false,"Y");
         assertNotNull(res);
         res = testDistributeCredentials_certificate_blank("BCPR", "YED2");
         assertNotNull(res);
@@ -576,12 +576,20 @@ public class DistributionServiceTest {
         return obj;
     }
 
-    private synchronized DistributionResponse testDistributeCredentials_transcript_blank(String runType, String localDownload) {
+    private synchronized DistributionResponse testDistributeCredentials_transcript_blank(String runType, boolean schoolNull, String localDownload) {
         Long batchId = 9029L;
         Map<String, DistributionPrintRequest> mapDist = new HashMap<>();
         String accessToken = MOCK_TOKEN;
         String transmissionMode = "paper";
         String mincode = "123123133";
+
+        ca.bc.gov.educ.api.distribution.model.dto.v2.School schObj = null;
+        if (!schoolNull) {
+            schObj = new ca.bc.gov.educ.api.distribution.model.dto.v2.School();
+            schObj.setMinCode(mincode);
+            schObj.setAddress1("sadadad");
+            schObj.setAddress2("adad");
+        }
 
         List<BlankCredentialDistribution> bcdList = new ArrayList<>();
         BlankCredentialDistribution bcd = new BlankCredentialDistribution();
@@ -626,6 +634,7 @@ public class DistributionServiceTest {
         when(this.responseMock.bodyToMono(byte[].class)).thenReturn(Mono.just(bytesSAR));
 
         Mockito.doReturn(getMockResponseObject()).when(this.restUtils).getTokenResponseObject();
+        Mockito.when(schoolService.getSchool(mincode, exception)).thenReturn(schObj);
 
         DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).build();
         return gradDistributionService.distributeCredentials(runType, batchId, distributionRequest, null, transmissionMode, localDownload, accessToken);
