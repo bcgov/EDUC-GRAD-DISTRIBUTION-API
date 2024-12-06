@@ -52,7 +52,7 @@ public class SchoolServiceTest {
     public void testGetCommonSchoolDetails() {
         String mincode = "123456";
         ca.bc.gov.educ.api.distribution.model.dto.v2.School commonSchool = new ca.bc.gov.educ.api.distribution.model.dto.v2.School();
-        commonSchool.setSchlNo(mincode);
+        commonSchool.setMinCode(mincode);
         commonSchool.setSchoolName("Test School");
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
@@ -63,14 +63,14 @@ public class SchoolServiceTest {
         when(this.responseMock.bodyToMono(ca.bc.gov.educ.api.distribution.model.dto.v2.School.class)).thenReturn(Mono.just(commonSchool));
 
         var response = this.schoolService.getSchool(mincode, new ExceptionMessage());
-        Assert.assertEquals(mincode, response.getSchlNo());
+        Assert.assertEquals(mincode, response.getMinCode());
     }
 
     @Test
     public void testGetDefaultSchoolDetails() {
         String mincode = "123456";
         ca.bc.gov.educ.api.distribution.model.dto.v2.School commonSchool = new ca.bc.gov.educ.api.distribution.model.dto.v2.School();
-        commonSchool.setSchlNo(mincode);
+        commonSchool.setMinCode(mincode);
         commonSchool.setSchoolName("Test School");
         commonSchool.setCity("VANCOUVER");
 
@@ -96,7 +96,7 @@ public class SchoolServiceTest {
     public void testGetCommonSchoolDetails_Exception() {
         String mincode = "123456";
         ca.bc.gov.educ.api.distribution.model.dto.v2.School commonSchool = new School();
-        commonSchool.setSchlNo(mincode);
+        commonSchool.setMinCode(mincode);
         commonSchool.setSchoolName("Test School");
 
         ExceptionMessage exceptionMessage = new ExceptionMessage();
