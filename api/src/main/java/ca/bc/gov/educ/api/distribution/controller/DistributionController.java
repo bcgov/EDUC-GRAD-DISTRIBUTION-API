@@ -14,10 +14,10 @@ import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import lombok.AllArgsConstructor;
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping(EducDistributionApiConstants.DISTRIBUTION_API_ROOT_MAPPING)
 @OpenAPIDefinition(info = @Info(title = "API for Distributing Credentials to Schools.", description = "This API is for Distributing Credentials to Schools.", version = "1"), security = {@SecurityRequirement(name = "OAUTH2", scopes = {"GRAD_GRADUATE_STUDENT"})})
+@AllArgsConstructor
 public class DistributionController {
 
     private static Logger logger = LoggerFactory.getLogger(DistributionController.class);
@@ -36,16 +37,12 @@ public class DistributionController {
     private static final String CONTENT_DISPOSITION = "Content-Disposition";
     private static final String ZIP_FILE_NAME = "inline; filename=userdistributionbatch_%s.zip";
 
-    @Autowired
     GradDistributionService gradDistributionService;
 
-    @Autowired
     PostingDistributionService postingDistributionService;
 
-    @Autowired
     GradValidation validation;
 
-    @Autowired
     RestUtils response;
 
     @PostMapping(EducDistributionApiConstants.DISTRIBUTION_RUN)
