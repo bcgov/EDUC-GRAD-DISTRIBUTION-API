@@ -36,7 +36,7 @@
         <org.mapstruct.version>1.6.3</org.mapstruct.version>
         <springdoc.version>2.0.2</springdoc.version>
         <junit>4.12</junit>
-        <log4j.version>2.20.0</log4j.version>
+        <log4j.version>2.24.3</log4j.version>
         <resilience4j.version>2.0.2</resilience4j.version>
     </properties>
 
@@ -105,7 +105,7 @@
         <dependency>
             <groupId>com.oracle.database.jdbc</groupId>
             <artifactId>ojdbc11</artifactId>
-            <version>21.3.0.0</version>
+            <version>23.6.0.24.10</version>
         </dependency>
         <dependency>
             <groupId>org.springdoc</groupId>
@@ -246,7 +246,7 @@
                 <plugin>
                     <groupId>org.hibernate.orm.tooling</groupId>
                     <artifactId>hibernate-enhance-maven-plugin</artifactId>
-                    <version>6.6.4.Final</version>
+                    <version>6.6.5.Final</version>
                 </plugin>
                 <plugin>
                     <groupId>org.springframework.boot</groupId>
@@ -336,7 +336,7 @@
                     <plugin>
                         <groupId>org.hibernate.orm.tooling</groupId>
                         <artifactId>hibernate-enhance-maven-plugin</artifactId>
-                        <version>6.6.4.Final</version>
+                        <version>6.6.5.Final</version>
                         <executions>
                             <execution>
                                 <configuration>
