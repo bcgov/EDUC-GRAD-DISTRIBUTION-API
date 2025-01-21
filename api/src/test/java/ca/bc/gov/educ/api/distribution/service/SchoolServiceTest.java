@@ -46,8 +46,6 @@ public class SchoolServiceTest {
     @MockBean
     WebClient webClient;
 
-    private static final byte[] TEST_BYTES = "The rain in Spain stays mainly on the plain.".getBytes();
-
     @Test
     public void testGetCommonSchoolDetails() {
         String mincode = "123456";

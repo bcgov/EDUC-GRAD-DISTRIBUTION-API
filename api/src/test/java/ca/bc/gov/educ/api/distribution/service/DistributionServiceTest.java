@@ -251,7 +251,6 @@ public class DistributionServiceTest {
     private synchronized DistributionResponse testDistributeSchoolReport(String runType, String reportType, String activityCode) {
         Long batchId = 9029L;
         Map<String, DistributionPrintRequest> mapDist = new HashMap<>();
-        String localDownload = "Y";
         String transmissionMode = "ftp";
         String accessToken = MOCK_TOKEN;
         String mincode = "123123133";
@@ -542,7 +541,6 @@ public class DistributionServiceTest {
         when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
         when(this.requestBodyUriMock.uri(String.format(constants.getSchoolLabelsReport(), "ADDRESS_LABEL_YE"))).thenReturn(this.requestBodyUriMock);
         when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
-        //when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
         when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(String.class)).thenReturn(Mono.just("1"));
@@ -643,7 +641,6 @@ public class DistributionServiceTest {
     private synchronized DistributionResponse testDistributeCredentials_certificate_blank(String runType, String paperType) {
         Long batchId = 9029L;
         Map<String, DistributionPrintRequest> mapDist = new HashMap<>();
-        String localDownload = "Y";
         String transmissionMode = "ftp";
         String accessToken = MOCK_TOKEN;
         String mincode = "123123133";
@@ -813,9 +810,7 @@ public class DistributionServiceTest {
         when(this.responseMock.bodyToMono(SchoolReports.class)).thenReturn(Mono.just(new SchoolReports()));
 
         byte[] greBPack = "Any String you want".getBytes();
-        byte[] greBTran = "ASD".getBytes();
         InputStreamResource inSRPack = new InputStreamResource(new ByteArrayInputStream(greBPack));
-        InputStreamResource inSRTran = new InputStreamResource(new ByteArrayInputStream(greBTran));
 
 
         when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
@@ -1170,9 +1165,7 @@ public class DistributionServiceTest {
         when(this.responseMock.bodyToMono(byte[].class)).thenReturn(Mono.just(bytesSAR));
 
         byte[] greBPack = "Any String you want".getBytes();
-        byte[] greBCert = "DER".getBytes();
         InputStreamResource inSRPack = new InputStreamResource(new ByteArrayInputStream(greBPack));
-        InputStreamResource inSRCert = new InputStreamResource(new ByteArrayInputStream(greBCert));
 
 
         when(this.webClient.post()).thenReturn(this.requestBodyUriMock);

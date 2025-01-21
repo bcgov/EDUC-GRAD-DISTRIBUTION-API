@@ -49,8 +49,6 @@ class DistributionControllerTest {
 		Long batchId= 9029L;
 		Map<String, DistributionPrintRequest> mapDist= new HashMap<>();
 		String transmissionMode = "paper";
-		String localDownload = null;
-		String accessToken = "123";
 		String mincode = "123123133";
 
 		ca.bc.gov.educ.api.distribution.model.dto.v2.School schObj = new ca.bc.gov.educ.api.distribution.model.dto.v2.School();
@@ -111,8 +109,6 @@ class DistributionControllerTest {
 		Long batchId= 9029L;
 		Map<String, DistributionPrintRequest> mapDist= new HashMap<>();
 		String transmissionMode = "paper";
-		String localDownload = null;
-		String accessToken = "123";
 		String mincode = "123123133";
 
 		ca.bc.gov.educ.api.distribution.model.dto.v2.School schObj = new School();
@@ -179,10 +175,10 @@ class DistributionControllerTest {
 
 	@Test
 	void testPostingDistribution() {
-		DistributionResponse response = new DistributionResponse();
-		Mockito.when(postingDistributionService.postingProcess(response)).thenReturn(Boolean.TRUE);
-		distributionController.postingDistribution(response);
-		Mockito.verify(postingDistributionService).postingProcess(response);
+		DistributionResponse distributionResponse = new DistributionResponse();
+		Mockito.when(postingDistributionService.postingProcess(distributionResponse)).thenReturn(Boolean.TRUE);
+		distributionController.postingDistribution(distributionResponse);
+		Mockito.verify(postingDistributionService).postingProcess(distributionResponse);
 	}
 	
 }
