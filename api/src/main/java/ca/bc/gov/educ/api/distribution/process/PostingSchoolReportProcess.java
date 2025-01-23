@@ -75,7 +75,7 @@ public class PostingSchoolReportProcess extends BaseProcess {
 				InputStreamResource gradReportPdf = restService.executeGet(
 						educDistributionApiConstants.getSchoolReport(),
 						InputStreamResource.class,
-						scdReport.getSchoolOfRecord(), scdReport.getReportTypeCode()
+						scdReport.getSchoolOfRecordID(), scdReport.getReportTypeCode()
 				);
 				if (gradReportPdf != null) {
 					locations.add(gradReportPdf.getInputStream());

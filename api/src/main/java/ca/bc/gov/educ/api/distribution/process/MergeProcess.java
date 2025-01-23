@@ -345,5 +345,6 @@ public class MergeProcess extends BaseProcess {
 		requestObj.setSchoolOfRecord(mincode);
 		requestObj.setReportTypeCode(reportType);
 		restService.executePost(educDistributionApiConstants.getUpdateSchoolReport(), SchoolReports.class, requestObj);
+
 	}
 }

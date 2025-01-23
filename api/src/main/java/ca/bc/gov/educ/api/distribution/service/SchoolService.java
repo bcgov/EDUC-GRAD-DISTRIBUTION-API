@@ -29,6 +29,7 @@ public class SchoolService {
 		Address address = (searchRequest == null || searchRequest.getAddress() == null) ? null : searchRequest.getAddress();
 		String userName = searchRequest == null ? null : searchRequest.getUser();
 		commonSchool.setMinCode(String.format("%09d" , 0));
+
 		commonSchool.setSchoolName(ObjectUtils.defaultIfNull(properName, ObjectUtils.defaultIfNull(userName, "")));
 		commonSchool.setAddress1(address == null ? "4TH FLOOR 620 SUPERIOR" : address.getStreetLine1());
 		commonSchool.setAddress2(address == null ? "PO BOX 9886 STN PROV GOVT" : address.getStreetLine2());

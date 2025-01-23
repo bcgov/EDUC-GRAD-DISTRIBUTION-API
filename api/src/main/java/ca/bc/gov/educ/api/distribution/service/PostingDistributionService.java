@@ -172,14 +172,14 @@ public class PostingDistributionService {
             List<SchoolReports> yeSchoolLabelReports = new ArrayList<>();
             if (processMincodes) {
                 yeSchoolLabelReports.addAll(Objects.requireNonNull(
-                        restService.executeGet(educDistributionApiConstants.getSchoolReportsByReportType(),
+                        restService.executeGet(educDistributionApiConstants.getSchoolReport(),
                                 new ParameterizedTypeReference<List<SchoolReports>>() {
                                 }, schooLabelReportType, "")
                 ));
             } else {
                 for (String mincode : mincodes) {
                     yeSchoolLabelReports.addAll(Objects.requireNonNull(
-                            restService.executeGet(educDistributionApiConstants.getSchoolReportsByReportType(),
+                            restService.executeGet(educDistributionApiConstants.getSchoolReport(),
                                     new ParameterizedTypeReference<List<SchoolReports>>() {
                                     }, schooLabelReportType, mincode)
                     ));
@@ -192,14 +192,14 @@ public class PostingDistributionService {
             List<SchoolReports> yeDistrictReports = new ArrayList<>();
             if (processMincodes) {
                 yeDistrictReports.addAll(Objects.requireNonNull(
-                        restService.executeGet(educDistributionApiConstants.getSchoolReportsByReportType(),
+                        restService.executeGet(educDistributionApiConstants.getDistrictReport(),
                                 new ParameterizedTypeReference<List<SchoolReports>>() {
                                 }, districtReportType, "")
                 ));
             } else {
                 for (String mincode : mincodes) {
                     yeDistrictReports.addAll(Objects.requireNonNull(
-                            restService.executeGet(educDistributionApiConstants.getSchoolReportsByReportType(),
+                            restService.executeGet(educDistributionApiConstants.getDistrictReport(),
                                     new ParameterizedTypeReference<List<SchoolReports>>() {
                                     }, districtReportType, mincode)
                     ));
@@ -213,14 +213,14 @@ public class PostingDistributionService {
             List<SchoolReports> yeSchoolReports = new ArrayList<>();
             if (processMincodes) {
                 yeSchoolReports.addAll(Objects.requireNonNull(
-                        restService.executeGet(educDistributionApiConstants.getSchoolReportsByReportType(),
+                        restService.executeGet(educDistributionApiConstants.getSchoolReport(),
                                 new ParameterizedTypeReference<List<SchoolReports>>() {
                                 }, schoolReportType, "")
                 ));
             } else {
                 for (String mincode : mincodes) {
                     yeSchoolReports.addAll(Objects.requireNonNull(
-                            restService.executeGet(educDistributionApiConstants.getSchoolReportsByReportType(),
+                            restService.executeGet(educDistributionApiConstants.getSchoolReport(),
                                     new ParameterizedTypeReference<List<SchoolReports>>() {
                                     }, schoolReportType, mincode)
                     ));
@@ -235,7 +235,7 @@ public class PostingDistributionService {
 
     @Generated
     protected int processSchoolLabelsDistribution(Long batchId, String mincode, String schooLabelReportType, String transmissionMode) {
-        List<SchoolReports> yeSchooLabelsReports = restService.executeGet(educDistributionApiConstants.getSchoolReportsByReportType(), new ParameterizedTypeReference<List<SchoolReports>>() {
+        List<SchoolReports> yeSchooLabelsReports = restService.executeGet(educDistributionApiConstants.getSchoolReport(), new ParameterizedTypeReference<List<SchoolReports>>() {
         }, schooLabelReportType, mincode);
         assert yeSchooLabelsReports != null;
         return processDistrictSchoolReports(yeSchooLabelsReports, batchId, schooLabelReportType, transmissionMode);
@@ -248,7 +248,7 @@ public class PostingDistributionService {
             numberOfPdfs += processSchoolLabelsDistribution(batchId, schooLabelReportType, transmissionMode);
         }
         if (StringUtils.isNotBlank(districtReportType)) {
-            List<SchoolReports> yeDistrictReports = restService.executeGet(educDistributionApiConstants.getSchoolReportsByReportType(),
+            List<SchoolReports> yeDistrictReports = restService.executeGet(educDistributionApiConstants.getDistrictReport(),
                     new ParameterizedTypeReference<List<SchoolReports>>() {
                     }, districtReportType, "");
 
@@ -256,7 +256,7 @@ public class PostingDistributionService {
             numberOfPdfs += processDistrictSchoolReports(yeDistrictReports, batchId, districtReportType, transmissionMode);
         }
         if (StringUtils.isNotBlank(schoolReportType)) {
-            List<SchoolReports> yeSchoolReports = restService.executeGet(educDistributionApiConstants.getSchoolReportsByReportType(),
+            List<SchoolReports> yeSchoolReports = restService.executeGet(educDistributionApiConstants.getSchoolReport(),
                     new ParameterizedTypeReference<List<SchoolReports>>() {
                     }, schoolReportType, "");
             assert yeSchoolReports != null;

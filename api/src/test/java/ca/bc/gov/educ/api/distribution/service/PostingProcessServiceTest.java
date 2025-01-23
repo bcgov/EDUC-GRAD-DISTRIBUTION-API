@@ -141,7 +141,7 @@ public class PostingProcessServiceTest {
         addressLabelSchl.setReport(Base64.getEncoder().encodeToString(RandomStringUtils.randomAlphanumeric(25).getBytes()));
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(String.format(educDistributionApiConstants.getSchoolReportsByReportType(), addressLabelSchl.getReportTypeCode(), ""))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersUriMock.uri(String.format(educDistributionApiConstants.getSchoolReport(), addressLabelSchl.getReportTypeCode(), ""))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
@@ -149,7 +149,7 @@ public class PostingProcessServiceTest {
         })).thenReturn(Mono.just(List.of(addressLabelSchl)));
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(String.format(educDistributionApiConstants.getSchoolReportsByReportType(), addressLabelSchl.getReportTypeCode(), addressLabelSchl.getSchoolOfRecord()))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersUriMock.uri(String.format(educDistributionApiConstants.getSchoolReport(), addressLabelSchl.getReportTypeCode(), addressLabelSchl.getSchoolOfRecord()))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
@@ -157,7 +157,7 @@ public class PostingProcessServiceTest {
         })).thenReturn(Mono.just(List.of(addressLabelSchl)));
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(String.format(educDistributionApiConstants.getSchoolReportsByReportType(), distrepYeSd.getReportTypeCode(), ""))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersUriMock.uri(String.format(educDistributionApiConstants.getSchoolReport(), distrepYeSd.getReportTypeCode(), ""))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
@@ -165,7 +165,7 @@ public class PostingProcessServiceTest {
         })).thenReturn(Mono.just(List.of(distrepYeSd)));
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(String.format(educDistributionApiConstants.getSchoolReportsByReportType(), distrepYeNgSd.getReportTypeCode(), ""))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersUriMock.uri(String.format(educDistributionApiConstants.getSchoolReport(), distrepYeNgSd.getReportTypeCode(), ""))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
@@ -173,7 +173,7 @@ public class PostingProcessServiceTest {
         })).thenReturn(Mono.just(List.of(distrepYeNgSd)));
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(String.format(educDistributionApiConstants.getSchoolReportsByReportType(), distrepYeSd.getReportTypeCode(), distrepYeSd.getSchoolOfRecord()))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersUriMock.uri(String.format(educDistributionApiConstants.getSchoolReport(), distrepYeSd.getReportTypeCode(), distrepYeSd.getSchoolOfRecord()))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
@@ -181,7 +181,7 @@ public class PostingProcessServiceTest {
         })).thenReturn(Mono.just(List.of(distrepYeSd)));
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(String.format(educDistributionApiConstants.getSchoolReportsByReportType(), distrepYeSc.getReportTypeCode(), ""))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersUriMock.uri(String.format(educDistributionApiConstants.getSchoolReport(), distrepYeSc.getReportTypeCode(), ""))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
@@ -189,7 +189,7 @@ public class PostingProcessServiceTest {
         })).thenReturn(Mono.just(List.of(distrepYeSc)));
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(String.format(educDistributionApiConstants.getSchoolReportsByReportType(), distrepYeSc.getReportTypeCode(), distrepYeSc.getSchoolOfRecord()))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersUriMock.uri(String.format(educDistributionApiConstants.getSchoolReport(), distrepYeSc.getReportTypeCode(), distrepYeSc.getSchoolOfRecord()))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);

@@ -47,7 +47,7 @@ public class GradDistributionService {
     private DistributionResponse processDistribution(String processType, ProcessorData data) {
         DistributionProcessType pType = DistributionProcessType.valueOf(processType);
         DistributionProcess process = distributionProcessFactory.createProcess(pType);
-        restUtils.fetchAccessToken(data);
+        //restUtils.fetchAccessToken(data);
         data = process.fire(data);
         return data.getDistributionResponse();
     }

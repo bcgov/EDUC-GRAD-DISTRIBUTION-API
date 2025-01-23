@@ -130,8 +130,11 @@ public class EducDistributionApiConstants {
     @Value("${endpoint.grad-graduation-report-api.school-report.url}")
     private String schoolReport;
 
-    @Value("${endpoint.grad-graduation-report-api.school-report-by-report-type.url}")
-    private String schoolReportsByReportType;
+    @Value("${endpoint.grad-graduation-report-api.district-report.url}")
+    private String districtReport;
+
+    /*@Value("${endpoint.grad-graduation-report-api.school-report-by-report-type.url}")
+    private String schoolReportsByReportType;*/
 
     @Value("${endpoint.grad-graduation-api.school_district_year_end_report.url}")
     private String schoolDistrictYearEndReport;

@@ -23,6 +23,7 @@ public class School {
 	private String openFlag;
 	private String schoolCategoryCode;
 	private String schoolCategoryLegacyCode;
+	private String schoolOfRecord;
 
 	public String getDistrictNumber() {
 		if (minCode != null && minCode.length() > 3) {
