@@ -1,0 +1,35 @@
+meta {
+  name: distribution run for Grad
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/distribute/run/:runType
+  body: json
+  auth: none
+}
+
+params:query {
+  ~batchId: 
+  ~activityCode: 
+  ~transmissionType: 
+  ~localDownload: 
+}
+
+params:path {
+  runType: 
+}
+
+headers {
+  Authorization: 
+}
+
+body:json {
+  {
+    "activityCode": "",
+    "schools": [],
+    "mapDist": {},
+    "studentSearchRequest": ""
+  }
+}
