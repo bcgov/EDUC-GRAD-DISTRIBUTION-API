@@ -1,15 +1,13 @@
 package ca.bc.gov.educ.api.distribution.process;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 public class DistributionProcessFactory {
 	
-    private static final Logger logger = LoggerFactory.getLogger(DistributionProcessFactory.class);
-
     @Autowired
     MergeProcess mergeProcess;
 
@@ -28,35 +26,38 @@ public class DistributionProcessFactory {
     @Autowired
     PSIReportProcess pSIReportProcess;
 
-	public DistributionProcess createProcess(DistributionProcessType processImplementation) {
+	public DistributionProcess createProcess(String processType) {
 		DistributionProcess pcs = null;
-        switch(processImplementation.name()) {
-            case "MER":
-                logger.debug("\n************* MERGE PROCESS (MER) START  ************");
+        DistributionProcessType pt = DistributionProcessType.valueOf(processType);
+        log.debug(String.format("Process Type: %s", pt));
+
+        switch(pt) {
+            case MER:
+                log.debug("\n************* MERGE PROCESS (MER) START  ************");
                 pcs = mergeProcess;
                 break;
-            case "RPR":
-                logger.debug("\n************* CREATE REPRINT PROCESS (RPR) START  ************");
+            case RPR:
+                log.debug("\n************* CREATE REPRINT PROCESS (RPR) START  ************");
                 pcs = createReprintProcess;
                 break;
-            case "BCPR":
-                logger.debug("\n************* CREATE BLANK CREDENTIAL PROCESS (BCPR) START  ************");
+            case BCPR:
+                log.debug("\n************* CREATE BLANK CREDENTIAL PROCESS (BCPR) START  ************");
                 pcs = createBlankCredentialProcess;
                 break;
-            case "MERYER":
-                logger.debug("\n************* MERGE PROCESS (MERYER) START  ************");
+            case MERYER:
+                log.debug("\n************* MERGE PROCESS (MERYER) START  ************");
                 pcs = yearEndMergeProcess;
                 break;
-            case "MERSUPP":
-                logger.debug("\n************* MERGE PROCESS (MERSUPP) START  ************");
+            case MERSUPP:
+                log.debug("\n************* MERGE PROCESS (MERSUPP) START  ************");
                 pcs = mergeProcess;
                 break;
-            case "PSR":
-                logger.debug("\n************* POSTING SCHOOL REPORT PROCESS (PSR) START  ************");
+            case PSR:
+                log.debug("\n************* POSTING SCHOOL REPORT PROCESS (PSR) START  ************");
                 pcs = postingSchoolReportProcess;
                 break;
-            case "PSPR":
-                logger.debug("\n************* PSI CREDENTIAL REPORT PROCESS (PSPR) START  ************");
+            case PSPR:
+                log.debug("\n************* PSI CREDENTIAL REPORT PROCESS (PSPR) START  ************");
                 pcs = pSIReportProcess;
                 break;
             default:

@@ -1,9 +1,8 @@
 package ca.bc.gov.educ.api.distribution.util;
 
 import com.jcraft.jsch.*;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +15,7 @@ import java.util.Map;
 
 import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants.TMP_DIR;
 
+@Slf4j
 @Component
 public class SFTPUtils {
     @Value("${sftp.bcmail.host}")
@@ -38,8 +38,6 @@ public class SFTPUtils {
     private static final String KNOWN_HOST = "/.ssh/known_hosts";
     private static final String RSA_PUB = "/.ssh/id_rsa.pub";
     private static final String RSA_PRV = "/.ssh/id_rsa";
-
-    private static Logger logger = LoggerFactory.getLogger(SFTPUtils.class);
 
     public boolean sftpUploadBCMail(Long batchId) {
         return sftpUploadBCMail(batchId, TMP_DIR);
@@ -121,9 +119,9 @@ public class SFTPUtils {
                         file -> {
                             try {
                                 channelSftp.put(entry.getKey(), file);
-                                logger.debug("Transferring file via ftp: {}", entry.getKey());
+                                log.debug("Transferring file via ftp: {}", entry.getKey());
                             } catch (SftpException e) {
-                                logger.error("Error during sftp transfer {} ", e.getLocalizedMessage());
+                                log.error("Error during sftp transfer {} ", e.getLocalizedMessage());
                             }
                         }
                 );
@@ -131,7 +129,7 @@ public class SFTPUtils {
             channelSftp.exit();
             return true;
         } catch (JSchException e) {
-            logger.error("Error during sftp transfer {} ", e.getLocalizedMessage());
+            log.error("Error during sftp transfer {} ", e.getLocalizedMessage());
             return false;
         } finally {
             if (jschSession != null) {
@@ -143,9 +141,9 @@ public class SFTPUtils {
     private boolean writeFile(String filename, String content) {
         try (FileWriter fileWriter = new FileWriter(filename)){
             fileWriter.write(content);
-            logger.debug("Write File Complete! - {} ", filename);
+            log.debug("Write File Complete! - {} ", filename);
         } catch (IOException e) {
-            logger.error("SFTP ERROR: Write File Failed! - {}", filename);
+            log.error("SFTP ERROR: Write File Failed! - {}", filename);
             e.printStackTrace();
         }
         return true;

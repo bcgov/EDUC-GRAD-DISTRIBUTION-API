@@ -9,6 +9,9 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import java.util.UUID;
+
+import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants.*;
 
 @Service
 public class SchoolService {
@@ -24,29 +27,30 @@ public class SchoolService {
 		this.educDistributionApiConstants = educDistributionApiConstants;
 	}
 
-	public ca.bc.gov.educ.api.distribution.model.dto.v2.School getDefaultSchoolDetailsForPackingSlip(StudentSearchRequest searchRequest, String properName) {
+	public School getDefaultSchoolDetailsForPackingSlip(StudentSearchRequest searchRequest, String properName) {
 		School commonSchool = new ca.bc.gov.educ.api.distribution.model.dto.v2.School();
 		Address address = (searchRequest == null || searchRequest.getAddress() == null) ? null : searchRequest.getAddress();
 		String userName = searchRequest == null ? null : searchRequest.getUser();
-		commonSchool.setMinCode(String.format("%09d" , 0));
+		commonSchool.setSchoolId(DEFAULT_SCHOOL_ID);
+		commonSchool.setMinCode(DEFAULT_MINCODE);
 		commonSchool.setSchoolName(ObjectUtils.defaultIfNull(properName, ObjectUtils.defaultIfNull(userName, "")));
-		commonSchool.setAddress1(address == null ? "4TH FLOOR 620 SUPERIOR" : address.getStreetLine1());
-		commonSchool.setAddress2(address == null ? "PO BOX 9886 STN PROV GOVT" : address.getStreetLine2());
-		commonSchool.setCity(address == null ? "VICTORIA" : address.getCity());
-		commonSchool.setProvCode(address == null ? "BC" : address.getRegion());
-		commonSchool.setPostal(address == null ? "V8W 9T6" : address.getCode());
-		commonSchool.setCountryCode(address == null ? "CN" : address.getCountry());
+		commonSchool.setAddress1(address == null ? DEFAULT_ADDRESS_LINE_1 : address.getStreetLine1());
+		commonSchool.setAddress2(address == null ? DEFAULT_ADDRESS_LINE_2 : address.getStreetLine2());
+		commonSchool.setCity(address == null ? DEFAULT_CITY : address.getCity());
+		commonSchool.setProvCode(address == null ? DEFAULT_PROVINCE_CODE : address.getRegion());
+		commonSchool.setPostal(address == null ? DEFAULT_POSTAL_CODE : address.getCode());
+		commonSchool.setCountryCode(address == null ? DEFAULT_COUNTRY_CODE : address.getCountry());
 		return commonSchool;
 	}
 
-	public ca.bc.gov.educ.api.distribution.model.dto.v2.School getSchool(String minCode, ExceptionMessage exception) {
-		ca.bc.gov.educ.api.distribution.model.dto.v2.School school = null;
-		if(!StringUtils.isBlank(minCode)) {
+	public School getSchool(UUID schoolId, ExceptionMessage exception) {
+		School school = null;
+		if(schoolId != null) {
 			try {
 				school = restService.executeGet(
-								educDistributionApiConstants.getSchoolByMincode(),
-								ca.bc.gov.educ.api.distribution.model.dto.v2.School.class,
-								minCode
+								educDistributionApiConstants.getSchoolById(),
+								School.class,
+						schoolId.toString()
 						);
 			} catch (Exception e) {
 				exception.setExceptionName("TRAX-API IS DOWN");
@@ -56,14 +60,14 @@ public class SchoolService {
 		return school;
 	}
 
-	public District getDistrict(String distCode, ExceptionMessage exception) {
+	public District getDistrict(UUID distId, ExceptionMessage exception) {
 		District district = null;
-		if(!StringUtils.isBlank(distCode)) {
+		if(distId != null) {
 			try {
 				district = restService.executeGet(
-								educDistributionApiConstants.getDistrictByDistcode(),
-								District.class,
-								distCode
+						educDistributionApiConstants.getDistrictById(),
+						District.class,
+						distId.toString()
 						);
 			} catch (Exception e) {
 				exception.setExceptionName("TRAX-API IS DOWN");
@@ -72,4 +76,22 @@ public class SchoolService {
 		}
 		return district;
 	}
+
+	public District getDistrictByDistrictNumber(String districtNumber, ExceptionMessage exception) {
+		District district = null;
+		if(StringUtils.isNotBlank(districtNumber)) {
+			try {
+				district = restService.executeGet(
+						educDistributionApiConstants.getDistrictByDistrictNumber(),
+						District.class,
+						districtNumber
+				);
+			} catch (Exception e) {
+				exception.setExceptionName("TRAX-API IS DOWN");
+				exception.setExceptionDetails(e.getLocalizedMessage());
+			}
+		}
+		return district;
+	}
+
 }

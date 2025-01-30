@@ -5,10 +5,9 @@ import ca.bc.gov.educ.api.distribution.model.dto.ProcessorData;
 import ca.bc.gov.educ.api.distribution.model.dto.ResponseObj;
 import ca.bc.gov.educ.api.distribution.model.dto.ResponseObjCache;
 import io.github.resilience4j.retry.annotation.Retry;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -28,10 +27,9 @@ import java.util.stream.Stream;
 /**
  * Utility class used to construct {@link ResponseEntity} for various HTTP methods.
  */
+@Slf4j
 @Component
 public class RestUtils {
-
-	private static final Logger LOGGER = LoggerFactory.getLogger(RestUtils.class);
 
 	private ModelMapper modelMapper;
 	private ResponseObjCache responseObjCache;
@@ -58,11 +56,11 @@ public class RestUtils {
 	}
 
 	public void fetchAccessToken(ProcessorData data) {
-		LOGGER.debug("Fetching the access token from KeyCloak API");
+		log.debug("Fetching the access token from KeyCloak API");
 		ResponseObj res = getTokenResponseObject();
 		if (res != null) {
 			data.setAccessToken(res.getAccess_token());
-			LOGGER.debug("Setting the new access token in summaryDTO.");
+			log.debug("Setting the new access token in summaryDTO.");
 		}
 	}
 
@@ -72,7 +70,7 @@ public class RestUtils {
 
 	@Retry(name = "rt-getToken", fallbackMethod = "rtGetTokenFallback")
 	public ResponseObj getResponseObj() {
-		LOGGER.debug("Fetch token");
+		log.debug("Fetch token");
 		HttpHeaders httpHeadersKC = EducDistributionApiUtils.getHeaders(
 				constants.getUserName(), constants.getPassword());
 		MultiValueMap<String, String> map= new LinkedMultiValueMap<>();
@@ -86,7 +84,7 @@ public class RestUtils {
 	}
 
 	public ResponseObj rtGetTokenFallBack(HttpServerErrorException exception){
-		LOGGER.error("{} NOT REACHABLE after many attempts.", constants.getTokenUrl(), exception);
+		log.error("{} NOT REACHABLE after many attempts.", constants.getTokenUrl(), exception);
 		return null;
 	}
 

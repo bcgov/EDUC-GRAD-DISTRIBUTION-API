@@ -13,9 +13,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.*;
+
+import static org.springframework.http.HttpStatus.OK;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -47,13 +50,15 @@ class DistributionControllerTest {
 		String runType = "MER";
 		String activityCode = "USERDIST";
 		Long batchId= 9029L;
-		Map<String, DistributionPrintRequest> mapDist= new HashMap<>();
+		Map<UUID, DistributionPrintRequest> mapDist= new HashMap<>();
 		String transmissionMode = "paper";
 		String localDownload = null;
 		String accessToken = "123";
 		String mincode = "123123133";
+		UUID schoolId = UUID.randomUUID();
 
 		ca.bc.gov.educ.api.distribution.model.dto.v2.School schObj = new ca.bc.gov.educ.api.distribution.model.dto.v2.School();
+		schObj.setSchoolId(UUID.randomUUID().toString());
 		schObj.setMinCode(mincode);
 		schObj.setAddress1("sadadad");
 		schObj.setAddress2("adad");
@@ -64,7 +69,7 @@ class DistributionControllerTest {
 		scd.setPen("123213133");
 		scd.setProgram("1950");
 		scd.setStudentID(UUID.randomUUID());
-		scd.setSchoolOfRecord(mincode);
+		scd.setSchoolId(schoolId);
 		scd.setPaperType("YED4");
 		scd.setStudentGrade("AD");
 		scd.setLegalFirstName("asda");
@@ -93,7 +98,7 @@ class DistributionControllerTest {
 		DistributionPrintRequest printRequest = new DistributionPrintRequest();
 		printRequest.setTranscriptPrintRequest(tPReq);
 		printRequest.setSchoolDistributionRequest(sdReq);
-		mapDist.put(mincode,printRequest);
+		mapDist.put(schoolId, printRequest);
 
 		DistributionResponse res = new DistributionResponse();
 		res.setMergeProcessResponse("MERGED");
@@ -109,13 +114,15 @@ class DistributionControllerTest {
 		String runType = "MER";
 		String activityCode = "MONTHLYDIST";
 		Long batchId= 9029L;
-		Map<String, DistributionPrintRequest> mapDist= new HashMap<>();
+		Map<UUID, DistributionPrintRequest> mapDist= new HashMap<>();
 		String transmissionMode = "paper";
 		String localDownload = null;
 		String accessToken = "123";
 		String mincode = "123123133";
+		UUID schoolId = UUID.randomUUID();
 
 		ca.bc.gov.educ.api.distribution.model.dto.v2.School schObj = new School();
+		schObj.setSchoolId(schoolId.toString());
 		schObj.setMinCode(mincode);
 		schObj.setAddress1("sadadad");
 		schObj.setAddress2("adad");
@@ -126,6 +133,7 @@ class DistributionControllerTest {
 		scd.setPen("123213133");
 		scd.setProgram("1950");
 		scd.setStudentID(UUID.randomUUID());
+		scd.setSchoolId(schoolId);
 		scd.setSchoolOfRecord(mincode);
 		scd.setPaperType("YED4");
 		scd.setStudentGrade("AD");
@@ -155,7 +163,7 @@ class DistributionControllerTest {
 		DistributionPrintRequest printRequest = new DistributionPrintRequest();
 		printRequest.setTranscriptPrintRequest(tPReq);
 		printRequest.setSchoolDistributionRequest(sdReq);
-		mapDist.put(mincode,printRequest);
+		mapDist.put(schoolId,printRequest);
 
 		DistributionResponse res = new DistributionResponse();
 		res.setMergeProcessResponse("MERGED");
