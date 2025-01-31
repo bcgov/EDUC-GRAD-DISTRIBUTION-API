@@ -1,17 +1,13 @@
 package ca.bc.gov.educ.api.distribution.service;
 
-import ca.bc.gov.educ.api.distribution.exception.ServiceException;
 import ca.bc.gov.educ.api.distribution.model.dto.*;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import ca.bc.gov.educ.api.distribution.util.JsonTransformer;
 import ca.bc.gov.educ.api.distribution.util.RestUtils;
-import com.nimbusds.oauth2.sdk.Response;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Test;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,30 +15,22 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.InputStreamResource;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.wildfly.common.Assert;
 import reactor.core.publisher.Mono;
 import reactor.util.retry.RetryBackoffSpec;
 
-import javax.xml.transform.OutputKeys;
 import java.io.ByteArrayInputStream;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Consumer;
 
-import static ca.bc.gov.educ.api.distribution.model.dto.ReportType.DISTREP_YE_SC;
-import static ca.bc.gov.educ.api.distribution.model.dto.ReportType.DISTREP_YE_SD;
-import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants.ADDRESS_LABEL_SCHL;
-import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants.ADDRESS_LABEL_YE;
+import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants.*;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 
@@ -110,6 +98,8 @@ public class DistributionServiceTest {
 
     @Mock
     Path path;
+
+    private static final UUID DEFAULT_SCHOOL_ID = new UUID(0, 0);
 
     @Test
     public void testDistributeCredentialsTranscriptMonthly() {
@@ -272,13 +262,10 @@ public class DistributionServiceTest {
     private synchronized DistributionResponse testDistributeSchoolReport(String runType, String reportType, String activityCode) {
         Long batchId = 9029L;
         Map<UUID, DistributionPrintRequest> mapDist = new HashMap<>();
-        String localDownload = "Y";
         String transmissionMode = "ftp";
         String accessToken = MOCK_TOKEN;
         String mincode = "123123133";
         UUID schoolId = UUID.randomUUID();
-
-        UUID DEFAULT_SCHOOL_ID = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
         ca.bc.gov.educ.api.distribution.model.dto.v2.School schObj = new ca.bc.gov.educ.api.distribution.model.dto.v2.School();
         schObj.setMinCode(mincode);
@@ -582,7 +569,6 @@ public class DistributionServiceTest {
         when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
         when(this.requestBodyUriMock.uri(String.format(constants.getSchoolLabelsReport(), "ADDRESS_LABEL_YE"))).thenReturn(this.requestBodyUriMock);
         when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
-        //when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
         when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(String.class)).thenReturn(Mono.just("1"));
@@ -685,7 +671,6 @@ public class DistributionServiceTest {
     private synchronized DistributionResponse testDistributeCredentials_certificate_blank(String runType, String paperType) {
         Long batchId = 9029L;
         Map<UUID, DistributionPrintRequest> mapDist = new HashMap<>();
-        String localDownload = "Y";
         String transmissionMode = "ftp";
         String accessToken = MOCK_TOKEN;
         String mincode = "123123133";
@@ -860,10 +845,7 @@ public class DistributionServiceTest {
         when(this.responseMock.bodyToMono(SchoolReports.class)).thenReturn(Mono.just(new SchoolReports()));
 
         byte[] greBPack = "Any String you want".getBytes();
-        byte[] greBTran = "ASD".getBytes();
         InputStreamResource inSRPack = new InputStreamResource(new ByteArrayInputStream(greBPack));
-        InputStreamResource inSRTran = new InputStreamResource(new ByteArrayInputStream(greBTran));
-
 
         when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
         when(this.requestBodyUriMock.uri(constants.getPackingSlip())).thenReturn(this.requestBodyUriMock);
@@ -903,7 +885,6 @@ public class DistributionServiceTest {
         when(this.responseMock.bodyToMono(String.class)).thenReturn(Mono.just("1"));
 
         SchoolReports addressLabelSchl = new SchoolReports();
-        String addressLabelSchlMincode = RandomStringUtils.randomNumeric(6);
         addressLabelSchl.setId(UUID.randomUUID());
         addressLabelSchl.setReportTypeCode(ADDRESS_LABEL_SCHL);
         addressLabelSchl.setSchoolOfRecordId(UUID.randomUUID());
@@ -912,7 +893,7 @@ public class DistributionServiceTest {
         addressLabelSchl.setReport(java.util.Base64.getEncoder().encodeToString(RandomStringUtils.randomAlphanumeric(25).getBytes()));
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolReport(), ADDRESS_LABEL_SCHL, "00000000-0000-0000-0000-000000000000"))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolReport(), ADDRESS_LABEL_SCHL, DEFAULT_SCHOOL_ID))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
@@ -1136,7 +1117,6 @@ public class DistributionServiceTest {
         when(this.responseMock.bodyToMono(String.class)).thenReturn(Mono.just("1"));
 
         SchoolReports addressLabelSchl = new SchoolReports();
-        String addressLabelSchlMincode = RandomStringUtils.randomNumeric(6);
         addressLabelSchl.setId(schoolId);
         addressLabelSchl.setReportTypeCode(ADDRESS_LABEL_SCHL);
         addressLabelSchl.setSchoolOfRecordId(schoolId);
@@ -1305,10 +1285,7 @@ public class DistributionServiceTest {
         when(this.responseMock.bodyToMono(byte[].class)).thenReturn(Mono.just(bytesSAR));
 
         byte[] greBPack = "Any String you want".getBytes();
-        byte[] greBCert = "DER".getBytes();
         InputStreamResource inSRPack = new InputStreamResource(new ByteArrayInputStream(greBPack));
-        InputStreamResource inSRCert = new InputStreamResource(new ByteArrayInputStream(greBCert));
-
 
         when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
         when(this.requestBodyUriMock.uri(constants.getPackingSlip())).thenReturn(this.requestBodyUriMock);

@@ -5,6 +5,8 @@ import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
+
 @Component
 @Getter
 @Setter
@@ -62,7 +64,7 @@ public class EducDistributionApiConstants {
     public static final String ADDRESS_LABEL_YE = "ADDRESS_LABEL_YE";
     public static final String ADDRESS_LABEL_PSI = "ADDRESS_LABEL_PSI";
 
-    public static final String DEFAULT_SCHOOL_ID = "00000000-0000-0000-0000-000000000000";
+    public static final String DEFAULT_SCHOOL_ID = new UUID(0, 0).toString();
     public static final String DEFAULT_MINCODE = "000000000";
     public static final String DEFAULT_ADDRESS_LINE_1 = "4TH FLOOR 620 SUPERIOR";
     public static final String DEFAULT_ADDRESS_LINE_2 = "PO BOX 9886 STN PROV GOVT";

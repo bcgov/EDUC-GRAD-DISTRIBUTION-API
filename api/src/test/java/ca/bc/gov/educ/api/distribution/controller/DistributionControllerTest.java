@@ -13,13 +13,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.*;
-
-import static org.springframework.http.HttpStatus.OK;
-
 
 @ExtendWith(MockitoExtension.class)
 class DistributionControllerTest {
@@ -52,8 +48,6 @@ class DistributionControllerTest {
 		Long batchId= 9029L;
 		Map<UUID, DistributionPrintRequest> mapDist= new HashMap<>();
 		String transmissionMode = "paper";
-		String localDownload = null;
-		String accessToken = "123";
 		String mincode = "123123133";
 		UUID schoolId = UUID.randomUUID();
 
@@ -116,8 +110,6 @@ class DistributionControllerTest {
 		Long batchId= 9029L;
 		Map<UUID, DistributionPrintRequest> mapDist= new HashMap<>();
 		String transmissionMode = "paper";
-		String localDownload = null;
-		String accessToken = "123";
 		String mincode = "123123133";
 		UUID schoolId = UUID.randomUUID();
 
@@ -187,10 +179,10 @@ class DistributionControllerTest {
 
 	@Test
 	void testPostingDistribution() {
-		DistributionResponse response = new DistributionResponse();
-		Mockito.when(postingDistributionService.postingProcess(response)).thenReturn(Boolean.TRUE);
-		distributionController.postingDistribution(response);
-		Mockito.verify(postingDistributionService).postingProcess(response);
+		DistributionResponse res = new DistributionResponse();
+		Mockito.when(postingDistributionService.postingProcess(res)).thenReturn(Boolean.TRUE);
+		distributionController.postingDistribution(res);
+		Mockito.verify(postingDistributionService).postingProcess(res);
 	}
 	
 }

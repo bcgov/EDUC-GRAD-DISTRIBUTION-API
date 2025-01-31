@@ -41,6 +41,4 @@ public class ReportServiceTest {
         response = this.reportService.preparePackingSlipData(searchRequest, commonSchool, 0L);
         Assert.assertNotNull(response);
     }
-
-
 }

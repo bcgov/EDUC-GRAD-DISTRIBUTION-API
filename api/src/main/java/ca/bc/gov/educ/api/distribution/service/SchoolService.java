@@ -20,6 +20,8 @@ public class SchoolService {
     RestService restService;
 	EducDistributionApiConstants educDistributionApiConstants;
 
+	private static final String TRAX_ERROR_MESSAGE = "TRAX-API IS DOWN: %s";
+
 	@Autowired
 	public SchoolService(RestUtils restUtils, RestService restService, EducDistributionApiConstants educDistributionApiConstants) {
 		this.restUtils = restUtils;
@@ -53,7 +55,7 @@ public class SchoolService {
 						schoolId.toString()
 						);
 			} catch (Exception e) {
-				exception.setExceptionName("TRAX-API IS DOWN");
+				exception.setExceptionName(String.format(TRAX_ERROR_MESSAGE, educDistributionApiConstants.getSchoolById()));
 				exception.setExceptionDetails(e.getLocalizedMessage());
 			}
 		}
@@ -70,7 +72,7 @@ public class SchoolService {
 						distId.toString()
 						);
 			} catch (Exception e) {
-				exception.setExceptionName("TRAX-API IS DOWN");
+				exception.setExceptionName(String.format(TRAX_ERROR_MESSAGE, educDistributionApiConstants.getDistrictById()));
 				exception.setExceptionDetails(e.getLocalizedMessage());
 			}
 		}
@@ -87,7 +89,7 @@ public class SchoolService {
 						districtNumber
 				);
 			} catch (Exception e) {
-				exception.setExceptionName("TRAX-API IS DOWN");
+				exception.setExceptionName(String.format(TRAX_ERROR_MESSAGE, educDistributionApiConstants.getDistrictByDistrictNumber()));
 				exception.setExceptionDetails(e.getLocalizedMessage());
 			}
 		}

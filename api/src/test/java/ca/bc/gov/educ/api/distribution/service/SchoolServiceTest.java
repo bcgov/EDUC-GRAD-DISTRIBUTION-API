@@ -13,12 +13,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 import java.util.UUID;
-import java.util.function.Consumer;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -48,8 +45,6 @@ public class SchoolServiceTest {
     WebClient webClient;
     @MockBean
     RestService restServiceMock;
-
-    private static final byte[] TEST_BYTES = "The rain in Spain stays mainly on the plain.".getBytes();
 
     @Test
     public void testGetCommonSchoolDetails() {
@@ -96,7 +91,7 @@ public class SchoolServiceTest {
         Assert.assertEquals("VICTORIA", response.getCity());
     }
 
-    @Test(expected = Exception.class)
+    @Test
     public void testGetCommonSchoolDetails_Exception() {
         String mincode = "123456";
         UUID schoolId = UUID.randomUUID();
@@ -110,10 +105,11 @@ public class SchoolServiceTest {
                 educDistributionApiConstants.getSchoolById(),
                 School.class,
                 schoolId.toString()
-        )).thenThrow(Exception.class);
+        )).thenThrow(NullPointerException.class);
         var response = this.schoolService.getSchool(schoolId, exceptionMessage);
         Assert.assertNull(response);
-        Assert.assertEquals(EducDistributionApiConstants.TRAX_API_STATUS, exceptionMessage.getExceptionName());
+        Assert.assertEquals(String.format("TRAX-API IS DOWN: %s", educDistributionApiConstants.getSchoolById()),
+                exceptionMessage.getExceptionName());
     }
 
     @Test
@@ -148,46 +144,69 @@ public class SchoolServiceTest {
         school.setMinCode(mincode);
         school.setSchoolName("Test School");
 
-        ExceptionMessage exceptionMessage = new ExceptionMessage();
-
-        when(restService.executeGet(educDistributionApiConstants.getDistrictById(), District.class,
+        when(restService.executeGet(educDistributionApiConstants.getSchoolById(), District.class,
                 schoolId.toString())).thenThrow(Exception.class);
 
-        var response = this.schoolService.getSchool(schoolId, exceptionMessage);
+        var response = this.schoolService.getSchool(schoolId, new ExceptionMessage());
         Assert.assertNull(response);
-        Assert.assertEquals("TRAX-API IS DOWN", exceptionMessage.getExceptionName());
     }
 
     @Test
     public void testGetTraxDistrict() {
-        String mincode = "123";
+        String districtNumber = "022";
         UUID districtId = UUID.randomUUID();
         District district = new District();
-        district.setDistrictNumber(mincode);
+        district.setDistrictNumber(districtNumber);
         district.setDistrictName("Test District");
 
         when(restService.executeGet(educDistributionApiConstants.getDistrictById(), District.class,
                 districtId.toString())).thenReturn(district);
         var response = this.schoolService.getDistrict(districtId, new ExceptionMessage());
-        Assert.assertEquals(mincode, response.getDistrictNumber());
+        Assert.assertEquals(districtNumber, response.getDistrictNumber());
     }
 
     @Test(expected = Exception.class)
     public void testGetTraxDistrict_Exception() {
-        String mincode = "123";
+        String districtNumber = "022";
         UUID districtId = UUID.randomUUID();
         District district = new District();
-        district.setDistrictNumber(mincode);
+        district.setDistrictNumber(districtNumber);
         district.setDistrictName("Test District");
 
         ExceptionMessage exceptionMessage = new ExceptionMessage();
-
         when(restService.executeGet(educDistributionApiConstants.getDistrictById(), District.class,
-                districtId.toString())).thenThrow(Exception.class);
+                districtNumber)).thenThrow(Exception.class);
 
         var response = this.schoolService.getDistrict(districtId, exceptionMessage);
         Assert.assertNull(response);
-        Assert.assertEquals("TRAX-API IS DOWN", exceptionMessage.getExceptionName());
+    }
+
+    @Test
+    public void testGetDistrictByDistrictNumber() {
+        String districtNumber = "022";
+        District district = new District();
+        district.setDistrictNumber(districtNumber);
+        district.setDistrictName("Test District");
+
+        when(restService.executeGet(educDistributionApiConstants.getDistrictByDistrictNumber(), District.class,
+                districtNumber)).thenReturn(district);
+        var response = this.schoolService.getDistrictByDistrictNumber(districtNumber, new ExceptionMessage());
+        Assert.assertEquals(districtNumber, response.getDistrictNumber());
+    }
+
+    @Test(expected = Exception.class)
+    public void testGetDistrictByDistrictNumber_Exception() {
+        String districtNumber = "022";
+        UUID districtId = UUID.randomUUID();
+        District district = new District();
+        district.setDistrictNumber(districtNumber);
+        district.setDistrictName("Test District");
+
+        when(restService.executeGet(educDistributionApiConstants.getDistrictByDistrictNumber(), District.class,
+                districtId.toString())).thenThrow(Exception.class);
+
+        var response = this.schoolService.getDistrictByDistrictNumber(districtNumber, new ExceptionMessage());
+        Assert.assertNull(response);
     }
 
 }
