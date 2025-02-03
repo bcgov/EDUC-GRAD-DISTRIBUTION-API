@@ -1545,7 +1545,7 @@ public class DistributionServiceTest {
         })).thenReturn(Mono.just(List.of(studentTranscripts)));
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolReport(), "ADDRESS_LABEL_PSI", "000000000"))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolReport(), "ADDRESS_LABEL_PSI", "00000000"))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);

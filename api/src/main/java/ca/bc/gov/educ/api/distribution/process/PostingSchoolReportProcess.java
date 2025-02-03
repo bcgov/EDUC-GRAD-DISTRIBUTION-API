@@ -55,7 +55,7 @@ public class PostingSchoolReportProcess extends BaseProcess {
 			if (counter % 50 == 0) {
 				restUtils.fetchAccessToken(processorData);
 			}
-			log.debug("School {}/{} Number of Reports {}",counter,mapDist.size(),numberOfPdfs);
+			log.debug("School {}/{} Number of Reports {}", counter, mapDist.size(), numberOfPdfs);
 
 		}
 		long endTime = System.currentTimeMillis();

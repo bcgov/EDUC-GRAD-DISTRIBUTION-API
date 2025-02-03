@@ -64,7 +64,7 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 				}
 			}
 		}
-		postingProcess(batchId,processorData,numberOfPdfs);
+		postingProcess(batchId, processorData, numberOfPdfs);
 		long endTime = System.currentTimeMillis();
 		long diff = (endTime - startTime)/1000;
 		log.debug("************* TIME Taken  ************ {} secs",diff);
@@ -79,7 +79,7 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 	}
 
 	private int processYed4Transcript(DistributionPrintRequest obj, int currentSlipCount, ReportRequest packSlipReq,
-									  String mincode,ProcessorData processorData, int numberOfPdfs) {
+									  String mincode, ProcessorData processorData, int numberOfPdfs) {
 		if (obj.getTranscriptPrintRequest() != null) {
 			TranscriptPrintRequest transcriptPrintRequest = obj.getTranscriptPrintRequest();
 			List<BlankCredentialDistribution> bcdList = transcriptPrintRequest.getBlankTranscriptList();
@@ -127,7 +127,7 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 		return numberOfPdfs;
 	}
 	private int processYedrCertificate(DistributionPrintRequest obj, int currentSlipCount, ReportRequest packSlipReq,
-									   String mincode,ProcessorData processorData, int numberOfPdfs) {
+									   String mincode, ProcessorData processorData, int numberOfPdfs) {
 		if (obj.getYedrCertificatePrintRequest() != null) {
 			currentSlipCount++;
 			processCertificatePrintFile(packSlipReq, obj.getYedrCertificatePrintRequest(), mincode, currentSlipCount,
@@ -139,7 +139,7 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 	}
 
 	private int processYedbCertificate(DistributionPrintRequest obj, int currentSlipCount, ReportRequest packSlipReq,
-									   String mincode,ProcessorData processorData, int numberOfPdfs) {
+									   String mincode, ProcessorData processorData, int numberOfPdfs) {
 		if (obj.getYedbCertificatePrintRequest() != null) {
 			currentSlipCount++;
 			processCertificatePrintFile(packSlipReq, obj.getYedbCertificatePrintRequest(), mincode, currentSlipCount,

@@ -66,7 +66,7 @@ public class MergeProcess extends BaseProcess {
 					ReportRequest schoolDistributionReportRequest = reportService.prepareSchoolDistributionReportData(
 							distributionPrintRequest.getSchoolDistributionRequest(), processorData.getBatchId(), schoolDetails);
 					createAndSaveDistributionReport(schoolDistributionReportRequest, schoolId, schoolDetails.getMinCode(),
-							schoolCategoryCode,processorData);
+							schoolCategoryCode, processorData);
 					numberOfPdfs++;
 				}
 				Pair<Integer,Integer> pV = processTranscriptPrintRequest(distributionPrintRequest, currentSlipCount,
@@ -121,7 +121,7 @@ public class MergeProcess extends BaseProcess {
 			log.debug("***** Number of distributed Supplemental school label reports {} *****", numberOfProcessedSchoolReports);
 		}
 		numberOfPdfs += numberOfProcessedSchoolReports;
-		postingProcess(batchId,processorData,numberOfPdfs);
+		postingProcess(batchId, processorData, numberOfPdfs);
 		long endTime = System.currentTimeMillis();
 		long diff = (endTime - startTime)/1000;
 		log.debug("************* TIME Taken  ************ {} secs",diff);
