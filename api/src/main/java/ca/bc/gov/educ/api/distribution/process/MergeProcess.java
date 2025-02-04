@@ -378,7 +378,8 @@ public class MergeProcess extends BaseProcess {
 				locations.add(new ByteArrayInputStream(bytesSAR));
 				byte[] encoded = Base64.encodeBase64(bytesSAR);
 				String encodedPdf = new String(encoded, StandardCharsets.US_ASCII);
-				if(!processorData.getActivityCode().contains(USERDIST.getValue()))
+				if(!StringUtils.containsAnyIgnoreCase(processorData.getActivityCode(),
+						USERDIST.getValue(), USERDISTRC.getValue()))
 					saveSchoolDistributionReport(encodedPdf, schoolId, DISTREP_SC.getValue());
 			}
 			mergeDocumentsPDFs(processorData, mincode, schoolCategoryCode,"/EDGRAD.R.","324W", locations);
