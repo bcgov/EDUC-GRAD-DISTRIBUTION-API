@@ -59,6 +59,11 @@ server:
       io: 16
   #port: ${HTTP_PORT}
   max-http-request-header-size: 20000
+  compression:
+    enabled: ${ENABLE_COMPRESSION}
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain,text/css,text/javascript,application/javascript
+    min-response-size: 2048
+    excluded-user-agents: MSIE 6.0,UCBrowser
 
 #API Documentation
 springdoc:
@@ -113,11 +118,13 @@ endpoint:
     get-certificate:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/studentcertificate?studentID=%s&certificateType=%s&documentStatusCode=%s
     update-grad-school-report:
-      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/schoolreport
+      url: ${GRAD_GRADUATION_REPORT_API}api/v2/graduationreports/schoolreports
+    update-grad-district-report:
+      url: ${GRAD_GRADUATION_REPORT_API}api/v2/graduationreports/district-report
     school-report:
-      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/schoolreport?mincode=%s&reportType=%s
-    school-report-by-report-type:
-      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/schoolreport/type/%s?mincode=%s
+      url: ${GRAD_GRADUATION_REPORT_API}api/v2/graduationreports/schoolreports?schoolOfRecordID=%s&reportType=%s
+    district-report:
+      url:${GRAD_GRADUATION_REPORT_API}api/v2/graduationreports/district-report?districtId=%s&reportType=%s
     get-achievement-report:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/studentreport?studentID=%s&reportType=%s&documentStatusCode=%s
     get-transcript-psi-by-student-id:
@@ -157,9 +164,11 @@ endpoint:
   grad-trax-api:
     psi-by-psi-code:
       url: ${GRAD_TRAX_API}api/v1/trax/psi/%s
-    school-by-min-code:
-      url: ${GRAD_TRAX_API}api/v2/trax/school-clob/search?mincode=%s
-    district-by-dist-code:
+    school-by-id:
+      url: ${GRAD_TRAX_API}api/v2/trax/school-clob/%s
+    district-by-id:
+      url: ${GRAD_TRAX_API}api/v2/trax/district/%s
+    district-by-district-number:
       url: ${GRAD_TRAX_API}api/v2/trax/district?distNo=%s
   grad-batch-graduation-api:
     distribution:

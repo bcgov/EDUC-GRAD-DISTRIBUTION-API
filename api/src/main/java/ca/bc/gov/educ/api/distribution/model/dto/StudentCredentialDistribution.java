@@ -1,5 +1,6 @@
 package ca.bc.gov.educ.api.distribution.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -14,7 +15,7 @@ public class StudentCredentialDistribution {
 	private String credentialTypeCode;
 	private UUID studentID;
 	private String paperType;
-	private String schoolOfRecord;
+	private UUID schoolId;
 	private String documentStatusCode;
 
 	private String pen;
@@ -28,6 +29,15 @@ public class StudentCredentialDistribution {
 	private String program;
 	private String studentGrade;
 	private List<GradRequirement> nonGradReasons;
+
+	@JsonIgnore
+	private UUID schoolAtGradId;
+	@JsonIgnore
+	private UUID schoolOfRecordOriginId;
+	@JsonIgnore
+	private UUID districtId;
+	@JsonIgnore
+	private String schoolOfRecord; // minCode is required for the print file name
 
 	public LocalDateTime getLastUpdateDate() {
 		return lastUpdateDate == null ? LocalDateTime.now() : lastUpdateDate;

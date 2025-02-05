@@ -14,9 +14,8 @@ import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Base64;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -25,13 +24,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @CrossOrigin
 @RestController
 @RequestMapping(EducDistributionApiConstants.DISTRIBUTION_API_ROOT_MAPPING)
 @OpenAPIDefinition(info = @Info(title = "API for Distributing Credentials to Schools.", description = "This API is for Distributing Credentials to Schools.", version = "1"), security = {@SecurityRequirement(name = "OAUTH2", scopes = {"GRAD_GRADUATE_STUDENT"})})
 public class DistributionController {
-
-    private static Logger logger = LoggerFactory.getLogger(DistributionController.class);
 
     private static final String CONTENT_DISPOSITION = "Content-Disposition";
     private static final String ZIP_FILE_NAME = "inline; filename=userdistributionbatch_%s.zip";
@@ -77,7 +75,7 @@ public class DistributionController {
     @Operation(summary = "Read Student Reports by Student ID and Report Type", description = "Read Student Reports by Student ID and Report Type", tags = { "Reports" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK")})
     public ResponseEntity<byte[]> downloadZipFile(@PathVariable(value = "batchId") Long batchId, @RequestParam(required = false) String transmissionMode) {
-        logger.debug("downloadZipFile : ");
+        log.debug("downloadZipFile : ");
         byte[] resultBinary = gradDistributionService.getDownload(batchId, transmissionMode);
         byte[] encoded = Base64.encodeBase64(resultBinary);
         return handleBinaryResponse(encoded,MediaType.TEXT_PLAIN,batchId);
@@ -88,7 +86,7 @@ public class DistributionController {
     @Operation(summary = "Read Student Reports by Student ID and Report Type", description = "Read Student Reports by Student ID and Report Type", tags = { "Reports" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK")})
     public ResponseEntity<Boolean> postingDistribution(@RequestBody DistributionResponse distributionResponse) {
-        logger.debug("zipBatchDirectory : ");
+        log.debug("zipBatchDirectory : ");
         return response.GET(postingDistributionService.postingProcess(distributionResponse));
     }
 

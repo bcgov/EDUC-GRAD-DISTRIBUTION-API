@@ -5,11 +5,9 @@ import ca.bc.gov.educ.api.distribution.model.dto.DistributionResponse;
 import ca.bc.gov.educ.api.distribution.model.dto.ProcessorData;
 import ca.bc.gov.educ.api.distribution.process.DistributionProcess;
 import ca.bc.gov.educ.api.distribution.process.DistributionProcessFactory;
-import ca.bc.gov.educ.api.distribution.process.DistributionProcessType;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import ca.bc.gov.educ.api.distribution.util.RestUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -19,10 +17,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+@Slf4j
 @Service
 public class GradDistributionService {
-
-    private static Logger logger = LoggerFactory.getLogger(GradDistributionService.class);
 
     DistributionProcessFactory distributionProcessFactory;
 
@@ -45,9 +42,7 @@ public class GradDistributionService {
     }
 
     private DistributionResponse processDistribution(String processType, ProcessorData data) {
-        DistributionProcessType pType = DistributionProcessType.valueOf(processType);
-        DistributionProcess process = distributionProcessFactory.createProcess(pType);
-        restUtils.fetchAccessToken(data);
+        DistributionProcess process = distributionProcessFactory.createProcess(processType);
         data = process.fire(data);
         return data.getDistributionResponse();
     }
@@ -60,8 +55,7 @@ public class GradDistributionService {
 
     private void asyncProcessDistribution(String processType, ProcessorData data) {
         String status;
-        DistributionProcessType pType = DistributionProcessType.valueOf(processType);
-        DistributionProcess process = distributionProcessFactory.createProcess(pType);
+        DistributionProcess process = distributionProcessFactory.createProcess(processType);
 
         try {
             restUtils.fetchAccessToken(data);
@@ -72,17 +66,16 @@ public class GradDistributionService {
                 status = "error";
             }
         } catch (Exception ex) {
-            logger.error("Distribution Process - unexpected exception occurred: {}", ex.getLocalizedMessage());
+            log.error("Distribution Process - unexpected exception occurred: {}", ex.getLocalizedMessage());
             status = "error";
         }
         restUtils.fetchAccessToken(data);
         DistributionResponse response = data.getDistributionResponse();
         response.setJobStatus(status);
         restUtils.notifyDistributionJobIsCompleted(data);
-        logger.info("Async distribution job is completed and notify it's status back to grad-batch-api: batchId [{}]", data.getBatchId());
+        log.info("Async distribution job is completed and notify it's status back to grad-batch-api: batchId [{}]", data.getBatchId());
     }
 
-    //Grad2-1931 Changed the zipped folder path to fetch - mchintha
     public byte[] getDownload(Long batchId, String transmissionMode) {
         String localFile = null;
         if((transmissionMode != null) && (transmissionMode.equalsIgnoreCase(EducDistributionApiConstants.TRANSMISSION_MODE_FTP) || transmissionMode.equalsIgnoreCase(EducDistributionApiConstants.TRANSMISSION_MODE_PAPER))) {
@@ -95,7 +88,7 @@ public class GradDistributionService {
         try {
             return Files.readAllBytes(path);
         } catch (IOException e) {
-            logger.debug("Error Message {}",e.getLocalizedMessage());
+            log.debug("Error Message {}",e.getLocalizedMessage());
         }
         return new byte[0];
     }

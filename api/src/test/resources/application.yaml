@@ -43,14 +43,14 @@ logging:
         gov:
           educ:
             api:
-              distribution: INFO
+              distribution: DEBUG
     org:
       springframework:
-        web: INFO
-        security: INFO
+        web: DEBUG
+        security: DEBUG
         boot:
           autoconfigure:
-            logging: INFO
+            logging: DEBUG
     jdk:
       management:
         agent: ERROR
@@ -115,11 +115,13 @@ endpoint:
     get-certificate:
       url: https://educ-grad-graduation-report-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/studentcertificate?studentID=%s&certificateType=%s&documentStatusCode=%s
     update-grad-school-report:
-      url: https://educ-grad-graduation-report-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/schoolreport
+      url: https://educ-grad-graduation-report-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v2/graduationreports/schoolreports
+    update-grad-district-report:
+      url: https://educ-grad-graduation-report-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v2/graduationreports/district-report
     school-report:
-      url: https://educ-grad-graduation-report-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/schoolreport?mincode=%s&reportType=%s
-    school-report-by-report-type:
-      url: https://educ-grad-graduation-report-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/schoolreport/type/%s?mincode=%s
+      url: https://educ-grad-graduation-report-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v2/graduationreports/schoolreports?schoolOfRecordID=%s&reportType=%s
+    district-report:
+      url: https://educ-grad-graduation-report-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v2/graduationreports/district-report?districtId=%s&reportType=%s
     get-achievement-report:
       url: https://educ-grad-graduation-report-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/studentreport?studentID=%s&reportType=%s&documentStatusCode=%s
     get-transcript-psi-by-student-id:
@@ -159,9 +161,11 @@ endpoint:
   grad-trax-api:
     psi-by-psi-code:
       url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/trax/psi/%s
-    school-by-min-code:
-      url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v2/trax/school-clob/search?mincode=%s
-    district-by-dist-code:
+    school-by-id:
+      url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v2/trax/school-clob/%s
+    district-by-id:
+      url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v2/trax/district/%s
+    district-by-district-number:
       url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v2/trax/district?distNo=%s
   grad-batch-graduation-api:
     distribution:

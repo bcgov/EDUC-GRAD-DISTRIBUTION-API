@@ -4,8 +4,7 @@ import ca.bc.gov.educ.api.distribution.exception.ServiceException;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import ca.bc.gov.educ.api.distribution.util.JsonTransformer;
 import ca.bc.gov.educ.api.distribution.util.RestUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
@@ -21,10 +20,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+@Slf4j
 @Service
 public class RestService {
-
-    private static Logger logger = LoggerFactory.getLogger(RestService.class);
 
     private static final String GET_REST_SERVICE_ERROR = "Unable to call rest service {} method of {} with params {}";
     private static final String POST_REST_SERVICE_ERROR = "Unable to call rest service {} method of {} with params {} and payload: {}";
@@ -82,10 +80,10 @@ public class RestService {
                     .block();
         } catch(ServiceException e) {
             if(HttpStatus.NO_CONTENT.value() == e.getStatusCode()) {
-                logger.warn(REST_SERVICE_WARN, "GET", executeUrl, Arrays.toString(params), "", e.getStatusCode());
+                log.warn(REST_SERVICE_WARN, "GET", executeUrl, Arrays.toString(params), "", e.getStatusCode());
                 return null;
             }
-            logger.error(GET_REST_SERVICE_ERROR, "GET", executeUrl, Arrays.toString(params));
+            log.error(GET_REST_SERVICE_ERROR, "GET", executeUrl, Arrays.toString(params));
             throw new ServiceException(getErrorMessage(url, e.getLocalizedMessage()), HttpStatus.SERVICE_UNAVAILABLE.value(), e);
         }
         return obj;
@@ -124,10 +122,10 @@ public class RestService {
                     .block();
         } catch(ServiceException e) {
             if(HttpStatus.NO_CONTENT.value() == e.getStatusCode()) {
-                logger.warn(REST_SERVICE_WARN, "GET", executeUrl, Arrays.toString(params), "", e.getStatusCode());
+                log.warn(REST_SERVICE_WARN, "GET", executeUrl, Arrays.toString(params), "", e.getStatusCode());
                 return null;
             }
-            logger.error(GET_REST_SERVICE_ERROR, "GET", executeUrl, Arrays.toString(params));
+            log.error(GET_REST_SERVICE_ERROR, "GET", executeUrl, Arrays.toString(params));
             throw new ServiceException(getErrorMessage(url, e.getLocalizedMessage()), HttpStatus.SERVICE_UNAVAILABLE.value(), e);
         }
         return obj;
@@ -163,10 +161,10 @@ public class RestService {
                     .block();
         } catch(ServiceException e) {
             if(HttpStatus.NO_CONTENT.value() == e.getStatusCode()) {
-                logger.warn(REST_SERVICE_WARN, "POST", executeUrl, Arrays.toString(params), jsonTransformer.marshall(requestBody), e.getStatusCode());
+                log.warn(REST_SERVICE_WARN, "POST", executeUrl, Arrays.toString(params), jsonTransformer.marshall(requestBody), e.getStatusCode());
                 return null;
             }
-            logger.error(POST_REST_SERVICE_ERROR, "POST", executeUrl, Arrays.toString(params), jsonTransformer.marshall(requestBody));
+            log.error(POST_REST_SERVICE_ERROR, "POST", executeUrl, Arrays.toString(params), jsonTransformer.marshall(requestBody));
             throw new ServiceException(getErrorMessage(url, e.getLocalizedMessage()), HttpStatus.SERVICE_UNAVAILABLE.value(), e);
         }
         return obj;
@@ -184,7 +182,7 @@ public class RestService {
                 h.set(EducDistributionApiConstants.CORRELATION_ID, correlationId.toString());
             }).retrieve().bodyToMono(boundClass).block();
         } catch(Exception e) {
-            logger.error(DELETE_REST_SERVICE_ERROR, "DELETE", executeUrl, Arrays.toString(params));
+            log.error(DELETE_REST_SERVICE_ERROR, "DELETE", executeUrl, Arrays.toString(params));
             throw new ServiceException(getErrorMessage(url, e.getLocalizedMessage()), HttpStatus.SERVICE_UNAVAILABLE.value(), e);
         }
         return obj;

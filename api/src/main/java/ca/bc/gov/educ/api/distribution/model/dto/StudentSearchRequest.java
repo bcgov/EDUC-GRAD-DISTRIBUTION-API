@@ -8,8 +8,10 @@ import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @Component
@@ -17,11 +19,13 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class StudentSearchRequest implements Serializable {
-    private List<String> schoolOfRecords;
-    private List<String> districts;
-    private List<String> schoolCategoryCodes;
-    private List<String> pens;
-    private List<String> programs;
+
+    private List<UUID> schoolIds = new ArrayList<>();
+    private List<UUID> districtIds = new ArrayList<>();
+    private List<String> schoolCategoryCodes = new ArrayList<>();
+    private List<String> pens = new ArrayList<>();
+    private List<String> programs = new ArrayList<>();
+    private List<String> reportTypes = new ArrayList<>();
 
     private String user;
     private Address address;

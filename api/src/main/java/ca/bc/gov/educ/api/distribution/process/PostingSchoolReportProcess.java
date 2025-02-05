@@ -6,10 +6,9 @@ import ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.io.MemoryUsageSetting;
 import org.apache.pdfbox.multipdf.PDFMergerUtility;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Component;
 
@@ -21,43 +20,47 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
+@Slf4j
 @Data
 @Component
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 public class PostingSchoolReportProcess extends BaseProcess {
 	
-	private static Logger logger = LoggerFactory.getLogger(PostingSchoolReportProcess.class);
-
 	@Override
 	public ProcessorData fire(ProcessorData processorData) {
 		long startTime = System.currentTimeMillis();
-		logger.debug("************* TIME START  ************ {}",startTime);
+		log.debug("************* TIME START  ************ {}",startTime);
 		DistributionResponse response = new DistributionResponse();
+		ExceptionMessage exception = new ExceptionMessage();
 		DistributionRequest distributionRequest = processorData.getDistributionRequest();
-		Map<String, DistributionPrintRequest> mapDist = distributionRequest.getMapDist();
+		Map<UUID, DistributionPrintRequest> mapDist = distributionRequest.getMapDist();
 		StudentSearchRequest searchRequest = distributionRequest.getStudentSearchRequest();
 		int numberOfPdfs = 0;
 		int counter=0;
-		for (String mincode : mapDist.keySet()) {
+		for (Map.Entry<UUID, DistributionPrintRequest> entry : mapDist.entrySet()) {
+			UUID schoolId = entry.getKey();
 			counter++;
-			DistributionPrintRequest obj = mapDist.get(mincode);
-			if (obj.getSchoolReportPostRequest() != null) {
-				SchoolReportPostRequest schoolRepPostReq = obj.getSchoolReportPostRequest();
-				numberOfPdfs = processFile(schoolRepPostReq.getGradReport(),mincode,numberOfPdfs,processorData);
-				numberOfPdfs = processFile(schoolRepPostReq.getNongradReport(),mincode,numberOfPdfs,processorData);
-				numberOfPdfs = processFile(schoolRepPostReq.getNongradprjreport(),mincode,numberOfPdfs,processorData);
+			DistributionPrintRequest distributionPrintRequest = entry.getValue();
+			ca.bc.gov.educ.api.distribution.model.dto.v2.School schoolDetails =
+					getBaseSchoolDetails(distributionPrintRequest, searchRequest, schoolId, exception);
+			if (distributionPrintRequest.getSchoolReportPostRequest() != null) {
+				SchoolReportPostRequest schoolRepPostReq = distributionPrintRequest.getSchoolReportPostRequest();
+				numberOfPdfs = processFile(schoolRepPostReq.getGradReport(), schoolDetails.getMinCode(), numberOfPdfs, processorData);
+				numberOfPdfs = processFile(schoolRepPostReq.getNongradReport(), schoolDetails.getMinCode(), numberOfPdfs, processorData);
+				numberOfPdfs = processFile(schoolRepPostReq.getNongradprjreport(), schoolDetails.getMinCode(), numberOfPdfs, processorData);
 			}
 			if (counter % 50 == 0) {
 				restUtils.fetchAccessToken(processorData);
 			}
-			logger.debug("School {}/{} Number of Reports {}",counter,mapDist.size(),numberOfPdfs);
+			log.debug("School {}/{} Number of Reports {}", counter, mapDist.size(), numberOfPdfs);
 
 		}
 		long endTime = System.currentTimeMillis();
 		long diff = (endTime - startTime)/1000;
-		logger.debug("************* TIME Taken  ************ {} secs",diff);
+		log.debug("************* TIME Taken  ************ {} secs",diff);
 		response.setMergeProcessResponse("Read Successful and Posting Done");
 		response.setNumberOfPdfs(numberOfPdfs);
 		response.setBatchId(processorData.getBatchId());
@@ -75,19 +78,19 @@ public class PostingSchoolReportProcess extends BaseProcess {
 				InputStreamResource gradReportPdf = restService.executeGet(
 						educDistributionApiConstants.getSchoolReport(),
 						InputStreamResource.class,
-						scdReport.getSchoolOfRecord(), scdReport.getReportTypeCode()
+						mincode, scdReport.getReportTypeCode()
 				);
 				if (gradReportPdf != null) {
 					locations.add(gradReportPdf.getInputStream());
-					logger.debug("*** Added School Report PDFs Report Type {}", scdReport.getReportTypeCode());
+					log.debug("*** Added School Report PDFs Report Type {}", scdReport.getReportTypeCode());
 					mergeDocuments(processorData, mincode, EducDistributionApiUtils.getFileNameSchoolReports(mincode), locations);
 					numberOfPdfs++;
 				} else {
-					logger.info("*** Failed to Add School Report PDFs Report Type {} in batch {}", scdReport.getReportTypeCode(), processorData.getBatchId());
+					log.info("*** Failed to Add School Report PDFs Report Type {} in batch {}", scdReport.getReportTypeCode(), processorData.getBatchId());
 				}
-				logger.debug("*** GRADDIST Report Created");
+				log.debug("*** GRADDIST Report Created");
 			} catch (IOException e) {
-				logger.debug(EXCEPTION, e.getLocalizedMessage());
+				log.debug(EXCEPTION, e.getLocalizedMessage());
 			}
 		}
 		return numberOfPdfs;
@@ -106,7 +109,7 @@ public class PostingSchoolReportProcess extends BaseProcess {
 			objs.addSources(locations);
 			objs.mergeDocuments(MemoryUsageSetting.setupMainMemoryOnly());
 		}catch (Exception e) {
-			logger.debug(EXCEPTION,e.getLocalizedMessage());
+			log.debug(EXCEPTION,e.getLocalizedMessage());
 		}
 	}
 }

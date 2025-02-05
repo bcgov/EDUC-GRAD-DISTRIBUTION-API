@@ -14,7 +14,6 @@ public class DistributionResponse {
     private String mergeProcessResponse;
     private int numberOfPdfs;
     private String jobStatus;
-    //Grad2-1931
     private Long batchId;
     private String localDownload;
     private String activityCode;

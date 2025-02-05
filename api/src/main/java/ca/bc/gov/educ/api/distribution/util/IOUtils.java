@@ -1,8 +1,7 @@
 package ca.bc.gov.educ.api.distribution.util;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.SystemUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.util.FileSystemUtils;
 
 import java.io.File;
@@ -15,9 +14,8 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Set;
 
+@Slf4j
 public class IOUtils {
-
-    private static final Logger logger = LoggerFactory.getLogger(IOUtils.class);
 
     private IOUtils(){}
 
@@ -58,7 +56,7 @@ public class IOUtils {
                 Files.deleteIfExists(Path.of(file.getAbsolutePath()));
             }
         } catch (IOException e) {
-            logger.error("Unable to delete file or folder {}", file.getAbsolutePath());
+            log.error("Unable to delete file or folder {}", file.getAbsolutePath());
         }
     }
 
