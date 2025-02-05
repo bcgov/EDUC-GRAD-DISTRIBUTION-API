@@ -124,7 +124,7 @@ endpoint:
     school-report:
       url: ${GRAD_GRADUATION_REPORT_API}api/v2/graduationreports/schoolreports?schoolOfRecordID=%s&reportType=%s
     district-report:
-      url:${GRAD_GRADUATION_REPORT_API}api/v2/graduationreports/district-report?districtId=%s&reportType=%s
+      url: ${GRAD_GRADUATION_REPORT_API}api/v2/graduationreports/district-report?districtId=%s&reportType=%s
     get-achievement-report:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/studentreport?studentID=%s&reportType=%s&documentStatusCode=%s
     get-transcript-psi-by-student-id:
