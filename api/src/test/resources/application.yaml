@@ -119,7 +119,7 @@ endpoint:
     update-grad-district-report:
       url: https://educ-grad-graduation-report-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v2/graduationreports/district-report
     school-report:
-      url: https://educ-grad-graduation-report-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v2/graduationreports/schoolreports?schoolOfRecordID=%s&reportType=%s
+      url: https://educ-grad-graduation-report-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v2/graduationreports/schoolreports?reportTypeCode=%s&schoolOfRecordId=%s
     district-report:
       url: https://educ-grad-graduation-report-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v2/graduationreports/district-report?districtId=%s&reportType=%s
     get-achievement-report:
