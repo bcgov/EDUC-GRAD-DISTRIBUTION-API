@@ -119,9 +119,9 @@ endpoint:
     update-grad-district-report:
       url: https://educ-grad-graduation-report-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v2/graduationreports/district-report
     school-report:
-      url: https://educ-grad-graduation-report-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v2/graduationreports/schoolreports?reportTypeCode=%s&schoolOfRecordId=%s
+      url: https://educ-grad-graduation-report-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v2/graduationreports/schoolreports/search?reportTypeCode=%s&schoolOfRecordId=%s
     district-report:
-      url: https://educ-grad-graduation-report-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v2/graduationreports/district-report?reportTypeCode=%s&districtId=%s
+      url: https://educ-grad-graduation-report-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v2/graduationreports/district-report/search?reportTypeCode=%s&districtId=%s
     get-achievement-report:
       url: https://educ-grad-graduation-report-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/studentreport?studentID=%s&reportType=%s&documentStatusCode=%s
     get-transcript-psi-by-student-id:
