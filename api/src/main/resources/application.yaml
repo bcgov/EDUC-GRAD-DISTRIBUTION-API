@@ -122,9 +122,9 @@ endpoint:
     update-grad-district-report:
       url: ${GRAD_GRADUATION_REPORT_API}api/v2/graduationreports/district-report
     school-report:
-      url: ${GRAD_GRADUATION_REPORT_API}api/v2/graduationreports/schoolreports?reportTypeCode=%s&schoolOfRecordId=%s
+      url: ${GRAD_GRADUATION_REPORT_API}api/v2/graduationreports/schoolreports/search?reportTypeCode=%s&schoolOfRecordId=%s
     district-report:
-      url: ${GRAD_GRADUATION_REPORT_API}api/v2/graduationreports/district-report?reportTypeCode=%s&districtId=%s
+      url: ${GRAD_GRADUATION_REPORT_API}api/v2/graduationreports/district-report/search?reportTypeCode=%s&districtId=%s
     get-achievement-report:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/studentreport?studentID=%s&reportType=%s&documentStatusCode=%s
     get-transcript-psi-by-student-id:
