@@ -271,15 +271,16 @@ public class PostingDistributionService {
         int numberOfPdfs = 0;
         for (SchoolReports report : schoolReports) {
             try {
-                byte[] gradReportPdf = restService.executeGet(educDistributionApiConstants.getSchoolReport(),
-                        byte[].class, report.getSchoolOfRecordId().toString(), report.getReportTypeCode());
+                byte[] gradReportPdf = restService.executeGet(educDistributionApiConstants.getSchoolReportPDF(),
+                        byte[].class, report.getReportTypeCode(), report.getSchoolOfRecordId().toString());
                 if (gradReportPdf != null) {
                     log.debug("*** Added School Report PDFs Report Type {} for school {} category {}",
                             report.getReportTypeCode(), report.getSchoolOfRecordId().toString(), report.getSchoolCategory());
                     uploadSchoolReportDocuments(
                             batchId,
                             reportType,
-                            report.getSchoolOfRecordId().toString(),
+                            DEFAULT_SCHOOL_ID.compareTo(report.getSchoolOfRecordId().toString()) == 0 ?
+                                    DEFAULT_MINCODE : report.getSchoolOfRecordId().toString(),
                             report.getSchoolCategory(),
                             transmissionMode,
                             gradReportPdf);

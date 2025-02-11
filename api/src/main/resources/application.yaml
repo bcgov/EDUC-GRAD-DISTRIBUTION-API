@@ -123,6 +123,8 @@ endpoint:
       url: ${GRAD_GRADUATION_REPORT_API}api/v2/graduationreports/district-report
     school-report:
       url: ${GRAD_GRADUATION_REPORT_API}api/v2/graduationreports/schoolreports/search?reportTypeCode=%s&schoolOfRecordId=%s
+    school-report-pdf:
+      url: ${GRAD_GRADUATION_REPORT_API}api/v2/graduationreports/schoolreports?reportTypeCode=%s&schoolOfRecordId=%s
     district-report:
       url: ${GRAD_GRADUATION_REPORT_API}api/v2/graduationreports/district-report/search?reportTypeCode=%s&districtId=%s
     get-achievement-report:
@@ -150,16 +152,22 @@ endpoint:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/report/data/%s?type=xml
     report-by-pen:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/report/data/%s?type=CERT
-    school_district_year_end_report:
+    school-district-year-end-report:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/report/schooldistrictyearend?slrt=%s&drt=%s&srt=%s
-    school_district_year_end_nongrad_report:
+    school-district-year-end-nongrad-report:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/report/schooldistrictnongradyearend?slrt=%s&drt=%s&srt=%s
-    school_district_month_report:
+    school-district-month-report:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/report/schooldistrictmonth?slrt=%s&drt=%s&srt=%s
-    school_district_supplemental_report:
+    school-district-supplemental-report:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/report/schooldistrictsupp?slrt=%s&drt=%s&srt=%s
-    school_labels_report:
+    school-labels-report:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/report/school/labels?reportType=%s
+    school-labels-report-pdf:
+      url: ${GRAD_GRADUATION_API}api/v1/graduate/report/school/labels/pdf?reportType=%s
+    district-labels-report:
+      url: ${GRAD_GRADUATION_API}api/v1/graduate/report/district/labels?reportType=%s
+    district-labels-report-pdf:
+      url: ${GRAD_GRADUATION_API}api/v1/graduate/report/district/labels/pdf?reportType=%s
 
   grad-trax-api:
     psi-by-psi-code:
