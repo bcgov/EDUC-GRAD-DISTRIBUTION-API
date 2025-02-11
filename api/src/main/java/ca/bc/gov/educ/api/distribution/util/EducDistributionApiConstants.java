@@ -151,23 +151,35 @@ public class EducDistributionApiConstants {
     @Value("${endpoint.grad-graduation-report-api.school-report.url}")
     private String schoolReport;
 
+    @Value("${endpoint.grad-graduation-report-api.school-report-pdf.url}")
+    private String schoolReportPDF;
+
     @Value("${endpoint.grad-graduation-report-api.district-report.url}")
     private String districtReport;
 
-    @Value("${endpoint.grad-graduation-api.school_district_year_end_report.url}")
+    @Value("${endpoint.grad-graduation-api.school-district-year-end-report.url}")
     private String schoolDistrictYearEndReport;
 
-    @Value("${endpoint.grad-graduation-api.school_district_year_end_nongrad_report.url}")
+    @Value("${endpoint.grad-graduation-api.school-district-year-end-nongrad-report.url}")
     private String schoolDistrictYearEndNonGradReport;
 
-    @Value("${endpoint.grad-graduation-api.school_district_month_report.url}")
+    @Value("${endpoint.grad-graduation-api.school-district-month-report.url}")
     private String schoolDistrictMonthReport;
 
-    @Value("${endpoint.grad-graduation-api.school_district_supplemental_report.url}")
+    @Value("${endpoint.grad-graduation-api.school-district-supplemental-report.url}")
     private String schoolDistrictSupplementalReport;
 
-    @Value("${endpoint.grad-graduation-api.school_labels_report.url}")
+    @Value("${endpoint.grad-graduation-api.school-labels-report.url}")
     private String schoolLabelsReport;
+
+    @Value("${endpoint.grad-graduation-api.school-labels-report-pdf.url}")
+    private String schoolLabelsReportPDF;
+
+    @Value("${endpoint.grad-graduation-api.district-labels-report.url}")
+    private String districtLabelsReport;
+
+    @Value("${endpoint.grad-graduation-api.district-labels-report-pdf.url}")
+    private String districtLabelsReportPDF;
 
     @Value("${endpoint.grad-batch-graduation-api.distribution.notify-completion.url}")
     private String distributionJobCompleteNotification;

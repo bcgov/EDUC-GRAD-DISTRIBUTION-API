@@ -120,6 +120,8 @@ endpoint:
       url: https://educ-grad-graduation-report-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v2/graduationreports/district-report
     school-report:
       url: https://educ-grad-graduation-report-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v2/graduationreports/schoolreports/search?reportTypeCode=%s&schoolOfRecordId=%s
+    school-report-pdf:
+      url: https://educ-grad-graduation-report-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v2/graduationreports/schoolreports?reportTypeCode=%s&schoolOfRecordId=%s
     district-report:
       url: https://educ-grad-graduation-report-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v2/graduationreports/district-report/search?reportTypeCode=%s&districtId=%s
     get-achievement-report:
@@ -147,16 +149,22 @@ endpoint:
       url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduate/report/data/%s
     report-by-pen:
       url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduate/report/data/%s?type=CERT
-    school_district_year_end_report:
+    school-district-year-end-report:
       url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduate/report/schooldistrictyearend?slrt=%s&drt=%s&srt=%s
-    school_district_year_end_nongrad_report:
+    school-district-year-end-nongrad-report:
       url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduate/report/schooldistrictnongradyearend?slrt=%s&drt=%s&srt=%s
-    school_district_month_report:
+    school-district-month-report:
       url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduate/report/schooldistrictmonth?slrt=%s&drt=%s&srt=%s
-    school_district_supplemental_report:
+    school-district-supplemental-report:
       url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduate/report/schooldistrictsupp?slrt=%s&drt=%s&srt=%s
-    school_labels_report:
-      url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.caapi/v1/graduate/report/school/labels?reportType=%s
+    school-labels-report:
+      url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduate/report/school/labels?reportType=%s
+    school-labels-report-pdf:
+      url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduate/report/school/labels/pdf?reportType=%s
+    district-labels-report:
+      url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduate/report/district/labels?reportType=%s
+    district-labels-report-pdf:
+      url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduate/report/district/labels/pdf?reportType=%s
 
   grad-trax-api:
     psi-by-psi-code:
