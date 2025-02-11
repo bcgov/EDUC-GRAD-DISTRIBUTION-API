@@ -279,7 +279,8 @@ public class PostingDistributionService {
                     uploadSchoolReportDocuments(
                             batchId,
                             reportType,
-                            report.getSchoolOfRecordId().toString(),
+                            DEFAULT_SCHOOL_ID.compareTo(report.getSchoolOfRecordId().toString()) == 0 ?
+                                    DEFAULT_MINCODE : report.getSchoolOfRecordId().toString(),
                             report.getSchoolCategory(),
                             transmissionMode,
                             gradReportPdf);
