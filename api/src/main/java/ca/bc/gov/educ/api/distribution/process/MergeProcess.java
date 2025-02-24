@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.distribution.process;
 
 import ca.bc.gov.educ.api.distribution.model.dto.*;
+import ca.bc.gov.educ.api.distribution.model.dto.v2.reports.SchoolReport;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils;
 import ca.bc.gov.educ.api.distribution.util.Generated;
 import lombok.Data;
@@ -89,7 +90,7 @@ public class MergeProcess extends BaseProcess {
 					createAndSaveNonGradReport(schoolDetails, studListNonGrad, schoolId, educDistributionApiConstants.getStudentNonGradProjected());
 				}
 				log.debug("PDFs Merged {}", schoolDetails.getSchoolName());
-				processSchoolsForLabels(searchRequest.getUser(), schoolsForLabels, schoolId, exception);
+				processSchoolsForLabels(searchRequest.getUser(), schoolsForLabels, schoolDetails);
 				if (counter % 50 == 0) {
 					restUtils.fetchAccessToken(processorData);
 				}
@@ -100,14 +101,14 @@ public class MergeProcess extends BaseProcess {
 		int numberOfProcessedSchoolReports = 0;
 		List<String> schoolsForLabelsCodes = List.of(DEFAULT_SCHOOL_ID);
 		if(schoolsForLabels.size() == 1) {
-			schoolsForLabelsCodes = List.of(schoolsForLabels.get(0).getMincode());
+			schoolsForLabelsCodes = List.of(schoolsForLabels.get(0).getSchoolId());
 		}
 		if(MONTHLYDIST.getValue().equalsIgnoreCase(processorData.getActivityCode())) {
 			log.debug("***** Create and Store Monthly school reports *****");
 			numberOfCreatedSchoolReports += createSchoolLabelsReport(schoolsForLabels, ADDRESS_LABEL_SCHL);
 			log.debug("***** Number of created Monthly school reports {} *****", numberOfCreatedSchoolReports);
 			log.debug("***** Distribute Monthly school reports *****");
-			numberOfProcessedSchoolReports += processDistrictSchoolDistribution(batchId, schoolsForLabelsCodes, ADDRESS_LABEL_SCHL,
+			numberOfProcessedSchoolReports += processDistrictSchoolDistribution(batchId, schoolsForLabelsCodes, null, ADDRESS_LABEL_SCHL,
 					null, null, processorData.getActivityCode());
 			log.debug("***** Number of distributed Monthly school reports {} *****", numberOfProcessedSchoolReports);
 		}
@@ -116,7 +117,7 @@ public class MergeProcess extends BaseProcess {
 			numberOfCreatedSchoolReports += createSchoolLabelsReport(schoolsForLabels, ADDRESS_LABEL_SCHL);
 			log.debug("***** Number of created Supplemental school reports {} *****", numberOfCreatedSchoolReports);
 			log.debug("***** Distribute Supplemental school label reports *****");
-			numberOfProcessedSchoolReports += processDistrictSchoolDistribution(batchId, schoolsForLabelsCodes, ADDRESS_LABEL_SCHL,
+			numberOfProcessedSchoolReports += processDistrictSchoolDistribution(batchId, schoolsForLabelsCodes, null, ADDRESS_LABEL_SCHL,
 					null, null, processorData.getActivityCode());
 			log.debug("***** Number of distributed Supplemental school label reports {} *****", numberOfProcessedSchoolReports);
 		}
@@ -422,10 +423,10 @@ public class MergeProcess extends BaseProcess {
 	}
 
 	private void saveSchoolDistributionReport(String encodedPdf, UUID schoolId, String reportType) {
-		SchoolReports requestObj = new SchoolReports();
+		SchoolReport requestObj = new SchoolReport();
 		requestObj.setReport(encodedPdf);
 		requestObj.setSchoolOfRecordId(schoolId);
 		requestObj.setReportTypeCode(reportType);
-		restService.executePost(educDistributionApiConstants.getUpdateSchoolReport(), SchoolReports.class, requestObj);
+		restService.executePost(educDistributionApiConstants.getUpdateSchoolReport(), SchoolReport.class, requestObj);
 	}
 }

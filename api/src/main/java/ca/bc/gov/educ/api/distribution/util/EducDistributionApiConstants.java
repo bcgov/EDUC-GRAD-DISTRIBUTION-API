@@ -151,11 +151,20 @@ public class EducDistributionApiConstants {
     @Value("${endpoint.grad-graduation-report-api.school-report.url}")
     private String schoolReport;
 
+    @Value("${endpoint.grad-graduation-report-api.light-school-report.url}")
+    private String lightSchoolReport;
+
     @Value("${endpoint.grad-graduation-report-api.school-report-pdf.url}")
     private String schoolReportPDF;
 
+    @Value("${endpoint.grad-graduation-report-api.district-report-pdf.url}")
+    private String districtReportPDF;
+
     @Value("${endpoint.grad-graduation-report-api.district-report.url}")
     private String districtReport;
+
+    @Value("${endpoint.grad-graduation-report-api.light-district-report.url}")
+    private String lightDistrictReport;
 
     @Value("${endpoint.grad-graduation-api.school-district-year-end-report.url}")
     private String schoolDistrictYearEndReport;

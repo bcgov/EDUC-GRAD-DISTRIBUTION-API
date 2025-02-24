@@ -1,6 +1,8 @@
 package ca.bc.gov.educ.api.distribution.service;
 
 import ca.bc.gov.educ.api.distribution.model.dto.*;
+import ca.bc.gov.educ.api.distribution.model.dto.v2.reports.DistrictReport;
+import ca.bc.gov.educ.api.distribution.model.dto.v2.reports.SchoolReport;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import ca.bc.gov.educ.api.distribution.util.JsonTransformer;
 import ca.bc.gov.educ.api.distribution.util.RestUtils;
@@ -28,6 +30,7 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Consumer;
 
+import static ca.bc.gov.educ.api.distribution.model.dto.ReportType.DISTREP_YE_SC;
 import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants.*;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -272,6 +275,7 @@ public class DistributionServiceTest {
         schObj.setAddress1("sadadad");
         schObj.setAddress2("adad");
         schObj.setSchoolId(schoolId.toString());
+        schObj.setDistrictId(UUID.randomUUID().toString());
 
         SchoolReportDistribution obj = new SchoolReportDistribution();
         obj.setId(UUID.randomUUID());
@@ -337,30 +341,30 @@ public class DistributionServiceTest {
         when(this.inputResponse.retryWhen(any(reactor.util.retry.Retry.class))).thenReturn(inputResponse);
         when(this.inputResponse.block()).thenReturn(inSRPack);
 
-        SchoolReports schoolLabelsReports = new SchoolReports();
+        SchoolReport schoolLabelsReports = new SchoolReport();
         schoolLabelsReports.setSchoolOfRecordId(DEFAULT_SCHOOL_ID);
         schoolLabelsReports.setReportTypeCode("ADDRESS_LABEL_YE");
         schoolLabelsReports.setId(UUID.randomUUID());
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolReport(), "ADDRESS_LABEL_YE", schoolLabelsReports.getSchoolOfRecordId()))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getDistrictReport(), "ADDRESS_LABEL_YE", schoolLabelsReports.getSchoolOfRecordId()))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
+        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReport>>() {
         })).thenReturn(Mono.just(List.of(schoolLabelsReports)));
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
         when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolReport(), "ADDRESS_LABEL_SCHL", schoolLabelsReports.getSchoolOfRecordId()))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
+        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReport>>() {
         })).thenReturn(Mono.just(List.of(schoolLabelsReports)));
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
         when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolReport(), "ADDRESS_LABEL_SCHL", ""))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
+        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReport>>() {
         })).thenReturn(Mono.just(List.of(schoolLabelsReports)));
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
@@ -368,25 +372,25 @@ public class DistributionServiceTest {
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 
-        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
+        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReport>>() {
         })).thenReturn(Mono.just(List.of(schoolLabelsReports)));
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolReport(), "ADDRESS_LABEL_YE", ""))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getDistrictReport(), "ADDRESS_LABEL_YE", ""))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
+        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReport>>() {
         })).thenReturn(Mono.just(List.of(schoolLabelsReports)));
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolReport(), "ADDRESS_LABEL_YE", mincode))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getDistrictReport(), "ADDRESS_LABEL_YE", mincode))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
+        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReport>>() {
         })).thenReturn(Mono.just(List.of(schoolLabelsReports)));
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolReport(), DEFAULT_SCHOOL_ID, "ADDRESS_LABEL_YE", schoolLabelsReports.getSchoolOfRecordId()))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getDistrictReport(), DEFAULT_SCHOOL_ID, "ADDRESS_LABEL_YE", schoolLabelsReports.getSchoolOfRecordId()))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(byte[].class)).thenReturn(Mono.just(UUID.randomUUID().toString().getBytes()));
@@ -397,59 +401,59 @@ public class DistributionServiceTest {
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(byte[].class)).thenReturn(Mono.just(UUID.randomUUID().toString().getBytes()));
 
-        SchoolReports districtReports = new SchoolReports();
-        districtReports.setSchoolOfRecordId(schoolId);
+        DistrictReport districtReports = new DistrictReport();
+        districtReports.setDistrictId(schoolId);
         districtReports.setReportTypeCode("DISTREP_YE_SD");
-        districtReports.setSchoolOfRecordName("Sooke");
+        districtReports.setDistrictName("Sooke");
         districtReports.setId(UUID.randomUUID());
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
         when(this.requestHeadersUriMock.uri(String.format(constants.getDistrictReport(), "DISTREP_YE_SD", obj.getSchoolOfRecord()))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
+        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<DistrictReport>>() {
         })).thenReturn(Mono.just(List.of(districtReports)));
 
-        SchoolReports schoolReports = new SchoolReports();
-        districtReports.setSchoolOfRecordId(schoolId);
+        SchoolReport schoolReports = new SchoolReport();
+        schoolReports.setSchoolOfRecordId(schoolId);
         schoolReports.setSchoolCategory("02");
-        districtReports.setReportTypeCode("DISTREP_YE_SC");
-        districtReports.setSchoolOfRecordName("Langford");
-        districtReports.setId(UUID.randomUUID());
+        schoolReports.setReportTypeCode("DISTREP_YE_SC");
+        schoolReports.setSchoolName("Langford");
+        schoolReports.setId(UUID.randomUUID());
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
         when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolReport(), "DISTREP_YE_SC", obj.getSchoolOfRecord()))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
+        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReport>>() {
         })).thenReturn(Mono.just(List.of(schoolReports)));
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
         when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolReport(), "DISTREP_YE_SC", ""))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
+        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReport>>() {
         })).thenReturn(Mono.just(List.of(schoolReports)));
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
         when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolReport(), "NONGRADDISTREP_SC", obj.getSchoolOfRecord()))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
+        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReport>>() {
         })).thenReturn(Mono.just(List.of(schoolReports)));
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
         when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolReport(), "DISTREP_SC", obj.getSchoolOfRecord()))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
+        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReport>>() {
         })).thenReturn(Mono.just(List.of(schoolReports)));
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(String.format(constants.getDistrictReport(), "DISTREP_YE_SD", districtReports.getSchoolOfRecordId()))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getDistrictReport(), "DISTREP_YE_SD", districtReports.getDistrictId()))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
+        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<DistrictReport>>() {
         })).thenReturn(Mono.just(List.of(districtReports)));
 
 
@@ -457,24 +461,24 @@ public class DistributionServiceTest {
         when(this.requestHeadersUriMock.uri(String.format(constants.getDistrictReport(), "DISTREP_YE_SD", ""))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
+        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<DistrictReport>>() {
         })).thenReturn(Mono.just(List.of(districtReports)));
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(String.format(constants.getDistrictReport(), "DISTREP_SD", districtReports.getSchoolOfRecordId()))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getDistrictReport(), "DISTREP_SD", districtReports.getDistrictId()))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
+        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<DistrictReport>>() {
         })).thenReturn(Mono.just(List.of(districtReports)));
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(String.format(constants.getDistrictReport(), "005", "DISTREP_YE_SD"))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getDistrictReport(), any(), "DISTREP_YE_SD"))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(byte[].class)).thenReturn(Mono.just(UUID.randomUUID().toString().getBytes()));
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(String.format(constants.getDistrictReport(), "005", "DISTREP_SD"))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getDistrictReport(), any(), "DISTREP_SD"))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(byte[].class)).thenReturn(Mono.just(UUID.randomUUID().toString().getBytes()));
@@ -483,14 +487,14 @@ public class DistributionServiceTest {
         when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolReport(), "DISTREP_YE_SC", schoolReports.getSchoolOfRecordId()))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
+        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReport>>() {
         })).thenReturn(Mono.just(List.of(schoolReports)));
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
         when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolReport(), "DISTREP_SC", schoolId.toString()))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
+        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReport>>() {
         })).thenReturn(Mono.just(List.of(schoolReports)));
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
@@ -498,24 +502,24 @@ public class DistributionServiceTest {
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
+        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReport>>() {
         })).thenReturn(Mono.just(List.of(schoolReports)));
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
         when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolReport(), "DISTREP_SC", null ))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
+        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReport>>() {
         })).thenReturn(Mono.just(List.of(schoolReports)));
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolReport(), "00500201", "DISTREP_YE_SC"))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolReport(), any(), "DISTREP_YE_SC"))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(byte[].class)).thenReturn(Mono.just(UUID.randomUUID().toString().getBytes()));
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolReport(), "00500201", "DISTREP_SC"))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolReport(), any(), "DISTREP_SC"))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(byte[].class)).thenReturn(Mono.just(UUID.randomUUID().toString().getBytes()));
@@ -742,6 +746,7 @@ public class DistributionServiceTest {
         String transmissionMode = "ftp";
         String mincode = "123123133";
         UUID schoolId = UUID.randomUUID();
+        UUID districtId = UUID.randomUUID();
 
         ca.bc.gov.educ.api.distribution.model.dto.v2.School schObj = null;
         if (!schoolNull) {
@@ -750,6 +755,7 @@ public class DistributionServiceTest {
             schObj.setAddress1("sadadad");
             schObj.setAddress2("adad");
             schObj.setSchoolId(schoolId.toString());
+            schObj.setDistrictId(districtId.toString());
         }
 
         List<StudentCredentialDistribution> scdList = new ArrayList<>();
@@ -804,7 +810,7 @@ public class DistributionServiceTest {
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(byte[].class)).thenReturn(Mono.just(bytesSAR));
 
-        SchoolReports schoolLabelsReports = new SchoolReports();
+        SchoolReport schoolLabelsReports = new SchoolReport();
         schoolLabelsReports.setSchoolOfRecordId(schoolId);
         schoolLabelsReports.setReportTypeCode("ADDRESS_LABEL_SCHL");
         schoolLabelsReports.setId(UUID.randomUUID());
@@ -814,7 +820,7 @@ public class DistributionServiceTest {
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
+        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReport>>() {
         })).thenReturn(Mono.just(List.of(schoolLabelsReports)));
 
         when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
@@ -842,7 +848,7 @@ public class DistributionServiceTest {
         when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(SchoolReports.class)).thenReturn(Mono.just(new SchoolReports()));
+        when(this.responseMock.bodyToMono(SchoolReport.class)).thenReturn(Mono.just(new SchoolReport()));
 
         byte[] greBPack = "Any String you want".getBytes();
         InputStreamResource inSRPack = new InputStreamResource(new ByteArrayInputStream(greBPack));
@@ -884,11 +890,11 @@ public class DistributionServiceTest {
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(String.class)).thenReturn(Mono.just("1"));
 
-        SchoolReports addressLabelSchl = new SchoolReports();
+        SchoolReport addressLabelSchl = new SchoolReport();
         addressLabelSchl.setId(UUID.randomUUID());
         addressLabelSchl.setReportTypeCode(ADDRESS_LABEL_SCHL);
         addressLabelSchl.setSchoolOfRecordId(UUID.randomUUID());
-        addressLabelSchl.setSchoolOfRecordName(RandomStringUtils.randomAlphabetic(15));
+        addressLabelSchl.setSchoolName(RandomStringUtils.randomAlphabetic(15));
         addressLabelSchl.setSchoolCategory(RandomStringUtils.randomNumeric(2));
         addressLabelSchl.setReport(java.util.Base64.getEncoder().encodeToString(RandomStringUtils.randomAlphanumeric(25).getBytes()));
 
@@ -897,8 +903,25 @@ public class DistributionServiceTest {
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
+        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReport>>() {
         })).thenReturn(Mono.just(List.of(addressLabelSchl)));
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolReport(), DISTREP_YE_SC, schoolId))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReport>>() {
+        })).thenReturn(Mono.just(List.of(schoolLabelsReports)));
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getSchoolDistrictYearEndReport(),
+            "", "", "DISTREP_YE_SC"))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(String.class)).thenReturn(Mono.just("1"));
 
         mockTokenResponseObject();
 
@@ -935,12 +958,14 @@ public class DistributionServiceTest {
         String accessToken = MOCK_TOKEN;
         String mincode = "123123133";
         UUID schoolId = UUID.randomUUID();
+        UUID districtId = UUID.randomUUID();
 
         ca.bc.gov.educ.api.distribution.model.dto.v2.School schObj = new ca.bc.gov.educ.api.distribution.model.dto.v2.School();
         schObj.setMinCode(mincode);
         schObj.setAddress1("sadadad");
         schObj.setAddress2("adad");
         schObj.setSchoolId(schoolId.toString());
+        schObj.setDistrictId(districtId.toString());
 
         List<StudentCredentialDistribution> scdList = new ArrayList<>();
         StudentCredentialDistribution scd = new StudentCredentialDistribution();
@@ -1046,9 +1071,9 @@ public class DistributionServiceTest {
         when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(SchoolReports.class)).thenReturn(Mono.just(new SchoolReports()));
+        when(this.responseMock.bodyToMono(SchoolReport.class)).thenReturn(Mono.just(new SchoolReport()));
 
-        SchoolReports schoolLabelsReports = new SchoolReports();
+        SchoolReport schoolLabelsReports = new SchoolReport();
         schoolLabelsReports.setSchoolOfRecordId(schoolId);
         schoolLabelsReports.setReportTypeCode("ADDRESS_LABEL_SCHL");
         schoolLabelsReports.setId(UUID.randomUUID());
@@ -1058,7 +1083,7 @@ public class DistributionServiceTest {
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
+        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReport>>() {
         })).thenReturn(Mono.just(List.of(schoolLabelsReports)));
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
@@ -1066,7 +1091,7 @@ public class DistributionServiceTest {
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
+        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReport>>() {
         })).thenReturn(Mono.just(List.of(schoolLabelsReports)));
 
         byte[] greBPack = "Any String you want".getBytes();
@@ -1116,20 +1141,20 @@ public class DistributionServiceTest {
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(String.class)).thenReturn(Mono.just("1"));
 
-        SchoolReports addressLabelSchl = new SchoolReports();
+        SchoolReport addressLabelSchl = new SchoolReport();
         addressLabelSchl.setId(schoolId);
         addressLabelSchl.setReportTypeCode(ADDRESS_LABEL_SCHL);
         addressLabelSchl.setSchoolOfRecordId(schoolId);
-        addressLabelSchl.setSchoolOfRecordName(RandomStringUtils.randomAlphabetic(15));
+        addressLabelSchl.setSchoolName(RandomStringUtils.randomAlphabetic(15));
         addressLabelSchl.setSchoolCategory(RandomStringUtils.randomNumeric(2));
         addressLabelSchl.setReport(java.util.Base64.getEncoder().encodeToString(RandomStringUtils.randomAlphanumeric(25).getBytes()));
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolReport(), addressLabelSchl.getReportTypeCode(), mincode))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolReport(), addressLabelSchl.getReportTypeCode(), schoolId))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
+        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReport>>() {
         })).thenReturn(Mono.just(List.of(addressLabelSchl)));
 
         School school = new School();
@@ -1147,11 +1172,11 @@ public class DistributionServiceTest {
         when(this.responseMock.bodyToMono(String.class)).thenReturn(Mono.just("1"));
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolReport(), "DISTREP_YE_SC", "123123133")))
+        when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolReport(), "DISTREP_YE_SC", schoolId)))
                 .thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
+        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReport>>() {
         })).thenReturn(Mono.just(List.of(schoolLabelsReports)));
 
         mockTokenResponseObject();
@@ -1319,6 +1344,9 @@ public class DistributionServiceTest {
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(ReportData.class)).thenReturn(inputResponseReport);
+        when(this.retryBackoffSpecMock.filter(any())).thenReturn(retryBackoffSpecMock);
+        when(this.retryBackoffSpecMock.onRetryExhaustedThrow(any())).thenReturn(retryBackoffSpecMock);
+        when(this.inputResponseReport.retryWhen(any(reactor.util.retry.Retry.class))).thenReturn(inputResponseReport);
         when(this.inputResponseReport.block()).thenReturn(data);
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
@@ -1549,16 +1577,16 @@ public class DistributionServiceTest {
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
-        })).thenReturn(Mono.just(List.of(new SchoolReports())));
+        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReport>>() {
+        })).thenReturn(Mono.just(List.of(new SchoolReport())));
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
         when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolReport(), "ADDRESS_LABEL_PSI", "001"))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
-        })).thenReturn(Mono.just(List.of(new SchoolReports())));
+        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReport>>() {
+        })).thenReturn(Mono.just(List.of(new SchoolReport())));
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
         when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolReport(), "ADDRESS_LABEL_PSI", ""))).thenReturn(this.requestHeadersMock);
@@ -1570,8 +1598,8 @@ public class DistributionServiceTest {
         when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolReport(), "ADDRESS_LABEL_PSI", psiCode))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReports>>() {
-        })).thenReturn(Mono.just(List.of(new SchoolReports())));
+        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<SchoolReport>>() {
+        })).thenReturn(Mono.just(List.of(new SchoolReport())));
 
         when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
         when(this.requestBodyUriMock.uri(String.format(constants.getSchoolLabelsReport(), "ADDRESS_LABEL_PSI", "", ""))).thenReturn(this.requestBodyUriMock);
@@ -1625,13 +1653,9 @@ public class DistributionServiceTest {
         schObj.setSchoolId(schoolId.toString());
         schObj.setAddress1("sadadad");
         schObj.setAddress2("adad");
+        schObj.setDistrictId(UUID.randomUUID().toString());
 
-        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolById(), schoolId))).thenReturn(this.requestHeadersMock);
-        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
-        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(ca.bc.gov.educ.api.distribution.model.dto.v2.School.class)).thenReturn(Mono.just(schObj));
+        Mockito.when(schoolService.getSchool(schoolId, exception)).thenReturn(schObj);
     }
 
     private void mockTokenResponseObject() {

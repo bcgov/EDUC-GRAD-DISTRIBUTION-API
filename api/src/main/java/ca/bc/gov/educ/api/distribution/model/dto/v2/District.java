@@ -1,25 +1,29 @@
 package ca.bc.gov.educ.api.distribution.model.dto.v2;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.stereotype.Component;
 
-import java.io.Serializable;
+import java.util.List;
 
 @Data
-public class District implements Serializable {
+@Component("instituteDistrict")
+@NoArgsConstructor
+@AllArgsConstructor
+public class District {
 
-    private static final long serialVersionUID = 2L;
+    private String districtId;
+    private String districtNumber;
+    private String faxNumber;
+    private String phoneNumber;
+    private String email;
+    private String website;
+    private String displayName;
+    private String districtRegionCode;
+    private String districtStatusCode;
+    private List<DistrictContact> contacts;
+    private List<DistrictAddress> addresses;
+    private List<Note> notes;
 
-    String districtNumber;
-    String districtName;
-    String districtSeq;
-    String schoolETPSystem;
-    String superIntendent;
-    String djdeFlash;
-    String activeFlag;
-    String address1;
-    String address2;
-    String city;
-    String provCode;
-    String countryCode;
-    String postal;
 }

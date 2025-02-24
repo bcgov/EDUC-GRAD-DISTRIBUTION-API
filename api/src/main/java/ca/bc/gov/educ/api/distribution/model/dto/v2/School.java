@@ -1,6 +1,5 @@
 package ca.bc.gov.educ.api.distribution.model.dto.v2;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import org.springframework.stereotype.Component;
 
@@ -10,6 +9,7 @@ public class School {
 
 	private String minCode;
 	private String schoolId;
+	private String districtId;
 	private String schoolName;
 	private String districtName;
 	private String transcriptEligibility;

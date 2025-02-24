@@ -120,10 +120,16 @@ endpoint:
       url: https://educ-grad-graduation-report-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v2/graduationreports/district-report
     school-report:
       url: https://educ-grad-graduation-report-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v2/graduationreports/schoolreports/search?reportTypeCode=%s&schoolOfRecordId=%s
+    light-school-report:
+      url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v2/graduationreports/schoolreports/search?reportTypeCode=%s&schoolOfRecordId=%s&isLight=true
     school-report-pdf:
       url: https://educ-grad-graduation-report-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v2/graduationreports/schoolreports?reportTypeCode=%s&schoolOfRecordId=%s
     district-report:
       url: https://educ-grad-graduation-report-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v2/graduationreports/district-report/search?reportTypeCode=%s&districtId=%s
+    light-district-report:
+      url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v2/graduationreports/district-report/search?reportTypeCode=%s&districtId=%s&isLight=true
+    district-report-pdf:
+      url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v2/graduationreports/district-report?reportTypeCode=%s&districtId=%s
     get-achievement-report:
       url: https://educ-grad-graduation-report-api-77c02f-test.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/studentreport?studentID=%s&reportType=%s&documentStatusCode=%s
     get-transcript-psi-by-student-id:

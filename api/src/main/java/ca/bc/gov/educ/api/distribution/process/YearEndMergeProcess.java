@@ -1,6 +1,8 @@
 package ca.bc.gov.educ.api.distribution.process;
 
 import ca.bc.gov.educ.api.distribution.model.dto.*;
+import ca.bc.gov.educ.api.distribution.model.dto.v2.District;
+import ca.bc.gov.educ.api.distribution.model.dto.v2.YearEndReportRequest;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -17,7 +19,6 @@ import java.util.UUID;
 import static ca.bc.gov.educ.api.distribution.model.dto.ActivityCode.*;
 import static ca.bc.gov.educ.api.distribution.model.dto.ReportType.*;
 import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants.*;
-import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils.*;
 
 @Slf4j
 @Data
@@ -42,7 +43,7 @@ public class YearEndMergeProcess extends MergeProcess {
         int numberOfProcessedSchoolReports = 0;
         int numberOfCreatedSchoolLabelReports = 0;
         List<ca.bc.gov.educ.api.distribution.model.dto.School> schoolsForLabels = new ArrayList<>();
-        List<ca.bc.gov.educ.api.distribution.model.dto.School> districtsForLabels = new ArrayList<>();
+        List<District> districtsForLabels = new ArrayList<>();
         List<String> processedSchools = new ArrayList<>();
         for (Map.Entry<UUID, DistributionPrintRequest> entry : mapDist.entrySet()) {
             UUID schoolId = entry.getKey();
@@ -52,17 +53,16 @@ public class YearEndMergeProcess extends MergeProcess {
             if (schoolDetails != null) {
                 int currentSlipCount = 0;
                 schoolCounter++;
-                processedSchools.add(schoolDetails.getMinCode());
+                processedSchools.add(schoolDetails.getSchoolId());
                 String schoolCategoryCode = schoolDetails.getSchoolCategoryLegacyCode();
 
                 log.debug("*** School Details Acquired {} category {}", schoolDetails.getMinCode(), schoolCategoryCode);
                 if(StringUtils.containsAnyIgnoreCase(schoolCategoryCode, "02", "03", "09")) {
-                    processSchoolsForLabels(searchRequest.getUser(), schoolsForLabels, schoolId, exception);
+                    processSchoolsForLabels(searchRequest.getUser(), schoolsForLabels, schoolDetails);
                     log.debug("Added Independent School {} for processing", schoolDetails.getSchoolName());
                 } else {
                     // No district for 02,03,09 school category
-                    String distcode = getDistrictCodeFromMincode(schoolDetails.getMinCode());
-                    processDistrictsForLabels(searchRequest.getUser(), districtsForLabels, distcode, exception);
+                    processDistrictsForLabels(districtsForLabels, schoolDetails.getDistrictId(), exception);
                 }
                 log.debug("{} School {}/{}", schoolDetails.getMinCode(), schoolCounter, mapDist.size());
                 List<Student> studListNonGrad = new ArrayList<>();
@@ -91,24 +91,24 @@ public class YearEndMergeProcess extends MergeProcess {
                             educDistributionApiConstants.getStudentNonGrad());
                     log.debug("***** Number of Student NonGrad School Reports Created {} *****", numberOfCreatedSchoolReports);
                     log.debug("***** Distribute Student NonGrad {} School Reports *****", schoolDetails.getMinCode());
-                    List<String> mincodes = new ArrayList<>();
-                    mincodes.add(schoolDetails.getMinCode());
+                    YearEndReportRequest yearEndReportRequest = new YearEndReportRequest();
+                    yearEndReportRequest.setSchoolIds(List.of(UUID.fromString(schoolDetails.getSchoolId())));
                     numberOfProcessedSchoolReports += processDistrictSchoolDistribution(processorData.getBatchId(),
-                            mincodes, null, null, NONGRADDISTREP_SC.getValue(),
+                        List.of(schoolDetails.getSchoolId()), null, null, null, NONGRADDISTREP_SC.getValue(),
                             null);
                     log.debug("***** Number of distributed Student NonGrad School Reports {} *****", numberOfProcessedSchoolReports);
                 }
 
                 if(!NONGRADYERUN.getValue().equalsIgnoreCase(processorData.getActivityCode())) {
                     log.debug("***** Create {} School Report *****", schoolDetails.getMinCode());
-                    List<String> mincodes = new ArrayList<>();
-                    mincodes.add(schoolDetails.getMinCode());
+                    YearEndReportRequest yearEndReportRequest = new YearEndReportRequest();
+                    yearEndReportRequest.setSchoolIds(List.of(UUID.fromString(schoolDetails.getSchoolId())));
                     numberOfCreatedSchoolReports += createDistrictSchoolYearEndReport(null,
-                            null, DISTREP_YE_SC.getValue(), mincodes);
+                            null, DISTREP_YE_SC.getValue(), yearEndReportRequest);
                     log.debug("***** Number of School Reports Created {} *****", numberOfCreatedSchoolReports);
                     log.debug("***** Distribute {} School Reports *****", schoolDetails.getMinCode());
                     numberOfProcessedSchoolReports += processDistrictSchoolDistribution(processorData.getBatchId(),
-                            mincodes, null, null, DISTREP_YE_SC.getValue(), null);
+                        List.of(schoolDetails.getSchoolId()), null, null, null, DISTREP_YE_SC.getValue(), null);
                     log.debug("***** {} School Report Created*****", schoolDetails.getMinCode());
                     log.debug("***** Number of distributed School Reports {} *****", numberOfProcessedSchoolReports);
                 }
@@ -119,26 +119,28 @@ public class YearEndMergeProcess extends MergeProcess {
         response.setTranscriptResponse(numberOfPdfs + " transcripts have been processed in batch " + processorData.getBatchId());
         if(!districtsForLabels.isEmpty()) {
             log.debug("***** Create and Store district labels reports *****");
-            for (ca.bc.gov.educ.api.distribution.model.dto.School sch : districtsForLabels) {
-                List<ca.bc.gov.educ.api.distribution.model.dto.School> districts = new ArrayList<>();
-                districts.add(sch);
-                numberOfCreatedSchoolLabelReports += createSchoolLabelsReport(districts, ADDRESS_LABEL_YE);
+            for (District district : districtsForLabels) {
+                List<District> districts = new ArrayList<>();
+                districts.add(district);
+                numberOfCreatedSchoolLabelReports += postingDistributionService.createDistrictLabelsReport(districts, ADDRESS_LABEL_YE);
             }
             log.debug("***** Number of created district labels reports {} *****", numberOfCreatedSchoolLabelReports);
             log.debug("***** Distribute District Label reports *****");
-            List<String> mincodes = districtsForLabels.stream()
-                    .map(ca.bc.gov.educ.api.distribution.model.dto.School::getMincode).toList();
-            numberOfProcessedSchoolReports += processDistrictSchoolDistribution(batchId, mincodes, ADDRESS_LABEL_YE,
+
+            List<String> districtIds = districtsForLabels.stream().map(District::getDistrictId).toList();
+            YearEndReportRequest yearEndReportRequest = new YearEndReportRequest();
+            yearEndReportRequest.setDistrictIds(districtIds.stream().map(UUID::fromString).toList());
+            numberOfProcessedSchoolReports += processDistrictSchoolDistribution(batchId, null, districtIds, ADDRESS_LABEL_YE,
                     null, null, null);
             log.debug("***** Number of distributed District Label reports {} *****", numberOfProcessedSchoolReports);
 
             if(!NONGRADYERUN.getValue().equalsIgnoreCase(processorData.getActivityCode())) {
                 log.debug("***** Create and Store District Reports *****");
                 numberOfCreatedSchoolLabelReports += createDistrictSchoolYearEndReport(null,
-                        DISTREP_YE_SD.getValue(), null, mincodes);
+                        DISTREP_YE_SD.getValue(), null, yearEndReportRequest);
                 log.debug("***** Number of created District Reports {} *****", numberOfCreatedSchoolLabelReports);
                 log.debug("***** Distribute District Reports *****");
-                numberOfProcessedSchoolReports += processDistrictSchoolDistribution(batchId, mincodes,
+                numberOfProcessedSchoolReports += processDistrictSchoolDistribution(batchId, null, districtIds,
                         null, DISTREP_YE_SD.getValue(), null, null);
             }
         }
