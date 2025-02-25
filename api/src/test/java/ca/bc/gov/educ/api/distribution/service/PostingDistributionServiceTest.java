@@ -60,6 +60,30 @@ class PostingDistributionServiceTest {
   }
 
   @Test
+  void testProcessDistrictSchoolDistribution_withNoIds() {
+    Long batchId = 1L;
+    UUID districtId = UUID.randomUUID();
+    List<String> districtIds = List.of(districtId.toString());
+    String districtReportType =NONGRADDISTREP_SD.getValue();
+    String transmissionMode = "transmissionMode";
+
+    DistrictReport districtReport = new DistrictReport();
+    districtReport.setDistrictId(districtId);
+    districtReport.setReportTypeCode(districtReportType);
+
+    when(restService.executeGet(educDistributionApiConstants.getDistrictReport(), new ParameterizedTypeReference<List<DistrictReport>>() {},  districtReportType, districtId.toString()))
+        .thenReturn(List.of(districtReport));
+    when(restService.executeGet(educDistributionApiConstants.getDistrictReportPDF(), byte[].class, districtReportType, districtId.toString()))
+        .thenReturn(null);
+
+    int result = postingDistributionService.processDistrictSchoolDistribution(batchId, null, districtIds, null, districtReportType, null, transmissionMode);
+
+    assertEquals(0, result);
+    verify(restService, times(1)).executeGet(educDistributionApiConstants.getDistrictReport(), new ParameterizedTypeReference<List<DistrictReport>>() {},  districtReportType, districtId.toString());
+    verify(restService, times(1)).executeGet(educDistributionApiConstants.getDistrictReportPDF(), byte[].class, districtReportType, districtId.toString());
+  }
+
+  @Test
   void testProcessDistrictSchoolDistribution_withSchoolIds() {
     Long batchId = 1L;
     UUID schoolId = UUID.randomUUID();
