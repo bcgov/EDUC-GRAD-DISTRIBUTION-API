@@ -7,6 +7,7 @@ import ca.bc.gov.educ.api.distribution.model.dto.v2.YearEndReportRequest;
 import ca.bc.gov.educ.api.distribution.model.dto.v2.reports.DistrictReport;
 import ca.bc.gov.educ.api.distribution.model.dto.v2.reports.SchoolReport;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
+import ca.bc.gov.educ.api.distribution.util.SFTPUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -57,6 +58,8 @@ public class PostingProcessServiceTest {
     private WebClient.ResponseSpec responseMock;
     @MockBean
     WebClient webClient;
+    @MockBean
+    SFTPUtils stpUtils;
 
 
     @Test
@@ -158,7 +161,7 @@ public class PostingProcessServiceTest {
         })).thenReturn(Mono.just(List.of(distrepYeSd)));
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(String.format(educDistributionApiConstants.getDistrictReport(), distrepYeNgSd.getReportTypeCode(), ""))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersUriMock.uri(String.format(educDistributionApiConstants.getLightDistrictReport(), distrepYeNgSd.getReportTypeCode(), ""))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
@@ -230,7 +233,7 @@ public class PostingProcessServiceTest {
         when(this.responseMock.bodyToMono(byte[].class)).thenReturn(Mono.just(bytesPdf));
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(String.format(educDistributionApiConstants.getSchoolReport(), distrepYeNgSd.getDistrictId(), ""))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersUriMock.uri(String.format(educDistributionApiConstants.getLightDistrictReport(), distrepYeNgSd.getDistrictId(), ""))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
@@ -250,6 +253,8 @@ public class PostingProcessServiceTest {
         when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(String.class)).thenReturn(Mono.just("1"));
+
+        when(this.stpUtils.sftpUploadBCMail(any(), any(), any())).thenReturn(true);
 
         var result = this.postingDistributionService.postingProcess(response);
         Assert.assertTrue(result);
