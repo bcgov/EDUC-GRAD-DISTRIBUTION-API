@@ -157,7 +157,7 @@ public class SchoolServiceTest {
         UUID districtId = UUID.randomUUID();
         District district = new District();
         district.setDistrictNumber(districtNumber);
-        district.setDistrictName("Test District");
+        district.setDisplayName("Test District");
 
         when(restService.executeGet(educDistributionApiConstants.getDistrictById(), District.class,
                 districtId.toString())).thenReturn(district);
@@ -171,7 +171,7 @@ public class SchoolServiceTest {
         UUID districtId = UUID.randomUUID();
         District district = new District();
         district.setDistrictNumber(districtNumber);
-        district.setDistrictName("Test District");
+        district.setDisplayName("Test District");
 
         ExceptionMessage exceptionMessage = new ExceptionMessage();
         when(restService.executeGet(educDistributionApiConstants.getDistrictById(), District.class,
@@ -186,7 +186,7 @@ public class SchoolServiceTest {
         String districtNumber = "022";
         District district = new District();
         district.setDistrictNumber(districtNumber);
-        district.setDistrictName("Test District");
+        district.setDisplayName("Test District");
 
         when(restService.executeGet(educDistributionApiConstants.getDistrictByDistrictNumber(), District.class,
                 districtNumber)).thenReturn(district);
@@ -200,7 +200,7 @@ public class SchoolServiceTest {
         UUID districtId = UUID.randomUUID();
         District district = new District();
         district.setDistrictNumber(districtNumber);
-        district.setDistrictName("Test District");
+        district.setDisplayName("Test District");
 
         when(restService.executeGet(educDistributionApiConstants.getDistrictByDistrictNumber(), District.class,
                 districtId.toString())).thenThrow(Exception.class);
