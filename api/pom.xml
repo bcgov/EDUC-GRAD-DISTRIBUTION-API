@@ -27,7 +27,8 @@
             src/main/java/ca/bc/gov/educ/api/distribution/exception/**,
             src/main/java/ca/bc/gov/educ/api/distribution/process/**,
             src/main/java/ca/bc/gov/educ/api/distribution/model/**,
-            src/main/java/ca/bc/gov/educ/api/distribution/util/**
+            src/main/java/ca/bc/gov/educ/api/distribution/util/**,
+            src/main/java/ca/bc/gov/educ/api/distribution/util/controller/APIMetadataController.java
         </sonar.coverage.exclusions>
         <java.version>18</java.version>
         <maven.compiler.version>3.10.1</maven.compiler.version>
