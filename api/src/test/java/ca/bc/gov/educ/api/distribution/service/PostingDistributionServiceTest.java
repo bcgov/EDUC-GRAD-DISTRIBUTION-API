@@ -102,7 +102,7 @@ class PostingDistributionServiceTest {
     districtReport.setDistrictId(districtId);
     districtReport.setReportTypeCode(districtReportType);
 
-    when(restService.executeGet(educDistributionApiConstants.getLightDistrictReport(), new ParameterizedTypeReference<List<DistrictReport>>() {},  districtReportType, districtId.toString()))
+    when(restService.executeGet(educDistributionApiConstants.getLightDistrictReport(), new ParameterizedTypeReference<List<DistrictReport>>() {},  districtReportType, ""))
         .thenReturn(List.of(districtReport));
     when(restService.executeGet(educDistributionApiConstants.getDistrictReportPDF(), byte[].class, districtReportType, districtId.toString()))
         .thenReturn(null);
@@ -110,7 +110,7 @@ class PostingDistributionServiceTest {
     int result = postingDistributionService.processDistrictSchoolDistribution(batchId, null, null, districtReportType, null, null, transmissionMode);
 
     assertEquals(0, result);
-    verify(restService, times(1)).executeGet(educDistributionApiConstants.getLightDistrictReport(), new ParameterizedTypeReference<List<DistrictReport>>() {},  districtReportType, districtId.toString());
+    verify(restService, times(1)).executeGet(educDistributionApiConstants.getLightDistrictReport(), new ParameterizedTypeReference<List<DistrictReport>>() {},  districtReportType, "");
     verify(restService, times(1)).executeGet(educDistributionApiConstants.getDistrictReportPDF(), byte[].class, districtReportType, districtId.toString());
   }
 
