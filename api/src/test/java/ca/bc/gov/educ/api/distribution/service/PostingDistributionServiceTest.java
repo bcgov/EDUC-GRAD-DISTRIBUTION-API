@@ -83,7 +83,7 @@ class PostingDistributionServiceTest {
     when(restService.executeGet(educDistributionApiConstants.getDistrictReportPDF(), byte[].class, districtReportType, districtId.toString()))
         .thenReturn(null);
 
-    int result = postingDistributionService.processDistrictSchoolDistribution(batchId, null, districtIds, null, districtReportType, null, transmissionMode);
+    int result = postingDistributionService.processDistrictSchoolDistribution(batchId, null, districtIds, districtReportType, null, null, transmissionMode);
 
     assertEquals(0, result);
     verify(restService, times(1)).executeGet(educDistributionApiConstants.getLightDistrictReport(), new ParameterizedTypeReference<List<DistrictReport>>() {},  districtReportType, districtId.toString());
