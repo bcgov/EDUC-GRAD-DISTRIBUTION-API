@@ -1,5 +1,7 @@
 package ca.bc.gov.educ.api.distribution.service;
 
+import ca.bc.gov.educ.api.distribution.model.dto.v2.District;
+import ca.bc.gov.educ.api.distribution.model.dto.v2.School;
 import ca.bc.gov.educ.api.distribution.model.dto.v2.reports.DistrictReport;
 import ca.bc.gov.educ.api.distribution.model.dto.v2.reports.SchoolReport;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
@@ -23,7 +25,8 @@ class PostingDistributionServiceTest {
 
   @Mock
   private RestService restService;
-
+  @Mock
+  private SchoolService schoolService;
   @Mock
   private EducDistributionApiConstants educDistributionApiConstants;
 
@@ -42,21 +45,24 @@ class PostingDistributionServiceTest {
     List<String> districtIds = List.of(districtId.toString());
     String districtReportType =NONGRADDISTREP_SD.getValue();
     String transmissionMode = "transmissionMode";
+    District district = District.builder().districtId(districtId.toString()).districtNumber("005").build();
 
     DistrictReport districtReport = new DistrictReport();
     districtReport.setDistrictId(districtId);
     districtReport.setReportTypeCode(districtReportType);
 
-    when(restService.executeGet(educDistributionApiConstants.getDistrictReport(), new ParameterizedTypeReference<List<DistrictReport>>() {},  districtReportType, districtId.toString()))
+    when(restService.executeGet(educDistributionApiConstants.getLightDistrictReport(), new ParameterizedTypeReference<List<DistrictReport>>() {},  districtReportType, districtId.toString()))
         .thenReturn(List.of(districtReport));
     when(restService.executeGet(educDistributionApiConstants.getDistrictReportPDF(), byte[].class, districtReportType, districtId.toString()))
         .thenReturn(new byte[]{1, 2, 3});
+    when(schoolService.getDistrict(eq(districtId), any())).thenReturn(district);
 
     int result = postingDistributionService.processDistrictSchoolDistribution(batchId, null, districtIds, null, districtReportType, null, transmissionMode);
 
     assertEquals(1, result);
-    verify(restService, times(1)).executeGet(educDistributionApiConstants.getDistrictReport(), new ParameterizedTypeReference<List<DistrictReport>>() {},  districtReportType, districtId.toString());
+    verify(restService, times(1)).executeGet(educDistributionApiConstants.getLightDistrictReport(), new ParameterizedTypeReference<List<DistrictReport>>() {},  districtReportType, districtId.toString());
     verify(restService, times(1)).executeGet(educDistributionApiConstants.getDistrictReportPDF(), byte[].class, districtReportType, districtId.toString());
+    verify(schoolService, times(1)).getDistrict(eq(districtId), any());
   }
 
   @Test
@@ -71,7 +77,7 @@ class PostingDistributionServiceTest {
     districtReport.setDistrictId(districtId);
     districtReport.setReportTypeCode(districtReportType);
 
-    when(restService.executeGet(educDistributionApiConstants.getDistrictReport(), new ParameterizedTypeReference<List<DistrictReport>>() {},  districtReportType, districtId.toString()))
+    when(restService.executeGet(educDistributionApiConstants.getLightDistrictReport(), new ParameterizedTypeReference<List<DistrictReport>>() {},  districtReportType, districtId.toString()))
         .thenReturn(List.of(districtReport));
     when(restService.executeGet(educDistributionApiConstants.getDistrictReportPDF(), byte[].class, districtReportType, districtId.toString()))
         .thenReturn(null);
@@ -79,7 +85,7 @@ class PostingDistributionServiceTest {
     int result = postingDistributionService.processDistrictSchoolDistribution(batchId, null, districtIds, null, districtReportType, null, transmissionMode);
 
     assertEquals(0, result);
-    verify(restService, times(1)).executeGet(educDistributionApiConstants.getDistrictReport(), new ParameterizedTypeReference<List<DistrictReport>>() {},  districtReportType, districtId.toString());
+    verify(restService, times(1)).executeGet(educDistributionApiConstants.getLightDistrictReport(), new ParameterizedTypeReference<List<DistrictReport>>() {},  districtReportType, districtId.toString());
     verify(restService, times(1)).executeGet(educDistributionApiConstants.getDistrictReportPDF(), byte[].class, districtReportType, districtId.toString());
   }
 
@@ -90,20 +96,25 @@ class PostingDistributionServiceTest {
     List<String> schoolIds = List.of(schoolId.toString());
     String reportType =DISTREP_YE_SC.getValue();
     String transmissionMode = "transmissionMode";
+    School school = new School();
+    school.setSchoolId(schoolId.toString());
+    school.setMinCode("12345678");
 
     SchoolReport schoolReport = new SchoolReport();
     schoolReport.setSchoolOfRecordId(schoolId);
     schoolReport.setReportTypeCode(reportType);
 
-    when(restService.executeGet(educDistributionApiConstants.getSchoolReport(), new ParameterizedTypeReference<List<SchoolReport>>() {},  reportType, schoolId.toString()))
+    when(restService.executeGet(educDistributionApiConstants.getLightSchoolReport(), new ParameterizedTypeReference<List<SchoolReport>>() {},  reportType, schoolId.toString()))
         .thenReturn(List.of(schoolReport));
     when(restService.executeGet(educDistributionApiConstants.getSchoolReportPDF(), byte[].class, reportType, schoolId.toString()))
         .thenReturn(new byte[]{1, 2, 3});
+    when(schoolService.getSchool(eq(schoolId), any())).thenReturn(school);
 
     int result = postingDistributionService.processDistrictSchoolDistribution(batchId, schoolIds, null, null, null, reportType, transmissionMode);
 
     assertEquals(1, result);
-    verify(restService, times(1)).executeGet(educDistributionApiConstants.getSchoolReport(), new ParameterizedTypeReference<List<SchoolReport>>() {},  reportType, schoolId.toString());
+    verify(restService, times(1)).executeGet(educDistributionApiConstants.getLightSchoolReport(), new ParameterizedTypeReference<List<SchoolReport>>() {},  reportType, schoolId.toString());
     verify(restService, times(1)).executeGet(educDistributionApiConstants.getSchoolReportPDF(), byte[].class, reportType, schoolId.toString());
+    verify(schoolService, times(1)).getSchool(eq(schoolId), any());
   }
 }
