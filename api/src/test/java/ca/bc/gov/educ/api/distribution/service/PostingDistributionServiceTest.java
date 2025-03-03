@@ -18,6 +18,7 @@ import java.util.UUID;
 
 import static ca.bc.gov.educ.api.distribution.model.dto.ReportType.DISTREP_YE_SC;
 import static ca.bc.gov.educ.api.distribution.model.dto.ReportType.NONGRADDISTREP_SD;
+import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants.ADDRESS_LABEL_SCHL;
 import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants.ADDRESS_LABEL_YE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -67,7 +68,7 @@ class PostingDistributionServiceTest {
   }
 
   @Test
-  void testProcessDistrictSchoolDistribution_withNoIds() {
+  void testProcessDistrictSchoolDistribution_withDistrictLabel() {
     Long batchId = 1L;
     UUID districtId = UUID.randomUUID();
     List<String> districtIds = List.of(districtId.toString());
@@ -88,6 +89,34 @@ class PostingDistributionServiceTest {
     assertEquals(0, result);
     verify(restService, times(1)).executeGet(educDistributionApiConstants.getLightDistrictReport(), new ParameterizedTypeReference<List<DistrictReport>>() {},  districtReportType, districtId.toString());
     verify(restService, times(1)).executeGet(educDistributionApiConstants.getDistrictReportPDF(), byte[].class, districtReportType, districtId.toString());
+  }
+
+  @Test
+  void testProcessDistrictSchoolDistribution_withSchoolLabelAndNoIds() {
+    Long batchId = 1L;
+    UUID schoolId = UUID.randomUUID();
+    String reportType =ADDRESS_LABEL_SCHL;
+    String transmissionMode = "transmissionMode";
+    School school = new School();
+    school.setSchoolId(schoolId.toString());
+    school.setMinCode("12345678");
+
+    SchoolReport schoolReport = new SchoolReport();
+    schoolReport.setSchoolOfRecordId(schoolId);
+    schoolReport.setReportTypeCode(reportType);
+
+    when(restService.executeGet(educDistributionApiConstants.getLightSchoolReport(), new ParameterizedTypeReference<List<SchoolReport>>() {},  reportType, ""))
+        .thenReturn(List.of(schoolReport));
+    when(restService.executeGet(educDistributionApiConstants.getSchoolReportPDF(), byte[].class, reportType, schoolId.toString()))
+        .thenReturn(new byte[]{1, 2, 3});
+    when(schoolService.getSchool(eq(schoolId), any())).thenReturn(school);
+
+    int result = postingDistributionService.processDistrictSchoolDistribution(batchId, null, null, reportType, null, null, transmissionMode);
+
+    assertEquals(1, result);
+    verify(restService, times(1)).executeGet(educDistributionApiConstants.getLightSchoolReport(), new ParameterizedTypeReference<List<SchoolReport>>() {},  reportType, "");
+    verify(restService, times(1)).executeGet(educDistributionApiConstants.getSchoolReportPDF(), byte[].class, reportType, schoolId.toString());
+    verify(schoolService, times(1)).getSchool(eq(schoolId), any());
   }
 
   @Test
