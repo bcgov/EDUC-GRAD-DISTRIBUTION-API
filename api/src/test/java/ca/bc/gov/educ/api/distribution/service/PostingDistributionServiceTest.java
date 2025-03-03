@@ -18,6 +18,7 @@ import java.util.UUID;
 
 import static ca.bc.gov.educ.api.distribution.model.dto.ReportType.DISTREP_YE_SC;
 import static ca.bc.gov.educ.api.distribution.model.dto.ReportType.NONGRADDISTREP_SD;
+import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants.ADDRESS_LABEL_YE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
@@ -70,7 +71,7 @@ class PostingDistributionServiceTest {
     Long batchId = 1L;
     UUID districtId = UUID.randomUUID();
     List<String> districtIds = List.of(districtId.toString());
-    String districtReportType =NONGRADDISTREP_SD.getValue();
+    String districtReportType =ADDRESS_LABEL_YE;
     String transmissionMode = "transmissionMode";
 
     DistrictReport districtReport = new DistrictReport();
