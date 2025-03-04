@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.distribution.model.dto.v2;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -11,6 +12,7 @@ import java.util.List;
 @Component("instituteDistrict")
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class District {
 
     private String districtId;
