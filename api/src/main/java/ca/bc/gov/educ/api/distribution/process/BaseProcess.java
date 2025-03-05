@@ -1,5 +1,6 @@
 package ca.bc.gov.educ.api.distribution.process;
 
+import ca.bc.gov.educ.api.distribution.constants.SchoolCategoryCodes;
 import ca.bc.gov.educ.api.distribution.model.dto.*;
 import ca.bc.gov.educ.api.distribution.model.dto.v2.District;
 import ca.bc.gov.educ.api.distribution.model.dto.v2.YearEndReportRequest;
@@ -238,7 +239,7 @@ public abstract class BaseProcess implements DistributionProcess {
         try {
             Boolean conditionResult = StringUtils.containsAnyIgnoreCase(activityCode, USERDIST.getValue(), USERDISTOC.getValue(),
                     USERDISTRC.getValue(), MONTHLYDIST.getValue(), SUPPDIST.getValue()) ||
-                    StringUtils.containsAnyIgnoreCase(schoolCategoryCode, "02", "03", "09");
+                SchoolCategoryCodes.getSchoolTypesWithoutDistricts().contains(schoolCategoryCode);
             if (Boolean.TRUE.equals(conditionResult)) {
                 directoryPathBuilder.append(rootDirectory).append(DEL)
                         .append(processorData.getBatchId()).append(DEL)

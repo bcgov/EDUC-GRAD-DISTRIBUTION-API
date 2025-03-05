@@ -1,5 +1,6 @@
 package ca.bc.gov.educ.api.distribution.service;
 
+import ca.bc.gov.educ.api.distribution.constants.SchoolCategoryCodes;
 import ca.bc.gov.educ.api.distribution.model.dto.DistributionResponse;
 import ca.bc.gov.educ.api.distribution.model.dto.ExceptionMessage;
 import ca.bc.gov.educ.api.distribution.model.dto.School;
@@ -59,7 +60,9 @@ public class PostingDistributionService {
         String download = distributionResponse.getLocalDownload();
         String transmissionMode = distributionResponse.getTransmissionMode();
         int numberOfPdfs = distributionResponse.getNumberOfPdfs();
-        if (NONGRADYERUN.getValue().equalsIgnoreCase(activityCode)) {
+        boolean hasDistricts = distributionResponse.getDistricts() != null && !distributionResponse.getDistricts().isEmpty();
+
+        if (NONGRADYERUN.getValue().equalsIgnoreCase(activityCode) && hasDistricts) {
             createDistrictSchoolYearEndNonGradReport(null, NONGRADDISTREP_SD.getValue(), null, distributionResponse.getDistrictSchools());
             numberOfPdfs += processDistrictSchoolDistribution(batchId, null, NONGRADDISTREP_SD.getValue(), null, transmissionMode);
             // GRAD2-2264: removed the redundant logic of NONGRADDISTREP_SC because schools are already processed in YearEndMergeProcess
@@ -306,23 +309,27 @@ public class PostingDistributionService {
                     log.debug("*** Added School Report PDFs Report Type {} for school {} category {}",
                             report.getReportTypeCode(), report.getSchoolOfRecordId().toString(), report.getSchoolCategory());
 
-                    ExceptionMessage exception = new ExceptionMessage();
-                    ca.bc.gov.educ.api.distribution.model.dto.v2.School school = schoolService.getSchool(report.getSchoolOfRecordId(), exception);
+                    String mincode = DEFAULT_MINCODE;
+                    if (!DEFAULT_SCHOOL_ID.equals(report.getSchoolOfRecordId().toString())) {
+                        ExceptionMessage exception = new ExceptionMessage();
+                        ca.bc.gov.educ.api.distribution.model.dto.v2.School school = schoolService.getSchool(report.getSchoolOfRecordId(), exception);
 
-                    if(school != null) {
-                        uploadSchoolReportDocuments(
-                            batchId,
-                            reportType,
-                            DEFAULT_SCHOOL_ID.compareTo(report.getSchoolOfRecordId().toString()) == 0 ?
-                                DEFAULT_MINCODE : school.getMinCode(),
-                            report.getSchoolCategory(),
-                            transmissionMode,
-                            gradReportPdf);
-                        numberOfPdfs++;
-                    } else {
-                        log.error("Failed to get school information for school {}. The report with id {} has not been processed.", report.getSchoolOfRecordId().toString(), report.getId());
-                        log.error("Exception: {}", exception);
+                        if (school == null) {
+                            log.error("Failed to retrieve school information for School {}. Report ID {} not processed.",
+                                report.getSchoolOfRecordId(), report.getId());
+                            log.error("Exception: {}", exception);
+                        } else {
+                            mincode = school.getMinCode();
+                        }
                     }
+                    uploadSchoolReportDocuments(
+                        batchId,
+                        reportType,
+                        mincode,
+                        report.getSchoolCategory(),
+                        transmissionMode,
+                        gradReportPdf);
+                    numberOfPdfs++;
                 } else {
                     log.debug("*** Failed to Add School Report PDFs Report Type {} for school {} category {} in batch {}",
                             report.getReportTypeCode(), report.getSchoolOfRecordId().toString(), report.getSchoolCategory(), batchId);
@@ -341,7 +348,10 @@ public class PostingDistributionService {
         if (StringUtils.isNotBlank(transmissionMode) && TRANSMISSION_MODE_FTP.equalsIgnoreCase(transmissionMode))
             return;
         String rootDirectory = StringUtils.containsAnyIgnoreCase(transmissionMode, TRANSMISSION_MODE_PAPER, TRANSMISSION_MODE_FTP) ? TMP_DIR + EducDistributionApiConstants.FILES_FOLDER_STRUCTURE + StringUtils.upperCase(transmissionMode) : TMP_DIR;
-        boolean schoolLevelFolders = StringUtils.containsAnyIgnoreCase(schoolCategory, "02", "03", "09") || MONTHLYDIST.getValue().equalsIgnoreCase(transmissionMode) || SUPPDIST.getValue().equalsIgnoreCase(transmissionMode);
+        boolean schoolLevelFolders =
+            SchoolCategoryCodes.getSchoolTypesWithoutDistricts().contains(schoolCategory)
+            || MONTHLYDIST.getValue().equalsIgnoreCase(transmissionMode)
+            || SUPPDIST.getValue().equalsIgnoreCase(transmissionMode) ;
         try {
             StringBuilder fileLocBuilder = new StringBuilder();
             if (isDistrict) {

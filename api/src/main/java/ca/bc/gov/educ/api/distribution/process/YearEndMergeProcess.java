@@ -1,5 +1,6 @@
 package ca.bc.gov.educ.api.distribution.process;
 
+import ca.bc.gov.educ.api.distribution.constants.SchoolCategoryCodes;
 import ca.bc.gov.educ.api.distribution.model.dto.*;
 import ca.bc.gov.educ.api.distribution.model.dto.v2.District;
 import ca.bc.gov.educ.api.distribution.model.dto.v2.YearEndReportRequest;
@@ -7,7 +8,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.internal.Pair;
 import org.springframework.stereotype.Component;
 
@@ -53,16 +53,16 @@ public class YearEndMergeProcess extends MergeProcess {
             if (schoolDetails != null) {
                 int currentSlipCount = 0;
                 schoolCounter++;
-                processedSchools.add(schoolDetails.getSchoolId());
-                String schoolCategoryCode = schoolDetails.getSchoolCategoryLegacyCode();
+                String schoolCategoryCode = schoolDetails.getSchoolCategoryCode();
 
                 log.debug("*** School Details Acquired {} category {}", schoolDetails.getMinCode(), schoolCategoryCode);
-                if(StringUtils.containsAnyIgnoreCase(schoolCategoryCode, "02", "03", "09")) {
+                if(SchoolCategoryCodes.getSchoolTypesWithoutDistricts().contains(schoolCategoryCode)) {
                     processSchoolsForLabels(searchRequest.getUser(), schoolsForLabels, schoolDetails);
                     log.debug("Added Independent School {} for processing", schoolDetails.getSchoolName());
                 } else {
                     // No district for 02,03,09 school category
                     processDistrictsForLabels(districtsForLabels, schoolDetails.getDistrictId(), exception);
+                    processedSchools.add(schoolDetails.getSchoolId());
                 }
                 log.debug("{} School {}/{}", schoolDetails.getMinCode(), schoolCounter, mapDist.size());
                 List<Student> studListNonGrad = new ArrayList<>();
