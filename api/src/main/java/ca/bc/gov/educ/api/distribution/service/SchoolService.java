@@ -1,12 +1,17 @@
 package ca.bc.gov.educ.api.distribution.service;
 
 import ca.bc.gov.educ.api.distribution.model.dto.*;
+import ca.bc.gov.educ.api.distribution.model.dto.v2.District;
+import ca.bc.gov.educ.api.distribution.model.dto.v2.School;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import ca.bc.gov.educ.api.distribution.util.RestUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import java.util.UUID;
+
+import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants.*;
 
 @Service
 public class SchoolService {
@@ -15,6 +20,8 @@ public class SchoolService {
     RestService restService;
 	EducDistributionApiConstants educDistributionApiConstants;
 
+	private static final String TRAX_ERROR_MESSAGE = "TRAX-API IS DOWN: %s";
+
 	@Autowired
 	public SchoolService(RestUtils restUtils, RestService restService, EducDistributionApiConstants educDistributionApiConstants) {
 		this.restUtils = restUtils;
@@ -22,69 +29,71 @@ public class SchoolService {
 		this.educDistributionApiConstants = educDistributionApiConstants;
 	}
 
-	public CommonSchool getCommonSchoolDetails(String mincode, ExceptionMessage exception) {
-		CommonSchool commonSchool = null;
-		try
-		{
-			commonSchool = restService.executeGet(
-					educDistributionApiConstants.getCommonSchoolByMincode(),
-					CommonSchool.class,
-					mincode
-			);
-		} catch (Exception e) {
-			exception.setExceptionName(EducDistributionApiConstants.TRAX_API_STATUS);
-			exception.setExceptionDetails(e.getLocalizedMessage());
-		}
-		return commonSchool;
-	}
-
-	public CommonSchool getDefaultSchoolDetailsForPackingSlip(StudentSearchRequest searchRequest, String properName) {
-		CommonSchool commonSchool = new CommonSchool();
+	public School getDefaultSchoolDetailsForPackingSlip(StudentSearchRequest searchRequest, String properName) {
+		School commonSchool = new ca.bc.gov.educ.api.distribution.model.dto.v2.School();
 		Address address = (searchRequest == null || searchRequest.getAddress() == null) ? null : searchRequest.getAddress();
 		String userName = searchRequest == null ? null : searchRequest.getUser();
-		commonSchool.setSchlNo(String.format("%09d" , 0));
+		commonSchool.setSchoolId(DEFAULT_SCHOOL_ID);
+		commonSchool.setMinCode(DEFAULT_MINCODE);
 		commonSchool.setSchoolName(ObjectUtils.defaultIfNull(properName, ObjectUtils.defaultIfNull(userName, "")));
-		commonSchool.setDistNo(String.format("%03d" , 0));
-		commonSchool.setScAddressLine1(address == null ? "4TH FLOOR 620 SUPERIOR" : address.getStreetLine1());
-		commonSchool.setScAddressLine2(address == null ? "PO BOX 9886 STN PROV GOVT" : address.getStreetLine2());
-		commonSchool.setScCity(address == null ? "VICTORIA" : address.getCity());
-		commonSchool.setScProvinceCode(address == null ? "BC" : address.getRegion());
-		commonSchool.setScPostalCode(address == null ? "V8W 9T6" : address.getCode());
-		commonSchool.setScCountryCode(address == null ? "CN" : address.getCountry());
+		commonSchool.setAddress1(address == null ? DEFAULT_ADDRESS_LINE_1 : address.getStreetLine1());
+		commonSchool.setAddress2(address == null ? DEFAULT_ADDRESS_LINE_2 : address.getStreetLine2());
+		commonSchool.setCity(address == null ? DEFAULT_CITY : address.getCity());
+		commonSchool.setProvCode(address == null ? DEFAULT_PROVINCE_CODE : address.getRegion());
+		commonSchool.setPostal(address == null ? DEFAULT_POSTAL_CODE : address.getCode());
+		commonSchool.setCountryCode(address == null ? DEFAULT_COUNTRY_CODE : address.getCountry());
 		return commonSchool;
 	}
 
-	public TraxSchool getTraxSchool(String minCode, ExceptionMessage exception) {
-		TraxSchool traxSchool = null;
-		if(!StringUtils.isBlank(minCode)) {
+	public School getSchool(UUID schoolId, ExceptionMessage exception) {
+		School school = null;
+		if(schoolId != null) {
 			try {
-				traxSchool = restService.executeGet(
-								educDistributionApiConstants.getTraxSchoolByMincode(),
-								TraxSchool.class,
-								minCode
+				school = restService.executeGet(
+								educDistributionApiConstants.getSchoolById(),
+								School.class,
+						schoolId.toString()
 						);
 			} catch (Exception e) {
-				exception.setExceptionName("TRAX-API IS DOWN");
+				exception.setExceptionName(String.format(TRAX_ERROR_MESSAGE, educDistributionApiConstants.getSchoolById()));
 				exception.setExceptionDetails(e.getLocalizedMessage());
 			}
 		}
-		return traxSchool;
+		return school;
 	}
 
-	public TraxDistrict getTraxDistrict(String distCode, ExceptionMessage exception) {
-		TraxDistrict traxDistrict = null;
-		if(!StringUtils.isBlank(distCode)) {
+	public District getDistrict(UUID distId, ExceptionMessage exception) {
+		District district = null;
+		if(distId != null) {
 			try {
-				traxDistrict = restService.executeGet(
-								educDistributionApiConstants.getTraxDistrictByDistcode(),
-								TraxDistrict.class,
-								distCode
+				district = restService.executeGet(
+						educDistributionApiConstants.getDistrictById(),
+						District.class,
+						distId.toString()
 						);
 			} catch (Exception e) {
-				exception.setExceptionName("TRAX-API IS DOWN");
+				exception.setExceptionName(String.format(TRAX_ERROR_MESSAGE, educDistributionApiConstants.getDistrictById()));
 				exception.setExceptionDetails(e.getLocalizedMessage());
 			}
 		}
-		return traxDistrict;
+		return district;
 	}
+
+	public District getDistrictByDistrictNumber(String districtNumber, ExceptionMessage exception) {
+		District district = null;
+		if(StringUtils.isNotBlank(districtNumber)) {
+			try {
+				district = restService.executeGet(
+						educDistributionApiConstants.getDistrictByDistrictNumber(),
+						District.class,
+						districtNumber
+				);
+			} catch (Exception e) {
+				exception.setExceptionName(String.format(TRAX_ERROR_MESSAGE, educDistributionApiConstants.getDistrictByDistrictNumber()));
+				exception.setExceptionDetails(e.getLocalizedMessage());
+			}
+		}
+		return district;
+	}
+
 }

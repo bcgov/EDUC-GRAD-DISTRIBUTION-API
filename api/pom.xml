@@ -6,7 +6,7 @@
 
     <groupId>ca.bc.gov.educ</groupId>
     <artifactId>educ-grad-distribution-api</artifactId>
-    <version>1.8.63</version>
+    <version>1.8.64</version>
     <name>educ-grad-distribution-api</name>
     <description>Ministry of Education GRAD DISTRIBUTION API</description>
 
@@ -27,7 +27,8 @@
             src/main/java/ca/bc/gov/educ/api/distribution/exception/**,
             src/main/java/ca/bc/gov/educ/api/distribution/process/**,
             src/main/java/ca/bc/gov/educ/api/distribution/model/**,
-            src/main/java/ca/bc/gov/educ/api/distribution/util/**
+            src/main/java/ca/bc/gov/educ/api/distribution/util/**,
+            src/main/java/ca/bc/gov/educ/api/distribution/controller/APIMetadataController.java
         </sonar.coverage.exclusions>
         <java.version>18</java.version>
         <maven.compiler.version>3.10.1</maven.compiler.version>

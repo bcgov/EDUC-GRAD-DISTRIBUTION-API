@@ -1,15 +1,19 @@
 package ca.bc.gov.educ.api.distribution.model.dto;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
+@NoArgsConstructor
 public class School implements Serializable {
 
     private static final long serialVersionUID = 2L;
 
+    private String schoolId;
     private String mincode;
     private String name;
     private String typeIndicator;
@@ -26,6 +30,21 @@ public class School implements Serializable {
 
     private List<Student> students;
 
+    public School(String schoolId) {
+        this.schoolId = schoolId;
+    }
+
+    public School(UUID schoolId) {
+        this.schoolId = schoolId != null? schoolId.toString() : null;
+    }
+
+    public String getSchoolId() {
+        return schoolId;
+    }
+
+    public void setSchoolId(String value) {
+        this.schoolId = value;
+    }
     public String getMincode() {
         return mincode;
     }

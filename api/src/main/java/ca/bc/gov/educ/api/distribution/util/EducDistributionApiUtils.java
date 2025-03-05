@@ -1,8 +1,7 @@
 package ca.bc.gov.educ.api.distribution.util;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
@@ -22,30 +21,11 @@ import java.util.zip.ZipOutputStream;
 
 import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants.DEL;
 
+@Slf4j
 public class EducDistributionApiUtils {
 
-	private static final Logger logger = LoggerFactory.getLogger(EducDistributionApiUtils.class);
 	private static final String ERROR = "ERROR: {}";
 	private static final String PARSE_EXP = "Parse Exception {}";
-
-	public static final String SCHOOL_LABELS_CODE = "000000000";
-	public static final String USERDIST = "USERDIST";
-
-	public static final String USERDISTRC = "USERDIST";
-	public static final String USERDISTOC = "USERDISTOC";
-	public static final String YEARENDDIST = "YEARENDDIST";
-	public static final String MONTHLYDIST = "MONTHLYDIST";
-	public static final String NONGRADYERUN = "NONGRADYERUN";
-	public static final String SUPPDIST = "SUPPDIST";
-	public static final String DISTREP_YE_SD = "DISTREP_YE_SD";
-	public static final String DISTREP_YE_SC = "DISTREP_YE_SC";
-	public static final String ADDRESS_LABEL_SCHL = "ADDRESS_LABEL_SCHL";
-	public static final String ADDRESS_LABEL_YE = "ADDRESS_LABEL_YE";
-	public static final String ADDRESS_LABEL_PSI = "ADDRESS_LABEL_PSI";
-	public static final String DISTREP_SD = "DISTREP_SD";
-	public static final String DISTREP_SC = "DISTREP_SC";
-	public static final String NONGRADDISTREP_SC = "NONGRADDISTREP_SC";
-	public static final String NONGRADDISTREP_SD = "NONGRADDISTREP_SD";
 
 	private EducDistributionApiUtils() {}
 
@@ -63,7 +43,7 @@ public class EducDistributionApiUtils {
 	}
 
 	public static Date parseDate(String dateString) {
-		if (dateString == null || "".compareTo(dateString) == 0)
+		if (dateString == null || StringUtils.isEmpty(dateString))
 			return null;
 
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat(EducDistributionApiConstants.DEFAULT_DATE_FORMAT);
@@ -137,7 +117,7 @@ public class EducDistributionApiUtils {
 		try {
 			return myFormat.format(fromUser.parse(updatedTimestamp));
 		} catch (ParseException e) {
-			logger.debug(PARSE_EXP,e.getLocalizedMessage());
+			log.debug(PARSE_EXP,e.getLocalizedMessage());
 		}
 		return updatedTimestamp;
 
@@ -150,7 +130,7 @@ public class EducDistributionApiUtils {
 			try {
 				return myFormat.format(fromUser.parse(updatedTimestamp));
 			} catch (ParseException e) {
-				logger.debug(PARSE_EXP,e.getLocalizedMessage());
+				log.debug(PARSE_EXP,e.getLocalizedMessage());
 			}
 		}
 		return updatedTimestamp;
@@ -164,7 +144,7 @@ public class EducDistributionApiUtils {
 			try {
 				return new SimpleDateFormat(EducDistributionApiConstants.DEFAULT_DATE_FORMAT).parse(myFormat.format(fromUser.parse(updatedTimestamp)));
 			} catch (ParseException e) {
-				logger.debug(PARSE_EXP, e.getLocalizedMessage());
+				log.debug(PARSE_EXP, e.getLocalizedMessage());
 			}
 		}
 		return null;
@@ -182,7 +162,7 @@ public class EducDistributionApiUtils {
 			Date temp = toLastDayOfMonth(parseDate(actualSessionDate, EducDistributionApiConstants.SECOND_DEFAULT_DATE_FORMAT));
 			sDates = formatDate(temp, EducDistributionApiConstants.DEFAULT_DATE_FORMAT);
 		} catch (ParseException pe) {
-			logger.error(ERROR,pe.getMessage());
+			log.error(ERROR,pe.getMessage());
 		}
 		return sDates;
 	}
@@ -195,7 +175,7 @@ public class EducDistributionApiUtils {
 			String sDates = EducDistributionApiUtils.formatDate(temp, EducDistributionApiConstants.DEFAULT_DATE_FORMAT);
 			sDate = EducDistributionApiUtils.parseDate(sDates, EducDistributionApiConstants.DEFAULT_DATE_FORMAT);
 		} catch (ParseException pe) {
-			logger.error(ERROR,pe.getMessage());
+			log.error(ERROR,pe.getMessage());
 		}
 		return sDate;
 	}
@@ -250,7 +230,7 @@ public class EducDistributionApiUtils {
 			}
 			zipOut.closeEntry();
 		} catch (Exception e) {
-			logger.error("Write Exception {}",e.getLocalizedMessage());
+			log.error("Write Exception {}",e.getLocalizedMessage());
 		}
 	}
 
@@ -263,55 +243,4 @@ public class EducDistributionApiUtils {
 		}
 		return null;
 	}
-
-	/**
-	public static boolean isValid(File file) {
-		ZipFile zipfile = null;
-		ZipInputStream zis = null;
-		ZipEntry ze = null;
-		try {
-			zipfile = new ZipFile(file);
-			zis = new ZipInputStream(new FileInputStream(file));
-			ze = zis.getNextEntry();
-			if(ze == null) {
-				return false;
-			}
-			while(ze != null) {
-				// if it throws an exception fetching any of the following then we know the file is corrupted.
-				zipfile.getInputStream(ze);
-				if(!ze.isDirectory()) {
-					String entryName = ze.getName();
-					ze.getCrc();
-					ze.getCompressedSize();
-					ze.getSize();
-					logger.debug("Validated {}", entryName);
-				}
-				ze = zis.getNextEntry();
-			}
-			return true;
-		} catch (ZipException e) {
-			logger.debug("Zip file {} is not valid: {}", file.getName(), e.getLocalizedMessage());
-			return false;
-		} catch (IOException e) {
-			return false;
-		} finally {
-			try {
-				if (zipfile != null) {
-					zipfile.close();
-					zipfile = null;
-				}
-			} catch (IOException e) {
-				return false;
-			} try {
-				if (zis != null) {
-					zis.close();
-					zis = null;
-				}
-			} catch (IOException e) {
-				return false;
-			}
-		}
-	}
-	 **/
-
 }

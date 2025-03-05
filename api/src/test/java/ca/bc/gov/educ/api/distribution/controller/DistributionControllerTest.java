@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.distribution.controller;
 
 import ca.bc.gov.educ.api.distribution.model.dto.*;
+import ca.bc.gov.educ.api.distribution.model.dto.v2.School;
 import ca.bc.gov.educ.api.distribution.service.GradDistributionService;
 import ca.bc.gov.educ.api.distribution.service.PostingDistributionService;
 import ca.bc.gov.educ.api.distribution.util.GradValidation;
@@ -15,7 +16,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.*;
-
 
 @ExtendWith(MockitoExtension.class)
 class DistributionControllerTest {
@@ -46,17 +46,16 @@ class DistributionControllerTest {
 		String runType = "MER";
 		String activityCode = "USERDIST";
 		Long batchId= 9029L;
-		Map<String, DistributionPrintRequest> mapDist= new HashMap<>();
+		Map<UUID, DistributionPrintRequest> mapDist= new HashMap<>();
 		String transmissionMode = "paper";
-		String localDownload = null;
-		String accessToken = "123";
 		String mincode = "123123133";
+		UUID schoolId = UUID.randomUUID();
 
-		CommonSchool schObj = new CommonSchool();
-		schObj.setSchlNo(mincode.substring(2,mincode.length()-1));
-		schObj.setDistNo(mincode.substring(0,2));
-		schObj.setPhysAddressLine1("sadadad");
-		schObj.setPhysAddressLine2("adad");
+		ca.bc.gov.educ.api.distribution.model.dto.v2.School schObj = new ca.bc.gov.educ.api.distribution.model.dto.v2.School();
+		schObj.setSchoolId(UUID.randomUUID().toString());
+		schObj.setMinCode(mincode);
+		schObj.setAddress1("sadadad");
+		schObj.setAddress2("adad");
 
 		List<StudentCredentialDistribution> scdList = new ArrayList<>();
 		StudentCredentialDistribution scd = new StudentCredentialDistribution();
@@ -64,7 +63,7 @@ class DistributionControllerTest {
 		scd.setPen("123213133");
 		scd.setProgram("1950");
 		scd.setStudentID(UUID.randomUUID());
-		scd.setSchoolOfRecord(mincode);
+		scd.setSchoolId(schoolId);
 		scd.setPaperType("YED4");
 		scd.setStudentGrade("AD");
 		scd.setLegalFirstName("asda");
@@ -93,7 +92,7 @@ class DistributionControllerTest {
 		DistributionPrintRequest printRequest = new DistributionPrintRequest();
 		printRequest.setTranscriptPrintRequest(tPReq);
 		printRequest.setSchoolDistributionRequest(sdReq);
-		mapDist.put(mincode,printRequest);
+		mapDist.put(schoolId, printRequest);
 
 		DistributionResponse res = new DistributionResponse();
 		res.setMergeProcessResponse("MERGED");
@@ -109,17 +108,16 @@ class DistributionControllerTest {
 		String runType = "MER";
 		String activityCode = "MONTHLYDIST";
 		Long batchId= 9029L;
-		Map<String, DistributionPrintRequest> mapDist= new HashMap<>();
+		Map<UUID, DistributionPrintRequest> mapDist= new HashMap<>();
 		String transmissionMode = "paper";
-		String localDownload = null;
-		String accessToken = "123";
 		String mincode = "123123133";
+		UUID schoolId = UUID.randomUUID();
 
-		CommonSchool schObj = new CommonSchool();
-		schObj.setSchlNo(mincode.substring(2,mincode.length()-1));
-		schObj.setDistNo(mincode.substring(0,2));
-		schObj.setPhysAddressLine1("sadadad");
-		schObj.setPhysAddressLine2("adad");
+		ca.bc.gov.educ.api.distribution.model.dto.v2.School schObj = new School();
+		schObj.setSchoolId(schoolId.toString());
+		schObj.setMinCode(mincode);
+		schObj.setAddress1("sadadad");
+		schObj.setAddress2("adad");
 
 		List<StudentCredentialDistribution> scdList = new ArrayList<>();
 		StudentCredentialDistribution scd = new StudentCredentialDistribution();
@@ -127,6 +125,7 @@ class DistributionControllerTest {
 		scd.setPen("123213133");
 		scd.setProgram("1950");
 		scd.setStudentID(UUID.randomUUID());
+		scd.setSchoolId(schoolId);
 		scd.setSchoolOfRecord(mincode);
 		scd.setPaperType("YED4");
 		scd.setStudentGrade("AD");
@@ -156,7 +155,7 @@ class DistributionControllerTest {
 		DistributionPrintRequest printRequest = new DistributionPrintRequest();
 		printRequest.setTranscriptPrintRequest(tPReq);
 		printRequest.setSchoolDistributionRequest(sdReq);
-		mapDist.put(mincode,printRequest);
+		mapDist.put(schoolId,printRequest);
 
 		DistributionResponse res = new DistributionResponse();
 		res.setMergeProcessResponse("MERGED");
@@ -180,10 +179,10 @@ class DistributionControllerTest {
 
 	@Test
 	void testPostingDistribution() {
-		DistributionResponse response = new DistributionResponse();
-		Mockito.when(postingDistributionService.postingProcess(response)).thenReturn(Boolean.TRUE);
-		distributionController.postingDistribution(response);
-		Mockito.verify(postingDistributionService).postingProcess(response);
+		DistributionResponse res = new DistributionResponse();
+		Mockito.when(postingDistributionService.postingProcess(res)).thenReturn(Boolean.TRUE);
+		distributionController.postingDistribution(res);
+		Mockito.verify(postingDistributionService).postingProcess(res);
 	}
 	
 }

@@ -69,6 +69,7 @@ oc create -n "$BUSINESS_NAMESPACE"-"$envValue" configmap "$APP_NAME"-config-map 
  --from-literal=GRAD_GRADUATION_API="http://educ-grad-graduation-api.$GRAD_NAMESPACE-$envValue.svc.cluster.local:8080/" \
  --from-literal=KEYCLOAK_TOKEN_URL="https://soam-$envValue.apps.silver.devops.gov.bc.ca/" \
  --from-literal=BCMAIL_LOCATION="$BCMAIL_LOCATION" \
+ --from-literal=ENABLE_COMPRESSION="true" \
  --dry-run=client -o yaml | oc apply -f -
 
 echo Creating config map "$APP_NAME"-flb-sc-config-map

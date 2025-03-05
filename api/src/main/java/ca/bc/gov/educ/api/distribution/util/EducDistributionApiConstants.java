@@ -5,6 +5,8 @@ import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
+
 @Component
 @Getter
 @Setter
@@ -58,6 +60,19 @@ public class EducDistributionApiConstants {
 
     public static final String TRAX_API_STATUS = "TRAX-API IS DOWN";
 
+    public static final String ADDRESS_LABEL_SCHL = "ADDRESS_LABEL_SCHL";
+    public static final String ADDRESS_LABEL_YE = "ADDRESS_LABEL_YE";
+    public static final String ADDRESS_LABEL_PSI = "ADDRESS_LABEL_PSI";
+
+    public static final String DEFAULT_SCHOOL_ID = new UUID(0, 0).toString();
+    public static final String DEFAULT_MINCODE = "00000000";
+    public static final String DEFAULT_ADDRESS_LINE_1 = "4TH FLOOR 620 SUPERIOR";
+    public static final String DEFAULT_ADDRESS_LINE_2 = "PO BOX 9886 STN PROV GOVT";
+    public static final String DEFAULT_CITY = "VICTORIA";
+    public static final String DEFAULT_PROVINCE_CODE = "BC";
+    public static final String DEFAULT_POSTAL_CODE = "V8W 9T6";
+    public static final String DEFAULT_COUNTRY_CODE = "CN";
+
     @Value("${endpoint.grad-graduation-report-api.get-transcript-list.url}")
     private String transcriptDistributionList;
 
@@ -94,17 +109,17 @@ public class EducDistributionApiConstants {
     @Value("${endpoint.keycloak.getToken}")
     private String tokenUrl;
 
-    @Value("${endpoint.grad-trax-api.commonschool-by-mincode.url}")
-    private String commonSchoolByMincode;
-
     @Value("${endpoint.grad-trax-api.psi-by-psi-code.url}")
     private String psiByPsiCode;
 
-    @Value("${endpoint.grad-trax-api.school-by-min-code.url}")
-    private String traxSchoolByMincode;
+    @Value("${endpoint.grad-trax-api.school-by-id.url}")
+    private String schoolById;
 
-    @Value("${endpoint.grad-trax-api.district-by-dist-code.url}")
-    private String traxDistrictByDistcode;
+    @Value("${endpoint.grad-trax-api.district-by-id.url}")
+    private String districtById;
+
+    @Value("${endpoint.grad-trax-api.district-by-district-number.url}")
+    private String districtByDistrictNumber;
 
     @Value("${endpoint.grad-report-api.get-school-distribution-report.url}")
     private String schoolDistributionReport;
@@ -124,6 +139,9 @@ public class EducDistributionApiConstants {
     @Value("${endpoint.grad-graduation-report-api.update-grad-school-report.url}")
     private String updateSchoolReport;
 
+    @Value("${endpoint.grad-graduation-report-api.update-grad-district-report.url}")
+    private String updateDistrictReport;
+
     @Value("${endpoint.grad-report-api.student_non_grad_projected}")
     private String studentNonGradProjected;
 
@@ -133,23 +151,44 @@ public class EducDistributionApiConstants {
     @Value("${endpoint.grad-graduation-report-api.school-report.url}")
     private String schoolReport;
 
-    @Value("${endpoint.grad-graduation-report-api.school-report-by-report-type.url}")
-    private String schoolReportsByReportType;
+    @Value("${endpoint.grad-graduation-report-api.light-school-report.url}")
+    private String lightSchoolReport;
 
-    @Value("${endpoint.grad-graduation-api.school_district_year_end_report.url}")
+    @Value("${endpoint.grad-graduation-report-api.school-report-pdf.url}")
+    private String schoolReportPDF;
+
+    @Value("${endpoint.grad-graduation-report-api.district-report-pdf.url}")
+    private String districtReportPDF;
+
+    @Value("${endpoint.grad-graduation-report-api.district-report.url}")
+    private String districtReport;
+
+    @Value("${endpoint.grad-graduation-report-api.light-district-report.url}")
+    private String lightDistrictReport;
+
+    @Value("${endpoint.grad-graduation-api.school-district-year-end-report.url}")
     private String schoolDistrictYearEndReport;
 
-    @Value("${endpoint.grad-graduation-api.school_district_year_end_nongrad_report.url}")
+    @Value("${endpoint.grad-graduation-api.school-district-year-end-nongrad-report.url}")
     private String schoolDistrictYearEndNonGradReport;
 
-    @Value("${endpoint.grad-graduation-api.school_district_month_report.url}")
+    @Value("${endpoint.grad-graduation-api.school-district-month-report.url}")
     private String schoolDistrictMonthReport;
 
-    @Value("${endpoint.grad-graduation-api.school_district_supplemental_report.url}")
+    @Value("${endpoint.grad-graduation-api.school-district-supplemental-report.url}")
     private String schoolDistrictSupplementalReport;
 
-    @Value("${endpoint.grad-graduation-api.school_labels_report.url}")
+    @Value("${endpoint.grad-graduation-api.school-labels-report.url}")
     private String schoolLabelsReport;
+
+    @Value("${endpoint.grad-graduation-api.school-labels-report-pdf.url}")
+    private String schoolLabelsReportPDF;
+
+    @Value("${endpoint.grad-graduation-api.district-labels-report.url}")
+    private String districtLabelsReport;
+
+    @Value("${endpoint.grad-graduation-api.district-labels-report-pdf.url}")
+    private String districtLabelsReportPDF;
 
     @Value("${endpoint.grad-batch-graduation-api.distribution.notify-completion.url}")
     private String distributionJobCompleteNotification;
