@@ -62,8 +62,9 @@ public class PSIReportProcess extends BaseProcess {
             int currentSlipCount = 0;
             DistributionPrintRequest distributionPrintRequest = mapDist.get(psId);
             //psiCode = StringUtils.trim(psiCode);
-            Psi psiDetails = psiService.getPsiDetails(psId.toString());
-            if (psiDetails != null) {
+            Optional<Psi> psiDetailsOptional = psiService.getPsiDetails(psId.toString());
+            if (psiDetailsOptional.isPresent()) {
+                Psi psiDetails = psiDetailsOptional.get();
                 log.debug("*** PSI Details Acquired {}", psiDetails.getPsiName());
                 ReportRequest packSlipReq = reportService.preparePackingSlipDataPSI(psiDetails, processorData.getBatchId());
                 Pair<Integer, Integer> pV = processTranscriptPrintRequest(distributionPrintRequest, currentSlipCount,
@@ -75,6 +76,8 @@ public class PSIReportProcess extends BaseProcess {
                     restUtils.fetchAccessToken(processorData);
                 }
                 log.debug("PSI {}/{}", counter, mapDist.size());
+            } else {
+                log.error("PSI Details not found for {}", psId);
             }
         }
         restUtils.fetchAccessToken(processorData);

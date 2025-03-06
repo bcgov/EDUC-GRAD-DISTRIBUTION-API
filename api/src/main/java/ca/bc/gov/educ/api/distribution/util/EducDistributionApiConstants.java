@@ -112,6 +112,9 @@ public class EducDistributionApiConstants {
     @Value("${endpoint.grad-trax-api.psi-by-psi-code.url}")
     private String psiByPsiCode;
 
+    @Value("${endpoint.grad-trax-api.all-psi.url}")
+    private String allPsi;
+
     @Value("${endpoint.grad-trax-api.school-by-id.url}")
     private String schoolById;
 
