@@ -175,6 +175,8 @@ endpoint:
   grad-trax-api:
     psi-by-psi-code:
       url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/trax/psi/%s
+    all-psi:
+      url: http://test
     school-by-id:
       url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v2/trax/school-clob/%s
     district-by-id:

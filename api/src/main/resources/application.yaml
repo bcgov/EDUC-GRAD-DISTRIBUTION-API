@@ -178,6 +178,8 @@ endpoint:
   grad-trax-api:
     psi-by-psi-code:
       url: ${GRAD_TRAX_API}api/v1/trax/psi/%s
+    all-psi:
+      url: ${GRAD_TRAX_API}api/v1/trax/psi
     school-by-id:
       url: ${GRAD_TRAX_API}api/v2/trax/school-clob/%s
     district-by-id:
