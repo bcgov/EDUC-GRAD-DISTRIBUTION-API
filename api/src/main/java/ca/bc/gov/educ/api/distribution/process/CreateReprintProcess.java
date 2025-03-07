@@ -67,14 +67,14 @@ public class CreateReprintProcess extends BaseProcess {
 				}
 			}
 		}
-		postingProcess(batchId,processorData,numberOfPdfs);
+		boolean postingStatus = postingProcess(batchId,processorData,numberOfPdfs);
 		long endTime = System.currentTimeMillis();
 		long diff = (endTime - startTime)/1000;
 		log.debug("************* TIME Taken  ************ {} secs",diff);
-		response.setMergeProcessResponse("Merge Successful and File Uploaded");
+		response.setMergeProcessResponse(postingStatus ? "COMPLETED": "FAILED");
 		response.setNumberOfPdfs(numberOfPdfs);
-		response.setBatchId(processorData.getBatchId());
 		response.setLocalDownload(processorData.getLocalDownload());
+		response.setBatchId(processorData.getBatchId());
 		response.setActivityCode(distributionRequest.getActivityCode());
 		response.setStudentSearchRequest(searchRequest);
 		processorData.setDistributionResponse(response);

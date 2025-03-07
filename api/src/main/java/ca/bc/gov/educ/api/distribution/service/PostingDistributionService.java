@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.distribution.service;
 
 import ca.bc.gov.educ.api.distribution.constants.SchoolCategoryCodes;
+import ca.bc.gov.educ.api.distribution.exception.ServiceException;
 import ca.bc.gov.educ.api.distribution.model.dto.DistributionResponse;
 import ca.bc.gov.educ.api.distribution.model.dto.ExceptionMessage;
 import ca.bc.gov.educ.api.distribution.model.dto.School;
@@ -71,10 +72,15 @@ public class PostingDistributionService {
     }
 
     public boolean zipBatchDirectory(Long batchId, String download, int numberOfPdfs, String pathToZip) {
-        createZipFile(batchId, pathToZip);
-        if (StringUtils.isBlank(download) || !"Y".equalsIgnoreCase(download)) {
-            createControlFile(batchId, numberOfPdfs, pathToZip);
-            sftpUtils.sftpUploadBCMail(batchId, pathToZip);
+        try {
+            createZipFile(batchId, pathToZip);
+            if (StringUtils.isBlank(download) || !"Y".equalsIgnoreCase(download)) {
+                createControlFile(batchId, numberOfPdfs, pathToZip);
+                return sftpUtils.sftpUploadBCMail(batchId, pathToZip);
+            }
+        } catch (Exception ex) {
+            log.error(ex.getLocalizedMessage());
+            return false;
         }
         return true;
     }
@@ -90,7 +96,7 @@ public class PostingDistributionService {
             EducDistributionApiUtils.zipFile(fileToZip, fileToZip.getName(), zipOut);
             zipOut.finish();
         } catch (IOException e) {
-            log.error(e.getLocalizedMessage());
+            throw new ServiceException("Failed to create zip file for batch " + batchId);
         }
     }
 
