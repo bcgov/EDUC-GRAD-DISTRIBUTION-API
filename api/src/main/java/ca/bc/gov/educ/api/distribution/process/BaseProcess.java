@@ -83,16 +83,16 @@ public abstract class BaseProcess implements DistributionProcess {
         packSlipReq.getData().getPackingSlip().setOrderNumber(batchId);
     }
 
-    protected void postingProcess(Long batchId, ProcessorData processorData, Integer numberOfPdfs) {
-        postingProcess(batchId, processorData.getLocalDownload(), numberOfPdfs, TMP_DIR);
+    protected Boolean postingProcess(Long batchId, ProcessorData processorData, Integer numberOfPdfs) {
+        return postingProcess(batchId, processorData.getLocalDownload(), numberOfPdfs, TMP_DIR);
     }
 
-    protected void postingProcess(Long batchId, ProcessorData processorData, Integer numberOfPdfs, String pathToZip) {
-        postingProcess(batchId, processorData.getLocalDownload(), numberOfPdfs, pathToZip);
+    protected Boolean postingProcess(Long batchId, ProcessorData processorData, Integer numberOfPdfs, String pathToZip) {
+        return postingProcess(batchId, processorData.getLocalDownload(), numberOfPdfs, pathToZip);
     }
 
-    protected void postingProcess(Long batchId, String download, Integer numberOfPdfs, String pathToZip) {
-        postingDistributionService.zipBatchDirectory(batchId, download, numberOfPdfs, pathToZip);
+    protected Boolean postingProcess(Long batchId, String download, Integer numberOfPdfs, String pathToZip) {
+        return postingDistributionService.zipBatchDirectory(batchId, download, numberOfPdfs, pathToZip);
     }
 
     protected Integer createSchoolLabelsReport(List<ca.bc.gov.educ.api.distribution.model.dto.School> schools, String schooLabelReportType) {
