@@ -85,7 +85,7 @@ public class PSIReportProcess extends BaseProcess {
         int numberOfCreatedSchoolLabelReports = createSchoolLabelsReport(schoolsForLabels, ADDRESS_LABEL_PSI);
         log.debug("***** Number of created school labels reports {} *****", numberOfCreatedSchoolLabelReports);
         log.debug("***** Distribute school labels reports *****");
-        String schoolLabelCode = schoolsForLabels.size() == 1 ? schoolsForLabels.get(0).getMincode() : DEFAULT_MINCODE;
+        String schoolLabelCode = schoolsForLabels.size() == 1 ? schoolsForLabels.get(0).getSchoolId() : DEFAULT_SCHOOL_ID;
         int numberOfProcessedSchoolLabelsReports = processDistrictSchoolDistribution(batchId, List.of(schoolLabelCode), null,
                 ADDRESS_LABEL_PSI, null, null, processorData.getTransmissionMode());
         log.debug("***** Number of distributed school labels reports {} *****", numberOfProcessedSchoolLabelsReports);
