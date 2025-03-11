@@ -159,6 +159,7 @@ public abstract class BaseProcess implements DistributionProcess {
 
     protected void processSchoolsForLabels(List<ca.bc.gov.educ.api.distribution.model.dto.School> schools, Psi psi) {
         ca.bc.gov.educ.api.distribution.model.dto.School school = new ca.bc.gov.educ.api.distribution.model.dto.School();
+        school.setSchoolId(DEFAULT_SCHOOL_ID);
         school.setMincode(psi.getPsiCode());
         school.setName(psi.getPsiName());
         school.setTypeBanner(psi.getAttentionName());
