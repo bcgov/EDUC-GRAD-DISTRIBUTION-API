@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.distribution.config;
 
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
+import ca.bc.gov.educ.api.distribution.util.LogHelper;
 import ca.bc.gov.educ.api.distribution.util.ThreadLocalStateUtil;
 import org.modelmapper.ModelMapper;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -23,6 +24,9 @@ import java.io.FileFilter;
 @EnableIntegration
 public class EducDistributionApiConfig {
 
+    LogHelper logHelper;
+    EducDistributionApiConstants constants;
+
     @Bean
     public ModelMapper modelMapper() {
         return new ModelMapper();
@@ -38,7 +42,9 @@ public class EducDistributionApiConfig {
                 .codecs(configurer -> configurer
                         .defaultCodecs()
                         .maxInMemorySize(300 * 1024 * 1024))
-                .build()).build();
+                .build())
+                .filter(this.log())
+                .build();
     }
 
     @Bean
@@ -66,5 +72,20 @@ public class EducDistributionApiConfig {
             return next.exchange(modifiedRequest);
         };
     }
-    
+
+    private ExchangeFilterFunction log() {
+        return (clientRequest, next) -> next
+                .exchange(clientRequest)
+                .doOnNext((clientResponse -> logHelper.logClientHttpReqResponseDetails(
+                        clientRequest.method(),
+                        clientRequest.url().toString(),
+                        clientResponse.statusCode().value(),
+                        //GRAD2-1929 Refactoring/Linting replaced rawStatusCode() with statusCode() as it was deprecated.
+                        // clientResponse.rawStatusCode(),
+                        clientRequest.headers().get(EducDistributionApiConstants.CORRELATION_ID),
+                        clientRequest.headers().get(EducDistributionApiConstants.REQUEST_SOURCE),
+                        constants.isSplunkLogHelperEnabled())
+                ));
+    }
+
 }

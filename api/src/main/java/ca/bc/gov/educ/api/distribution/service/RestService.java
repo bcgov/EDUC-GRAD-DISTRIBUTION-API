@@ -54,7 +54,6 @@ public class RestService {
         try {
             final String serviceUrl = parseUrlParameters(url, params);
             executeUrl = serviceUrl;
-            final UUID correlationId = UUID.randomUUID();
             obj = this.webClient
                     .get()
                     .uri(serviceUrl)
@@ -92,7 +91,6 @@ public class RestService {
         try {
             final String serviceUrl = parseUrlParameters(url, params);
             executeUrl = serviceUrl;
-            final UUID correlationId = UUID.randomUUID();
             obj = this.webClient
                     .get()
                     .uri(serviceUrl)
@@ -131,7 +129,6 @@ public class RestService {
         try {
             final String serviceUrl = parseUrlParameters(url, params);
             executeUrl = serviceUrl;
-            final UUID correlationId = UUID.randomUUID();
             obj = this.webClient.post()
                     .uri(serviceUrl)
                     .headers(h -> h.setBearerAuth(restUtils.getAccessToken()))
@@ -167,7 +164,6 @@ public class RestService {
         try {
             final String serviceUrl = parseUrlParameters(url, params);
             executeUrl = serviceUrl;
-            final UUID correlationId = UUID.randomUUID();
             obj = webClient.delete().uri(serviceUrl).headers(h -> h.setBearerAuth(restUtils.getAccessToken()))
                     .retrieve()
                     .bodyToMono(boundClass)
