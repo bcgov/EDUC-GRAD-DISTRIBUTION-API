@@ -80,8 +80,6 @@ public class EducDistributionApiConfig {
                         clientRequest.method(),
                         clientRequest.url().toString(),
                         clientResponse.statusCode().value(),
-                        //GRAD2-1929 Refactoring/Linting replaced rawStatusCode() with statusCode() as it was deprecated.
-                        // clientResponse.rawStatusCode(),
                         clientRequest.headers().get(EducDistributionApiConstants.CORRELATION_ID),
                         clientRequest.headers().get(EducDistributionApiConstants.REQUEST_SOURCE),
                         constants.isSplunkLogHelperEnabled())
