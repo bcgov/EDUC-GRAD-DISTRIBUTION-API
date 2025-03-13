@@ -122,11 +122,11 @@ public class MergeProcess extends BaseProcess {
 			log.debug("***** Number of distributed Supplemental school label reports {} *****", numberOfProcessedSchoolReports);
 		}
 		numberOfPdfs += numberOfProcessedSchoolReports;
-		postingProcess(batchId, processorData, numberOfPdfs);
+		boolean postingStatus = postingProcess(batchId,processorData,numberOfPdfs);
 		long endTime = System.currentTimeMillis();
 		long diff = (endTime - startTime)/1000;
 		log.debug("************* TIME Taken  ************ {} secs",diff);
-		response.setMergeProcessResponse("Merge Successful and File Uploaded");
+		response.setMergeProcessResponse(postingStatus ? "COMPLETED": "FAILED");
 		response.setNumberOfPdfs(numberOfPdfs);
 		response.setBatchId(processorData.getBatchId());
 		response.setLocalDownload(processorData.getLocalDownload());

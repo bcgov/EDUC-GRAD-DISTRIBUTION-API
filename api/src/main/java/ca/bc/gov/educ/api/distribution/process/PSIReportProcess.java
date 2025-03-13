@@ -89,11 +89,11 @@ public class PSIReportProcess extends BaseProcess {
                 ADDRESS_LABEL_PSI, null, null, processorData.getTransmissionMode());
         log.debug("***** Number of distributed school labels reports {} *****", numberOfProcessedSchoolLabelsReports);
         numberOfPdfs += numberOfProcessedSchoolLabelsReports;
-        postingProcess(batchId, processorData, numberOfPdfs, getRootPathForFilesStorage(processorData));
+        boolean postingStatus = postingProcess(batchId, processorData, numberOfPdfs, getRootPathForFilesStorage(processorData));
         long eTime = System.currentTimeMillis();
-        long difference = (eTime - sTime) / 1000;
-        log.debug("************* TIME Taken  ************ {} secs", difference);
-        response.setMergeProcessResponse("Merge Successful and File Uploaded");
+        long diff = (eTime - sTime)/1000;
+        log.debug("************* TIME Taken  ************ {} secs",diff);
+        response.setMergeProcessResponse(postingStatus ? "COMPLETED": "FAILED");
         response.setNumberOfPdfs(numberOfPdfs);
         response.setBatchId(processorData.getBatchId());
         response.setLocalDownload(processorData.getLocalDownload());
