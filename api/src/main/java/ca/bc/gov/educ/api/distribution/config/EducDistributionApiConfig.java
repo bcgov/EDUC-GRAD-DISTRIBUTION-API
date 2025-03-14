@@ -4,6 +4,7 @@ import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import ca.bc.gov.educ.api.distribution.util.LogHelper;
 import ca.bc.gov.educ.api.distribution.util.ThreadLocalStateUtil;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,7 +15,6 @@ import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
 
 import java.io.FileFilter;
@@ -26,6 +26,12 @@ public class EducDistributionApiConfig {
 
     LogHelper logHelper;
     EducDistributionApiConstants constants;
+
+    @Autowired
+    public EducDistributionApiConfig(LogHelper logHelper, EducDistributionApiConstants constants) {
+        this.logHelper = logHelper;
+        this.constants = constants;
+    }
 
     @Bean
     public ModelMapper modelMapper() {
