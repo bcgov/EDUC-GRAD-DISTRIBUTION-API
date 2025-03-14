@@ -56,14 +56,10 @@ public class RestService {
         try {
             final String serviceUrl = parseUrlParameters(url, params);
             executeUrl = serviceUrl;
-            final UUID correlationId = UUID.randomUUID();
             obj = this.webClient
                     .get()
                     .uri(serviceUrl)
-                    .headers(h -> {
-                        h.setBearerAuth(restUtils.getAccessToken());
-                        h.set(EducDistributionApiConstants.CORRELATION_ID, correlationId.toString());
-                    })
+                    .headers(h -> h.setBearerAuth(restUtils.getAccessToken()))
                     .retrieve()
                     .onStatus(HttpStatusCode::is5xxServerError,
                             clientResponse -> Mono.error(new ServiceException(getErrorMessage(serviceUrl, ERROR_500), clientResponse.statusCode().value())))
@@ -97,14 +93,10 @@ public class RestService {
         try {
             final String serviceUrl = parseUrlParameters(url, params);
             executeUrl = serviceUrl;
-            final UUID correlationId = UUID.randomUUID();
             obj = this.webClient
                     .get()
                     .uri(serviceUrl)
-                    .headers(h -> {
-                        h.setBearerAuth(restUtils.getAccessToken());
-                        h.set(EducDistributionApiConstants.CORRELATION_ID, correlationId.toString());
-                    })
+                    .headers(h -> h.setBearerAuth(restUtils.getAccessToken()))
                     .retrieve()
                     // if 5xx errors, throw Service error
                     .onStatus(HttpStatusCode::is5xxServerError,
@@ -139,13 +131,9 @@ public class RestService {
         try {
             final String serviceUrl = parseUrlParameters(url, params);
             executeUrl = serviceUrl;
-            final UUID correlationId = UUID.randomUUID();
             obj = this.webClient.post()
                     .uri(serviceUrl)
-                    .headers(h -> {
-                        h.setBearerAuth(restUtils.getAccessToken());
-                        h.set(EducDistributionApiConstants.CORRELATION_ID, correlationId.toString());
-                    })
+                    .headers(h -> h.setBearerAuth(restUtils.getAccessToken()))
                     .body(BodyInserters.fromValue(requestBody))
                     .retrieve()
                     .onStatus(HttpStatusCode::is5xxServerError,
@@ -178,11 +166,10 @@ public class RestService {
         try {
             final String serviceUrl = parseUrlParameters(url, params);
             executeUrl = serviceUrl;
-            final UUID correlationId = UUID.randomUUID();
-            obj = webClient.delete().uri(serviceUrl).headers(h -> {
-                h.setBearerAuth(restUtils.getAccessToken());
-                h.set(EducDistributionApiConstants.CORRELATION_ID, correlationId.toString());
-            }).retrieve().bodyToMono(boundClass).block();
+            obj = webClient.delete().uri(serviceUrl).headers(h -> h.setBearerAuth(restUtils.getAccessToken()))
+                    .retrieve()
+                    .bodyToMono(boundClass)
+                    .block();
         } catch(Exception e) {
             log.error(DELETE_REST_SERVICE_ERROR, "DELETE", executeUrl, Arrays.toString(params));
             throw new ServiceException(getErrorMessage(url, e.getLocalizedMessage()), HttpStatus.SERVICE_UNAVAILABLE.value(), e);
