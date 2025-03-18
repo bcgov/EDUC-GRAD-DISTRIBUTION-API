@@ -10,6 +10,8 @@ import ca.bc.gov.educ.api.distribution.util.RestUtils;
 import io.undertow.util.BadRequestException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -41,9 +43,10 @@ class DistributionControllerTest {
 	
 	@Mock
 	SecurityContextHolder securityContextHolder;
-	
-	@Test
-	void testDistributeCredentials() throws BadRequestException {
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void testDistributeCredentials(boolean isPsi) throws BadRequestException {
 		String runType = "MER";
 		String activityCode = "USERDIST";
 		Long batchId= 9029L;
@@ -100,7 +103,7 @@ class DistributionControllerTest {
 
 		DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).build();
 		Mockito.when(gradDistributionService.distributeCredentials(runType,batchId,distributionRequest,activityCode, transmissionMode.toUpperCase(),null,"accessToken")).thenReturn(res);
-		distributionController.distributeCredentials(runType,batchId,activityCode,transmissionMode.toUpperCase(),distributionRequest,null,"accessToken", false);
+		distributionController.distributeCredentials(runType,batchId,activityCode,transmissionMode.toUpperCase(),distributionRequest,null,"accessToken", isPsi);
 		Mockito.verify(gradDistributionService).distributeCredentials(runType,batchId,distributionRequest,activityCode,transmissionMode.toUpperCase(),null,"accessToken");
 	}
 
