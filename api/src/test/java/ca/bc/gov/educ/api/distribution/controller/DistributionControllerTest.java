@@ -7,6 +7,7 @@ import ca.bc.gov.educ.api.distribution.service.PostingDistributionService;
 import ca.bc.gov.educ.api.distribution.util.GradValidation;
 import ca.bc.gov.educ.api.distribution.util.MessageHelper;
 import ca.bc.gov.educ.api.distribution.util.RestUtils;
+import io.undertow.util.BadRequestException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -42,11 +43,11 @@ class DistributionControllerTest {
 	SecurityContextHolder securityContextHolder;
 	
 	@Test
-	void testDistributeCredentials() {
+	void testDistributeCredentials() throws BadRequestException {
 		String runType = "MER";
 		String activityCode = "USERDIST";
 		Long batchId= 9029L;
-		Map<UUID, DistributionPrintRequest> mapDist= new HashMap<>();
+		Map<String, DistributionPrintRequest> mapDist= new HashMap<>();
 		String transmissionMode = "paper";
 		String mincode = "123123133";
 		UUID schoolId = UUID.randomUUID();
@@ -92,23 +93,23 @@ class DistributionControllerTest {
 		DistributionPrintRequest printRequest = new DistributionPrintRequest();
 		printRequest.setTranscriptPrintRequest(tPReq);
 		printRequest.setSchoolDistributionRequest(sdReq);
-		mapDist.put(schoolId, printRequest);
+		mapDist.put(schoolId.toString(), printRequest);
 
 		DistributionResponse res = new DistributionResponse();
 		res.setMergeProcessResponse("MERGED");
 
 		DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).build();
 		Mockito.when(gradDistributionService.distributeCredentials(runType,batchId,distributionRequest,activityCode, transmissionMode.toUpperCase(),null,"accessToken")).thenReturn(res);
-		distributionController.distributeCredentials(runType,batchId,activityCode,transmissionMode.toUpperCase(),distributionRequest,null,"accessToken");
+		distributionController.distributeCredentials(runType,batchId,activityCode,transmissionMode.toUpperCase(),distributionRequest,null,"accessToken", false);
 		Mockito.verify(gradDistributionService).distributeCredentials(runType,batchId,distributionRequest,activityCode,transmissionMode.toUpperCase(),null,"accessToken");
 	}
 
 	@Test
-	void testDistributeCredentialsAsynchronously() {
+	void testDistributeCredentialsAsynchronously() throws BadRequestException {
 		String runType = "MER";
 		String activityCode = "MONTHLYDIST";
 		Long batchId= 9029L;
-		Map<UUID, DistributionPrintRequest> mapDist= new HashMap<>();
+		Map<String, DistributionPrintRequest> mapDist= new HashMap<>();
 		String transmissionMode = "paper";
 		String mincode = "123123133";
 		UUID schoolId = UUID.randomUUID();
@@ -155,14 +156,14 @@ class DistributionControllerTest {
 		DistributionPrintRequest printRequest = new DistributionPrintRequest();
 		printRequest.setTranscriptPrintRequest(tPReq);
 		printRequest.setSchoolDistributionRequest(sdReq);
-		mapDist.put(schoolId,printRequest);
+		mapDist.put(schoolId.toString(),printRequest);
 
 		DistributionResponse res = new DistributionResponse();
 		res.setMergeProcessResponse("MERGED");
 
 		DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).build();
 		Mockito.doNothing().when(gradDistributionService).asyncDistributeCredentials(runType,batchId,distributionRequest,activityCode, transmissionMode.toUpperCase(),null,"accessToken");
-		distributionController.distributeCredentials(runType,batchId,activityCode,transmissionMode.toUpperCase(),distributionRequest,null,"accessToken");
+		distributionController.distributeCredentials(runType,batchId,activityCode,transmissionMode.toUpperCase(),distributionRequest,null,"accessToken", false);
 		Mockito.verify(gradDistributionService).asyncDistributeCredentials(runType,batchId,distributionRequest,activityCode,transmissionMode.toUpperCase(),null,"accessToken");
 	}
 

@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.undertow.util.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +54,11 @@ public class DistributionController {
     public ResponseEntity<DistributionResponse> distributeCredentials(
             @PathVariable String runType, @RequestParam(required = false) Long batchId ,@RequestParam(required = false) String activityCode,
             @RequestParam(required = false) String transmissionType, @RequestBody DistributionRequest distributionRequest,
-            @RequestParam(required = false) String localDownload, @RequestHeader(name="Authorization") String accessToken) {
+            @RequestParam(required = false) String localDownload, @RequestHeader(name="Authorization") String accessToken,
+            @RequestParam(required = false, defaultValue = "false") boolean isPsi) throws BadRequestException {
+        if(!isPsi) {
+            validation.validateDistributionRequest(distributionRequest);
+        }
         if (isAsyncDistribution(runType, activityCode)) {
             // non-blocking IO - launching async process to distribute credentials
             gradDistributionService.asyncDistributeCredentials(runType,batchId,distributionRequest,activityCode,transmissionType,localDownload,accessToken);

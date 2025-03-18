@@ -42,14 +42,14 @@ public class MergeProcess extends BaseProcess {
 		DistributionResponse response = new DistributionResponse();
 		ExceptionMessage exception = new ExceptionMessage();
 		DistributionRequest distributionRequest = processorData.getDistributionRequest();
-		Map<UUID, DistributionPrintRequest> mapDist = distributionRequest.getMapDist();
+		Map<String, DistributionPrintRequest> mapDist = distributionRequest.getMapDist();
 		StudentSearchRequest searchRequest = distributionRequest.getStudentSearchRequest();
 		Long batchId = processorData.getBatchId();
 		int numberOfPdfs = 0;
 		int counter = 0;
 		List<ca.bc.gov.educ.api.distribution.model.dto.School> schoolsForLabels = new ArrayList<>();
-		for (Map.Entry<UUID, DistributionPrintRequest> entry : mapDist.entrySet()) {
-			UUID schoolId = entry.getKey();
+		for (Map.Entry<String, DistributionPrintRequest> entry : mapDist.entrySet()) {
+			UUID schoolId = UUID.fromString(entry.getKey());
 			counter++;
 			int currentSlipCount = 0;
 			DistributionPrintRequest distributionPrintRequest = entry.getValue();
