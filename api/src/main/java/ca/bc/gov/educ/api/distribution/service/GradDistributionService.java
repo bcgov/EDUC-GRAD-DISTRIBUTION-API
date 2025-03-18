@@ -60,7 +60,8 @@ public class GradDistributionService {
         try {
             restUtils.fetchAccessToken(data);
             data = process.fire(data);
-            if (data.getDistributionResponse().getMergeProcessResponse().toLowerCase().contains("successful")) {
+            String mergeProcessResponse = data.getDistributionResponse().getMergeProcessResponse().toLowerCase();
+            if (mergeProcessResponse.contains("successful") || mergeProcessResponse.contains("completed")) {
                 status = "success";
             } else {
                 status = "error";
