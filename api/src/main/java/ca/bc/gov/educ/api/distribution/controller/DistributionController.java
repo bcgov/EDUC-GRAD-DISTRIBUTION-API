@@ -25,6 +25,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import static ca.bc.gov.educ.api.distribution.process.DistributionProcessType.PSPR;
+
 @Slf4j
 @CrossOrigin
 @RestController
@@ -54,9 +56,8 @@ public class DistributionController {
     public ResponseEntity<DistributionResponse> distributeCredentials(
             @PathVariable String runType, @RequestParam(required = false) Long batchId ,@RequestParam(required = false) String activityCode,
             @RequestParam(required = false) String transmissionType, @RequestBody DistributionRequest distributionRequest,
-            @RequestParam(required = false) String localDownload, @RequestHeader(name="Authorization") String accessToken,
-            @RequestParam(required = false, defaultValue = "false") boolean isPsi) throws BadRequestException {
-        if(!isPsi) {
+            @RequestParam(required = false) String localDownload, @RequestHeader(name="Authorization") String accessToken) throws BadRequestException {
+        if(runType != null && !runType.equalsIgnoreCase(PSPR.name())) {
             validation.validateDistributionRequest(distributionRequest);
         }
         if (isAsyncDistribution(runType, activityCode)) {
