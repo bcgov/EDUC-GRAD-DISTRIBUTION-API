@@ -36,12 +36,12 @@ public class PostingSchoolReportProcess extends BaseProcess {
 		DistributionResponse response = new DistributionResponse();
 		ExceptionMessage exception = new ExceptionMessage();
 		DistributionRequest distributionRequest = processorData.getDistributionRequest();
-		Map<UUID, DistributionPrintRequest> mapDist = distributionRequest.getMapDist();
+		Map<String, DistributionPrintRequest> mapDist = distributionRequest.getMapDist();
 		StudentSearchRequest searchRequest = distributionRequest.getStudentSearchRequest();
 		int numberOfPdfs = 0;
 		int counter=0;
-		for (Map.Entry<UUID, DistributionPrintRequest> entry : mapDist.entrySet()) {
-			UUID schoolId = entry.getKey();
+		for (Map.Entry<String, DistributionPrintRequest> entry : mapDist.entrySet()) {
+			UUID schoolId = UUID.fromString(entry.getKey());
 			counter++;
 			DistributionPrintRequest distributionPrintRequest = entry.getValue();
 			ca.bc.gov.educ.api.distribution.model.dto.v2.School schoolDetails =
