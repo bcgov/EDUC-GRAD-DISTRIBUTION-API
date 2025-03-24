@@ -21,7 +21,9 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static ca.bc.gov.educ.api.distribution.model.dto.ActivityCode.*;
@@ -113,8 +115,8 @@ public abstract class BaseProcess implements DistributionProcess {
         return postingDistributionService.processSchoolLabelsDistribution(batchId, schooLabelReportType, transmissionMode);
     }
 
-    protected int processDistrictSchoolDistribution(Long batchId, List<String> schoolIds, List<String> districtIds,  String schooLabelReportType, String districtReportType, String schoolReportType, String transmissionMode) {
-        return postingDistributionService.processDistrictSchoolDistribution(batchId, schoolIds, districtIds, schooLabelReportType, districtReportType, schoolReportType, transmissionMode);
+    protected int processDistrictSchoolDistribution(Long batchId, List<String> schoolIds, List<String> districtIds,  String schoolLabelReportType, String districtReportType, String schoolReportType, String transmissionMode) {
+        return postingDistributionService.processDistrictSchoolDistribution(batchId, schoolIds, districtIds, schoolLabelReportType, districtReportType, schoolReportType, transmissionMode);
     }
 
     protected void mergeDocumentsPDFs(ProcessorData processorData, String mincode, String schoolCategoryCode, String fileName,
@@ -204,6 +206,24 @@ public abstract class BaseProcess implements DistributionProcess {
             districts.add(district);
             log.debug("District {} has been added to the district labels", district.getDistrictNumber());
         }
+    }
+
+    protected void processDistrictsForLabels(Map<District, List<School>> districtSchools, ca.bc.gov.educ.api.distribution.model.dto.v2.School school, ExceptionMessage exception) {
+       District existDistrict = districtSchools.keySet().stream().filter(s -> school.getDistrictId().equalsIgnoreCase(s.getDistrictId())).findAny().orElse(null);
+       if( existDistrict != null) {
+            log.debug("District {} already exists in the district labels.", existDistrict.getDistrictNumber());
+            processSchoolsForLabels(null, districtSchools.get(existDistrict), school);
+        } else {
+           log.debug("Acquiring new district {} from TRAX API", school.getDistrictId());
+           if (school.getDistrictId() != null) {
+               District district = schoolService.getDistrict(UUID.fromString(school.getDistrictId()), exception);
+               if (district != null) {
+                   districtSchools.put(district, new ArrayList<>());
+                   processSchoolsForLabels(null, districtSchools.get(district), school);
+                   log.debug("District {} has been added to the district labels", district.getDistrictNumber());
+               }
+           }
+       }
     }
 
     /**
