@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -129,10 +130,21 @@ public abstract class BaseProcess implements DistributionProcess {
             //Naming the file with extension
             filePathBuilder.append(fileName).append(paperType).append(".").append(EducDistributionApiUtils.getFileNameSchoolReports(mincode)).append(".pdf");
             pdfMergerUtility.setDestinationFileName(filePathBuilder.toString());
-            pdfMergerUtility.addSources(locations);
             MemoryUsageSetting memoryUsageSetting = MemoryUsageSetting.setupMixed(50000000)
                     .setTempDir(bufferDirectory);
-            pdfMergerUtility.mergeDocuments(memoryUsageSetting);
+            log.info("mergeDocumentsPDFs :: starting merge step step");
+            List<InputStream> batch = new ArrayList<>();
+            for (int i = 0; i < locations.size(); i++) {
+              batch.add(locations.get(i));
+
+              // Merge every 10 PDFs or at the last file
+              if (batch.size() == 10 || i == locations.size() - 1) {
+                log.info("Merging batch of {} PDFs", batch.size());
+                pdfMergerUtility.addSources(batch);
+                pdfMergerUtility.mergeDocuments(memoryUsageSetting);
+                batch.clear(); // Clear the batch after merging
+              }
+            }
         } catch (Exception e) {
             log.error(EXCEPTION, e.getLocalizedMessage());
         } finally {
