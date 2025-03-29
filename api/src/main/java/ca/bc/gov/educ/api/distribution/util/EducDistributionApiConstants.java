@@ -65,6 +65,7 @@ public class EducDistributionApiConstants {
 
     public static final String ADDRESS_LABEL_SCHL = "ADDRESS_LABEL_SCHL";
     public static final String ADDRESS_LABEL_YE = "ADDRESS_LABEL_YE";
+    public static final String ADDRESS_LABEL_SCH_YE = "ADDRESS_LABEL_SCH_YE";
     public static final String ADDRESS_LABEL_PSI = "ADDRESS_LABEL_PSI";
 
     public static final String DEFAULT_SCHOOL_ID = new UUID(0, 0).toString();
@@ -195,6 +196,9 @@ public class EducDistributionApiConstants {
 
     @Value("${endpoint.grad-graduation-api.district-labels-report-pdf.url}")
     private String districtLabelsReportPDF;
+
+    @Value("${endpoint.grad-graduation-api.district-school-labels-report.url}")
+    private String districtSchoolLabelsReport;
 
     @Value("${endpoint.grad-batch-graduation-api.distribution.notify-completion.url}")
     private String distributionJobCompleteNotification;

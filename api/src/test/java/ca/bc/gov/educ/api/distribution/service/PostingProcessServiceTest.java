@@ -345,6 +345,28 @@ public class PostingProcessServiceTest {
     }
 
     @Test
+    public void testCreateDistrictSchoolLabelsReport() {
+        UUID districtId = UUID.randomUUID();
+
+        School school = new School();
+        school.setMincode(RandomStringUtils.randomNumeric(6));
+        school.setName(RandomStringUtils.randomAlphabetic(15));
+        school.setSchoolCategoryCode(RandomStringUtils.randomNumeric(2));
+        school.setSchoolId(UUID.randomUUID().toString());
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(educDistributionApiConstants.getDistrictSchoolLabelsReport(), districtId, ADDRESS_LABEL_SCH_YE))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(String.class)).thenReturn(Mono.just("1"));
+        var result = this.postingDistributionService.createDistrictLabelsReport(districtId.toString(), List.of(school), ADDRESS_LABEL_SCH_YE);
+        Assert.assertTrue(1 == result);
+    }
+
+    @Test
     public void testCreateDistrictSchoolMonthReport() {
         District district = new District();
         district.setDistrictNumber(RandomStringUtils.randomNumeric(3));

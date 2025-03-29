@@ -138,7 +138,7 @@ endpoint:
     get-transcript-psi-by-student-id:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/psi/studenttranscript/%s
     get-transcript-by-student-id:
-        url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/studenttranscript/%s
+      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/studenttranscript/%s
   grad-student-api:
     get-student-record:
       url: ${GRAD_STUDENT_API}api/v1/student/stdid/%s
@@ -174,7 +174,8 @@ endpoint:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/report/district/labels?reportType=%s
     district-labels-report-pdf:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/report/district/labels/pdf?reportType=%s
-
+    district-school-labels-report:
+      url: ${GRAD_GRADUATION_API}api/v1/graduate/report/district/school/labels?districtId=%s&reportType=%s
   grad-trax-api:
     psi-by-psi-code:
       url: ${GRAD_TRAX_API}api/v1/trax/psi/%s
