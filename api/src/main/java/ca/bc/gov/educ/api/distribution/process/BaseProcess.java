@@ -137,7 +137,7 @@ public abstract class BaseProcess implements DistributionProcess {
 
               // Merge every 10 PDFs or at the last file
               if (batch.size() == 10 || i == locations.size() - 1) {
-                  mergePDFBatch(pdfMergerUtility, batch, memoryUsageSetting);
+                  mergePDFBatch(pdfMergerUtility, batch);
               }
             }
             pdfMergerUtility.mergeDocuments(memoryUsageSetting);
@@ -169,7 +169,7 @@ public abstract class BaseProcess implements DistributionProcess {
         return pdfMergerUtility;
     }
 
-    private void mergePDFBatch(PDFMergerUtility pdfMergerUtility, List<InputStream> batch, MemoryUsageSetting memoryUsageSetting) throws IOException {
+    private void mergePDFBatch(PDFMergerUtility pdfMergerUtility, List<InputStream> batch) {
         log.info("Merging batch of {} PDFs", batch.size());
         pdfMergerUtility.addSources(batch);
         closeStreams(batch);
