@@ -122,7 +122,6 @@ public class PSIReportProcess extends BaseProcess {
                     processStudentsForCSVs(scdList, psiCode, processorData);
                 } else {
                     processStudentsForPDFs(processorData.getBatchId(), scdList, locations);
-                    log.info("processTranscriptPrintRequest :: mergeDocumentsPDFs step");
                     mergeDocumentsPDFs(processorData, psiCode, SchoolCategoryCodes.INDEPEND.getCode(), "/EDGRAD.T.",
                             "YED4", locations);
                 }
