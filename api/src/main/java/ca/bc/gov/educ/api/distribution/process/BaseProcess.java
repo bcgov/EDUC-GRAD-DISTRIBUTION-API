@@ -62,9 +62,9 @@ public abstract class BaseProcess implements DistributionProcess {
     PsiService psiService;
 
     protected ca.bc.gov.educ.api.distribution.model.dto.v2.School getBaseSchoolDetails(
-            DistributionPrintRequest distributionPrintRequest, StudentSearchRequest searchRequest, UUID schoolId, ExceptionMessage exception) {
+        DistributionPrintRequest distributionPrintRequest, StudentSearchRequest searchRequest, UUID schoolId, ExceptionMessage exception) {
         if (distributionPrintRequest != null &&
-                (StringUtils.isNotBlank(distributionPrintRequest.getProperName()) || DEFAULT_SCHOOL_ID.equals(schoolId.toString())))
+            (StringUtils.isNotBlank(distributionPrintRequest.getProperName()) || DEFAULT_SCHOOL_ID.equals(schoolId.toString())))
             return schoolService.getDefaultSchoolDetailsForPackingSlip(searchRequest, distributionPrintRequest.getProperName());
         else
             return schoolService.getSchool(schoolId, exception);
@@ -121,82 +121,25 @@ public abstract class BaseProcess implements DistributionProcess {
 
     protected void mergeDocumentsPDFs(ProcessorData processorData, String mincode, String schoolCategoryCode, String fileName,
                                       String paperType, List<InputStream> locations) {
-        String correlationId = ThreadLocalStateUtil.getCorrelationID();
-        log.debug("CorrelationId {} :: mergeDocumentsPDFs :: starting merge for {} pdfs", correlationId, locations.size());
-        File tempDir = null;
-        final int BATCH_SIZE = 1000;
-        List<File> intermediateFiles = new ArrayList<>();
+        File bufferDirectory = null;
         try {
-            tempDir = IOUtils.createTempDirectory(TMP_DIR, "buffer");
+            String rootDirectory = StringUtils.isNotBlank(processorData.getTransmissionMode()) ?
+                TMP_DIR + EducDistributionApiConstants.FILES_FOLDER_STRUCTURE + StringUtils.upperCase(processorData.getTransmissionMode()) : TMP_DIR;
+            StringBuilder filePathBuilder = createFolderStructureInTempDirectory(rootDirectory, processorData, mincode, schoolCategoryCode);
+            bufferDirectory = IOUtils.createTempDirectory(TMP_DIR, "buffer");
+            PDFMergerUtility pdfMergerUtility = new PDFMergerUtility();
+            //Naming the file with extension
+            filePathBuilder.append(fileName).append(paperType).append(".").append(EducDistributionApiUtils.getFileNameSchoolReports(mincode)).append(".pdf");
+            pdfMergerUtility.setDestinationFileName(filePathBuilder.toString());
+            pdfMergerUtility.addSources(locations);
             MemoryUsageSetting memoryUsageSetting = MemoryUsageSetting.setupMixed(50000000)
-                .setTempDir(tempDir);
-            String outputFilePath = buildOutputFilePath(processorData, mincode, schoolCategoryCode, fileName, paperType);
-
-            if (locations.size() <= BATCH_SIZE) {
-                PDFMergerUtility merger = setupPDFMerger(outputFilePath);
-                for (InputStream in : locations) {
-                    merger.addSource(in);
-                }
-                merger.mergeDocuments(memoryUsageSetting);
-                return;
-            }
-
-            for (int i = 0; i < locations.size(); i += BATCH_SIZE) {
-                List<InputStream> streamsBatch = new ArrayList<>();
-                int end = Math.min(i + BATCH_SIZE, locations.size());
-                log.debug("CorrelationId {} :: mergeDocumentsPDFs :: adding batch of pdfs ({}/{})", correlationId, end, locations.size());
-                for (int j = i; j < end; j++) {
-                    streamsBatch.add(locations.get(j));
-                }
-                File batchOutput = new File(tempDir, "temp_" + i + ".pdf");
-
-              // Merge every 10 PDFs or at the last file
-              if (batch.size() == 10 || i == locations.size() - 1) {
-                  mergePDFBatch(pdfMergerUtility, batch, memoryUsageSetting);
-              }
-            }
+                .setTempDir(bufferDirectory);
+            pdfMergerUtility.mergeDocuments(memoryUsageSetting);
         } catch (Exception e) {
             log.error(EXCEPTION, e.getLocalizedMessage());
         } finally {
             if (bufferDirectory != null) {
                 IOUtils.removeFileOrDirectory(bufferDirectory);
-            }
-        }
-    }
-
-    private String buildOutputFilePath(ProcessorData processorData, String mincode, String schoolCategoryCode, String fileName, String paperType) {
-        String rootDirectory = StringUtils.isNotBlank(processorData.getTransmissionMode()) ?
-            TMP_DIR + EducDistributionApiConstants.FILES_FOLDER_STRUCTURE + StringUtils.upperCase(processorData.getTransmissionMode()) : TMP_DIR;
-        StringBuilder filePathBuilder = createFolderStructureInTempDirectory(rootDirectory, processorData, mincode, schoolCategoryCode);
-        return filePathBuilder.append(fileName)
-            .append(paperType)
-            .append(".")
-            .append(EducDistributionApiUtils.getFileNameSchoolReports(mincode))
-            .append(".pdf")
-            .toString();
-    }
-
-    private PDFMergerUtility setupPDFMerger(String outputFilePath) {
-        PDFMergerUtility pdfMergerUtility = new PDFMergerUtility();
-        pdfMergerUtility.setDestinationFileName(outputFilePath);
-        pdfMergerUtility.setDocumentMergeMode(PDFMergerUtility.DocumentMergeMode.OPTIMIZE_RESOURCES_MODE);
-        return pdfMergerUtility;
-    }
-
-    private void mergePDFBatch(PDFMergerUtility pdfMergerUtility, List<InputStream> batch, MemoryUsageSetting memoryUsageSetting) throws IOException {
-        log.info("Merging batch of {} PDFs", batch.size());
-        pdfMergerUtility.addSources(batch);
-        pdfMergerUtility.mergeDocuments(memoryUsageSetting);
-        closeStreams(batch);
-        batch.clear();
-    }
-
-    private void closeStreams(List<InputStream> streams) {
-        for (InputStream inputStream : streams) {
-            try {
-                inputStream.close();
-            } catch (IOException e) {
-                log.warn("Failed to close InputStream: {}", e.getMessage());
             }
         }
     }
@@ -290,7 +233,7 @@ public abstract class BaseProcess implements DistributionProcess {
      * </ul>
      */
     public StringBuilder createFolderStructureInTempDirectory(
-            String rootDirectory, ProcessorData processorData, String minCode, String schoolCategoryCode) {
+        String rootDirectory, ProcessorData processorData, String minCode, String schoolCategoryCode) {
         String districtCode = StringUtils.substring(minCode, 0, 3);
         String activityCode = processorData.getActivityCode();
         StringBuilder directoryPathBuilder = new StringBuilder();
@@ -298,27 +241,27 @@ public abstract class BaseProcess implements DistributionProcess {
         Path path;
         try {
             Boolean conditionResult = StringUtils.containsAnyIgnoreCase(activityCode, USERDIST.getValue(), USERDISTOC.getValue(),
-                    USERDISTRC.getValue(), MONTHLYDIST.getValue(), SUPPDIST.getValue()) ||
+                USERDISTRC.getValue(), MONTHLYDIST.getValue(), SUPPDIST.getValue()) ||
                 SchoolCategoryCodes.getSchoolTypesWithoutDistricts().contains(schoolCategoryCode);
             if (Boolean.TRUE.equals(conditionResult)) {
                 directoryPathBuilder.append(rootDirectory).append(DEL)
-                        .append(processorData.getBatchId()).append(DEL)
-                        .append(minCode).append(DEL);
+                    .append(processorData.getBatchId()).append(DEL)
+                    .append(minCode).append(DEL);
             } else {
                 directoryPathBuilder.append(rootDirectory).append(DEL)
-                        .append(processorData.getBatchId()).append(DEL)
-                        .append(districtCode).append(DEL).append(minCode);
+                    .append(processorData.getBatchId()).append(DEL)
+                    .append(districtCode).append(DEL).append(minCode);
             }
             path = Paths.get(directoryPathBuilder.toString());
             Files.createDirectories(path);
 
             if (Boolean.TRUE.equals(conditionResult)) {
                 filePathBuilder.append(rootDirectory).append(DEL)
-                        .append(processorData.getBatchId()).append(DEL).append(minCode);
+                    .append(processorData.getBatchId()).append(DEL).append(minCode);
             } else {
                 filePathBuilder.append(rootDirectory).append(DEL)
-                        .append(processorData.getBatchId()).append(DEL)
-                        .append(districtCode).append(DEL).append(minCode);
+                    .append(processorData.getBatchId()).append(DEL)
+                    .append(districtCode).append(DEL).append(minCode);
             }
         } catch (Exception e) {
             log.error(EXCEPTION, e.getLocalizedMessage());
