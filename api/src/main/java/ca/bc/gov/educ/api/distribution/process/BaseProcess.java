@@ -121,31 +121,57 @@ public abstract class BaseProcess implements DistributionProcess {
 
     protected void mergeDocumentsPDFs(ProcessorData processorData, String mincode, String schoolCategoryCode, String fileName,
                                       String paperType, List<InputStream> locations) {
-        File bufferDirectory = null;
+        String correlationId = ThreadLocalStateUtil.getCorrelationID();
+        log.debug("CorrelationId {} :: mergeDocumentsPDFs :: starting merge for {} pdfs", correlationId, locations.size());
+        File tempDir = null;
+        final int BATCH_SIZE = 1000;
+        List<File> intermediateFiles = new ArrayList<>();
         try {
-            bufferDirectory = IOUtils.createTempDirectory(TMP_DIR, "buffer");
+            tempDir = IOUtils.createTempDirectory(TMP_DIR, "buffer");
+            MemoryUsageSetting memoryUsageSetting = MemoryUsageSetting.setupMixed(50000000)
+                .setTempDir(tempDir);
             String outputFilePath = buildOutputFilePath(processorData, mincode, schoolCategoryCode, fileName, paperType);
 
-            PDFMergerUtility pdfMergerUtility = setupPDFMerger(outputFilePath);
-            MemoryUsageSetting memoryUsageSetting = MemoryUsageSetting.setupMixed(50000000)
-                    .setTempDir(bufferDirectory);
-
-            log.info("mergeDocumentsPDFs :: starting merge step step");
-            List<InputStream> batch = new ArrayList<>();
-            for (int i = 0; i < locations.size(); i++) {
-              batch.add(locations.get(i));
-
-              // Merge every 10 PDFs or at the last file
-              if (batch.size() == 10 || i == locations.size() - 1) {
-                  mergePDFBatch(pdfMergerUtility, batch);
-              }
+            if (locations.size() <= BATCH_SIZE) {
+                PDFMergerUtility merger = setupPDFMerger(outputFilePath);
+                for (InputStream in : locations) {
+                    merger.addSource(in);
+                }
+                merger.mergeDocuments(memoryUsageSetting);
+                return;
             }
-            pdfMergerUtility.mergeDocuments(memoryUsageSetting);
+
+            for (int i = 0; i < locations.size(); i += BATCH_SIZE) {
+                List<InputStream> streamsBatch = new ArrayList<>();
+                int end = Math.min(i + BATCH_SIZE, locations.size());
+                log.debug("CorrelationId {} :: mergeDocumentsPDFs :: adding batch of pdfs ({}/{})", correlationId, end, locations.size());
+                for (int j = i; j < end; j++) {
+                    streamsBatch.add(locations.get(j));
+                }
+                File batchOutput = new File(tempDir, "temp_" + i + ".pdf");
+
+                PDFMergerUtility tempMerger = setupPDFMerger(batchOutput.getAbsolutePath());
+                for (InputStream in : streamsBatch) {
+                    tempMerger.addSource(in);
+                }
+                log.debug("CorrelationId {} :: mergeDocumentsPDFs :: merging batch of pdfs ({}/{})", correlationId, end, locations.size());
+                tempMerger.mergeDocuments(memoryUsageSetting);
+                closeStreams(streamsBatch);
+                intermediateFiles.add(batchOutput);
+            }
+
+            PDFMergerUtility finalMerger = setupPDFMerger(outputFilePath);
+
+            for (File intermFile : intermediateFiles) {
+                finalMerger.addSource(intermFile);
+            }
+            log.debug("CorrelationId {} :: mergeDocumentsPDFs :: final merge of temp documents", correlationId);
+            finalMerger.mergeDocuments(memoryUsageSetting);
         } catch (Exception e) {
             log.error(EXCEPTION, e.getLocalizedMessage());
         } finally {
-            if (bufferDirectory != null) {
-                IOUtils.removeFileOrDirectory(bufferDirectory);
+            if (tempDir != null) {
+                IOUtils.removeFileOrDirectory(tempDir);
             }
         }
     }
@@ -167,13 +193,6 @@ public abstract class BaseProcess implements DistributionProcess {
         pdfMergerUtility.setDestinationFileName(outputFilePath);
         pdfMergerUtility.setDocumentMergeMode(PDFMergerUtility.DocumentMergeMode.OPTIMIZE_RESOURCES_MODE);
         return pdfMergerUtility;
-    }
-
-    private void mergePDFBatch(PDFMergerUtility pdfMergerUtility, List<InputStream> batch) {
-        log.info("Merging batch of {} PDFs", batch.size());
-        pdfMergerUtility.addSources(batch);
-        closeStreams(batch);
-        batch.clear();
     }
 
     private void closeStreams(List<InputStream> streams) {
