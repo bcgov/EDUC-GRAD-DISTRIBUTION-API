@@ -150,28 +150,16 @@ public abstract class BaseProcess implements DistributionProcess {
                 }
                 File batchOutput = new File(tempDir, "temp_" + i + ".pdf");
 
-                PDFMergerUtility tempMerger = setupPDFMerger(batchOutput.getAbsolutePath());
-                for (InputStream in : streamsBatch) {
-                    tempMerger.addSource(in);
-                }
-                log.debug("CorrelationId {} :: mergeDocumentsPDFs :: merging batch of pdfs ({}/{})", correlationId, end, locations.size());
-                tempMerger.mergeDocuments(memoryUsageSetting);
-                closeStreams(streamsBatch);
-                intermediateFiles.add(batchOutput);
+              // Merge every 10 PDFs or at the last file
+              if (batch.size() == 10 || i == locations.size() - 1) {
+                  mergePDFBatch(pdfMergerUtility, batch, memoryUsageSetting);
+              }
             }
-
-            PDFMergerUtility finalMerger = setupPDFMerger(outputFilePath);
-
-            for (File intermFile : intermediateFiles) {
-                finalMerger.addSource(intermFile);
-            }
-            log.debug("CorrelationId {} :: mergeDocumentsPDFs :: final merge of temp documents", correlationId);
-            finalMerger.mergeDocuments(memoryUsageSetting);
         } catch (Exception e) {
             log.error(EXCEPTION, e.getLocalizedMessage());
         } finally {
-            if (tempDir != null) {
-                IOUtils.removeFileOrDirectory(tempDir);
+            if (bufferDirectory != null) {
+                IOUtils.removeFileOrDirectory(bufferDirectory);
             }
         }
     }
@@ -193,6 +181,14 @@ public abstract class BaseProcess implements DistributionProcess {
         pdfMergerUtility.setDestinationFileName(outputFilePath);
         pdfMergerUtility.setDocumentMergeMode(PDFMergerUtility.DocumentMergeMode.OPTIMIZE_RESOURCES_MODE);
         return pdfMergerUtility;
+    }
+
+    private void mergePDFBatch(PDFMergerUtility pdfMergerUtility, List<InputStream> batch, MemoryUsageSetting memoryUsageSetting) throws IOException {
+        log.info("Merging batch of {} PDFs", batch.size());
+        pdfMergerUtility.addSources(batch);
+        pdfMergerUtility.mergeDocuments(memoryUsageSetting);
+        closeStreams(batch);
+        batch.clear();
     }
 
     private void closeStreams(List<InputStream> streams) {
