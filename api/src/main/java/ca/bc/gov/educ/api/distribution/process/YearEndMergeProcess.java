@@ -35,7 +35,7 @@ public class YearEndMergeProcess extends MergeProcess {
         ExceptionMessage exception = new ExceptionMessage();
         DistributionRequest distributionRequest = processorData.getDistributionRequest();
         Long batchId = processorData.getBatchId();
-        Map<UUID, DistributionPrintRequest> mapDist = distributionRequest.getMapDist();
+        Map<String, DistributionPrintRequest> mapDist = distributionRequest.getMapDist();
         StudentSearchRequest searchRequest = distributionRequest.getStudentSearchRequest();
         int numberOfPdfs = 0;
         int schoolCounter = 0;
@@ -45,8 +45,8 @@ public class YearEndMergeProcess extends MergeProcess {
         List<ca.bc.gov.educ.api.distribution.model.dto.School> schoolsForLabels = new ArrayList<>();
         List<District> districtsForLabels = new ArrayList<>();
         List<String> processedSchools = new ArrayList<>();
-        for (Map.Entry<UUID, DistributionPrintRequest> entry : mapDist.entrySet()) {
-            UUID schoolId = entry.getKey();
+        for (Map.Entry<String, DistributionPrintRequest> entry : mapDist.entrySet()) {
+            UUID schoolId = UUID.fromString(entry.getKey());
             DistributionPrintRequest distributionPrintRequest = entry.getValue();
             ca.bc.gov.educ.api.distribution.model.dto.v2.School schoolDetails =
                     getBaseSchoolDetails(distributionPrintRequest, searchRequest, schoolId, exception);

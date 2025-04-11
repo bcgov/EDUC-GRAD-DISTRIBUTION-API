@@ -2,6 +2,7 @@ package ca.bc.gov.educ.api.distribution.service;
 
 import ca.bc.gov.educ.api.distribution.exception.ServiceException;
 import ca.bc.gov.educ.api.distribution.model.dto.SchoolReports;
+import io.netty.channel.ConnectTimeoutException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -10,9 +11,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
@@ -43,6 +47,8 @@ public class RestServiceTest {
     WebClient webClient;
 
     private static final byte[] TEST_BYTES = "The rain in Spain stays mainly on the plain.".getBytes();
+    private static final String TEST_URL = "https://fake.url.com";
+    private static final String TEST_BODY = "{test:test}";
 
     @Test
     public void testGet_GivenProperData_Expect200Response(){
@@ -169,6 +175,83 @@ public class RestServiceTest {
         when(this.responseMock.bodyToMono(ServiceException.class)).thenReturn(Mono.just(new ServiceException()));
 
         this.restService.executeDelete("https://httpstat.us/503", String.class, "");
+    }
+
+    @Test(expected = ServiceException.class)
+    public void testGet_Given5xxErrorFromService_ExpectConnectionError(){
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri("https://fake.url.com")).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.onStatus(any(), any())).thenThrow(new ServiceException());
+        when(this.responseMock.bodyToMono(byte[].class)).thenReturn(Mono.just(TEST_BYTES));
+
+        when(responseMock.bodyToMono(String.class)).thenReturn(Mono.error(new ConnectTimeoutException("Connection closed")));
+        restService.executeGet("https://fake.url.com", String.class);
+    }
+
+    @Test(expected = ServiceException.class)
+    public void testGet_Given5xxErrorFromService_ExpectWebClientRequestError(){
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri("https://fake.url.com")).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.onStatus(any(), any())).thenThrow(new ServiceException());
+        when(this.responseMock.bodyToMono(byte[].class)).thenReturn(Mono.just(TEST_BYTES));
+
+        Throwable cause = new RuntimeException("Simulated cause");
+        when(responseMock.bodyToMono(String.class)).thenReturn(Mono.error(new WebClientRequestException(cause, HttpMethod.GET, null, new HttpHeaders())));
+        restService.executeGet("https://fake.url.com", String.class);
+    }
+
+    @Test(expected = ServiceException.class)
+    public void testPost_Given5xxErrorFromService_ExpectConnectionError(){
+        String testBody = "test";
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri("https://fake.url.com")).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.onStatus(any(), any())).thenThrow(new ServiceException());
+        when(this.responseMock.bodyToMono(byte[].class)).thenReturn(Mono.just(TEST_BYTES));
+
+        when(responseMock.bodyToMono(byte[].class)).thenReturn(Mono.error(new ConnectTimeoutException("Connection closed")));
+        this.restService.executePost(TEST_URL, byte[].class, TEST_BODY);
+    }
+
+    @Test(expected = ServiceException.class)
+    public void testPost_Given5xxErrorFromService_ExpectWebClientRequestError(){
+        String testBody = "test";
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri("https://fake.url.com")).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.onStatus(any(), any())).thenThrow(new ServiceException());
+        when(this.responseMock.bodyToMono(byte[].class)).thenReturn(Mono.just(TEST_BYTES));
+
+        Throwable cause = new RuntimeException("Simulated cause");
+        when(responseMock.bodyToMono(byte[].class)).thenReturn(Mono.error(new WebClientRequestException(cause, HttpMethod.POST, null, new HttpHeaders())));
+        this.restService.executePost(TEST_URL, byte[].class, TEST_BODY);
+    }
+
+    @Test(expected = ServiceException.class)
+    public void testPostWithToken_Given5xxErrorFromService_ExpectWebClientRequestError(){
+        String testBody = "test";
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri("https://fake.url.com")).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.onStatus(any(), any())).thenThrow(new ServiceException());
+        when(this.responseMock.bodyToMono(byte[].class)).thenReturn(Mono.just(TEST_BYTES));
+
+        Throwable cause = new RuntimeException("Simulated cause");
+        when(responseMock.bodyToMono(byte[].class)).thenReturn(Mono.error(new WebClientRequestException(cause, HttpMethod.POST, null, new HttpHeaders())));
+        this.restService.executePost(TEST_URL, byte[].class, TEST_BODY, "");
     }
 
 }

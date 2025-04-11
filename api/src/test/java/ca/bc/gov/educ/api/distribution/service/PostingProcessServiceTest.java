@@ -257,11 +257,11 @@ public class PostingProcessServiceTest {
         when(this.stpUtils.sftpUploadBCMail(any(), any(), any())).thenReturn(true);
 
         var result = this.postingDistributionService.postingProcess(response);
-        Assert.assertTrue(result);
+        Assert.assertFalse(result);
 
         response.setActivityCode(NONGRADYERUN.getValue());
         result = this.postingDistributionService.postingProcess(response);
-        Assert.assertTrue(result);
+        Assert.assertFalse(result);
     }
 
     @Test

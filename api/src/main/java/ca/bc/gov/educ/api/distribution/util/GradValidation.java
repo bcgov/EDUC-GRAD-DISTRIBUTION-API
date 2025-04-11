@@ -2,8 +2,11 @@ package ca.bc.gov.educ.api.distribution.util;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 import java.util.function.Consumer;
 
+import ca.bc.gov.educ.api.distribution.model.dto.DistributionRequest;
+import io.undertow.util.BadRequestException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -104,4 +107,14 @@ public class GradValidation {
     	warningList.get().clear();
     	
     }
+
+		public void validateDistributionRequest(DistributionRequest distributionRequest) throws BadRequestException {
+			for (String key : distributionRequest.getMapDist().keySet()) {
+				try {
+					UUID.fromString(key);
+				} catch (IllegalArgumentException e) {
+					throw new BadRequestException(String.format("Invalid UUID in mapDist: %s", key), e);
+				}
+			}
+	}
 }

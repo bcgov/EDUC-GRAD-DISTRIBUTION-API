@@ -10,11 +10,14 @@ import org.springframework.lang.NonNull;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.stereotype.Component;
+
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Component
 @Slf4j
 public final class LogHelper {
     private static final ObjectMapper mapper = new ObjectMapper();
@@ -37,6 +40,10 @@ public final class LogHelper {
             if (correlationID != null) {
                 httpMap.put("correlation_id", correlationID);
             }
+            val requestSource = request.getHeader(EducDistributionApiConstants.REQUEST_SOURCE);
+            if (requestSource != null) {
+                httpMap.put("request_source", requestSource);
+            }
             httpMap.put("server_http_request_url", String.valueOf(request.getRequestURL()));
             httpMap.put("server_http_request_processing_time_ms", totalTime);
             httpMap.put("server_http_request_payload", String.valueOf(request.getAttribute("payload")));
@@ -58,7 +65,7 @@ public final class LogHelper {
      * @param responseCode
      * @param correlationID
      */
-    public static void logClientHttpReqResponseDetails(@NonNull final HttpMethod method, final String url, final int responseCode, final List<String> correlationID, final boolean logging) {
+    public static void logClientHttpReqResponseDetails(@NonNull final HttpMethod method, final String url, final int responseCode, final List<String> correlationID, final List<String> requestSource,final boolean logging) {
         if (!logging) return;
         try {
             final Map<String, Object> httpMap = new HashMap<>();
@@ -67,6 +74,9 @@ public final class LogHelper {
             httpMap.put("client_http_request_url", url);
             if (correlationID != null) {
                 httpMap.put("correlation_id", String.join(",", correlationID));
+            }
+            if (requestSource != null) {
+                httpMap.put("request_source", String.join(",", requestSource));
             }
             MDC.putCloseable("httpEvent", mapper.writeValueAsString(httpMap));
             log.info("");

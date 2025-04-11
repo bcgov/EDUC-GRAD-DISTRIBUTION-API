@@ -264,7 +264,7 @@ public class DistributionServiceTest {
 
     private synchronized DistributionResponse testDistributeSchoolReport(String runType, String reportType, String activityCode) {
         Long batchId = 9029L;
-        Map<UUID, DistributionPrintRequest> mapDist = new HashMap<>();
+        Map<String, DistributionPrintRequest> mapDist = new HashMap<>();
         String transmissionMode = "ftp";
         String accessToken = MOCK_TOKEN;
         String mincode = "123123133";
@@ -296,7 +296,7 @@ public class DistributionServiceTest {
 
         DistributionPrintRequest printRequest = new DistributionPrintRequest();
         printRequest.setSchoolReportPostRequest(tPReq);
-        mapDist.put(schoolId, printRequest);
+        mapDist.put(schoolId.toString(), printRequest);
 
         mockSchoolObject(schoolId);
 
@@ -608,7 +608,7 @@ public class DistributionServiceTest {
 
     private synchronized DistributionResponse testDistributeCredentials_transcript_blank(String runType, boolean schoolNull, String localDownload) {
         Long batchId = 9029L;
-        Map<UUID, DistributionPrintRequest> mapDist = new HashMap<>();
+        Map<String, DistributionPrintRequest> mapDist = new HashMap<>();
         String accessToken = MOCK_TOKEN;
         String transmissionMode = "paper";
         String mincode = "123123133";
@@ -639,7 +639,7 @@ public class DistributionServiceTest {
 
         DistributionPrintRequest printRequest = new DistributionPrintRequest();
         printRequest.setTranscriptPrintRequest(tPReq);
-        mapDist.put(schoolId, printRequest);
+        mapDist.put(schoolId.toString(), printRequest);
 
         mockSchoolObject(schoolId);
 
@@ -674,7 +674,7 @@ public class DistributionServiceTest {
 
     private synchronized DistributionResponse testDistributeCredentials_certificate_blank(String runType, String paperType) {
         Long batchId = 9029L;
-        Map<UUID, DistributionPrintRequest> mapDist = new HashMap<>();
+        Map<String, DistributionPrintRequest> mapDist = new HashMap<>();
         String transmissionMode = "ftp";
         String accessToken = MOCK_TOKEN;
         String mincode = "123123133";
@@ -707,7 +707,7 @@ public class DistributionServiceTest {
             printRequest.setYedbCertificatePrintRequest(cReq);
         if (paperType.equalsIgnoreCase("YEDR"))
             printRequest.setYedrCertificatePrintRequest(cReq);
-        mapDist.put(schoolId, printRequest);
+        mapDist.put(schoolId.toString(), printRequest);
 
         mockSchoolObject(schoolId);
 
@@ -741,7 +741,7 @@ public class DistributionServiceTest {
 
     private synchronized DistributionResponse testDistributeCredentials_transcript(String runType, String activityCode, boolean schoolNull, String localDownload, boolean isAsyncProcess) {
         Long batchId = 9029L;
-        Map<UUID, DistributionPrintRequest> mapDist = new HashMap<>();
+        Map<String, DistributionPrintRequest> mapDist = new HashMap<>();
         String accessToken = MOCK_TOKEN;
         String transmissionMode = "ftp";
         String mincode = "123123133";
@@ -794,7 +794,7 @@ public class DistributionServiceTest {
         DistributionPrintRequest printRequest = new DistributionPrintRequest();
         printRequest.setTranscriptPrintRequest(tPReq);
         printRequest.setSchoolDistributionRequest(sdReq);
-        mapDist.put(schoolId, printRequest);
+        mapDist.put(schoolId.toString(), printRequest);
 
         if (!schoolNull) {
             mockSchoolObject(schoolId);
@@ -952,7 +952,7 @@ public class DistributionServiceTest {
 
     private synchronized DistributionResponse testDistributeCredentials_certificate(String runType, String activityCode, String paperType, String properName, boolean noSchoolDis, boolean isAsyncProcess) {
         Long batchId = 9029L;
-        Map<UUID, DistributionPrintRequest> mapDist = new HashMap<>();
+        Map<String, DistributionPrintRequest> mapDist = new HashMap<>();
         String localDownload = "Y";
         String transmissionMode = "ftp";
         String accessToken = MOCK_TOKEN;
@@ -1032,7 +1032,7 @@ public class DistributionServiceTest {
             printRequest.setYedbCertificatePrintRequest(cReq);
         if (paperType.equalsIgnoreCase("YEDR"))
             printRequest.setYedrCertificatePrintRequest(cReq);
-        mapDist.put(schoolId, printRequest);
+        mapDist.put(schoolId.toString(), printRequest);
 
         mockSchoolObject(schoolId);
 
@@ -1212,7 +1212,7 @@ public class DistributionServiceTest {
 
     private synchronized DistributionResponse testDistributeCredentials_certificate_reprint(String runType, String activityCode, String paperType, boolean schoolNull) {
         Long batchId = 9029L;
-        Map<UUID, DistributionPrintRequest> mapDist = new HashMap<>();
+        Map<String, DistributionPrintRequest> mapDist = new HashMap<>();
         String localDownload = "Y";
         String accessToken = MOCK_TOKEN;
         String transmissionMode = "ftp";
@@ -1286,7 +1286,7 @@ public class DistributionServiceTest {
             printRequest.setYedbCertificatePrintRequest(cReq);
         if (paperType.equalsIgnoreCase("YEDR"))
             printRequest.setYedrCertificatePrintRequest(cReq);
-        mapDist.put(schoolId, printRequest);
+        mapDist.put(schoolId.toString(), printRequest);
 
         mockSchoolObject(schoolId);
 
@@ -1375,10 +1375,9 @@ public class DistributionServiceTest {
     private synchronized DistributionResponse testpsiDistributeCredential(String runType, String localDownload, String transmissionMode) {
         String activityCode = null;
         Long batchId = 9029L;
-        Map<UUID, DistributionPrintRequest> mapDist = new HashMap<>();
+        Map<String, DistributionPrintRequest> mapDist = new HashMap<>();
         String accessToken = MOCK_TOKEN;
         String psiCode = "001";
-        UUID psiId = UUID.randomUUID();
 
         Psi psiObj = new Psi();
         psiObj.setPsiCode("001");
@@ -1391,18 +1390,16 @@ public class DistributionServiceTest {
         scd.setPen("123213133");
         scd.setStudentID(UUID.randomUUID());
         scd.setPsiCode("001");
-        scd.setPsiId(psiId);
         scdList.add(scd);
 
         PsiCredentialPrintRequest cReq = new PsiCredentialPrintRequest();
         cReq.setBatchId(batchId);
         cReq.setCount(34);
         cReq.setPsiList(scdList);
-        cReq.setPsId(psiId.toString());
 
         DistributionPrintRequest printRequest = new DistributionPrintRequest();
         printRequest.setPsiCredentialPrintRequest(cReq);
-        mapDist.put(psiId, printRequest);
+        mapDist.put(psiCode, printRequest);
 
         //Grad2-1931 Setting properties for report data to test PSI FTP transmission mode.
         ReportData data = new ReportData();
@@ -1573,7 +1570,7 @@ public class DistributionServiceTest {
         })).thenReturn(Mono.just(List.of(studentTranscripts)));
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(String.format(constants.getLightSchoolReport(), "ADDRESS_LABEL_PSI", "00000000"))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getLightSchoolReport(), "ADDRESS_LABEL_PSI", DEFAULT_SCHOOL_ID))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
@@ -1620,7 +1617,7 @@ public class DistributionServiceTest {
         when(this.responseMock.bodyToMono(String.class)).thenReturn(Mono.just("1"));
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(String.format(constants.getPsiByPsiCode(), psiId.toString()))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getPsiByPsiCode(), psiCode))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);

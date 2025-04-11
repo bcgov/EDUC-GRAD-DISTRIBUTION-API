@@ -1,5 +1,6 @@
 package ca.bc.gov.educ.api.distribution.process;
 
+import ca.bc.gov.educ.api.distribution.constants.SchoolCategoryCodes;
 import ca.bc.gov.educ.api.distribution.model.dto.*;
 import ca.bc.gov.educ.api.distribution.model.dto.v2.School;
 import lombok.Data;
@@ -30,13 +31,13 @@ public class CreateReprintProcess extends BaseProcess {
 		DistributionResponse response = new DistributionResponse();
 		ExceptionMessage exception = new ExceptionMessage();
 		DistributionRequest distributionRequest = processorData.getDistributionRequest();
-		Map<UUID, DistributionPrintRequest> mapDist = distributionRequest.getMapDist();
+		Map<String, DistributionPrintRequest> mapDist = distributionRequest.getMapDist();
 		StudentSearchRequest searchRequest = distributionRequest.getStudentSearchRequest();
 		Long batchId = processorData.getBatchId();
 		int numberOfPdfs = 0;
 		int counter=0;
-		for (Map.Entry<UUID, DistributionPrintRequest> entry : mapDist.entrySet()) {
-			UUID schoolId = entry.getKey();
+		for (Map.Entry<String, DistributionPrintRequest> entry : mapDist.entrySet()) {
+			UUID schoolId = UUID.fromString(entry.getKey());
 			counter++;
 			int currentSlipCount = 0;
 			DistributionPrintRequest distributionPrintRequest = entry.getValue();
@@ -67,14 +68,14 @@ public class CreateReprintProcess extends BaseProcess {
 				}
 			}
 		}
-		postingProcess(batchId,processorData,numberOfPdfs);
+		boolean postingStatus = postingProcess(batchId,processorData,numberOfPdfs);
 		long endTime = System.currentTimeMillis();
 		long diff = (endTime - startTime)/1000;
 		log.debug("************* TIME Taken  ************ {} secs",diff);
-		response.setMergeProcessResponse("Merge Successful and File Uploaded");
+		response.setMergeProcessResponse(postingStatus ? "COMPLETED": "FAILED");
 		response.setNumberOfPdfs(numberOfPdfs);
-		response.setBatchId(processorData.getBatchId());
 		response.setLocalDownload(processorData.getLocalDownload());
+		response.setBatchId(processorData.getBatchId());
 		response.setActivityCode(distributionRequest.getActivityCode());
 		response.setStudentSearchRequest(searchRequest);
 		processorData.setDistributionResponse(response);
@@ -169,7 +170,7 @@ public class CreateReprintProcess extends BaseProcess {
 							scd.getCredentialTypeCode(), failedToAdd, scd.getStudentID(), processorData.getBatchId());
 				}
 			}
-			mergeDocumentsPDFs(processorData, mincode,"02","/EDGRAD.C.", paperType, locations);
+			mergeDocumentsPDFs(processorData, mincode, SchoolCategoryCodes.INDEPEND.getCode(), "/EDGRAD.C.", paperType, locations);
 		} catch (IOException e) {
 			log.debug(EXCEPTION,e.getMessage());
 		}
@@ -184,7 +185,7 @@ public class CreateReprintProcess extends BaseProcess {
 			if(bytesSAR != null) {
 				locations.add(new ByteArrayInputStream(bytesSAR));
 			}
-			mergeDocumentsPDFs(processorData,mincode,"02","/EDGRAD.R.","324W",locations);
+			mergeDocumentsPDFs(processorData,mincode,SchoolCategoryCodes.INDEPEND.getCode(),"/EDGRAD.R.","324W",locations);
 		} catch (Exception e) {
 			log.debug(EXCEPTION,e.getMessage());
 		}

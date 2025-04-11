@@ -1,5 +1,6 @@
 package ca.bc.gov.educ.api.distribution.process;
 
+import ca.bc.gov.educ.api.distribution.constants.SchoolCategoryCodes;
 import ca.bc.gov.educ.api.distribution.model.dto.*;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils;
@@ -44,7 +45,7 @@ public class PSIReportProcess extends BaseProcess {
         DistributionResponse response = new DistributionResponse();
         response.setTransmissionMode(processorData.getTransmissionMode());
         DistributionRequest distributionRequest = processorData.getDistributionRequest();
-        Map<UUID, DistributionPrintRequest> mapDist = distributionRequest.getMapDist();
+        Map<String, DistributionPrintRequest> mapDist = distributionRequest.getMapDist();
         StudentSearchRequest searchRequest = distributionRequest.getStudentSearchRequest();
         Long batchId = processorData.getBatchId();
         int numberOfPdfs = 0;
@@ -53,17 +54,18 @@ public class PSIReportProcess extends BaseProcess {
         List<Integer> valueList = mapDist.values()
                 .stream()
                 .map(e -> e.getPsiCredentialPrintRequest().getPsiList().size())
-                .collect(Collectors.toList());
+                .toList();
         int studentsCount = valueList.stream().mapToInt(i->i).sum();
         log.debug("Total number of students to be processed: {}", studentsCount);
-        for (Map.Entry<UUID, DistributionPrintRequest> entry : mapDist.entrySet()) {
-            UUID psId = entry.getKey();
+        for (Map.Entry<String, DistributionPrintRequest> entry : mapDist.entrySet()) {
+            String psId = entry.getKey();
             counter++;
             int currentSlipCount = 0;
             DistributionPrintRequest distributionPrintRequest = mapDist.get(psId);
-            //psiCode = StringUtils.trim(psiCode);
-            Psi psiDetails = psiService.getPsiDetails(psId.toString());
-            if (psiDetails != null) {
+
+            Optional<Psi> psiDetailsOptional = psiService.getPsiDetails(psId);
+            if (psiDetailsOptional.isPresent()) {
+                Psi psiDetails = psiDetailsOptional.get();
                 log.debug("*** PSI Details Acquired {}", psiDetails.getPsiName());
                 ReportRequest packSlipReq = reportService.preparePackingSlipDataPSI(psiDetails, processorData.getBatchId());
                 Pair<Integer, Integer> pV = processTranscriptPrintRequest(distributionPrintRequest, currentSlipCount,
@@ -75,6 +77,8 @@ public class PSIReportProcess extends BaseProcess {
                     restUtils.fetchAccessToken(processorData);
                 }
                 log.debug("PSI {}/{}", counter, mapDist.size());
+            } else {
+                log.error("PSI Details not found for {}", psId);
             }
         }
         restUtils.fetchAccessToken(processorData);
@@ -82,16 +86,15 @@ public class PSIReportProcess extends BaseProcess {
         int numberOfCreatedSchoolLabelReports = createSchoolLabelsReport(schoolsForLabels, ADDRESS_LABEL_PSI);
         log.debug("***** Number of created school labels reports {} *****", numberOfCreatedSchoolLabelReports);
         log.debug("***** Distribute school labels reports *****");
-        String schoolLabelCode = schoolsForLabels.size() == 1 ? schoolsForLabels.get(0).getMincode() : DEFAULT_MINCODE;
-        int numberOfProcessedSchoolLabelsReports = processDistrictSchoolDistribution(batchId, List.of(schoolLabelCode), null,
+        int numberOfProcessedSchoolLabelsReports = processDistrictSchoolDistribution(batchId, List.of(DEFAULT_SCHOOL_ID), null,
                 ADDRESS_LABEL_PSI, null, null, processorData.getTransmissionMode());
         log.debug("***** Number of distributed school labels reports {} *****", numberOfProcessedSchoolLabelsReports);
         numberOfPdfs += numberOfProcessedSchoolLabelsReports;
-        postingProcess(batchId, processorData, numberOfPdfs, getRootPathForFilesStorage(processorData));
+        boolean postingStatus = postingProcess(batchId, processorData, numberOfPdfs, getRootPathForFilesStorage(processorData));
         long eTime = System.currentTimeMillis();
-        long difference = (eTime - sTime) / 1000;
-        log.debug("************* TIME Taken  ************ {} secs", difference);
-        response.setMergeProcessResponse("Merge Successful and File Uploaded");
+        long diff = (eTime - sTime)/1000;
+        log.debug("************* TIME Taken  ************ {} secs",diff);
+        response.setMergeProcessResponse(postingStatus ? "COMPLETED": "FAILED");
         response.setNumberOfPdfs(numberOfPdfs);
         response.setBatchId(processorData.getBatchId());
         response.setLocalDownload(processorData.getLocalDownload());
@@ -119,7 +122,7 @@ public class PSIReportProcess extends BaseProcess {
                     processStudentsForCSVs(scdList, psiCode, processorData);
                 } else {
                     processStudentsForPDFs(processorData.getBatchId(), scdList, locations);
-                    mergeDocumentsPDFs(processorData, psiCode, "02", "/EDGRAD.T.",
+                    mergeDocumentsPDFs(processorData, psiCode, SchoolCategoryCodes.INDEPEND.getCode(), "/EDGRAD.T.",
                             "YED4", locations);
                 }
                 numOfPdfs++;
@@ -174,7 +177,7 @@ public class PSIReportProcess extends BaseProcess {
                     .concat(EducDistributionApiConstants.FILES_FOLDER_STRUCTURE)
                     .concat(transmissionMode.toUpperCase());
             StringBuilder filePathBuilder = createFolderStructureInTempDirectory(rootDirectory, processorData,
-                    psiCode, "02");
+                    psiCode, SchoolCategoryCodes.INDEPEND.getCode());
             filePathBuilder.append(EducDistributionApiConstants.FTP_FILENAME_PREFIX)
                     .append(psiCode)
                     .append(EducDistributionApiConstants.FTP_FILENAME_SUFFIX).append(".")

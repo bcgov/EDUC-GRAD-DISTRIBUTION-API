@@ -9,7 +9,6 @@ public class PsiCredentialDistribution {
 
 	private String pen;
 	private String psiCode;
-	private UUID psiId;
 	private String psiYear;
 	private UUID studentID;
 }

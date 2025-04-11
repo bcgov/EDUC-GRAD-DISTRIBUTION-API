@@ -7,8 +7,11 @@ import ca.bc.gov.educ.api.distribution.service.PostingDistributionService;
 import ca.bc.gov.educ.api.distribution.util.GradValidation;
 import ca.bc.gov.educ.api.distribution.util.MessageHelper;
 import ca.bc.gov.educ.api.distribution.util.RestUtils;
+import io.undertow.util.BadRequestException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -40,13 +43,13 @@ class DistributionControllerTest {
 	
 	@Mock
 	SecurityContextHolder securityContextHolder;
-	
-	@Test
-	void testDistributeCredentials() {
+
+	@ParameterizedTest
+	@ValueSource(strings = {"USERDIST", "PSPR"})
+	void testDistributeCredentials(String activityCode) throws BadRequestException {
 		String runType = "MER";
-		String activityCode = "USERDIST";
 		Long batchId= 9029L;
-		Map<UUID, DistributionPrintRequest> mapDist= new HashMap<>();
+		Map<String, DistributionPrintRequest> mapDist= new HashMap<>();
 		String transmissionMode = "paper";
 		String mincode = "123123133";
 		UUID schoolId = UUID.randomUUID();
@@ -92,7 +95,7 @@ class DistributionControllerTest {
 		DistributionPrintRequest printRequest = new DistributionPrintRequest();
 		printRequest.setTranscriptPrintRequest(tPReq);
 		printRequest.setSchoolDistributionRequest(sdReq);
-		mapDist.put(schoolId, printRequest);
+		mapDist.put(schoolId.toString(), printRequest);
 
 		DistributionResponse res = new DistributionResponse();
 		res.setMergeProcessResponse("MERGED");
@@ -104,11 +107,11 @@ class DistributionControllerTest {
 	}
 
 	@Test
-	void testDistributeCredentialsAsynchronously() {
+	void testDistributeCredentialsAsynchronously() throws BadRequestException {
 		String runType = "MER";
 		String activityCode = "MONTHLYDIST";
 		Long batchId= 9029L;
-		Map<UUID, DistributionPrintRequest> mapDist= new HashMap<>();
+		Map<String, DistributionPrintRequest> mapDist= new HashMap<>();
 		String transmissionMode = "paper";
 		String mincode = "123123133";
 		UUID schoolId = UUID.randomUUID();
@@ -155,7 +158,7 @@ class DistributionControllerTest {
 		DistributionPrintRequest printRequest = new DistributionPrintRequest();
 		printRequest.setTranscriptPrintRequest(tPReq);
 		printRequest.setSchoolDistributionRequest(sdReq);
-		mapDist.put(schoolId,printRequest);
+		mapDist.put(schoolId.toString(),printRequest);
 
 		DistributionResponse res = new DistributionResponse();
 		res.setMergeProcessResponse("MERGED");
