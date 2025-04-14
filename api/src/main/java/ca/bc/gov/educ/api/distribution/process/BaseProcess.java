@@ -212,8 +212,8 @@ public abstract class BaseProcess implements DistributionProcess {
     protected void processDistrictsForLabels(Map<District, List<School>> districtSchools, ca.bc.gov.educ.api.distribution.model.dto.v2.School school, ExceptionMessage exception) {
        District existDistrict = districtSchools.keySet().stream().filter(s -> school.getDistrictId().equalsIgnoreCase(s.getDistrictId())).findAny().orElse(null);
        if( existDistrict != null) {
-            log.debug("District {} already exists in the district labels.", existDistrict.getDistrictNumber());
             processSchoolsForLabels(null, districtSchools.get(existDistrict), school);
+           log.debug("District {} already exists in the district labels. School {} added", existDistrict.getDistrictNumber());
         } else {
            log.debug("Acquiring new district {} from TRAX API", school.getDistrictId());
            if (school.getDistrictId() != null) {
@@ -221,7 +221,7 @@ public abstract class BaseProcess implements DistributionProcess {
                if (district != null) {
                    districtSchools.put(district, new ArrayList<>());
                    processSchoolsForLabels(null, districtSchools.get(district), school);
-                   log.debug("District {} has been added to the district labels", district.getDistrictNumber());
+                   log.debug("District {} does not exist in the district labels. District & School {} added", district.getDistrictNumber(), school.getSchoolId());
                }
            }
        }
