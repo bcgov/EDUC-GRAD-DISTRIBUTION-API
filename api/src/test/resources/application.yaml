@@ -171,7 +171,8 @@ endpoint:
       url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduate/report/district/labels?reportType=%s
     district-labels-report-pdf:
       url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduate/report/district/labels/pdf?reportType=%s
-
+    district-school-labels-report:
+      url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduate/report/district/school/labels?districtId=%s&reportType=%s
   grad-trax-api:
     psi-by-psi-code:
       url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/trax/psi/%s
