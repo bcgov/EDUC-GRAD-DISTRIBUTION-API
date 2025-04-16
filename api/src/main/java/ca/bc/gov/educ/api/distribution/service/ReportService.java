@@ -138,7 +138,7 @@ public class ReportService {
         ReportRequest req = new ReportRequest();
         ReportData data = new ReportData();
 
-        List<StudentCredentialDistribution> schoolReportList = schoolDistributionRequest.getStudentList();
+        List<? extends StudentCredentialDistribution> schoolReportList = schoolDistributionRequest.getStudentList();
         Map<Pen, Student> students = new HashMap<>();
         ca.bc.gov.educ.api.distribution.model.dto.School school = new ca.bc.gov.educ.api.distribution.model.dto.School();
         school.setMincode(schoolDetails.getMinCode());

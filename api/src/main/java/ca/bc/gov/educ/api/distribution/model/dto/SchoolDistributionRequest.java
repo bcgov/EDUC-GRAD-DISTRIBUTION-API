@@ -10,5 +10,5 @@ public class SchoolDistributionRequest {
 	private Long batchId;
 	private String psId;
 	private Integer count;
-	private List<StudentCredentialDistribution> studentList;
+	private List<? extends StudentCredentialDistribution> studentList;
 }
