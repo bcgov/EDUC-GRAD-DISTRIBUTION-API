@@ -47,7 +47,9 @@ public class YearEndMergeProcess extends MergeProcess {
         for (Map.Entry<String, DistributionPrintRequest> entry : mapDist.entrySet()) {
             UUID schoolId = UUID.fromString(entry.getKey());
             DistributionPrintRequest distributionPrintRequest = entry.getValue();
-            studentList.addAll((Collection<? extends YearEndStudentCredentialDistribution>) distributionPrintRequest.getSchoolDistributionRequest().getStudentList());
+            if (distributionPrintRequest.getSchoolDistributionRequest() != null && !distributionPrintRequest.getSchoolDistributionRequest().getStudentList().isEmpty()) {
+                studentList.addAll((Collection<? extends YearEndStudentCredentialDistribution>) distributionPrintRequest.getSchoolDistributionRequest().getStudentList());
+            }
             ca.bc.gov.educ.api.distribution.model.dto.v2.School schoolDetails =
                     getBaseSchoolDetails(distributionPrintRequest, searchRequest, schoolId, exception);
             if (schoolDetails != null) {
@@ -93,6 +95,7 @@ public class YearEndMergeProcess extends MergeProcess {
                     log.debug("***** Distribute Student NonGrad {} School Reports *****", schoolDetails.getMinCode());
                     YearEndReportRequest yearEndReportRequest = new YearEndReportRequest();
                     yearEndReportRequest.setSchoolIds(List.of(UUID.fromString(schoolDetails.getSchoolId())));
+                    yearEndReportRequest.setStudentList(studentList);
                     numberOfProcessedSchoolReports += processDistrictSchoolDistribution(processorData.getBatchId(),
                         List.of(schoolDetails.getSchoolId()), null, null, null, NONGRADDISTREP_SC.getValue(),
                             null);
