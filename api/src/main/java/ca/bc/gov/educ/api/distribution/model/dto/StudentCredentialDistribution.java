@@ -52,4 +52,9 @@ public class StudentCredentialDistribution {
 	public LocalDateTime getLastUpdateDate() {
 		return lastUpdateDate == null ? LocalDateTime.now() : lastUpdateDate;
 	}
+	//Start of YE specific properties
+	private String reportingSchoolTypeCode;
+	private String transcriptTypeCode;
+	private String certificateTypeCode;
+	//End of YE specific properties
 }

@@ -5,6 +5,7 @@ import ca.bc.gov.educ.api.distribution.model.dto.*;
 import ca.bc.gov.educ.api.distribution.model.dto.v2.District;
 import ca.bc.gov.educ.api.distribution.model.dto.v2.YearEndReportRequest;
 import ca.bc.gov.educ.api.distribution.model.dto.v2.YearEndStudentCredentialDistribution;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -13,6 +14,7 @@ import org.modelmapper.internal.Pair;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static ca.bc.gov.educ.api.distribution.model.dto.ActivityCode.*;
 import static ca.bc.gov.educ.api.distribution.model.dto.ReportType.*;
@@ -36,6 +38,7 @@ public class YearEndMergeProcess extends MergeProcess {
         List<YearEndStudentCredentialDistribution> studentList = new ArrayList<>();
         Map<String, DistributionPrintRequest> mapDist = distributionRequest.getMapDist();
         StudentSearchRequest searchRequest = distributionRequest.getStudentSearchRequest();
+        ObjectMapper mapper = new ObjectMapper();
         int numberOfPdfs = 0;
         int schoolCounter = 0;
         int numberOfCreatedSchoolReports = 0;
@@ -48,7 +51,12 @@ public class YearEndMergeProcess extends MergeProcess {
             UUID schoolId = UUID.fromString(entry.getKey());
             DistributionPrintRequest distributionPrintRequest = entry.getValue();
             if (distributionPrintRequest.getSchoolDistributionRequest() != null && !distributionPrintRequest.getSchoolDistributionRequest().getStudentList().isEmpty()) {
-                studentList.addAll((Collection<? extends YearEndStudentCredentialDistribution>) distributionPrintRequest.getSchoolDistributionRequest().getStudentList());
+                studentList.addAll(distributionPrintRequest
+                        .getSchoolDistributionRequest()
+                        .getStudentList()
+                        .stream()
+                        .map(student -> mapper.convertValue(student, YearEndStudentCredentialDistribution.class))
+                        .collect(Collectors.toList()));
             }
             ca.bc.gov.educ.api.distribution.model.dto.v2.School schoolDetails =
                     getBaseSchoolDetails(distributionPrintRequest, searchRequest, schoolId, exception);
