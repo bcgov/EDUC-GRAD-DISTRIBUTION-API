@@ -391,7 +391,8 @@ public class PostingDistributionService {
                 fileNameBuilder.append("/EDGRAD.R.").append("324W.");
             }
             if(ADDRESS_LABEL_SCH_YE.equalsIgnoreCase(reportType)) {
-                fileNameBuilder.append(EducDistributionApiUtils.getFileNameSchoolReports(DEFAULT_MINCODE)).append(".pdf");
+                String filenameSuffix = StringUtils.isNotBlank(districtCode) ? districtCode.concat(DEFAULT_MINCODE.substring(3)): DEFAULT_MINCODE;
+                fileNameBuilder.append(EducDistributionApiUtils.getFileNameSchoolReports(filenameSuffix)).append(".pdf");
             } else {
                 fileNameBuilder.append(EducDistributionApiUtils.getFileNameSchoolReports(mincode)).append(".pdf");
             }
