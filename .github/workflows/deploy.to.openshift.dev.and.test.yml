@@ -210,7 +210,7 @@ jobs:
           -p STORAGE_LIMIT=${{ env.STORAGE_LIMIT }} | oc apply -f -
           
           # UPDATE Configmaps
-          curl -s https://raw.githubusercontent.com/bcgov/${{ env.REPO_NAME }}/${{ env.BRANCH }}/tools/config/update-configmap.sh \
+          curl -s https://raw.githubusercontent.com/bcgov/${{ env.REPO_NAME }}/${{ github.ref }}/tools/config/update-configmap.sh \
           | bash /dev/stdin \
           test \
           ${{ env.REPO_NAME }} \
