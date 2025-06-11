@@ -89,7 +89,7 @@ jobs:
           # run build
           # apply build config
           echo 'applying ${{ env.REPO_NAME }}'
-          oc process -f https://raw.githubusercontent.com/bcgov/EDUC-GRAD-DISTRIBUTION-API/${{ github.ref }}/tools/openshift/api.bc.yaml -p REPO_NAME=${{ env.REPO_NAME }} -p BRANCH_NAME=${{ env.BRANCH }} | oc apply -f -
+          oc process -f https://raw.githubusercontent.com/bcgov/EDUC-GRAD-DISTRIBUTION-API/${{ github.ref }}/tools/openshift/api.bc.yaml -p REPO_NAME=${{ env.REPO_NAME }} -p BRANCH_NAME=${{ github.ref }} | oc apply -f -
           
           # run build --follow shows log, --wait throws non-zero if fail
           oc start-build ${{ env.REPO_NAME }}-bc --follow --wait
@@ -109,7 +109,7 @@ jobs:
           -p STORAGE_LIMIT=${{ env.STORAGE_LIMIT }} | oc apply -f -
 
           # UPDATE Configmaps
-          curl -s https://raw.githubusercontent.com/bcgov/${{ env.REPO_NAME }}/${{ env.BRANCH }}/tools/config/update-configmap.sh \
+          curl -s https://raw.githubusercontent.com/bcgov/${{ env.REPO_NAME }}/${{ github.ref }}/tools/config/update-configmap.sh \
           | bash /dev/stdin \
           dev \
           ${{ env.REPO_NAME }} \
@@ -121,7 +121,7 @@ jobs:
           ${{ vars.BCMAIL_LOCATION }}
           
           # OVERRIDE Configmaps
-          curl -s https://raw.githubusercontent.com/bcgov/${{ env.REPO_NAME }}/${{ env.BRANCH }}/tools/config/override-configmap-dev.sh \
+          curl -s https://raw.githubusercontent.com/bcgov/${{ env.REPO_NAME }}/${{ github.ref }}/tools/config/override-configmap-dev.sh \
           | bash /dev/stdin \
           dev \
           ${{ env.REPO_NAME }} \
@@ -210,7 +210,7 @@ jobs:
           -p STORAGE_LIMIT=${{ env.STORAGE_LIMIT }} | oc apply -f -
           
           # UPDATE Configmaps
-          curl -s https://raw.githubusercontent.com/bcgov/${{ env.REPO_NAME }}/${{ env.BRANCH }}/tools/config/update-configmap.sh \
+          curl -s https://raw.githubusercontent.com/bcgov/${{ env.REPO_NAME }}/${{ github.ref }}/tools/config/update-configmap.sh \
           | bash /dev/stdin \
           test \
           ${{ env.REPO_NAME }} \
