@@ -192,14 +192,14 @@ jobs:
           oc rollout cancel deployment/${{ env.SPRING_BOOT_IMAGE_NAME }} 2> /dev/null \
           || true && echo "No rollout in progress"
           
-          oc tag ${{ env.BUSINESS_NAMESPACE }}-dev/${{ env.REPO_NAME }}:${{ env.TAG }} \
-          ${{ env.BUSINESS_NAMESPACE }}-test/${{ env.REPO_NAME }}:${{ env.TAG }}
+          oc tag ${{ env.BUSINESS_NAMESPACE }}-dev/${{ env.REPO_NAME }}:latest \
+          ${{ env.BUSINESS_NAMESPACE }}-test/${{ env.REPO_NAME }}:latest
           
           # Process and apply deployment template
           oc process -f tools/openshift/api.dc.yaml \
           -p IS_NAMESPACE=${{ env.OPENSHIFT_NAMESPACE }} \
           -p REPO_NAME=${{ env.REPO_NAME }} \
-          -p TAG_NAME=${{ steps.get-latest-tag.outputs.tag }} \
+          -p TAG_NAME=latest \
           -p HOST_ROUTE=${{ env.REPO_NAME }}-${{ env.OPENSHIFT_NAMESPACE }}.${{ env.APP_DOMAIN }} \
           -p MIN_REPLICAS=${{ env.MIN_REPLICAS }} \
           -p MAX_REPLICAS=${{ env.MAX_REPLICAS }} \
@@ -210,7 +210,7 @@ jobs:
           -p STORAGE_LIMIT=${{ env.STORAGE_LIMIT }} | oc apply -f -
           
           # UPDATE Configmaps
-          curl -s https://raw.githubusercontent.com/bcgov/${{ env.REPO_NAME }}/${{ github.ref }}/tools/config/update-configmap.sh \
+          curl -s https://raw.githubusercontent.com/bcgov/${{ env.REPO_NAME }}/${{ env.BRANCH }}/tools/config/update-configmap.sh \
           | bash /dev/stdin \
           test \
           ${{ env.REPO_NAME }} \
@@ -222,7 +222,8 @@ jobs:
           ${{ vars.BCMAIL_LOCATION }}
           
           # Start rollout (if necessary) and follow it
-          oc rollout restart deployment/${{ env.SPRING_BOOT_IMAGE_NAME }} 
+          oc rollout restart deployment/${{ env.SPRING_BOOT_IMAGE_NAME }}
+          
           
           # Get status, returns 0 if rollout is successful
           oc rollout status deployment/${{ env.SPRING_BOOT_IMAGE_NAME }}
