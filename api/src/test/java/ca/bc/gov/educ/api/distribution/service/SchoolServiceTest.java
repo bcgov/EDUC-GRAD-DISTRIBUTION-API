@@ -13,11 +13,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
-import java.util.function.Consumer;
+import java.util.UUID;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -45,25 +43,26 @@ public class SchoolServiceTest {
     private WebClient.ResponseSpec responseMock;
     @MockBean
     WebClient webClient;
-
-    private static final byte[] TEST_BYTES = "The rain in Spain stays mainly on the plain.".getBytes();
+    @MockBean
+    RestService restServiceMock;
 
     @Test
     public void testGetCommonSchoolDetails() {
         String mincode = "123456";
-        ca.bc.gov.educ.api.distribution.model.dto.v2.School commonSchool = new ca.bc.gov.educ.api.distribution.model.dto.v2.School();
+        UUID schoolId = UUID.randomUUID();
+        School commonSchool = new School();
         commonSchool.setMinCode(mincode);
         commonSchool.setSchoolName("Test School");
+        commonSchool.setSchoolId(schoolId.toString());
 
-        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(String.format(educDistributionApiConstants.getSchoolByMincode(), mincode))).thenReturn(this.requestHeadersMock);
-        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
-        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(ca.bc.gov.educ.api.distribution.model.dto.v2.School.class)).thenReturn(Mono.just(commonSchool));
+        when(restService.executeGet(
+                educDistributionApiConstants.getSchoolById(),
+                School.class,
+                schoolId.toString()
+        )).thenReturn(commonSchool);
 
-        var response = this.schoolService.getSchool(mincode, new ExceptionMessage());
-        Assert.assertEquals(mincode, response.getMinCode());
+        var response = this.schoolService.getSchool(schoolId, new ExceptionMessage());
+        Assert.assertEquals(schoolId.toString(), response.getSchoolId());
     }
 
     @Test
@@ -95,22 +94,22 @@ public class SchoolServiceTest {
     @Test
     public void testGetCommonSchoolDetails_Exception() {
         String mincode = "123456";
+        UUID schoolId = UUID.randomUUID();
         ca.bc.gov.educ.api.distribution.model.dto.v2.School commonSchool = new School();
         commonSchool.setMinCode(mincode);
         commonSchool.setSchoolName("Test School");
+        commonSchool.setSchoolId(schoolId.toString());
 
         ExceptionMessage exceptionMessage = new ExceptionMessage();
-
-        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(String.format(educDistributionApiConstants.getSchoolByMincode(), mincode))).thenReturn(this.requestHeadersMock);
-        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
-        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(ca.bc.gov.educ.api.distribution.model.dto.v2.School.class)).thenReturn(Mono.just(commonSchool));
-
-        var response = this.schoolService.getSchool("234567", exceptionMessage);
+        when(restService.executeGet(
+                educDistributionApiConstants.getSchoolById(),
+                School.class,
+                schoolId.toString()
+        )).thenThrow(NullPointerException.class);
+        var response = this.schoolService.getSchool(schoolId, exceptionMessage);
         Assert.assertNull(response);
-        Assert.assertEquals(EducDistributionApiConstants.TRAX_API_STATUS, exceptionMessage.getExceptionName());
+        Assert.assertEquals(String.format("TRAX-API IS DOWN: %s", educDistributionApiConstants.getSchoolById()),
+                exceptionMessage.getExceptionName());
     }
 
     @Test
@@ -123,79 +122,91 @@ public class SchoolServiceTest {
     @Test
     public void testGetTraxSchool() {
         String mincode = "123456";
+        UUID schoolId = UUID.randomUUID();
         ca.bc.gov.educ.api.distribution.model.dto.v2.School school = new ca.bc.gov.educ.api.distribution.model.dto.v2.School();
         school.setMinCode(mincode);
         school.setSchoolName("Test School");
+        school.setSchoolId(schoolId.toString());
 
-        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(String.format(educDistributionApiConstants.getSchoolByMincode(), mincode))).thenReturn(this.requestHeadersMock);
-        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
-        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(ca.bc.gov.educ.api.distribution.model.dto.v2.School.class)).thenReturn(Mono.just(school));
+        when(this.restService.executeGet(educDistributionApiConstants.getSchoolById(),
+                School.class,
+                schoolId.toString())).thenReturn(school);
 
-        var response = this.schoolService.getSchool(mincode, new ExceptionMessage());
+        var response = this.schoolService.getSchool(schoolId, new ExceptionMessage());
         Assert.assertEquals(mincode, response.getMinCode());
     }
 
-    @Test
+    @Test(expected = Exception.class)
     public void testGetTraxSchool_Exception() {
         String mincode = "123456";
+        UUID schoolId = UUID.randomUUID();
         ca.bc.gov.educ.api.distribution.model.dto.v2.School school = new ca.bc.gov.educ.api.distribution.model.dto.v2.School();
         school.setMinCode(mincode);
         school.setSchoolName("Test School");
 
-        ExceptionMessage exceptionMessage = new ExceptionMessage();
+        when(restService.executeGet(educDistributionApiConstants.getSchoolById(), District.class,
+                schoolId.toString())).thenThrow(Exception.class);
 
-        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(String.format(educDistributionApiConstants.getSchoolByMincode(), mincode))).thenReturn(this.requestHeadersMock);
-        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
-        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(ca.bc.gov.educ.api.distribution.model.dto.v2.School.class)).thenReturn(Mono.just(school));
-
-        var response = this.schoolService.getSchool("234567", exceptionMessage);
+        var response = this.schoolService.getSchool(schoolId, new ExceptionMessage());
         Assert.assertNull(response);
-        Assert.assertEquals("TRAX-API IS DOWN", exceptionMessage.getExceptionName());
     }
 
     @Test
     public void testGetTraxDistrict() {
-        String mincode = "123";
+        String districtNumber = "022";
+        UUID districtId = UUID.randomUUID();
         District district = new District();
-        district.setDistrictNumber(mincode);
-        district.setDistrictName("Test District");
+        district.setDistrictNumber(districtNumber);
+        district.setDisplayName("Test District");
 
-        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(String.format(educDistributionApiConstants.getDistrictByDistcode(), mincode))).thenReturn(this.requestHeadersMock);
-        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
-        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(District.class)).thenReturn(Mono.just(district));
+        when(restService.executeGet(educDistributionApiConstants.getDistrictById(), District.class,
+                districtId.toString())).thenReturn(district);
+        var response = this.schoolService.getDistrict(districtId, new ExceptionMessage());
+        Assert.assertEquals(districtNumber, response.getDistrictNumber());
+    }
 
-        var response = this.schoolService.getDistrict(mincode, new ExceptionMessage());
-        Assert.assertEquals(mincode, response.getDistrictNumber());
+    @Test(expected = Exception.class)
+    public void testGetTraxDistrict_Exception() {
+        String districtNumber = "022";
+        UUID districtId = UUID.randomUUID();
+        District district = new District();
+        district.setDistrictNumber(districtNumber);
+        district.setDisplayName("Test District");
+
+        ExceptionMessage exceptionMessage = new ExceptionMessage();
+        when(restService.executeGet(educDistributionApiConstants.getDistrictById(), District.class,
+                districtNumber)).thenThrow(Exception.class);
+
+        var response = this.schoolService.getDistrict(districtId, exceptionMessage);
+        Assert.assertNull(response);
     }
 
     @Test
-    public void testGetTraxDistrict_Exception() {
-        String mincode = "123";
+    public void testGetDistrictByDistrictNumber() {
+        String districtNumber = "022";
         District district = new District();
-        district.setDistrictNumber(mincode);
-        district.setDistrictName("Test District");
+        district.setDistrictNumber(districtNumber);
+        district.setDisplayName("Test District");
 
-        ExceptionMessage exceptionMessage = new ExceptionMessage();
+        when(restService.executeGet(educDistributionApiConstants.getDistrictByDistrictNumber(), District.class,
+                districtNumber)).thenReturn(district);
+        var response = this.schoolService.getDistrictByDistrictNumber(districtNumber, new ExceptionMessage());
+        Assert.assertEquals(districtNumber, response.getDistrictNumber());
+    }
 
-        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(String.format(educDistributionApiConstants.getDistrictByDistcode(), mincode))).thenReturn(this.requestHeadersMock);
-        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
-        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(District.class)).thenReturn(Mono.just(district));
+    @Test(expected = Exception.class)
+    public void testGetDistrictByDistrictNumber_Exception() {
+        String districtNumber = "022";
+        UUID districtId = UUID.randomUUID();
+        District district = new District();
+        district.setDistrictNumber(districtNumber);
+        district.setDisplayName("Test District");
 
-        var response = this.schoolService.getDistrict("234", exceptionMessage);
+        when(restService.executeGet(educDistributionApiConstants.getDistrictByDistrictNumber(), District.class,
+                districtId.toString())).thenThrow(Exception.class);
+
+        var response = this.schoolService.getDistrictByDistrictNumber(districtNumber, new ExceptionMessage());
         Assert.assertNull(response);
-        Assert.assertEquals("TRAX-API IS DOWN", exceptionMessage.getExceptionName());
     }
 
 }

@@ -59,6 +59,11 @@ server:
       io: 16
   #port: ${HTTP_PORT}
   max-http-request-header-size: 20000
+  compression:
+    enabled: ${ENABLE_COMPRESSION}
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain,text/css,text/javascript,application/javascript
+    min-response-size: 2048
+    excluded-user-agents: MSIE 6.0,UCBrowser
 
 #API Documentation
 springdoc:
@@ -113,17 +118,27 @@ endpoint:
     get-certificate:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/studentcertificate?studentID=%s&certificateType=%s&documentStatusCode=%s
     update-grad-school-report:
-      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/schoolreport
+      url: ${GRAD_GRADUATION_REPORT_API}api/v2/graduationreports/schoolreports
+    update-grad-district-report:
+      url: ${GRAD_GRADUATION_REPORT_API}api/v2/graduationreports/district-report
     school-report:
-      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/schoolreport?mincode=%s&reportType=%s
-    school-report-by-report-type:
-      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/schoolreport/type/%s?mincode=%s
+      url: ${GRAD_GRADUATION_REPORT_API}api/v2/graduationreports/schoolreports/search?reportTypeCode=%s&schoolOfRecordId=%s
+    light-school-report:
+      url: ${GRAD_GRADUATION_REPORT_API}api/v2/graduationreports/schoolreports/search?reportTypeCode=%s&schoolOfRecordId=%s&isLight=true
+    school-report-pdf:
+      url: ${GRAD_GRADUATION_REPORT_API}api/v2/graduationreports/schoolreports?reportTypeCode=%s&schoolOfRecordId=%s
+    district-report:
+      url: ${GRAD_GRADUATION_REPORT_API}api/v2/graduationreports/district-report/search?reportTypeCode=%s&districtId=%s
+    light-district-report:
+      url: ${GRAD_GRADUATION_REPORT_API}api/v2/graduationreports/district-report/search?reportTypeCode=%s&districtId=%s&isLight=true
+    district-report-pdf:
+      url: ${GRAD_GRADUATION_REPORT_API}api/v2/graduationreports/district-report?reportTypeCode=%s&districtId=%s
     get-achievement-report:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/studentreport?studentID=%s&reportType=%s&documentStatusCode=%s
     get-transcript-psi-by-student-id:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/psi/studenttranscript/%s
     get-transcript-by-student-id:
-        url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/studenttranscript/%s
+      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/studenttranscript/%s
   grad-student-api:
     get-student-record:
       url: ${GRAD_STUDENT_API}api/v1/student/stdid/%s
@@ -143,23 +158,34 @@ endpoint:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/report/data/%s?type=xml
     report-by-pen:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/report/data/%s?type=CERT
-    school_district_year_end_report:
+    school-district-year-end-report:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/report/schooldistrictyearend?slrt=%s&drt=%s&srt=%s
-    school_district_year_end_nongrad_report:
+    school-district-year-end-nongrad-report:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/report/schooldistrictnongradyearend?slrt=%s&drt=%s&srt=%s
-    school_district_month_report:
+    school-district-month-report:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/report/schooldistrictmonth?slrt=%s&drt=%s&srt=%s
-    school_district_supplemental_report:
+    school-district-supplemental-report:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/report/schooldistrictsupp?slrt=%s&drt=%s&srt=%s
-    school_labels_report:
+    school-labels-report:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/report/school/labels?reportType=%s
-
+    school-labels-report-pdf:
+      url: ${GRAD_GRADUATION_API}api/v1/graduate/report/school/labels/pdf?reportType=%s
+    district-labels-report:
+      url: ${GRAD_GRADUATION_API}api/v1/graduate/report/district/labels?reportType=%s
+    district-labels-report-pdf:
+      url: ${GRAD_GRADUATION_API}api/v1/graduate/report/district/labels/pdf?reportType=%s
+    district-school-labels-report:
+      url: ${GRAD_GRADUATION_API}api/v1/graduate/report/district/school/labels?districtId=%s&reportType=%s
   grad-trax-api:
     psi-by-psi-code:
       url: ${GRAD_TRAX_API}api/v1/trax/psi/%s
-    school-by-min-code:
-      url: ${GRAD_TRAX_API}api/v2/trax/school-clob/search?mincode=%s
-    district-by-dist-code:
+    all-psi:
+      url: ${GRAD_TRAX_API}api/v1/trax/psi
+    school-by-id:
+      url: ${GRAD_TRAX_API}api/v2/trax/school-clob/%s
+    district-by-id:
+      url: ${GRAD_TRAX_API}api/v2/trax/district/%s
+    district-by-district-number:
       url: ${GRAD_TRAX_API}api/v2/trax/district?distNo=%s
   grad-batch-graduation-api:
     distribution:

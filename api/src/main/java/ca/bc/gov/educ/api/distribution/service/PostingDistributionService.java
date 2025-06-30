@@ -1,17 +1,21 @@
 package ca.bc.gov.educ.api.distribution.service;
 
+import ca.bc.gov.educ.api.distribution.constants.SchoolCategoryCodes;
+import ca.bc.gov.educ.api.distribution.exception.ServiceException;
 import ca.bc.gov.educ.api.distribution.model.dto.DistributionResponse;
+import ca.bc.gov.educ.api.distribution.model.dto.ExceptionMessage;
 import ca.bc.gov.educ.api.distribution.model.dto.School;
-import ca.bc.gov.educ.api.distribution.model.dto.SchoolReports;
 import ca.bc.gov.educ.api.distribution.model.dto.v2.District;
+import ca.bc.gov.educ.api.distribution.model.dto.v2.YearEndReportRequest;
+import ca.bc.gov.educ.api.distribution.model.dto.v2.reports.DistrictReport;
+import ca.bc.gov.educ.api.distribution.model.dto.v2.reports.SchoolReport;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils;
 import ca.bc.gov.educ.api.distribution.util.Generated;
 import ca.bc.gov.educ.api.distribution.util.SFTPUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
@@ -23,31 +27,32 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.zip.ZipOutputStream;
 
+import static ca.bc.gov.educ.api.distribution.model.dto.ActivityCode.*;
+import static ca.bc.gov.educ.api.distribution.model.dto.ReportType.DISTREP_YE_SD;
+import static ca.bc.gov.educ.api.distribution.model.dto.ReportType.NONGRADDISTREP_SD;
 import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants.*;
 import static ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils.*;
 import static java.nio.file.Files.createDirectories;
 
+@Slf4j
 @Service
 public class PostingDistributionService {
-
-    private static final Logger logger = LoggerFactory.getLogger(PostingDistributionService.class);
 
     final SFTPUtils sftpUtils;
 
     final EducDistributionApiConstants educDistributionApiConstants;
     final RestService restService;
+    private final SchoolService schoolService;
 
     @Autowired
-    public PostingDistributionService(SFTPUtils sftpUtils, EducDistributionApiConstants educDistributionApiConstants, RestService restService) {
+    public PostingDistributionService(SFTPUtils sftpUtils, EducDistributionApiConstants educDistributionApiConstants, RestService restService, SchoolService schoolService) {
         this.sftpUtils = sftpUtils;
         this.educDistributionApiConstants = educDistributionApiConstants;
         this.restService = restService;
+        this.schoolService = schoolService;
     }
 
     public boolean postingProcess(DistributionResponse distributionResponse) {
@@ -56,21 +61,26 @@ public class PostingDistributionService {
         String download = distributionResponse.getLocalDownload();
         String transmissionMode = distributionResponse.getTransmissionMode();
         int numberOfPdfs = distributionResponse.getNumberOfPdfs();
-        List<String> districtCodes = extractDistrictCodes(distributionResponse);
-        if (NONGRADYERUN.equalsIgnoreCase(activityCode) && !districtCodes.isEmpty()) {
-            createDistrictSchoolYearEndNonGradReport(null, NONGRADDISTREP_SD, null,
-                distributionResponse.getDistrictSchools().isEmpty()? districtCodes : distributionResponse.getDistrictSchools());
-            numberOfPdfs += processDistrictSchoolDistribution(batchId, null, NONGRADDISTREP_SD, null, transmissionMode);
+        boolean hasDistricts = distributionResponse.getDistricts() != null && !distributionResponse.getDistricts().isEmpty();
+
+        if (NONGRADYERUN.getValue().equalsIgnoreCase(activityCode) && hasDistricts) {
+            createDistrictSchoolYearEndNonGradReport(null, NONGRADDISTREP_SD.getValue(), null, distributionResponse.getDistrictSchools());
+            numberOfPdfs += processDistrictSchoolDistribution(batchId, null, NONGRADDISTREP_SD.getValue(), null, transmissionMode);
             // GRAD2-2264: removed the redundant logic of NONGRADDISTREP_SC because schools are already processed in YearEndMergeProcess
         }
         return zipBatchDirectory(batchId, download, numberOfPdfs, TMP_DIR);
     }
 
     public boolean zipBatchDirectory(Long batchId, String download, int numberOfPdfs, String pathToZip) {
-        createZipFile(batchId, pathToZip);
-        if (StringUtils.isBlank(download) || !"Y".equalsIgnoreCase(download)) {
-            createControlFile(batchId, numberOfPdfs, pathToZip);
-            sftpUtils.sftpUploadBCMail(batchId, pathToZip);
+        try {
+            createZipFile(batchId, pathToZip);
+            if (StringUtils.isBlank(download) || !"Y".equalsIgnoreCase(download)) {
+                createControlFile(batchId, numberOfPdfs, pathToZip);
+                return sftpUtils.sftpUploadBCMail(batchId, pathToZip);
+            }
+        } catch (Exception ex) {
+            log.error(ex.getLocalizedMessage());
+            return false;
         }
         return true;
     }
@@ -86,7 +96,7 @@ public class PostingDistributionService {
             EducDistributionApiUtils.zipFile(fileToZip, fileToZip.getName(), zipOut);
             zipOut.finish();
         } catch (IOException e) {
-            logger.error(e.getLocalizedMessage());
+            throw new ServiceException("Failed to create zip file for batch " + batchId);
         }
     }
 
@@ -96,9 +106,9 @@ public class PostingDistributionService {
             fos.write(contentInBytes);
             fos.flush();
         } catch (IOException e) {
-            logger.error(e.getLocalizedMessage());
+            log.error(e.getLocalizedMessage());
         }
-        logger.debug("Created Control file for {} PDFs", numberOfPdfs);
+        log.debug("Created Control file for {} PDFs", numberOfPdfs);
     }
 
     public Integer createDistrictSchoolSuppReport(String schooLabelReportType, String districtReportType, String schoolReportType) {
@@ -109,39 +119,16 @@ public class PostingDistributionService {
         return NumberUtils.toInt(restService.executeGet(educDistributionApiConstants.getSchoolDistrictMonthReport(), String.class, schooLabelReportType, districtReportType, schoolReportType));
     }
 
-    public Integer createSchoolLabelsReport(List<School> schools, String schooLabelReportType) {
-        logger.debug("***** Create School Label Reports {} *****", schooLabelReportType);
-        Integer reportCount = 0;
-        String url = String.format(educDistributionApiConstants.getSchoolLabelsReport(), schooLabelReportType);
-        List<School> processSchools = new ArrayList<>();
-        if (StringUtils.equalsIgnoreCase(ADDRESS_LABEL_SCHL, schooLabelReportType)) {
-            for (School s : schools) {
-                if (s.getMincode().length() > 3) {
-                    processSchools.add(s);
-                }
-            }
-        }
-        if (StringUtils.equalsIgnoreCase(ADDRESS_LABEL_YE, schooLabelReportType)) {
-            for (School s : schools) {
-                if (s.getMincode().length() == 3) {
-                    processSchools.add(s);
-                }
-            }
-        }
-        if (StringUtils.equalsIgnoreCase(ADDRESS_LABEL_PSI, schooLabelReportType)) {
-            for (School s : schools) {
-                if (s.getMincode().length() <= 3) {
-                    processSchools.add(s);
-                }
-            }
-        }
-        reportCount += NumberUtils.toInt(restService.executePost(url, String.class, processSchools));
-        logger.debug("***** Number of created School Label Reports {} *****", reportCount);
-        return reportCount;
+    public Integer createSchoolLabelsReport(List<School> schools, String schoolLabelReportType) {
+        return NumberUtils.toInt(restService.executePost(educDistributionApiConstants.getSchoolLabelsReport(), String.class, schools, schoolLabelReportType));
     }
 
-    public Integer createDistrictLabelsReport(List<District> schools, String districtLabelReportType) {
-        return NumberUtils.toInt(restService.executePost(educDistributionApiConstants.getSchoolLabelsReport(), String.class, schools, districtLabelReportType));
+    public Integer createDistrictLabelsReport(List<District> districts, String districtLabelReportType) {
+        return NumberUtils.toInt(restService.executePost(educDistributionApiConstants.getDistrictLabelsReport(), String.class, districts, districtLabelReportType));
+    }
+
+    public Integer createDistrictLabelsReport(String districtId, List<School> schools, String districtLabelReportType) {
+        return NumberUtils.toInt(restService.executePost(educDistributionApiConstants.getDistrictSchoolLabelsReport(), String.class, schools, districtId, districtLabelReportType));
     }
 
     public Integer createDistrictSchoolYearEndReport(String schooLabelReportType, String districtReportType, String schoolReportType) {
@@ -152,140 +139,213 @@ public class PostingDistributionService {
         return NumberUtils.toInt(restService.executeGet(educDistributionApiConstants.getSchoolDistrictYearEndNonGradReport(), String.class, schooLabelReportType, districtReportType, schoolReportType));
     }
 
-    public Integer createDistrictSchoolYearEndReport(String schooLabelReportType, String districtReportType, String schoolReportType, List<String> schools) {
-        return NumberUtils.toInt(restService.executePost(educDistributionApiConstants.getSchoolDistrictYearEndReport(), String.class, schools, schooLabelReportType, districtReportType, schoolReportType));
+    public Integer createDistrictSchoolYearEndReport(String schooLabelReportType, String districtReportType, String schoolReportType, YearEndReportRequest yearEndReportRequest) {
+        return NumberUtils.toInt(restService.executePost(educDistributionApiConstants.getSchoolDistrictYearEndReport(), String.class, yearEndReportRequest, schooLabelReportType, districtReportType, schoolReportType));
     }
 
     public Integer createDistrictSchoolYearEndNonGradReport(String schooLabelReportType, String districtReportType, String schoolReportType, List<String> schools) {
         return NumberUtils.toInt(restService.executePost(educDistributionApiConstants.getSchoolDistrictYearEndNonGradReport(), String.class, schools, schooLabelReportType, districtReportType, schoolReportType));
     }
 
-    public int processSchoolLabelsDistribution(Long batchId, String schooLabelReportType, String transmissionMode) {
-        return processSchoolLabelsDistribution(batchId, "", schooLabelReportType, transmissionMode);
+    private int processDistrictLabelDistribution(Long batchId, String districtLabelReportType, List<String> districtIds, String transmissionMode) {
+        List<DistrictReport> yeDistrictLabelReports = new ArrayList<>();
+        if (districtIds == null || districtIds.isEmpty()) {
+            yeDistrictLabelReports.addAll(Objects.requireNonNull(
+                restService.executeGet(educDistributionApiConstants.getLightDistrictReport(),
+                    new ParameterizedTypeReference<List<DistrictReport>>() {
+                    }, districtLabelReportType, "")
+            ));
+        } else {
+            for (String districtId : districtIds) {
+                yeDistrictLabelReports.addAll(Objects.requireNonNull(
+                    restService.executeGet(educDistributionApiConstants.getLightDistrictReport(),
+                        new ParameterizedTypeReference<List<DistrictReport>>() {
+                        }, districtLabelReportType, districtId)
+                ));
+            }
+        }
+        return processDistrictReports(yeDistrictLabelReports, batchId, districtLabelReportType, transmissionMode);
+    }
+
+    private int processSchoolLabelDistribution(Long batchId, List<String> schoolIds, String schoolLabelReportType, String transmissionMode) {
+        List<SchoolReport> yeSchoolLabelReports = new ArrayList<>();
+        if (schoolIds == null || schoolIds.isEmpty()) {
+            yeSchoolLabelReports.addAll(Objects.requireNonNull(
+                restService.executeGet(educDistributionApiConstants.getLightSchoolReport(),
+                    new ParameterizedTypeReference<List<SchoolReport>>() {
+                    }, schoolLabelReportType, "")
+            ));
+        } else {
+            for (String schoolId : schoolIds) {
+                yeSchoolLabelReports.addAll(Objects.requireNonNull(
+                    restService.executeGet(educDistributionApiConstants.getLightSchoolReport(),
+                        new ParameterizedTypeReference<List<SchoolReport>>() {
+                        }, schoolLabelReportType, schoolId)
+                ));
+            }
+        }
+        return  processSchoolReports(yeSchoolLabelReports, batchId, schoolLabelReportType, transmissionMode);
     }
 
     @Generated
-    public int processDistrictSchoolDistribution(Long batchId, Collection<String> mincodes, String schooLabelReportType, String districtReportType, String schoolReportType, String transmissionMode) {
+    public int processDistrictSchoolDistribution(Long batchId, List<String> schoolIds, List<String> districtIds, String schoolLabelReportType, String districtReportType, String schoolReportType, String transmissionMode) {
         int numberOfPdfs = 0;
-        boolean processMincodes = !(mincodes != null && !mincodes.isEmpty());
-        if (StringUtils.isNotBlank(schooLabelReportType)) {
-            List<SchoolReports> yeSchoolLabelReports = new ArrayList<>();
-            if (processMincodes) {
-                yeSchoolLabelReports.addAll(Objects.requireNonNull(
-                        restService.executeGet(educDistributionApiConstants.getSchoolReportsByReportType(),
-                                new ParameterizedTypeReference<List<SchoolReports>>() {
-                                }, schooLabelReportType, "")
-                ));
+        if (StringUtils.isNotBlank(schoolLabelReportType)) {
+            if(ADDRESS_LABEL_YE.equals(schoolLabelReportType) || ADDRESS_LABEL_SCH_YE.equals(schoolLabelReportType) ) {//ADDRESS_LABEL_YE & ADDRESS_LABEL_SCH_YE are district reports
+                numberOfPdfs += processDistrictLabelDistribution(batchId, schoolLabelReportType, districtIds, transmissionMode);
             } else {
-                for (String mincode : mincodes) {
-                    yeSchoolLabelReports.addAll(Objects.requireNonNull(
-                            restService.executeGet(educDistributionApiConstants.getSchoolReportsByReportType(),
-                                    new ParameterizedTypeReference<List<SchoolReports>>() {
-                                    }, schooLabelReportType, mincode)
-                    ));
-                }
+                numberOfPdfs += processSchoolLabelDistribution(batchId, schoolIds, schoolLabelReportType, transmissionMode);
             }
-            assert yeSchoolLabelReports != null;
-            numberOfPdfs += processDistrictSchoolReports(yeSchoolLabelReports, batchId, schooLabelReportType, transmissionMode);
         }
         if (StringUtils.isNotBlank(districtReportType)) {
-            List<SchoolReports> yeDistrictReports = new ArrayList<>();
-            if (processMincodes) {
+            List<DistrictReport> yeDistrictReports = new ArrayList<>();
+            if (districtIds == null || districtIds.isEmpty()) {
                 yeDistrictReports.addAll(Objects.requireNonNull(
-                        restService.executeGet(educDistributionApiConstants.getSchoolReportsByReportType(),
-                                new ParameterizedTypeReference<List<SchoolReports>>() {
+                        restService.executeGet(educDistributionApiConstants.getLightDistrictReport(),
+                                new ParameterizedTypeReference<List<DistrictReport>>() {
                                 }, districtReportType, "")
                 ));
             } else {
-                for (String mincode : mincodes) {
+                for (String districtId : districtIds) {
                     yeDistrictReports.addAll(Objects.requireNonNull(
-                            restService.executeGet(educDistributionApiConstants.getSchoolReportsByReportType(),
-                                    new ParameterizedTypeReference<List<SchoolReports>>() {
-                                    }, districtReportType, mincode)
+                            restService.executeGet(educDistributionApiConstants.getLightDistrictReport(),
+                                    new ParameterizedTypeReference<List<DistrictReport>>() {
+                                    }, districtReportType, districtId)
                     ));
                 }
             }
-
-            assert yeDistrictReports != null;
-            numberOfPdfs += processDistrictSchoolReports(yeDistrictReports, batchId, districtReportType, transmissionMode);
+            numberOfPdfs += processDistrictReports(yeDistrictReports, batchId, districtReportType, transmissionMode);
         }
         if (StringUtils.isNotBlank(schoolReportType)) {
-            List<SchoolReports> yeSchoolReports = new ArrayList<>();
-            if (processMincodes) {
+            List<SchoolReport> yeSchoolReports = new ArrayList<>();
+            if (schoolIds == null || schoolIds.isEmpty()) {
                 yeSchoolReports.addAll(Objects.requireNonNull(
-                        restService.executeGet(educDistributionApiConstants.getSchoolReportsByReportType(),
-                                new ParameterizedTypeReference<List<SchoolReports>>() {
+                        restService.executeGet(educDistributionApiConstants.getLightSchoolReport(),
+                                new ParameterizedTypeReference<List<SchoolReport>>() {
                                 }, schoolReportType, "")
                 ));
             } else {
-                for (String mincode : mincodes) {
+                for (String schoolId : schoolIds) {
                     yeSchoolReports.addAll(Objects.requireNonNull(
-                            restService.executeGet(educDistributionApiConstants.getSchoolReportsByReportType(),
-                                    new ParameterizedTypeReference<List<SchoolReports>>() {
-                                    }, schoolReportType, mincode)
+                            restService.executeGet(educDistributionApiConstants.getLightSchoolReport(),
+                                    new ParameterizedTypeReference<List<SchoolReport>>() {
+                                    }, schoolReportType, schoolId)
                     ));
                 }
             }
-            assert yeSchoolReports != null;
-
-            numberOfPdfs += processDistrictSchoolReports(yeSchoolReports, batchId, schoolReportType, transmissionMode);
+            numberOfPdfs += processSchoolReports(yeSchoolReports, batchId, schoolReportType, transmissionMode);
         }
         return numberOfPdfs;
     }
 
     @Generated
-    protected int processSchoolLabelsDistribution(Long batchId, String mincode, String schooLabelReportType, String transmissionMode) {
-        List<SchoolReports> yeSchooLabelsReports = restService.executeGet(educDistributionApiConstants.getSchoolReportsByReportType(), new ParameterizedTypeReference<List<SchoolReports>>() {
-        }, schooLabelReportType, mincode);
+    public int processSchoolLabelsDistribution(Long batchId, String schoolLabelReportType, String transmissionMode) {
+        List<SchoolReport> yeSchooLabelsReports = restService.executeGet(educDistributionApiConstants.getLightSchoolReport(), new ParameterizedTypeReference<>() {
+        }, schoolLabelReportType, DEFAULT_SCHOOL_ID);
         assert yeSchooLabelsReports != null;
-        return processDistrictSchoolReports(yeSchooLabelsReports, batchId, schooLabelReportType, transmissionMode);
+        return processSchoolReports(yeSchooLabelsReports, batchId, schoolLabelReportType, transmissionMode);
     }
 
     @Generated
-    protected int processDistrictSchoolDistribution(Long batchId, String schooLabelReportType, String districtReportType, String schoolReportType, String transmissionMode) {
+    protected int processDistrictSchoolDistribution(Long batchId, String schoolLabelReportType, String districtReportType, String schoolReportType, String transmissionMode) {
         int numberOfPdfs = 0;
-        if (StringUtils.isNotBlank(schooLabelReportType)) {
-            numberOfPdfs += processSchoolLabelsDistribution(batchId, schooLabelReportType, transmissionMode);
+        if (StringUtils.isNotBlank(schoolLabelReportType)) {
+            numberOfPdfs += processSchoolLabelsDistribution(batchId, schoolLabelReportType, transmissionMode);
         }
         if (StringUtils.isNotBlank(districtReportType)) {
-            List<SchoolReports> yeDistrictReports = restService.executeGet(educDistributionApiConstants.getSchoolReportsByReportType(),
-                    new ParameterizedTypeReference<List<SchoolReports>>() {
+            List<DistrictReport> yeDistrictReports = restService.executeGet(educDistributionApiConstants.getLightDistrictReport(),
+                    new ParameterizedTypeReference<>() {
                     }, districtReportType, "");
 
             assert yeDistrictReports != null;
-            numberOfPdfs += processDistrictSchoolReports(yeDistrictReports, batchId, districtReportType, transmissionMode);
+            numberOfPdfs += processDistrictReports(yeDistrictReports, batchId, districtReportType, transmissionMode);
         }
         if (StringUtils.isNotBlank(schoolReportType)) {
-            List<SchoolReports> yeSchoolReports = restService.executeGet(educDistributionApiConstants.getSchoolReportsByReportType(),
-                    new ParameterizedTypeReference<List<SchoolReports>>() {
+            List<SchoolReport> yeSchoolReports = restService.executeGet(educDistributionApiConstants.getLightSchoolReport(),
+                    new ParameterizedTypeReference<>() {
                     }, schoolReportType, "");
             assert yeSchoolReports != null;
-            numberOfPdfs += processDistrictSchoolReports(yeSchoolReports, batchId, schoolReportType, transmissionMode);
+            numberOfPdfs += processSchoolReports(yeSchoolReports, batchId, schoolReportType, transmissionMode);
+        }
+        return numberOfPdfs;
+    }
+
+    protected int processDistrictReports(List<DistrictReport> districtReports, Long batchId, String reportType, String transmissionMode) {
+        int numberOfPdfs = 0;
+        for (DistrictReport report : districtReports) {
+            try {
+                byte[] gradReportPdf = restService.executeGet(educDistributionApiConstants.getDistrictReportPDF(),
+                    byte[].class, report.getReportTypeCode(), report.getDistrictId().toString());
+                if (gradReportPdf != null) {
+                    log.debug("*** Added District Report PDFs Report Type {} for district {}",
+                        report.getReportTypeCode(), report.getDistrictId().toString());
+
+                    ExceptionMessage exception = new ExceptionMessage();
+                    District district = schoolService.getDistrict(report.getDistrictId(), exception);
+
+                    if(district != null) {
+                        uploadSchoolReportDocuments(
+                            batchId,
+                            reportType,
+                            DEFAULT_SCHOOL_ID.compareTo(report.getDistrictId().toString()) == 0 ?
+                                DEFAULT_MINCODE : district.getDistrictNumber(),
+                            null,
+                            transmissionMode,
+                            gradReportPdf);
+                        numberOfPdfs++;
+                    } else {
+                        log.error("Failed to get district information for district {}. The report with id {} has not been processed.", report.getDistrictId().toString(), report.getId());
+                        log.error("Exception: {}", exception);
+                    }
+                } else {
+                    log.debug("*** Failed to Add District Report PDFs Report Type {} for district {} in batch {}",
+                        report.getReportTypeCode(), report.getDistrictId().toString(), batchId);
+                }
+            } catch (Exception e) {
+                log.error(e.getLocalizedMessage());
+            }
         }
         return numberOfPdfs;
     }
 
     @Generated
-    protected int processDistrictSchoolReports(List<SchoolReports> schoolReports, Long batchId, String reportType, String transmissionMode) {
+    protected int processSchoolReports(List<SchoolReport> schoolReports, Long batchId, String reportType, String transmissionMode) {
         int numberOfPdfs = 0;
-        for (SchoolReports report : schoolReports) {
+        for (SchoolReport report : schoolReports) {
             try {
-                byte[] gradReportPdf = restService.executeGet(educDistributionApiConstants.getSchoolReport(), byte[].class, report.getSchoolOfRecord(), report.getReportTypeCode());
+                byte[] gradReportPdf = restService.executeGet(educDistributionApiConstants.getSchoolReportPDF(),
+                        byte[].class, report.getReportTypeCode(), report.getSchoolOfRecordId().toString());
                 if (gradReportPdf != null) {
-                    logger.debug("*** Added School Report PDFs Report Type {} for school {} category {}", report.getReportTypeCode(), report.getSchoolOfRecord(), report.getSchoolCategory());
+                    log.debug("*** Added School Report PDFs Report Type {} for school {} category {}",
+                            report.getReportTypeCode(), report.getSchoolOfRecordId().toString(), report.getSchoolCategory());
+
+                    String mincode = DEFAULT_MINCODE;
+                    if (!DEFAULT_SCHOOL_ID.equals(report.getSchoolOfRecordId().toString())) {
+                        ExceptionMessage exception = new ExceptionMessage();
+                        ca.bc.gov.educ.api.distribution.model.dto.v2.School school = schoolService.getSchool(report.getSchoolOfRecordId(), exception);
+
+                        if (school == null) {
+                            log.error("Failed to retrieve school information for School {}. Report ID {} not processed.",
+                                report.getSchoolOfRecordId(), report.getId());
+                            log.error("Exception: {}", exception);
+                        } else {
+                            mincode = school.getMinCode();
+                        }
+                    }
                     uploadSchoolReportDocuments(
-                            batchId,
-                            reportType,
-                            report.getSchoolOfRecord(),
-                            report.getSchoolCategory(),
-                            transmissionMode,
-                            gradReportPdf);
+                        batchId,
+                        reportType,
+                        mincode,
+                        report.getSchoolCategory(),
+                        transmissionMode,
+                        gradReportPdf);
                     numberOfPdfs++;
                 } else {
-                    logger.debug("*** Failed to Add School Report PDFs Report Type {} for school {} category {} in batch {}", report.getReportTypeCode(), report.getSchoolOfRecord(), report.getSchoolCategory(), batchId);
+                    log.debug("*** Failed to Add School Report PDFs Report Type {} for school {} category {} in batch {}",
+                            report.getReportTypeCode(), report.getSchoolOfRecordId().toString(), report.getSchoolCategory(), batchId);
                 }
             } catch (Exception e) {
-                logger.error(e.getLocalizedMessage());
+                log.error(e.getLocalizedMessage());
             }
         }
         return numberOfPdfs;
@@ -293,17 +353,20 @@ public class PostingDistributionService {
 
     @Generated
     protected void uploadSchoolReportDocuments(Long batchId, String reportType, String mincode, String schoolCategory, String transmissionMode, byte[] gradReportPdf) {
-        boolean isDistrict = ADDRESS_LABEL_YE.equalsIgnoreCase(reportType) || DISTREP_YE_SD.equalsIgnoreCase(reportType) || NONGRADDISTREP_SD.equalsIgnoreCase(reportType);
+        boolean isDistrict = ADDRESS_LABEL_YE.equalsIgnoreCase(reportType) || ADDRESS_LABEL_SCH_YE.equalsIgnoreCase(reportType)  || DISTREP_YE_SD.getValue().equalsIgnoreCase(reportType) || NONGRADDISTREP_SD.getValue().equalsIgnoreCase(reportType);
         String districtCode = getDistrictCodeFromMincode(mincode);
         if (StringUtils.isNotBlank(transmissionMode) && TRANSMISSION_MODE_FTP.equalsIgnoreCase(transmissionMode))
             return;
         String rootDirectory = StringUtils.containsAnyIgnoreCase(transmissionMode, TRANSMISSION_MODE_PAPER, TRANSMISSION_MODE_FTP) ? TMP_DIR + EducDistributionApiConstants.FILES_FOLDER_STRUCTURE + StringUtils.upperCase(transmissionMode) : TMP_DIR;
-        boolean schoolLevelFolders = StringUtils.containsAnyIgnoreCase(schoolCategory, "02", "03", "09") || MONTHLYDIST.equalsIgnoreCase(transmissionMode) || SUPPDIST.equalsIgnoreCase(transmissionMode);
+        boolean schoolLevelFolders =
+            SchoolCategoryCodes.getSchoolTypesWithoutDistricts().contains(schoolCategory)
+            || MONTHLYDIST.getValue().equalsIgnoreCase(transmissionMode)
+            || SUPPDIST.getValue().equalsIgnoreCase(transmissionMode) ;
         try {
             StringBuilder fileLocBuilder = new StringBuilder();
             if (isDistrict) {
                 fileLocBuilder.append(rootDirectory).append(DEL).append(batchId).append(DEL).append(districtCode);
-            } else if (SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode) || ADDRESS_LABEL_SCHL.equalsIgnoreCase(reportType) || ADDRESS_LABEL_PSI.equalsIgnoreCase(reportType)) {
+            } else if (DEFAULT_MINCODE.equalsIgnoreCase(mincode) || ADDRESS_LABEL_SCHL.equalsIgnoreCase(reportType) || ADDRESS_LABEL_PSI.equalsIgnoreCase(reportType)) {
                 fileLocBuilder.append(rootDirectory).append(DEL).append(batchId);
             } else if (schoolLevelFolders) {
                 fileLocBuilder.append(rootDirectory).append(DEL).append(batchId).append(DEL).append(mincode);
@@ -315,30 +378,30 @@ public class PostingDistributionService {
             StringBuilder fileNameBuilder = new StringBuilder();
             if (isDistrict) {
                 fileNameBuilder.append(rootDirectory).append(DEL).append(batchId).append(DEL).append(districtCode);
-            } else if (SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode) || ADDRESS_LABEL_SCHL.equalsIgnoreCase(reportType) || ADDRESS_LABEL_PSI.equalsIgnoreCase(reportType)) {
+            } else if (DEFAULT_MINCODE.equalsIgnoreCase(mincode) || ADDRESS_LABEL_SCHL.equalsIgnoreCase(reportType) || ADDRESS_LABEL_PSI.equalsIgnoreCase(reportType)) {
                 fileNameBuilder.append(rootDirectory).append(DEL).append(batchId);
             } else if (schoolLevelFolders) {
                 fileNameBuilder.append(rootDirectory).append(DEL).append(batchId).append(DEL).append(mincode);
             } else {
                 fileNameBuilder.append(rootDirectory).append(DEL).append(batchId).append(DEL).append(districtCode).append(DEL).append(mincode);
             }
-            if (SCHOOL_LABELS_CODE.equalsIgnoreCase(mincode) || ADDRESS_LABEL_YE.equalsIgnoreCase(reportType) || ADDRESS_LABEL_SCHL.equalsIgnoreCase(reportType) || ADDRESS_LABEL_PSI.equalsIgnoreCase(reportType)) {
+            if (DEFAULT_MINCODE.equalsIgnoreCase(mincode) || ADDRESS_LABEL_YE.equalsIgnoreCase(reportType) || ADDRESS_LABEL_SCH_YE.equalsIgnoreCase(reportType) || ADDRESS_LABEL_SCHL.equalsIgnoreCase(reportType) || ADDRESS_LABEL_PSI.equalsIgnoreCase(reportType)) {
                 fileNameBuilder.append("/EDGRAD.L.").append("3L14.");
             } else {
                 fileNameBuilder.append("/EDGRAD.R.").append("324W.");
             }
-            fileNameBuilder.append(EducDistributionApiUtils.getFileNameSchoolReports(mincode)).append(".pdf");
+            if(ADDRESS_LABEL_SCH_YE.equalsIgnoreCase(reportType)) {
+                String filenameSuffix = StringUtils.isNotBlank(districtCode) ? districtCode.concat(DEFAULT_MINCODE.substring(3)): DEFAULT_MINCODE;
+                fileNameBuilder.append(EducDistributionApiUtils.getFileNameSchoolReports(filenameSuffix)).append(".pdf");
+            } else {
+                fileNameBuilder.append(EducDistributionApiUtils.getFileNameSchoolReports(mincode)).append(".pdf");
+            }
             try (OutputStream out = new FileOutputStream(fileNameBuilder.toString())) {
                 out.write(gradReportPdf);
                 out.flush();
             }
         } catch (Exception e) {
-            logger.error(e.getLocalizedMessage());
+            log.error(e.getLocalizedMessage());
         }
     }
-
-    private List<String> extractDistrictCodes(DistributionResponse distributionResponse) {
-        return distributionResponse.getDistricts().stream().map(ca.bc.gov.educ.api.distribution.model.dto.School::getMincode).toList();
-    }
-
 }

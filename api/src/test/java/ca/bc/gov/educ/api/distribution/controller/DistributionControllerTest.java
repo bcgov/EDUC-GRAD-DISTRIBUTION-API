@@ -7,8 +7,11 @@ import ca.bc.gov.educ.api.distribution.service.PostingDistributionService;
 import ca.bc.gov.educ.api.distribution.util.GradValidation;
 import ca.bc.gov.educ.api.distribution.util.MessageHelper;
 import ca.bc.gov.educ.api.distribution.util.RestUtils;
+import io.undertow.util.BadRequestException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -16,7 +19,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.*;
-
 
 @ExtendWith(MockitoExtension.class)
 class DistributionControllerTest {
@@ -41,19 +43,19 @@ class DistributionControllerTest {
 	
 	@Mock
 	SecurityContextHolder securityContextHolder;
-	
-	@Test
-	void testDistributeCredentials() {
+
+	@ParameterizedTest
+	@ValueSource(strings = {"USERDIST", "PSPR"})
+	void testDistributeCredentials(String activityCode) throws BadRequestException {
 		String runType = "MER";
-		String activityCode = "USERDIST";
 		Long batchId= 9029L;
 		Map<String, DistributionPrintRequest> mapDist= new HashMap<>();
 		String transmissionMode = "paper";
-		String localDownload = null;
-		String accessToken = "123";
 		String mincode = "123123133";
+		UUID schoolId = UUID.randomUUID();
 
 		ca.bc.gov.educ.api.distribution.model.dto.v2.School schObj = new ca.bc.gov.educ.api.distribution.model.dto.v2.School();
+		schObj.setSchoolId(UUID.randomUUID().toString());
 		schObj.setMinCode(mincode);
 		schObj.setAddress1("sadadad");
 		schObj.setAddress2("adad");
@@ -64,7 +66,7 @@ class DistributionControllerTest {
 		scd.setPen("123213133");
 		scd.setProgram("1950");
 		scd.setStudentID(UUID.randomUUID());
-		scd.setSchoolOfRecord(mincode);
+		scd.setSchoolId(schoolId);
 		scd.setPaperType("YED4");
 		scd.setStudentGrade("AD");
 		scd.setLegalFirstName("asda");
@@ -93,7 +95,7 @@ class DistributionControllerTest {
 		DistributionPrintRequest printRequest = new DistributionPrintRequest();
 		printRequest.setTranscriptPrintRequest(tPReq);
 		printRequest.setSchoolDistributionRequest(sdReq);
-		mapDist.put(mincode,printRequest);
+		mapDist.put(schoolId.toString(), printRequest);
 
 		DistributionResponse res = new DistributionResponse();
 		res.setMergeProcessResponse("MERGED");
@@ -105,17 +107,17 @@ class DistributionControllerTest {
 	}
 
 	@Test
-	void testDistributeCredentialsAsynchronously() {
+	void testDistributeCredentialsAsynchronously() throws BadRequestException {
 		String runType = "MER";
 		String activityCode = "MONTHLYDIST";
 		Long batchId= 9029L;
 		Map<String, DistributionPrintRequest> mapDist= new HashMap<>();
 		String transmissionMode = "paper";
-		String localDownload = null;
-		String accessToken = "123";
 		String mincode = "123123133";
+		UUID schoolId = UUID.randomUUID();
 
 		ca.bc.gov.educ.api.distribution.model.dto.v2.School schObj = new School();
+		schObj.setSchoolId(schoolId.toString());
 		schObj.setMinCode(mincode);
 		schObj.setAddress1("sadadad");
 		schObj.setAddress2("adad");
@@ -126,6 +128,7 @@ class DistributionControllerTest {
 		scd.setPen("123213133");
 		scd.setProgram("1950");
 		scd.setStudentID(UUID.randomUUID());
+		scd.setSchoolId(schoolId);
 		scd.setSchoolOfRecord(mincode);
 		scd.setPaperType("YED4");
 		scd.setStudentGrade("AD");
@@ -155,7 +158,7 @@ class DistributionControllerTest {
 		DistributionPrintRequest printRequest = new DistributionPrintRequest();
 		printRequest.setTranscriptPrintRequest(tPReq);
 		printRequest.setSchoolDistributionRequest(sdReq);
-		mapDist.put(mincode,printRequest);
+		mapDist.put(schoolId.toString(),printRequest);
 
 		DistributionResponse res = new DistributionResponse();
 		res.setMergeProcessResponse("MERGED");
@@ -179,10 +182,10 @@ class DistributionControllerTest {
 
 	@Test
 	void testPostingDistribution() {
-		DistributionResponse response = new DistributionResponse();
-		Mockito.when(postingDistributionService.postingProcess(response)).thenReturn(Boolean.TRUE);
-		distributionController.postingDistribution(response);
-		Mockito.verify(postingDistributionService).postingProcess(response);
+		DistributionResponse res = new DistributionResponse();
+		Mockito.when(postingDistributionService.postingProcess(res)).thenReturn(Boolean.TRUE);
+		distributionController.postingDistribution(res);
+		Mockito.verify(postingDistributionService).postingProcess(res);
 	}
 	
 }

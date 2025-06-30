@@ -19,4 +19,14 @@ public class AsyncConfig {
         executor.initialize();
         return executor;
     }
+
+    @Bean(name = "cacheExecutor")
+    public TaskExecutor cacheExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(1);
+        executor.setMaxPoolSize(1);
+        executor.setThreadNamePrefix("Cache-Refresh-");
+        executor.initialize();
+        return executor;
+    }
 }

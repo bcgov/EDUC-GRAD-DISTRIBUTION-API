@@ -2,8 +2,7 @@ package ca.bc.gov.educ.api.distribution.config;
 
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiConstants;
 import ca.bc.gov.educ.api.distribution.util.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -16,10 +15,9 @@ import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.List;
 
+@Slf4j
 @Configuration
 public class ScheduledTasksConfig {
-
-    private static final Logger logger = LoggerFactory.getLogger(ScheduledTasksConfig.class);
 
     FileFilter fileFilter;
 
@@ -36,7 +34,7 @@ public class ScheduledTasksConfig {
         files.forEach(file -> {
             LocalDateTime lastModified = LocalDateTime.ofInstant(Instant.ofEpochMilli(file.lastModified()), ZoneId.systemDefault());
             if(lastModified.isBefore(fileExpiry)){
-                logger.debug("Removing file or directory: {}", file.getName());
+                log.debug("Removing file or directory: {}", file.getName());
                 IOUtils.removeFileOrDirectory(file);
             }
         });

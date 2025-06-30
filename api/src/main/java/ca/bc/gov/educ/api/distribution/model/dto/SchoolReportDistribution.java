@@ -10,4 +10,5 @@ public class SchoolReportDistribution {
 	private UUID id;
 	private String reportTypeCode;
 	private String schoolOfRecord;
+	private String schoolOfRecordID;
 }
