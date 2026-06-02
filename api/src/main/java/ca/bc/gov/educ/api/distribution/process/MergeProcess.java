@@ -258,11 +258,6 @@ public class MergeProcess extends BaseProcess {
 		scdList.sort(Comparator.comparing(StudentCredentialDistribution::getLegalLastName, Comparator.nullsLast(String::compareTo))
 				.thenComparing(StudentCredentialDistribution::getLegalFirstName, Comparator.nullsLast(String::compareTo)));
 		for (StudentCredentialDistribution scd : scdList) {
-			if(scd.getNonGradReasons() != null && !scd.getNonGradReasons().isEmpty()) {
-				Student objStd = prepareStudentObj(scd, studListNonGrad);
-				if(objStd != null)
-					studListNonGrad.add(objStd);
-			}
 			int result = 0;
 			if(scd.getStudentID() != null) {
 				result = addStudentTranscriptToLocations(scd.getStudentID().toString(), locations);
@@ -270,8 +265,14 @@ public class MergeProcess extends BaseProcess {
 			if(result == 0) {
 				failedToAdd++;
 				log.info("*** Failed to Add PDFs {} Current student {} school {} in batch {}", failedToAdd,
-						scd.getStudentID(), scd.getSchoolOfRecord(), processorData.getBatchId());
+							scd.getStudentID(), scd.getSchoolOfRecord(), processorData.getBatchId());
 			} else {
+				if(scd.getNonGradReasons() != null && !scd.getNonGradReasons().isEmpty()) {
+					Student objStd = prepareStudentObj(scd, studListNonGrad);
+					if(objStd != null) {
+						studListNonGrad.add(objStd);
+					}
+				}
 				currentTranscript++;
 				log.debug("*** Added Transcript PDFs {}/{} Current student {} - {}, {}", currentTranscript,
 						scdList.size(), scd.getStudentID(), scd.getLegalLastName(), scd.getLegalFirstName());
