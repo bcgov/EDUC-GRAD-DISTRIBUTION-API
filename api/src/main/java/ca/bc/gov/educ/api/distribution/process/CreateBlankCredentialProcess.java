@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.distribution.process;
 
 import ca.bc.gov.educ.api.distribution.constants.SchoolCategoryCodes;
+import ca.bc.gov.educ.api.distribution.exception.ServiceException;
 import ca.bc.gov.educ.api.distribution.model.dto.*;
 import ca.bc.gov.educ.api.distribution.model.dto.v2.School;
 import ca.bc.gov.educ.api.distribution.util.EducDistributionApiUtils;
@@ -79,6 +80,21 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 		return processorData;
 	}
 
+    private byte[] getTranscriptReport(ReportRequest reportParams) {
+        byte[] transcriptReport;
+        try{
+            transcriptReport = restService.executePost(educDistributionApiConstants.getTranscriptReport(),
+                    byte[].class, reportParams);
+        } catch(ServiceException e) {
+            if(e.getStatusCode() == 204){
+                return new byte[0];
+            } else {
+                throw e;
+            }
+        }
+        return transcriptReport;
+    }
+
 	private int processYed4Transcript(DistributionPrintRequest obj, int currentSlipCount, ReportRequest packSlipReq,
 									  String mincode, ProcessorData processorData, int numberOfPdfs) {
 		if (obj.getTranscriptPrintRequest() != null) {
@@ -103,8 +119,7 @@ public class CreateBlankCredentialProcess extends BaseProcess {
 					ReportRequest reportParams = new ReportRequest();
 					reportParams.setOptions(options);
 					reportParams.setData(data);
-					byte[] bytesSAR = restService.executePost(educDistributionApiConstants.getTranscriptReport(),
-							byte[].class, reportParams);
+                    byte[] bytesSAR = getTranscriptReport(reportParams);
 					if (bytesSAR != null && bytesSAR.length > 0) {
 						for(int i=1;i<=bcd.getQuantity();i++) {
 							locations.add(new ByteArrayInputStream(bytesSAR));
