@@ -34,8 +34,14 @@ env:
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   openshift-ci-cd:
+    permissions:
+      contents: read
+      issues: write
     name: Build and deploy to OpenShift DEV
     runs-on: ubuntu-22.04
     environment: dev
